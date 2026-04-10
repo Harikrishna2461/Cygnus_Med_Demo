@@ -35,3 +35,8 @@ build/
 *.pid
 .env
 .env.local
+
+# Large model weights and checkpoints (> 100 MB)
+*.pth
+backend/weights/
+backend/vision/segmentation/checkpoints/
