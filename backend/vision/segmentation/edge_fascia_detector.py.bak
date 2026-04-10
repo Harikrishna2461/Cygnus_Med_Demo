@@ -1,0 +1,505 @@
+"""
+Edge-based Fascia Boundary Detection.
+Finds THIN fascia boundaries (1-2 pixels), not thick bands.
+"""
+
+import cv2
+import numpy as np
+from typing import Dict, Tuple, Optional
+from scipy.ndimage import gaussian_filter1d
+
+
+class EdgeFasciaDetector:
+    """
+    Detects fascia as thin bright edge boundaries.
+    Optimized for real ultrasound with delicate fascia lines.
+    """
+    
+    def __init__(self):
+        self.fascia_mask = None
+        self.upper_edge = None
+        self.lower_edge = None
+        self.confidence = 0.0
+    
+    def enhance_image(self, image: np.ndarray) -> np.ndarray:
+        """Enhance contrast while preserving edges."""
+        if len(image.shape) == 3:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        
+        # Bilateral filter
+        denoised = cv2.bilateralFilter(image, 7, 50, 50)
+        
+        # CLAHE
+        clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8))
+        enhanced = clahe.apply(denoised)
+        
+        return enhanced
+    
+    def detect_edges_canny(self, image: np.ndarray,
+                           threshold1: int = 50,
+                           threshold2: int = 150) -> np.ndarray:
+        """Detect edges using Canny edge detector."""
+        edges = cv2.Canny(image, threshold1, threshold2)
+        return edges
+    
+    def find_fascia_band_region(self, image: np.ndarray) -> Tuple[int, int]:
+        """
+        Find the y-region containing fascia using intensity analysis.
+        Skips top surface artifacts and finds main fascia region.
+        
+        Args:
+            image: Enhanced grayscale image
+            
+        Returns:
+            (y_start, y_end) - approximate band boundaries
+        """
+        h, w = image.shape
+        
+        # Skip top 15% (surface artifacts, text labels like "TRB", skin)
+        skip_top = max(30, int(h * 0.15))
+        
+        # Use Laplacian (edge/texture energy) to find fascia region
+        laplacian = cv2.Laplacian(image, cv2.CV_64F)
+        laplacian = np.abs(laplacian)
+        
+        # Project texture onto y-axis
+        texture_per_row = np.mean(laplacian, axis=1)
+        
+        # Only look below skip_top
+        texture_below = texture_per_row[skip_top:]
+        texture_smooth = gaussian_filter1d(texture_below, sigma=3)
+        
+        # Find row with highest texture (likely fascia)
+        relative_peak_y = np.argmax(texture_smooth)
+        peak_y = skip_top + relative_peak_y
+        
+        # Band extends ±40 pixels from peak
+        y_start = max(skip_top, peak_y - 40)
+        y_end = min(h - 1, peak_y + 40)
+        
+        return y_start, y_end
+    
+    def find_boundary_line(self, image: np.ndarray,
+                          y_start: int, y_end: int,
+                          find_upper: bool = True) -> Optional[np.ndarray]:
+        """
+        Find fascia boundary by finding pairs of adjacent bright peaks.
+        
+        Real fascia = TWO adjacent peaks (upper and lower boundaries of thin band)
+        with spacing of 10-20 pixels between them.
+        
+        Args:
+            image: Enhanced image
+            y_start, y_end: Search region bounds
+            find_upper: True=find upper boundary, False=find lower boundary
+            
+        Returns:
+            Array of (x, y) coordinates on the boundary
+        """
+        w = image.shape[1]
+        
+        # Extract search region
+        region = image[y_start:y_end+1, :]
+        region_h = region.shape[0]
+        
+        # Find brightness profile (average brightness per row)
+        brightness_per_row = np.mean(region, axis=1)
+        
+        # Smooth to find peaks
+        from scipy.ndimage import gaussian_filter1d
+        brightness_smooth = gaussian_filter1d(brightness_per_row.astype(float), sigma=1)
+        
+        # Find peaks
+        gradient = np.diff(brightness_smooth)
+        sign_change = np.diff(np.sign(gradient))
+        peaks = np.where(sign_change < 0)[0]  # Local maxima
+        
+        if len(peaks) < 2:
+            return None
+        
+        # Adaptive threshold
+        peak_brightness = brightness_per_row[peaks]
+        max_brightness_in_region = brightness_per_row.max()
+        brightness_threshold = max(85, max_brightness_in_region * 0.65)
+        
+        significant_mask = peak_brightness > brightness_threshold
+        significant_peaks = peaks[significant_mask]
+        significant_brightness = peak_brightness[significant_mask]
+        
+        if len(significant_peaks) < 2:
+            return None
+        
+        # Find pairs of consecutive peaks with 10-20 pixel spacing
+        fascia_pairs = []
+        for i in range(len(significant_peaks) - 1):
+            spacing = significant_peaks[i+1] - significant_peaks[i]
+            if 8 <= spacing <= 25:  # Typical fascia spacing
+                pair_brightness = (significant_brightness[i] + significant_brightness[i+1]) / 2
+                fascia_pairs.append({
+                    'upper_idx': i,
+                    'lower_idx': i+1,
+                    'upper_y': significant_peaks[i],
+                    'lower_y': significant_peaks[i+1],
+                    'spacing': spacing,
+                    'brightness': pair_brightness
+                })
+        
+        # DEBUG
+        import sys
+        print(f"[DEBUG find_boundary_line] Significant peaks: {significant_peaks}", file=sys.stderr)
+        print(f"[DEBUG find_boundary_line] Found {len(fascia_pairs)} fascia pairs", file=sys.stderr)
+        for p in fascia_pairs:
+            print(f"  Pair: y=[{p['upper_y']}, {p['lower_y']}] spacing={p['spacing']}", file=sys.stderr)
+        
+        if len(fascia_pairs) == 0:
+            return None
+        
+        # Select best pair: prioritize topmost if find_upper, bottommost if find_lower
+        if find_upper:
+            # Use topmost pair
+            best_pair = min(fascia_pairs, key=lambda p: p['upper_y'])
+            y_local = best_pair['upper_y']
+        else:
+            # Use bottommost pair
+            best_pair = max(fascia_pairs, key=lambda p: p['lower_y'])
+            y_local = best_pair['lower_y']
+        
+        y_global = y_start + y_local
+        
+        # Create boundary points
+        boundary_points = []
+        for x in range(w):
+            # For each column, find the brightest pixels near y_global
+            y_min = max(0, y_global - 2)
+            y_max = min(image.shape[0] - 1, y_global + 2)
+            
+            search_col = image[y_min:y_max + 1, x]
+            brightest_idx = np.argmax(search_col)
+            y_found = y_min + brightest_idx
+            
+            boundary_points.append([x, y_found])
+        
+        if len(boundary_points) < 50:
+            return None
+        
+        boundary = np.array(boundary_points, dtype=np.int32)
+        
+        # Smooth boundary
+        y_values = boundary[:, 1].astype(float)
+        y_smooth = gaussian_filter1d(y_values, sigma=2)
+        boundary[:, 1] = np.clip(y_smooth.astype(np.int32), 0, image.shape[0]-1)
+        
+        return boundary
+    
+    def validate_boundaries(self, image: np.ndarray,
+                           upper: np.ndarray,
+                           lower: np.ndarray) -> float:
+        """
+        Validate fascia boundaries.
+        
+        Checks:
+        - Lower is consistently below upper
+        - Spacing is small (5-15 pixels, real fascia)
+        - Boundaries are sharp (high gradient at edges)
+        """
+        if upper is None or lower is None:
+            return 0.0
+        
+        upper_y = upper[:, 1].astype(float)
+        lower_y = lower[:, 1].astype(float)
+        
+        # Check offset
+        if not np.all(lower_y >= upper_y):
+            return 0.0
+        
+        # Check spacing (5-15 pixels for real fascia)
+        spacing = lower_y - upper_y
+        
+        if len(spacing) == 0:
+            return 0.0
+        
+        avg_spacing = np.mean(spacing)
+        spacing_std = np.std(spacing)
+        
+        # Real fascia is thin and consistent
+        if avg_spacing < 3 or avg_spacing > 20:
+            return 0.0
+        
+        # Penalize high variance
+        if spacing_std > 5:
+            spacing_score = max(0, 1.0 - spacing_std / 10)
+        else:
+            spacing_score = 1.0
+        
+        # Check edge sharpness (fascia should have sharp boundaries)
+        h, w = image.shape
+        edge_strength = []
+        
+        for x, y in upper[:, :]:
+            y = int(y)
+            if 0 < y < h - 1:
+                grad = abs(int(image[y+1, x]) - int(image[y-1, x]))
+                edge_strength.append(grad)
+        
+        if len(edge_strength) > 0:
+            avg_edge = np.mean(edge_strength)
+            # Strong edges = gradient > 30
+            edge_score = min(avg_edge / 50, 1.0)
+        else:
+            edge_score = 0.5
+        
+        # Combined confidence
+        confidence = spacing_score * 0.6 + edge_score * 0.4
+        
+        return max(0, min(1, confidence))
+    
+    def create_boundary_mask(self, shape: Tuple, 
+                            upper: np.ndarray,
+                            lower: np.ndarray) -> np.ndarray:
+        """Create mask with thin boundary lines."""
+        mask = np.zeros(shape, dtype=np.uint8)
+        
+        if upper is None or lower is None:
+            return mask
+        
+        # Draw thin lines (1-2 pixels)
+        cv2.polylines(mask, [upper], False, 255, 1)
+        cv2.polylines(mask, [lower], False, 255, 1)
+        
+        return mask
+    
+    def find_fascia_pair(self, image: np.ndarray,
+                         y_start: int, y_end: int) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+        """
+        Find the best pair of fascia boundaries (upper and lower).
+        Returns (upper_boundary, lower_boundary) as (x,y) coordinate arrays,  or None if not found.
+        """
+        from scipy.ndimage import gaussian_filter1d
+        
+        w = image.shape[1]
+        
+        # Extract search region
+        region = image[y_start:y_end+1, :]
+        
+        # Find brightness profile
+        brightness_per_row = np.mean(region, axis=1)
+        
+        # Smooth to find peaks
+        brightness_smooth = gaussian_filter1d(brightness_per_row.astype(float), sigma=1)
+        
+        # Find peaks
+        gradient = np.diff(brightness_smooth)
+        sign_change = np.diff(np.sign(gradient))
+        peaks = np.where(sign_change < 0)[0]  # Local maxima
+        
+        if len(peaks) < 2:
+            return None
+        
+        # Adaptive threshold
+        peak_brightness = brightness_per_row[peaks]
+        max_brightness_in_region = brightness_per_row.max()
+        brightness_threshold = max(85, max_brightness_in_region * 0.65)
+        
+        significant_mask = peak_brightness > brightness_threshold
+        significant_peaks = peaks[significant_mask]
+        significant_brightness = peak_brightness[significant_mask]
+        
+        if len(significant_peaks) < 2:
+            return None
+        
+        # Group consecutive peaks that are close together (5-20 pixels apart)
+        # A "fascia structure" is a cluster of peaks, not just two adjacent ones
+        peak_clusters = []
+        current_cluster = [significant_peaks[0]]
+        
+        for i in range(1, len(significant_peaks)):
+            prev_peak = significant_peaks[i-1]
+            curr_peak = significant_peaks[i]
+            spacing = curr_peak - prev_peak
+            
+            if spacing <= 20:  # Within cluster threshold
+                current_cluster.append(curr_peak)
+            else:
+                # End current cluster, start new one
+                if len(current_cluster) >= 2:
+                    peak_clusters.append(current_cluster)
+                current_cluster = [curr_peak]
+        
+        # Add last cluster
+        if len(current_cluster) >= 2:
+            peak_clusters.append(current_cluster)
+        
+        if len(peak_clusters) == 0:
+            return None
+        
+        # Find fascia boundaries as outer edges of each cluster
+        fascia_pairs = []
+        for cluster in peak_clusters:
+            upper_y = cluster[0]
+            lower_y = cluster[-1]
+            cluster_center = (upper_y + lower_y) / 2
+            cluster_brightness = significant_brightness[[i for i, p in enumerate(significant_peaks) if p in cluster]].mean()
+            cluster_spacing = lower_y - upper_y
+            
+            # Score: prefer large, bright structures in middle of image
+            score = cluster_brightness * (cluster_spacing / 50.0)  # Favor larger
+            
+            fascia_pairs.append({
+                'upper_y': upper_y,
+                'lower_y': lower_y,
+                'spacing': cluster_spacing,
+                'brightness': cluster_brightness,
+                'score': score,
+                'num_peaks': len(cluster)
+            })
+        
+        if len(fascia_pairs) == 0:
+            return None
+        
+        # DEBUG: Print all pairs
+        import sys
+        print(f"[DEBUG] Found {len(fascia_pairs)} fascia clusters:", file=sys.stderr)
+        for i, p in enumerate(fascia_pairs):
+            print(f"  [{i}] y=[{p['upper_y']}, {p['lower_y']}] spacing={p['spacing']} peaks={p['num_peaks']} score={p['score']:.2f}", file=sys.stderr)
+        
+        # Select best pair: largest, brightest cluster
+        best_pair = max(fascia_pairs, key=lambda p: p['score'])
+        print(f"[DEBUG] Selected cluster: y=[{best_pair['upper_y']}, {best_pair['lower_y']}] spacing={best_pair['spacing']}", file=sys.stderr)
+        upper_y_local = best_pair['upper_y']
+        lower_y_local = best_pair['lower_y']
+        
+        # Convert to global coordinates
+        upper_y_global = y_start + upper_y_local
+        lower_y_global = y_start + lower_y_local
+        
+        # Create boundary points for each
+        upper = self._create_boundary_for_y(image, upper_y_global)
+        lower = self._create_boundary_for_y(image, lower_y_global)
+        
+        return upper, lower
+    
+    def _create_boundary_for_y(self, image: np.ndarray, y_global: int) -> np.ndarray:
+        """Create boundary point array for a given y-coordinate."""
+        from scipy.ndimage import gaussian_filter1d
+        
+        w = image.shape[1]
+        
+        boundary_points = []
+        for x in range(w):
+            # Find brightest pixel near y_global
+            y_min = max(0, y_global - 2)
+            y_max = min(image.shape[0] - 1, y_global + 2)
+            
+            search_col = image[y_min:y_max + 1, x]
+            brightest_idx = np.argmax(search_col)
+            y_found = y_min + brightest_idx
+            
+            boundary_points.append([x, y_found])
+        
+        boundary = np.array(boundary_points, dtype=np.int32)
+        
+        # Smooth boundary
+        y_values = boundary[:, 1].astype(float)
+        y_smooth = gaussian_filter1d(y_values, sigma=2)
+        boundary[:, 1] = np.clip(y_smooth.astype(np.int32), 0, image.shape[0]-1)
+        
+        return boundary
+    
+    def detect(self, image: np.ndarray, threshold: float = 0.5, 
+               return_boundary: bool = False) -> Dict:
+        """
+        Main detection pipeline.
+        
+        Args:
+            image: Input ultrasound image
+            threshold: Ignored (for API compatibility)
+            return_boundary: If True, include boundary coordinates
+        
+        Returns:
+            Dict with mask, boundaries, confidence, etc.
+        """
+        h, w = image.shape[:2]
+        
+        # Step 1: Enhance
+        enhanced = self.enhance_image(image)
+        
+        # Step 2: Find band region
+        y_start, y_end = self.find_fascia_band_region(enhanced)
+        
+        # Step 3: Find best fascia PAIR (upper and lower together)
+        pair_result = self.find_fascia_pair(enhanced, y_start, y_end)
+        
+        if pair_result is None:
+            return {
+                'mask': np.zeros((h, w), dtype=np.uint8),
+                'upper_edge': None,
+                'lower_edge': None,
+                'confidence': 0.0,
+                'status': 'boundaries_not_found'
+            }
+        
+        upper, lower = pair_result
+        
+        # Step 4: Validate
+        confidence = self.validate_boundaries(enhanced, upper, lower)
+        
+        # Step 5: Create mask
+        mask = self.create_boundary_mask((h, w), upper, lower)
+        
+        self.upper_edge = upper
+        self.lower_edge = lower
+        self.confidence = confidence
+        self.fascia_mask = mask
+        
+        return {
+            'mask': mask,
+            'upper_edge': upper,
+            'lower_edge': lower,
+            'confidence': confidence,
+            'status': 'success'
+        }
+    
+    def get_mask(self) -> np.ndarray:
+        """Return fascia mask."""
+        if self.fascia_mask is None:
+            return np.zeros((256, 256), dtype=np.uint8)
+        return self.fascia_mask
+
+
+if __name__ == '__main__':
+    """Test edge-based fascia detector"""
+    # Create realistic test image
+    img = np.ones((256, 256), dtype=np.uint8) * 100
+    
+    # Brighter tissue above
+    img[:90, :] = np.random.randint(130, 170, (90, 256), dtype=np.uint8)
+    
+    # Upper fascia - thin line
+    img[100:102, 20:240] = 200
+    
+    # Lower fascia - thin line  
+    img[110:112, 20:240] = 200
+    
+    # Darker muscle below
+    img[120:, :] = np.random.randint(50, 80, (136, 256), dtype=np.uint8)
+    
+    # Add speckle
+    noise = np.random.normal(0, 8, img.shape)
+    img = np.clip(img.astype(float) + noise, 0, 255).astype(np.uint8)
+    
+    img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    
+    detector = EdgeFasciaDetector()
+    result = detector.detect(img)
+    
+    print(f"Edge-based fascia detection:")
+    print(f"  Status: {result['status']}")
+    print(f"  Confidence: {result['confidence']:.3f}")
+    
+    if result['upper_edge'] is not None:
+        upper = result['upper_edge']
+        lower = result['lower_edge']
+        spacing = lower[:, 1] - upper[:, 1]
+        print(f"  Upper edge: {len(upper)} points, y=[{upper[:, 1].min()}, {upper[:, 1].max()}]")
+        print(f"  Lower edge: {len(lower)} points, y=[{lower[:, 1].min()}, {lower[:, 1].max()}]")
+        print(f"  Spacing: {spacing.mean():.1f} ± {spacing.std():.1f} pixels")
