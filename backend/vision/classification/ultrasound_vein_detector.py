@@ -149,7 +149,7 @@ class UltrasoundVeinDetector:
         hf_token = (
             os.environ.get("HF_TOKEN")
             or os.environ.get("HUGGINGFACE_TOKEN")
-            or "YOUR_HF_TOKEN_HERE"
+            or None  # Set via environment variable
         )
         self.client = InferenceClient(model=self.model_name, token=hf_token)
         logger.info(f"UltrasoundVeinDetector initialized (API mode: {self.model_name})")
