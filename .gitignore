@@ -1,0 +1,37 @@
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.pyc
+
+# Claude files
+.claude/
+
+# Cache directories
+.cache/
+*.cache
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Other temporary files
+*.log
+*.pid
+.env
+.env.local

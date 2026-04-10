@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Backend Flask Application
+  backend:
+    container_name: cmed_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+    volumes:
+      - ./backend/faiss_index:/app/faiss_index
+      - ./backend/app.log:/app/app.log
+    depends_on:
+      - ollama
+    networks:
+      - cmed_network
+    command: python app.py
+
+  # Frontend React Application
+  frontend:
+    container_name: cmed_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+    depends_on:
+      - backend
+    networks:
+      - cmed_network
+
+  # Ollama LLM Service
+  ollama:
+    container_name: cmed_ollama
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - cmed_network
+    environment:
+      - OLLAMA_MODELS=/root/.ollama/models
+
+networks:
+  cmed_network:
+    driver: bridge
+
+volumes:
+  ollama_data:

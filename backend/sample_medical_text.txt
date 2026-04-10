@@ -1,0 +1,190 @@
+
+VASCULAR MEDICINE AND HAEMODYNAMIC ASSESSMENT
+
+CHAPTER 1: VENOUS SYSTEM ANATOMY AND PHYSIOLOGY
+
+The venous system consists of superficial, deep and perforating veins. The superficial system includes the great saphenous vein (GSV), small saphenous vein (SSV), and their tributaries. The deep veins comprise the femoral, popliteal, tibial and peroneal veins. Perforating veins connect the superficial and deep systems.
+
+The great saphenous vein runs from the medial ankle to the groin, joining the femoral vein at the saphenofemoral junction. The small saphenous vein ascends the posterior calf and typically joins the popliteal vein. Normal venous flow is centripetal (toward the heart) and unidirectional, maintained by bicuspid venous valves.
+
+HAEMODYNAMIC PRINCIPLES IN VENOUS DISEASE
+
+Three-compartment model: N1, N2, and N3 compartments.
+- N1: Normal veins with competent valves
+- N2: Veins with valve incompetence but no reflux below the entry point
+- N3: Veins with reflux extending into the deep system
+
+Entry Point (EP): The proximal location where reflux enters the incompetent superficial vein.
+
+Re-entry Point (RP): Where the incompetent vein re-enters the deep system or competent superficial vein.
+
+CHAPTER 2: CLASSIFICATION OF VENOUS SHUNTS
+
+TYPE 1 SHUNT (Simple Reflux)
+- Incompetent valve at the saphenofemoral junction
+- Reflux in the great saphenous vein extending into tributaries
+- No reflux in perforating veins
+- Treatment: CHIVA-type closure of tributaries or saphenofemoral ligation
+
+TYPE 2 SHUNT (Reflux with Perforating Involvement)
+- Incompetence at saphenofemoral junction
+- Reflux in the GSV
+- Perforating veins in the medial thigh showing incompetence
+- Treatment: CHIVA with hemodynamic correction at perforators
+
+TYPE 3 SHUNT (Perforating Vein Origin)
+- Incompetent perforating veins as primary entry point
+- Incompetence at the mid-thigh or knee level
+- Reflux in the saphenous vein secondary to perforator incompetence
+- Treatment: Perforator ligation at entry point
+
+ULTRASOUND ASSESSMENT PARAMETERS
+
+1. Vein Diameter Measurement
+   - Measured in transverse section at rest
+   - GSV normal: < 3mm
+   - GSV abnormal: > 5mm
+   - Clinical significance: Progressive dilatation indicates disease progression
+
+2. Reflux Duration
+   - Normal: < 0.5 seconds
+   - Pathological: > 1 second
+   - Assessed with Valsalva or proximal compression
+
+3. Flow Velocity
+   - Normal antegrade flow: 0.3-0.9 m/s
+   - Reflux velocity indicates severity
+   - Low velocity reflux (<0.2 m/s) suggests chronicity
+
+4. Valve Cusp Appearance
+   - Normal: Thin, echogenic, coapt completely
+   - Diseased: Thick, irregular, separated cusps
+
+HEMODYNAMIC CLASSIFICATION (Widmer)
+
+C0: No visible signs of venous disease
+C1: Telangiectasias or reticular veins
+C2: Varicose veins > 3mm
+C3: Edema without skin changes
+C4: Pigmentation or eczema
+C5: Healed venous ulcer
+C6: Active venous ulcer
+
+ETIOLOGICAL CLASSIFICATION
+
+Primary (Essential) Venous Insufficiency
+- Valve incompetence without prior thrombosis
+- Genetic predisposition
+- Environmental factors: prolonged standing, pressure
+
+Secondary Venous Insufficiency
+- Post-thrombotic syndrome
+- Iliac vein obstruction
+- Pelvic mass compression
+
+TREATMENT STRATEGIES
+
+CONSERVATIVE MANAGEMENT
+- Compression therapy: 20-30 mmHg for C2-C4
+- Leg elevation
+- Exercise programs
+- Pharmacotherapy: Flavonoids, diosmin
+
+ABLATION TECHNIQUES
+- Radiofrequency ablation (RFA): 85° C, 120 seconds per segment
+- Endovenous laser ablation (EVLA): 980nm or 1470nm wavelength
+- Cyanoacrylate glue: VenaSeal system
+- Sclerotherapy: Sodium tetradecyl sulfate or polidocanol
+
+CHIVA METHOD (Conservative Hemodynamic Treatment)
+- Hemodynamically meaningful truncation
+- Preserves saphenous vein function for grafting
+- Addresses hypoplasia by creating preferential reflux pathways
+- Entry point treatment with tributary ligation
+- Often avoids saphenofemoral or saphenopopliteal junction closure
+
+INDICATIONS FOR TREATMENT
+- C2-C6 with hemodynamic abnormality
+- Progressive symptoms
+- Recurrent ulceration
+- Patient preference
+- Cosmetic concerns
+
+CONTRAINDICATIONS FOR ENDOVENOUS ABLATION
+- Deep venous thrombosis in target vein
+- Severe arterial insufficiency
+- Systemic infection
+- Pregnancy (relative)
+- Inability to comply with post-procedural care
+
+ASSESSMENT OF PROBE POSITIONING IN ULTRASOUND
+
+Optimal probe positioning for venous assessment:
+- Transverse (axial) view: Shows circular or oval vein cross-section
+- Sagittal (longitudinal) view: Shows valves and flow direction
+- Probe angulation: 15-30 degrees for optimal valve visualization
+- Compression maneuver: Gentle posterior pressure to assess compressibility
+- Dynamic assessment: Valsalva, limb elevation, muscle contraction
+
+Doppler mode selection:
+- B-mode (gray-scale): Structural assessment
+- PW-Doppler: Single-site velocity measurement
+- CW-Doppler: High-velocity flow assessment
+- Color Doppler: Flow mapping and reflux detection
+
+CLINICAL DECISION SUPPORT GUIDELINES
+
+For GSV incompetence with C2 symptoms:
+1. Confirm reflux duration > 1 second
+2. Assess diameter and degree of incompetence
+3. Evaluate for perforator involvement
+4. Classify as Type 1, 2, or 3 shunt
+5. Select treatment: CHIVA, ablation, or ligation
+
+For below-knee insufficiency:
+1. Assess small saphenous vein
+2. Evaluate medial and lateral calf perforators
+3. Determine if isolated perforator disease
+4. Consider endovenous ablation of SSV with selective perforator treatment
+
+For recurrent varicose veins:
+1. Complete mapping of previous treatment site
+2. Assess for neo-vascularization
+3. Evaluate arteriovenous communications
+4. Plan revision strategy accordingly
+
+ULTRASOUND PROBE GUIDANCE PRINCIPLES
+
+Scanning technique for optimal visualization:
+- Start with B-mode transverse view at known reference points
+- Systematically scan longitudinally along vein course
+- Use color Doppler to confirm vein identity
+- Optimize gain and frequency for target vein depth
+- Use Valsalva to assess valve competence
+
+Navigation targets in lower extremity venous mapping:
+- Saphenofemoral junction: Medial groin at skin crease
+- Saphenopopliteal junction: Popliteal fossa, medial aspect
+- Medial calf perforators: Located medial gastrocnemius
+- Lateral calf perforators: Located between peroneal and soleus
+- Hunter's canal perforators: Located along medial thigh
+
+Probe movement terminology:
+- Medial/Lateral: Toward midline or away from midline
+- Proximal/Distal: Toward heart or away from heart
+- Superficial/Deep: Toward skin or toward deep structures
+- Angular: Rotating probe plane
+
+SUMMARY OF KEY HAEMODYNAMIC CONCEPTS
+
+The N1-N2-N3 classification provides hemodynamic context:
+- N1 compartment: Normal veins with intact valves
+- N2 compartment: Incompetent vein with preserved distal valve
+- N3 compartment: Segmental reflux involving multiple valve levels
+
+Entry Point determination is critical for surgical planning:
+- Primary entry point: Most proximal location of incompetence
+- Secondary pathways: Tributaries and perforators carrying reflux
+- Hemodynamic significance: Whether reflux affects outflow capacity
+
+The CHIVA principle emphasizes preservation of saphenous veins when possible while correcting hemodynamic abnormalities through strategic intervention at entry points and re-entry pathways.
