@@ -1,8 +1,44 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+// Default clip_list: 18 clips representing a Type 3 shunt assessment
+// (EP N1→N2 at SFJ, EP N2→N3, RP N3→N2, RP N2→N1, RP N3→N1 with No Reflux elim test)
+// This is the most clinically interesting / complex single-assessment pattern.
+const REPORT_DEFAULT_CLIPS = JSON.stringify([
+  {"flow":"EP","fromType":"N1","toType":"N2","posXRatio":0.30,"posYRatio":0.07,"eliminationTest":"","step":"SFJ","legSide":"left"},
+  {"flow":"EP","fromType":"N2","toType":"N2","posXRatio":0.50,"posYRatio":0.20,"eliminationTest":"","step":"SFJ-Knee","legSide":"left"},
+  {"flow":"EP","fromType":"N2","toType":"N3","posXRatio":0.33,"posYRatio":0.25,"eliminationTest":"","step":"SFJ-Knee","legSide":"left"},
+  {"flow":"RP","fromType":"N3","toType":"N2","posXRatio":0.36,"posYRatio":0.40,"eliminationTest":"","step":"Knee","legSide":"left"},
+  {"flow":"EP","fromType":"N1","toType":"N1","posXRatio":0.45,"posYRatio":0.10,"eliminationTest":"","step":"SFJ","legSide":"left"},
+  {"flow":"RP","fromType":"N2","toType":"N1","posXRatio":0.32,"posYRatio":0.15,"eliminationTest":"","step":"SFJ-Knee","legSide":"left"},
+  {"flow":"EP","fromType":"N3","toType":"N3","posXRatio":0.52,"posYRatio":0.68,"eliminationTest":"","step":"Knee-Ankle","legSide":"left"},
+  {"flow":"RP","fromType":"N3","toType":"N2","posXRatio":0.37,"posYRatio":0.55,"eliminationTest":"","step":"Knee-Ankle","legSide":"left"},
+  {"flow":"EP","fromType":"N2","toType":"N2","posXRatio":0.48,"posYRatio":0.22,"eliminationTest":"","step":"Knee","legSide":"left"},
+  {"flow":"RP","fromType":"N3","toType":"N1","posXRatio":0.38,"posYRatio":0.45,"eliminationTest":"No Reflux","step":"Knee-Ankle","legSide":"left"},
+  {"flow":"RP","fromType":"N2","toType":"N1","posXRatio":0.31,"posYRatio":0.18,"eliminationTest":"","step":"SFJ-Knee","legSide":"left"},
+  {"flow":"EP","fromType":"N1","toType":"N1","posXRatio":0.44,"posYRatio":0.75,"eliminationTest":"","step":"Ankle","legSide":"left"},
+  {"flow":"EP","fromType":"N2","toType":"N3","posXRatio":0.35,"posYRatio":0.30,"eliminationTest":"","step":"SFJ-Knee","legSide":"left"},
+  {"flow":"RP","fromType":"N3","toType":"N2","posXRatio":0.38,"posYRatio":0.50,"eliminationTest":"","step":"Knee","legSide":"left"},
+  {"flow":"EP","fromType":"N3","toType":"N3","posXRatio":0.50,"posYRatio":0.60,"eliminationTest":"","step":"Knee-Ankle","legSide":"left"},
+  {"flow":"RP","fromType":"N2","toType":"N1","posXRatio":0.34,"posYRatio":0.28,"eliminationTest":"","step":"Knee","legSide":"left"},
+  {"flow":"EP","fromType":"N1","toType":"N1","posXRatio":0.55,"posYRatio":0.95,"eliminationTest":"","step":"SPJ","legSide":"left"},
+  {"flow":"EP","fromType":"N2","toType":"N2","posXRatio":0.48,"posYRatio":0.65,"eliminationTest":"","step":"Ankle","legSide":"left"}
+], null, 2);
+
 const ClinicalReasoning = () => {
-  const [mode, setMode] = useState('single'); // 'single' or 'stream'
+  const [mode, setMode] = useState('single'); // 'single', 'stream', or 'report'
+
+  // Post-assessment report state
+  const [reportClips, setReportClips] = useState(REPORT_DEFAULT_CLIPS);
+  const [reportPatientInfo, setReportPatientInfo] = useState(JSON.stringify({
+    "patient_id": "PAT-001",
+    "assessor": "Dr. Smith",
+    "leg_side": "Left",
+    "notes": ""
+  }, null, 2));
+  const [reportResult, setReportResult] = useState(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState(null);
   
   // Single mode state - Task-1: Temporal Flow Analysis with Ligation
   const [inputData, setInputData] = useState(JSON.stringify({
@@ -40,46 +76,27 @@ const ClinicalReasoning = () => {
 
   // Stream mode state - Mixed normal (EP) and abnormal (RP) flows, LLM generates reasoning dynamically
   const [streamData, setStreamData] = useState(JSON.stringify([
-    { sequenceNumber: 1, fromType: "N1", toType: "N1", step: "SFJ-Knee", flow: "EP", posXRatio: 0.45, posYRatio: 0.10, clipPath: "frame-001.png", legSide: "left", confidence: 0.95, reflux_duration: 0.0, description: "Setup" },
-    { sequenceNumber: 2, fromType: "N2", toType: "N2", step: "SFJ-Knee", flow: "EP", posXRatio: 0.50, posYRatio: 0.20, clipPath: "frame-002.png", legSide: "left", confidence: 0.94, reflux_duration: 0.0, description: "Setup" },
-    { sequenceNumber: 3, fromType: "N1", toType: "N2", step: "SFJ-Knee", flow: "RP", posXRatio: 0.45, posYRatio: 0.08, clipPath: "frame-003.png", legSide: "left", confidence: 0.88, reflux_duration: 0.6, description: "Analyzing..." },
-    { sequenceNumber: 4, fromType: "N2", toType: "N1", step: "SFJ-Knee", flow: "RP", posXRatio: 0.48, posYRatio: 0.12, clipPath: "frame-004.png", legSide: "left", confidence: 0.91, reflux_duration: 1.1, description: "Analyzing...", "ligation": { "procedure_name": "SFJ Ligation with Crossectomy", "description": "Surgical tying of saphenofemoral junction to close Type 1 reflux pathway", "technique": "Open surgical exposure with 4-0 absorbable sutures at SFJ", "location": "Saphenofemoral junction in groin crease", "vessels_ligated": ["Great Saphenous Vein at SFJ", "Superficial epigastric vein", "Superficial circumflex iliac vein"], "compression_post_op": "Class III 40-50mmHg weeks 1-2, then Class II 23-32mmHg weeks 3-6" } },
-    { sequenceNumber: 5, fromType: "N3", toType: "N3", step: "Knee-Ankle", flow: "EP", posXRatio: 0.52, posYRatio: 0.68, clipPath: "frame-005.png", legSide: "left", confidence: 0.93, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 6, fromType: "N1", toType: "N1", step: "SPJ-Ankle", flow: "EP", posXRatio: 0.55, posYRatio: 0.95, clipPath: "frame-006.png", legSide: "left", confidence: 0.92, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 7, fromType: "N2", toType: "N3", step: "Knee-Ankle", flow: "RP", posXRatio: 0.50, posYRatio: 0.62, clipPath: "frame-007.png", legSide: "left", confidence: 0.85, reflux_duration: 0.7, description: "Analyzing..." },
-    { sequenceNumber: 8, fromType: "N3", toType: "N2", step: "Knee-Ankle", flow: "RP", posXRatio: 0.48, posYRatio: 0.68, clipPath: "frame-008.png", legSide: "left", confidence: 0.84, reflux_duration: 0.9, description: "Analyzing...", "ligation": { "procedure_name": "Tributary Ligation - Isolated", "description": "Ligation of incompetent tributary branches while preserving competent GSV", "technique": "Small 2-3cm incisions above medial knee with 3-0 absorbable sutures", "location": "Medial knee above tributary-GSV junction", "vessels_ligated": ["Medial tributary branches from GSV", "Reverse flow perforators"], "suture_material": "Polyglactin 910 (Vicryl) 3-0", "GSV_status": "Competent - preserved for potential future use", "compression_post_op": "Class III 40-50mmHg weeks 1-2, then Class II weeks 3-4" } },
-    { sequenceNumber: 9, fromType: "N1", toType: "N1", step: "Knee-Ankle", flow: "EP", posXRatio: 0.45, posYRatio: 0.75, clipPath: "frame-009.png", legSide: "left", confidence: 0.90, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 10, fromType: "N2", toType: "N2", step: "SFJ-Knee", flow: "EP", posXRatio: 0.50, posYRatio: 0.22, clipPath: "frame-010.png", legSide: "left", confidence: 0.92, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 11, fromType: "N1", toType: "N3", step: "SFJ-Knee", flow: "RP", posXRatio: 0.42, posYRatio: 0.15, clipPath: "frame-011.png", legSide: "left", confidence: 0.87, reflux_duration: 0.8, description: "Analyzing..." },
-    { sequenceNumber: 12, fromType: "N3", toType: "N2", step: "SFJ-Knee", flow: "RP", posXRatio: 0.38, posYRatio: 0.18, clipPath: "frame-012.png", legSide: "left", confidence: 0.86, reflux_duration: 0.9, description: "Analyzing..." },
-    { sequenceNumber: 13, fromType: "N2", toType: "N1", step: "SFJ-Knee", flow: "RP", posXRatio: 0.52, posYRatio: 0.25, clipPath: "frame-013.png", legSide: "left", confidence: 0.85, reflux_duration: 1.2, description: "Analyzing...", "ligation": { "procedure_name": "Dual Ligation - SFJ with Tributary", "description": "Two-stage ligation for Type 3 complex multi-vessel reflux", "technique": "Primary: Groin incision 4-0 sutures SFJ; Secondary: Medial knee 3-0 sutures tributary junction", "location_primary": "Groin saphenofemoral junction", "location_secondary": "Medial knee tributary convergence", "vessels_ligated_primary": ["Great Saphenous Vein at SFJ", "All SFJ tributaries"], "vessels_ligated_secondary": ["Major tributary branches"], "timing": "Primary immediate, secondary 2-4 weeks later", "compression_post_op": "Class III 40mmHg weeks 1-3, then Class II weeks 4-8" } },
-    { sequenceNumber: 14, fromType: "N3", toType: "N3", step: "SFJ-Knee", flow: "EP", posXRatio: 0.45, posYRatio: 0.35, clipPath: "frame-014.png", legSide: "left", confidence: 0.91, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 15, fromType: "N1", toType: "N1", step: "SPJ-Ankle", flow: "EP", posXRatio: 0.55, posYRatio: 0.90, clipPath: "frame-015.png", legSide: "left", confidence: 0.94, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 16, fromType: "P", toType: "N2", step: "SFJ-Knee", flow: "RP", posXRatio: 0.40, posYRatio: 0.08, clipPath: "frame-016.png", legSide: "left", confidence: 0.82, reflux_duration: 1.5, description: "Analyzing..." },
-    { sequenceNumber: 17, fromType: "N2", toType: "N1", step: "SFJ-Knee", flow: "RP", posXRatio: 0.45, posYRatio: 0.20, clipPath: "frame-017.png", legSide: "left", confidence: 0.83, reflux_duration: 1.7, description: "Analyzing...", "ligation": null },
-    { sequenceNumber: 18, fromType: "N1", toType: "N1", step: "SFJ-Knee", flow: "EP", posXRatio: 0.45, posYRatio: 0.12, clipPath: "frame-018.png", legSide: "left", confidence: 0.94, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 19, fromType: "N2", toType: "N2", step: "Knee-Ankle", flow: "EP", posXRatio: 0.48, posYRatio: 0.65, clipPath: "frame-019.png", legSide: "left", confidence: 0.92, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 20, fromType: "N1", toType: "N3", step: "Knee-Ankle", flow: "RP", posXRatio: 0.35, posYRatio: 0.32, clipPath: "frame-020.png", legSide: "left", confidence: 0.78, reflux_duration: 1.1, description: "Analyzing..." },
-    { sequenceNumber: 21, fromType: "N3", toType: "N2", step: "Knee-Ankle", flow: "RP", posXRatio: 0.55, posYRatio: 0.75, clipPath: "frame-021.png", legSide: "left", confidence: 0.79, reflux_duration: 0.9, description: "Analyzing...", "ligation": { "procedure_name": "Perforator Ligation - SEPS", "description": "Subfascial endoscopic closure of perforator reflux pathway", "technique": "Subfascial endoscopic approach via calf incision, titanium clips or absorbable sutures", "location": "Calf perforators (Cockett/Hunt region)", "vessels_ligated": ["Incompetent perforating veins N1-N3 connection"], "suture_material": "Titanium clips or 2-0/3-0 absorbable sutures", "compression_post_op": "Class III 40-50mmHg weeks 1-2, then Class II weeks 3-6" } },
-    { sequenceNumber: 22, fromType: "N3", toType: "N3", step: "Knee-Ankle", flow: "EP", posXRatio: 0.52, posYRatio: 0.72, clipPath: "frame-022.png", legSide: "left", confidence: 0.91, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 23, fromType: "N1", toType: "N1", step: "SPJ-Ankle", flow: "EP", posXRatio: 0.55, posYRatio: 0.88, clipPath: "frame-023.png", legSide: "left", confidence: 0.93, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 24, fromType: "P", toType: "N3", step: "Knee-Ankle", flow: "RP", posXRatio: 0.42, posYRatio: 0.60, clipPath: "frame-024.png", legSide: "left", confidence: 0.80, reflux_duration: 1.4, description: "Analyzing..." },
-    { sequenceNumber: 25, fromType: "N3", toType: "N2", step: "Knee-Ankle", flow: "RP", posXRatio: 0.50, posYRatio: 0.70, clipPath: "frame-025.png", legSide: "left", confidence: 0.81, reflux_duration: 1.2, description: "Analyzing...", "ligation": null },
-    { sequenceNumber: 26, fromType: "N2", toType: "N1", step: "SFJ-Knee", flow: "RP", posXRatio: 0.48, posYRatio: 0.18, clipPath: "frame-026.png", legSide: "left", confidence: 0.82, reflux_duration: 0.8, description: "Analyzing..." },
-    { sequenceNumber: 27, fromType: "N1", toType: "N1", step: "Knee-Ankle", flow: "EP", posXRatio: 0.45, posYRatio: 0.72, clipPath: "frame-027.png", legSide: "left", confidence: 0.93, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 28, fromType: "N2", toType: "N2", step: "SFJ-Knee", flow: "EP", posXRatio: 0.50, posYRatio: 0.22, clipPath: "frame-028.png", legSide: "left", confidence: 0.93, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 29, fromType: "N1", toType: "N3", step: "SFJ-Knee", flow: "RP", posXRatio: 0.32, posYRatio: 0.30, clipPath: "frame-029.png", legSide: "left", confidence: 0.74, reflux_duration: 0.9, description: "Analyzing..." },
-    { sequenceNumber: 30, fromType: "N3", toType: "N2", step: "SFJ-Knee", flow: "RP", posXRatio: 0.52, posYRatio: 0.28, clipPath: "frame-030.png", legSide: "left", confidence: 0.75, reflux_duration: 0.7, description: "Analyzing...", "ligation": null },
-    { sequenceNumber: 31, fromType: "N2", toType: "N2", step: "Knee-Ankle", flow: "EP", posXRatio: 0.48, posYRatio: 0.65, clipPath: "frame-031.png", legSide: "left", confidence: 0.92, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 32, fromType: "N1", toType: "N2", step: "SFJ-Knee", flow: "RP", posXRatio: 0.45, posYRatio: 0.10, clipPath: "frame-032.png", legSide: "left", confidence: 0.89, reflux_duration: 1.3, description: "Analyzing..." },
-    { sequenceNumber: 33, fromType: "N2", toType: "N1", step: "SFJ-Knee", flow: "RP", posXRatio: 0.48, posYRatio: 0.12, clipPath: "frame-033.png", legSide: "left", confidence: 0.87, reflux_duration: 0.6, description: "Analyzing...", "ligation": { "procedure_name": "Dual Ligation - Staged Approach", "description": "SFJ ligation initially, then staged tributary ligation after 4-6 weeks", "technique": "Primary: SFJ crossectomy 4-0 sutures; Secondary: Tributary incisions 3-0 sutures", "location_primary": "Groin saphenofemoral junction", "location_secondary": "Medial knee after primary healing", "timing": "Primary immediate, secondary 4-6 weeks post-primary", "compression_post_op": "Class III 40mmHg primary weeks 1-2, then Class II weeks 3-6; Secondary phase: Class III week 1, Class II weeks 2-4" } },
-    { sequenceNumber: 34, fromType: "N1", toType: "N1", step: "SPJ-Ankle", flow: "EP", posXRatio: 0.55, posYRatio: 0.90, clipPath: "frame-034.png", legSide: "left", confidence: 0.94, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 35, fromType: "N2", toType: "N3", step: "Knee-Ankle", flow: "RP", posXRatio: 0.50, posYRatio: 0.62, clipPath: "frame-035.png", legSide: "right", confidence: 0.83, reflux_duration: 0.8, description: "Analyzing..." },
-    { sequenceNumber: 36, fromType: "N3", toType: "N2", step: "Knee-Ankle", flow: "RP", posXRatio: 0.48, posYRatio: 0.68, clipPath: "frame-036.png", legSide: "right", confidence: 0.82, reflux_duration: 0.9, description: "Analyzing...", "ligation": null },
-    { sequenceNumber: 37, fromType: "N1", toType: "N1", step: "Knee-Ankle", flow: "EP", posXRatio: 0.45, posYRatio: 0.75, clipPath: "frame-037.png", legSide: "right", confidence: 0.95, reflux_duration: 0.0, description: "Separator" },
-    { sequenceNumber: 38, fromType: "N1", toType: "N2", step: "SFJ-Knee", flow: "RP", posXRatio: 0.45, posYRatio: 0.08, clipPath: "frame-038.png", legSide: "right", confidence: 0.88, reflux_duration: 0.7, description: "Analyzing..." },
-    { sequenceNumber: 39, fromType: "N2", toType: "N1", step: "SFJ-Knee", flow: "RP", posXRatio: 0.48, posYRatio: 0.12, clipPath: "frame-039.png", legSide: "right", confidence: 0.90, reflux_duration: 1.2, description: "Analyzing...", "ligation": { "procedure_name": "SFJ Ligation with Crossectomy", "description": "Surgical tying of right saphenofemoral junction for Type 1 reflux", "technique": "Open surgical approach with 4-0 absorbable sutures", "location": "Right groin saphenofemoral junction", "vessels_ligated": ["Right Great Saphenous Vein at SFJ", "Right superficial tributaries"], "suture_material": "Polyglactin 910 (Vicryl) 4-0", "compression_post_op": "Class III 40-50mmHg weeks 1-2, then Class II weeks 3-6" } },
-    { sequenceNumber: 40, fromType: "N1", toType: "N1", step: "SPJ-Ankle", flow: "EP", posXRatio: 0.55, posYRatio: 0.92, clipPath: "frame-040.png", legSide: "right", confidence: 0.94, reflux_duration: 0.0, description: "Separator" }
+    // ── Cluster 1: Type 1 pattern (EP N1→N2 at SFJ, RP N2→N1) ──────────────
+    { sequenceNumber:1,  flow:"EP", fromType:"N1", toType:"N1", posXRatio:0.45, posYRatio:0.10, step:"SFJ",       legSide:"left",  confidence:0.95, reflux_duration:0.0, description:"Baseline", clipPath:"frame-001.png" },
+    { sequenceNumber:2,  flow:"EP", fromType:"N1", toType:"N2", posXRatio:0.30, posYRatio:0.07, step:"SFJ",       legSide:"left",  confidence:0.94, reflux_duration:0.0, description:"SFJ entry point detected", clipPath:"frame-002.png" },
+    { sequenceNumber:3,  flow:"RP", fromType:"N1", toType:"N2", posXRatio:0.30, posYRatio:0.07, step:"SFJ",       legSide:"left",  confidence:0.90, reflux_duration:0.8, description:"RP at SFJ — N1→N2 reflux", clipPath:"frame-003.png", ligation:{ procedure_name:"SFJ Ligation (Crossectomy)", technique:"Open groin incision, 4-0 Vicryl at SFJ", location:"Saphenofemoral junction", vessels_ligated:["GSV at SFJ","Superficial epigastric vein"], compression_post_op:"Class III 40-50mmHg wk 1-2, Class II wk 3-6" } },
+    { sequenceNumber:4,  flow:"RP", fromType:"N2", toType:"N1", posXRatio:0.32, posYRatio:0.15, step:"SFJ-Knee",  legSide:"left",  confidence:0.88, reflux_duration:1.1, description:"RP N2→N1 proximal GSV", clipPath:"frame-004.png" },
+    { sequenceNumber:5,  flow:"RP", fromType:"N2", toType:"N1", posXRatio:0.34, posYRatio:0.28, step:"SFJ-Knee",  legSide:"left",  confidence:0.86, reflux_duration:0.9, description:"RP N2→N1 mid GSV", clipPath:"frame-005.png" },
+    { sequenceNumber:6,  flow:"EP", fromType:"N2", toType:"N2", posXRatio:0.50, posYRatio:0.45, step:"Knee",      legSide:"left",  confidence:0.93, reflux_duration:0.0, description:"Normal flow below knee", clipPath:"frame-006.png" },
+    // ── Cluster 2: Type 3 pattern (EP N2→N3, RP N3→N2, RP N2→N1) ──────────
+    { sequenceNumber:7,  flow:"EP", fromType:"N2", toType:"N3", posXRatio:0.33, posYRatio:0.25, step:"SFJ-Knee",  legSide:"left",  confidence:0.92, reflux_duration:0.0, description:"Entry point N2→N3 tributary", clipPath:"frame-007.png" },
+    { sequenceNumber:8,  flow:"RP", fromType:"N3", toType:"N2", posXRatio:0.36, posYRatio:0.40, step:"Knee",      legSide:"left",  confidence:0.87, reflux_duration:1.2, description:"RP N3→N2 tributary reflux", clipPath:"frame-008.png", ligation:{ procedure_name:"Tributary Ligation at N2→N3", technique:"Small 2cm incision, 3-0 Vicryl at tributary junction", location:"Medial thigh tributary", vessels_ligated:["N3 tributary at N2 junction"], compression_post_op:"Class III wk 1-2, Class II wk 3-8" } },
+    { sequenceNumber:9,  flow:"RP", fromType:"N3", toType:"N2", posXRatio:0.38, posYRatio:0.55, step:"Knee-Ankle", legSide:"left",  confidence:0.85, reflux_duration:0.9, description:"RP second N3→N2 branch", clipPath:"frame-009.png" },
+    { sequenceNumber:10, flow:"RP", fromType:"N2", toType:"N1", posXRatio:0.31, posYRatio:0.18, step:"SFJ-Knee",  legSide:"left",  confidence:0.84, reflux_duration:1.3, description:"RP N2→N1 via GSV after tributary loop", clipPath:"frame-010.png" },
+    { sequenceNumber:11, flow:"EP", fromType:"N3", toType:"N3", posXRatio:0.52, posYRatio:0.68, step:"Knee-Ankle", legSide:"left",  confidence:0.93, reflux_duration:0.0, description:"Normal distal tributary", clipPath:"frame-011.png" },
+    { sequenceNumber:12, flow:"EP", fromType:"N1", toType:"N1", posXRatio:0.55, posYRatio:0.95, step:"SPJ",        legSide:"left",  confidence:0.94, reflux_duration:0.0, description:"SPJ — normal", clipPath:"frame-012.png" },
+    // ── Cluster 3: Type 2A pattern (EP N2→N3 only, no SFJ entry, RP N3) ────
+    { sequenceNumber:13, flow:"EP", fromType:"N2", toType:"N3", posXRatio:0.35, posYRatio:0.30, step:"SFJ-Knee",  legSide:"right", confidence:0.91, reflux_duration:0.0, description:"Right leg: entry point N2→N3", clipPath:"frame-013.png" },
+    { sequenceNumber:14, flow:"EP", fromType:"N2", toType:"N3", posXRatio:0.37, posYRatio:0.38, step:"SFJ-Knee",  legSide:"right", confidence:0.90, reflux_duration:0.0, description:"Second N2→N3 branch", clipPath:"frame-014.png" },
+    { sequenceNumber:15, flow:"RP", fromType:"N3", toType:"N2", posXRatio:0.39, posYRatio:0.48, step:"Knee",      legSide:"right", confidence:0.86, reflux_duration:1.0, description:"RP N3→N2 right leg", clipPath:"frame-015.png", ligation:{ procedure_name:"Ligate highest EP at N2→N3", technique:"Small incision at highest EP entry, 3-0 absorbable sutures", location:"Right medial knee", vessels_ligated:["Highest N2→N3 entry point"], compression_post_op:"Class II 23-32mmHg wk 1-4" } },
+    { sequenceNumber:16, flow:"RP", fromType:"N3", toType:"N2", posXRatio:0.41, posYRatio:0.58, step:"Knee-Ankle", legSide:"right", confidence:0.84, reflux_duration:0.8, description:"RP N3→N2 distal tributary", clipPath:"frame-016.png" },
+    { sequenceNumber:17, flow:"EP", fromType:"N2", toType:"N2", posXRatio:0.48, posYRatio:0.22, step:"Knee",      legSide:"right", confidence:0.93, reflux_duration:0.0, description:"GSV competent — no SFJ reflux right", clipPath:"frame-017.png" },
+    { sequenceNumber:18, flow:"EP", fromType:"N1", toType:"N1", posXRatio:0.44, posYRatio:0.75, step:"Ankle",     legSide:"right", confidence:0.92, reflux_duration:0.0, description:"Normal deep system right ankle", clipPath:"frame-018.png" }
   ], null, 2));
   
   const [bufferInterval, setBufferInterval] = useState(0.5);
@@ -243,6 +260,45 @@ const ClinicalReasoning = () => {
     setAnalysisTime(null);
   };
 
+  // Post-assessment report handlers
+  const handleGenerateReport = async () => {
+    setReportError(null);
+    setReportResult(null);
+    setReportLoading(true);
+    try {
+      let clips, patientInfo;
+      try { clips = JSON.parse(reportClips); } catch(e) { throw new Error('Invalid clip_list JSON: ' + e.message); }
+      try { patientInfo = JSON.parse(reportPatientInfo); } catch(e) { patientInfo = {}; }
+      const res = await axios.post('/api/shunt/classify-report', { clip_list: clips, patient_info: patientInfo });
+      setReportResult(res.data.classification);
+    } catch(err) {
+      setReportError(err.response?.data?.error || err.message || 'Report generation failed');
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      let clips, patientInfo;
+      try { clips = JSON.parse(reportClips); } catch(e) { throw new Error('Invalid clip_list JSON'); }
+      try { patientInfo = JSON.parse(reportPatientInfo); } catch(e) { patientInfo = {}; }
+      const res = await axios.post(
+        '/api/shunt/classify-report?format=pdf',
+        { clip_list: clips, patient_info: patientInfo },
+        { responseType: 'blob' }
+      );
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `shunt_report_${new Date().toISOString().slice(0,10)}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch(err) {
+      setReportError('PDF download failed: ' + (err.message || 'Unknown error'));
+    }
+  };
+
   return (
     <div className="page-container">
       {/* Mode Selection */}
@@ -267,6 +323,15 @@ const ClinicalReasoning = () => {
                 onChange={(e) => setMode(e.target.value)}
               />
               Continuous Stream (with buffer)
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input
+                type="radio"
+                value="report"
+                checked={mode === 'report'}
+                onChange={(e) => setMode(e.target.value)}
+              />
+              Post-Assessment Report (PDF)
             </label>
           </div>
         </div>
@@ -386,6 +451,162 @@ const ClinicalReasoning = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* ── Post-Assessment Report Mode ── */}
+      {mode === 'report' && (
+        <>
+          <div className="section">
+            <h2 className="section-title">📋 Post-Assessment Shunt Report</h2>
+            <div className="section-content">
+              <p className="text-muted" style={{ marginBottom: '1rem', fontSize: '0.9rem' }}>
+                Paste 15–20 EP/RP clips from the completed duplex assessment. The LLM will classify
+                the shunt type using few-shot examples from the CHIVA cheatsheet and generate a
+                downloadable PDF report for clinical review.
+              </p>
+
+              <div className="form-group">
+                <label className="form-label">
+                  Clip List (JSON array, 15–20 points)
+                </label>
+                <textarea
+                  className="form-textarea"
+                  value={reportClips}
+                  onChange={(e) => setReportClips(e.target.value)}
+                  style={{ minHeight: '280px', fontFamily: 'monospace', fontSize: '0.82rem' }}
+                  placeholder='[{"flow":"EP","fromType":"N1","toType":"N2","posXRatio":0.30,"posYRatio":0.07,...}]'
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Patient / Assessment Info (optional)</label>
+                <textarea
+                  className="form-textarea"
+                  value={reportPatientInfo}
+                  onChange={(e) => setReportPatientInfo(e.target.value)}
+                  style={{ minHeight: '100px', fontFamily: 'monospace', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleGenerateReport}
+                  disabled={reportLoading}
+                  style={{ backgroundColor: '#C01C1C', borderColor: '#C01C1C' }}
+                >
+                  {reportLoading ? '🔄 Classifying...' : '🔬 Classify Shunt'}
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleDownloadPDF}
+                  disabled={reportLoading}
+                  style={{ backgroundColor: '#8B0000', borderColor: '#8B0000' }}
+                >
+                  📄 Download PDF Report
+                </button>
+                {reportResult && (
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => { setReportResult(null); setReportError(null); }}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Report error */}
+          {reportError && (
+            <div className="output-container" style={{ borderLeft: '4px solid #dc2626' }}>
+              <div className="output-header"><h3>❌ Error</h3></div>
+              <div className="output-content"><p className="text-error">{reportError}</p></div>
+            </div>
+          )}
+
+          {/* Report results */}
+          {reportResult && (
+            <>
+              {/* Multi-finding overview badges */}
+              {reportResult.findings && reportResult.findings.length > 1 && (
+                <div className="output-container" style={{ borderLeft: '4px solid #C01C1C' }}>
+                  <div className="output-header">
+                    <h3>🔬 Findings Overview — {reportResult.findings.length} Legs</h3>
+                    <span className="output-status success">✓ Rule-Based</span>
+                  </div>
+                  <div className="output-content">
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                      {reportResult.findings.map((f, i) => (
+                        <div key={i} style={{ flex: 1, minWidth: 160, background: '#C01C1C', color: 'white', borderRadius: 8, padding: '0.9rem 1.1rem', textAlign: 'center' }}>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.85, textTransform: 'uppercase', letterSpacing: 1 }}>{f.leg} Leg</div>
+                          <div style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0.3rem 0' }}>{f.shunt_type}</div>
+                          <div style={{ fontSize: '0.78rem', opacity: 0.85 }}>Confidence: {((f.confidence||0)*100).toFixed(0)}%</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Per-finding detail */}
+              {(reportResult.findings || [{ ...reportResult, leg: 'Assessment', num_clips: reportResult.num_clips }]).map((f, fi) => (
+                <div key={fi} className="output-container" style={{ borderLeft: '4px solid #C01C1C' }}>
+                  <div className="output-header">
+                    <h3>🦵 {f.leg} Leg — {f.shunt_type}</h3>
+                    <span className="output-status success">Confidence: {((f.confidence||0)*100).toFixed(0)}%</span>
+                  </div>
+                  <div className="output-content">
+                    {f.summary && <p style={{ marginBottom: '0.8rem', color: '#333', fontStyle: 'italic', fontSize: '0.92rem' }}>{f.summary}</p>}
+
+                    {(f.needs_elim_test || f.ask_diameter || f.ask_branching) && (
+                      <div style={{ background: '#FFFBEB', border: '1px solid #F59E0B', borderRadius: 4, padding: '0.5rem 0.8rem', marginBottom: '0.8rem', fontSize: '0.85rem', color: '#92400E' }}>
+                        {f.needs_elim_test && <div>⚠ Elimination test required before ligation decision</div>}
+                        {f.ask_diameter    && <div>ℹ Specify RP diameter at N2: Small or Large</div>}
+                        {f.ask_branching   && <div>ℹ Specify N3 branching pattern</div>}
+                      </div>
+                    )}
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div style={{ background: '#eff6ff', borderLeft: '3px solid #C01C1C', borderRadius: 4, padding: '0.75rem' }}>
+                        <div style={{ fontWeight: 600, color: '#C01C1C', fontSize: '0.85rem', marginBottom: '0.4rem' }}>Clinical Reasoning</div>
+                        {(f.reasoning||[]).map((r,i) => <div key={i} style={{ fontSize: '0.82rem', marginBottom: '0.2rem' }}>• {String(r).replace(/^[•\-\s]+/,'')}</div>)}
+                        {(!f.reasoning||f.reasoning.length===0) && <div style={{ fontSize: '0.82rem', color: '#888' }}>No pattern detected.</div>}
+                      </div>
+                      <div style={{ background: '#fff5f5', borderLeft: '3px solid #8B0000', borderRadius: 4, padding: '0.75rem' }}>
+                        <div style={{ fontWeight: 600, color: '#8B0000', fontSize: '0.85rem', marginBottom: '0.4rem' }}>Proposed Ligation</div>
+                        {(f.ligation||[]).map((l,i) => <div key={i} style={{ fontSize: '0.82rem', marginBottom: '0.2rem', fontWeight: i===0?600:400 }}>• {String(l).replace(/^[•\-\s]+/,'')}</div>)}
+                        {(!f.ligation||f.ligation.length===0) && <div style={{ fontSize: '0.82rem', color: '#888' }}>No ligation required.</div>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ textAlign: 'center', marginTop: '1rem', marginBottom: '1.5rem' }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleDownloadPDF}
+                  style={{
+                    backgroundColor: '#8B0000', borderColor: '#8B0000',
+                    padding: '0.75rem 2rem', fontSize: '1rem'
+                  }}
+                >
+                  📄 Download Full PDF Report
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Loading */}
+          {reportLoading && (
+            <div className="output-container" style={{ textAlign: 'center' }}>
+              <div className="spinner" style={{ marginBottom: '1rem' }}></div>
+              <p>🔄 Running LLM shunt classification with few-shot examples...</p>
+              <p className="text-muted mt-1">Analysing {(() => { try { return JSON.parse(reportClips).length; } catch { return '?'; } })()} clips</p>
+            </div>
+          )}
+        </>
       )}
 
       {/* Error Display */}
