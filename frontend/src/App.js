@@ -56,12 +56,12 @@ function App() {
       <div className="app-container">
         {/* Header */}
         <header className="app-header">
-          <div className="header-logo">
-            <img src="/logo.png" alt="Logo" className="logo-image" />
+          <div className="header-logo-left">
+            <img src="/logo.png" alt="Cygnus Medical Logo" className="logo-image" />
           </div>
           <div className="header-content">
-            <h1>🏥 Clinical Medical Decision Support</h1>
-            <p className="subtitle">Powered by LLM + Vector DB</p>
+            <h1>Cygnus Medical</h1>
+            <p className="subtitle">AI-Assisted CHIVA Shunt Assessment &amp; Clinical Decision Support</p>
           </div>
         </header>
 
@@ -101,7 +101,7 @@ function App() {
 
         {/* Footer */}
         <footer className="app-footer">
-          <p>Clinical Decision Support Demo | Fast, Accurate, Evidence-Based</p>
+          <p>Cygnus Medical &copy; {new Date().getFullYear()} &nbsp;|&nbsp; AI-Assisted CHIVA Assessment &nbsp;|&nbsp; For clinical review only — validated by a qualified vascular surgeon</p>
         </footer>
       </div>
     </Router>

@@ -69,6 +69,15 @@ except ImportError as e:
     logger_temp.warning(f"Ligation generator not available: {e}")
     LIGATION_GENERATOR_AVAILABLE = False
 
+try:
+    from shunt_llm_classifier import classify_shunt_with_llm
+    from shunt_report_pdf import generate_shunt_report_pdf
+    SHUNT_REPORT_AVAILABLE = True
+except ImportError as e:
+    logger_temp = logging.getLogger(__name__)
+    logger_temp.warning(f"Shunt report modules not available: {e}")
+    SHUNT_REPORT_AVAILABLE = False
+
 # Import vision modules (lazy load to avoid heavy CV dependencies on startup)
 try:
     from vision.vision_main import VeinDetectionPipeline
@@ -2753,6 +2762,76 @@ def mlops_get_performance_trend(task_name):
 # =====================
 # STATIC FILE SERVING
 # =====================
+@app.route('/api/shunt/classify-report', methods=['POST'])
+def shunt_classify_report():
+    """
+    Post-assessment shunt classification with LLM few-shot examples.
+    Accepts a clip_list (15-20 data points) and returns:
+      - JSON classification result
+    Also available as PDF via ?format=pdf
+    """
+    if not SHUNT_REPORT_AVAILABLE:
+        return jsonify({"error": "Shunt report modules not available"}), 503
+
+    data = request.get_json(force=True)
+    clip_list = data.get("clip_list", [])
+    patient_info = data.get("patient_info", {})
+    fmt = request.args.get("format", "json")
+
+    if not clip_list:
+        return jsonify({"error": "clip_list is required"}), 400
+
+    def call_llm_narrative(prompt, stream=False):
+        """LLM call for short narrative sentence — low token budget, safe."""
+        try:
+            resp = requests.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "temperature": 0.4,
+                    "num_predict": 80,
+                    "top_k": 20,
+                    "top_p": 0.85,
+                    "keep_alive": "10m",
+                },
+                timeout=60,
+            )
+            resp.raise_for_status()
+            return resp.json().get("response", "")
+        except Exception as e:
+            logger.warning(f"Narrative LLM error: {e}")
+            return ""
+
+    try:
+        # Rule-based classification (deterministic) + LLM narrative summary
+        classification = classify_shunt_with_llm(clip_list, call_llm_narrative)
+
+        if fmt == "pdf":
+            pdf_bytes = generate_shunt_report_pdf(classification, clip_list, patient_info or None)
+            from flask import send_file
+            import io
+            buf = io.BytesIO(pdf_bytes)
+            buf.seek(0)
+            return send_file(
+                buf,
+                mimetype="application/pdf",
+                as_attachment=True,
+                download_name=f"shunt_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            )
+
+        return jsonify({
+            "classification": classification,
+            "num_clips": len(clip_list),
+            "status": "success"
+        })
+
+    except Exception as e:
+        logger.error(f"Shunt classify-report error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve_static(path):
