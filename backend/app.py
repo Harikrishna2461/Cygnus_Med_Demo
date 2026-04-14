@@ -6,6 +6,9 @@ Features: RAG-based clinical reasoning + ultrasound probe guidance + Streaming d
 import sys
 import os
 
+# Needed when faiss or torch are still present as transitive deps
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+
 # Add backend directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -13,15 +16,14 @@ import json
 import logging
 import time
 import requests
-import pickle
 import numpy as np
 import cv2
 import torch
 from flask import Flask, request, jsonify, send_from_directory, Response, session
 from flask_cors import CORS
-from functools import lru_cache
 from pathlib import Path
-import faiss
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
 import subprocess
 from datetime import datetime, timedelta
 import psutil
@@ -33,14 +35,21 @@ from config import (
     OLLAMA_BASE_URL,
     OLLAMA_MODEL,
     OLLAMA_EMBEDDING_MODEL,
-    FAISS_INDEX_PATH,
-    FAISS_METADATA_PATH,
+    QDRANT_PATH,
+    QDRANT_HOST,
+    QDRANT_PORT,
+    QDRANT_API_KEY,
+    QDRANT_COLLECTION,
     MAX_RETRIEVAL_RESULTS,
     CACHE_TTL,
     LOG_FILE,
     LOG_LEVEL,
-    EMBEDDING_DIMENSION
+    EMBEDDING_DIMENSION,
+    GROQ_API_KEY,
+    GROQ_MODEL,
 )
+from groq import Groq as GroqClient
+_groq_client = GroqClient(api_key=GROQ_API_KEY)
 from monitoring import metrics_collector, resource_monitor, ollama_monitor, get_all_metrics
 from mlops_tracker import mlops_tracker
 
@@ -70,12 +79,13 @@ except ImportError as e:
     LIGATION_GENERATOR_AVAILABLE = False
 
 try:
-    from shunt_llm_classifier import classify_shunt_with_llm
+    from shunt_llm_classifier import classify_shunt_with_llm, CHIVA_RULES
     from shunt_report_pdf import generate_shunt_report_pdf
     SHUNT_REPORT_AVAILABLE = True
 except ImportError as e:
     logger_temp = logging.getLogger(__name__)
     logger_temp.warning(f"Shunt report modules not available: {e}")
+    CHIVA_RULES = ""
     SHUNT_REPORT_AVAILABLE = False
 
 # Import vision modules (lazy load to avoid heavy CV dependencies on startup)
@@ -108,10 +118,9 @@ app.config['SESSION_TYPE'] = 'filesystem'
 CORS(app, supports_credentials=True)
 
 # Global state
-faiss_index = None
-metadata = []
-response_cache = {}  # Simple in-memory cache
-ACTIVE_RUNS = {}  # Track active runs: {session_id}:{task_name} -> run_id
+qdrant_client: QdrantClient | None = None
+response_cache = {}   # Simple in-memory cache
+ACTIVE_RUNS = {}      # Track active runs: {session_id}:{task_name} -> run_id
 
 
 def clean_numpy_for_json(obj):
@@ -156,33 +165,35 @@ def clean_numpy_for_json(obj):
         return obj  # Return as-is if already JSON serializable
 
 
-def load_faiss_index():
-    """Load FAISS index from disk at startup"""
-    global faiss_index, metadata
-    
+def load_qdrant_client() -> bool:
+    """Connect to the Qdrant vector store (local file-based or remote)."""
+    global qdrant_client
     try:
-        if os.path.exists(FAISS_INDEX_PATH) and os.path.exists(FAISS_METADATA_PATH):
-            faiss_index = faiss.read_index(FAISS_INDEX_PATH)
-            with open(FAISS_METADATA_PATH, 'rb') as f:
-                metadata = pickle.load(f)
-            logger.info(f"✓ Loaded FAISS index with {len(metadata)} chunks")
-            return True
+        if QDRANT_HOST:
+            qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT, api_key=QDRANT_API_KEY)
+            logger.info(f"✓ Connected to remote Qdrant at {QDRANT_HOST}:{QDRANT_PORT}")
         else:
-            logger.warning("⚠ FAISS index not found. Run ingest.py first!")
-            return False
+            if not os.path.exists(QDRANT_PATH):
+                logger.warning(f"⚠ Qdrant storage not found at {QDRANT_PATH}. Run ingest.py first!")
+                return False
+            qdrant_client = QdrantClient(path=QDRANT_PATH)
+            logger.info(f"✓ Opened local Qdrant storage at {QDRANT_PATH}")
+
+        info = qdrant_client.get_collection(QDRANT_COLLECTION)
+        logger.info(f"✓ Collection '{QDRANT_COLLECTION}' — {info.points_count} points loaded")
+        return True
     except Exception as e:
-        logger.error(f"✗ Error loading FAISS index: {e}")
+        logger.error(f"✗ Error connecting to Qdrant: {e}")
         return False
 
 
 @app.before_request
 def initialize():
-    """Initialize FAISS index on first request"""
-    global faiss_index
-    if faiss_index is None:
-        load_faiss_index()
-        # Initialize monitoring with paths
-        resource_monitor.set_index_paths(FAISS_INDEX_PATH, FAISS_METADATA_PATH)
+    """Initialize Qdrant client on first request."""
+    global qdrant_client
+    if qdrant_client is None:
+        load_qdrant_client()
+        resource_monitor.set_index_paths(QDRANT_PATH, QDRANT_PATH)
 
 
 @app.after_request
@@ -199,96 +210,59 @@ def get_embedding(text):
     """Get embedding from Ollama"""
     try:
         response = requests.post(
-            f"{OLLAMA_BASE_URL}/api/embeddings",
-            json={"model": OLLAMA_EMBEDDING_MODEL, "prompt": text},
+            f"{OLLAMA_BASE_URL}/api/embed",
+            json={"model": OLLAMA_EMBEDDING_MODEL, "input": text},
             timeout=30
         )
         response.raise_for_status()
-        return np.array(response.json()["embedding"], dtype=np.float32)
+        return np.array(response.json()["embeddings"][0], dtype=np.float32)
     except Exception as e:
         logger.error(f"Embedding error: {e}")
         return np.zeros(EMBEDDING_DIMENSION, dtype=np.float32)
 
 
-def retrieve_context(query, k=MAX_RETRIEVAL_RESULTS):
-    """Retrieve top-k relevant chunks from FAISS"""
-    if faiss_index is None:
-        logger.warning("FAISS index not loaded")
-        return []
-    
-    try:
-        start_time = time.time()
-        
-        # Get query embedding
-        query_embedding = get_embedding(query)
-        query_embedding = query_embedding.reshape(1, -1)
-        
-        # Search FAISS
-        distances, indices = faiss_index.search(query_embedding, k)
-        
-        elapsed = time.time() - start_time
-        logger.info(f"FAISS retrieval took {elapsed:.3f}s for {k} results")
-        
-        # Retrieve metadata
-        context = []
-        for idx in indices[0]:
-            if 0 <= idx < len(metadata):
-                context.append(metadata[idx])
-        
-        return context
-    except Exception as e:
-        logger.error(f"Retrieval error: {e}")
+def retrieve_context(query: str, k: int = MAX_RETRIEVAL_RESULTS) -> list[str]:
+    """Retrieve top-k relevant text chunks from Qdrant via semantic search."""
+    if qdrant_client is None:
+        logger.warning("Qdrant client not initialised")
         return []
 
-
-def call_llm(prompt, stream=True):
-    """Call Ollama LLM with mistral optimization"""
     try:
         start_time = time.time()
-        
-        response = requests.post(
-            f"{OLLAMA_BASE_URL}/api/generate",
-            json={
-                "model": OLLAMA_MODEL,
-                "prompt": prompt,
-                "stream": stream,
-                "temperature": 0.5,  # Lower for faster, more focused output
-                "num_predict": 200,  # Keep responses short for 1B model
-                "top_k": 20,
-                "top_p": 0.8,
-                "keep_alive": "10m",  # Keep model in GPU memory
-            },
-            timeout=60,  # Give model time to generate responses
-            stream=stream
+        query_embedding = get_embedding(query).tolist()
+
+        results = qdrant_client.search(
+            collection_name=QDRANT_COLLECTION,
+            query_vector=query_embedding,
+            limit=k,
+            with_payload=True,
         )
-        response.raise_for_status()
-        
-        if stream:
-            # Collect streamed output with timeout
-            full_response = ""
-            chunk_count = 0
-            for line in response.iter_lines():
-                if line:
-                    try:
-                        chunk = json.loads(line)
-                        full_response += chunk.get("response", "")
-                        chunk_count += 1
-                    except json.JSONDecodeError:
-                        continue
-            
-            elapsed = time.time() - start_time
-            logger.info(f"LLM inference took {elapsed:.3f}s ({chunk_count} chunks)")
-            return full_response
-        else:
-            data = response.json()
-            elapsed = time.time() - start_time
-            logger.info(f"LLM inference took {elapsed:.3f}s")
-            return data.get("response", "")
-    except requests.Timeout:
-        logger.error("LLM request timed out after 90 seconds")
-        return "Error: Response generation took too long."
+
+        elapsed = time.time() - start_time
+        logger.info(f"Qdrant retrieval took {elapsed:.3f}s for {k} results")
+
+        return [hit.payload.get("text", "") for hit in results]
     except Exception as e:
-        logger.error(f"LLM error: {e}")
+        logger.error(f"Qdrant retrieval error: {e}")
+        return []
+
+
+def call_llm(prompt, stream=False, temperature=0.3, max_tokens=1024):
+    """Call Groq LLM (llama-3.3-70b-versatile) — replaces local Ollama inference."""
+    try:
+        start_time = time.time()
+        resp = _groq_client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        elapsed = time.time() - start_time
+        text = resp.choices[0].message.content or ""
+        logger.info(f"Groq inference took {elapsed:.3f}s ({len(text)} chars)")
+        return text
+    except Exception as e:
+        logger.error(f"Groq LLM error: {e}")
         return f"Error: {str(e)}"
 
 
@@ -420,7 +394,7 @@ def analyze_clinical_case():
                         'end_time': datetime.now().isoformat(),
                         'response_time_ms': elapsed_ms,
                         'cached': True,
-                        'model_name': OLLAMA_MODEL,
+                        'model_name': GROQ_MODEL,
                         'model_type': 'llama',
                         'input_size_bytes': len(json.dumps(ultrasound_data)),
                         'output_size_bytes': len(json.dumps(cached_response)),
@@ -435,65 +409,58 @@ def analyze_clinical_case():
         
         metrics_collector.record_cache_miss()
         
-        # Extract ultrasound parameters
-        reflux_type = ultrasound_data.get('reflux_type', 'unknown')
-        description = ultrasound_data.get('description', 'No description provided')
-        location = ultrasound_data.get('location', 'Unknown')
-        reflux_duration = ultrasound_data.get('reflux_duration', 'N/A')
-        
-        # Convert input to text for retrieval
-        query_text = json.dumps(ultrasound_data, indent=2)
+        # Extract clip fields (new stream format)
+        flow      = ultrasound_data.get('flow', 'EP')
+        from_type = ultrasound_data.get('fromType', 'N1')
+        to_type   = ultrasound_data.get('toType', 'N1')
+        pos_y     = ultrasound_data.get('posYRatio', 0.0)
+        step      = ultrasound_data.get('step', 'Unknown')
+        leg_side  = ultrasound_data.get('legSide', 'unknown')
+        conf      = ultrasound_data.get('confidence', 0.0)
+        rdur      = ultrasound_data.get('reflux_duration', 0.0)
+        desc      = ultrasound_data.get('description', '')
+        elim      = (ultrasound_data.get('eliminationTest') or '').strip()
+
+        # RAG retrieval — 2 chunks, short, to stay within 4K context
+        query_text = (
+            f"CHIVA venous shunt {flow} {from_type}→{to_type} "
+            f"posYRatio={pos_y} step={step} ligation treatment"
+        )
         input_size_bytes = len(query_text.encode())
-        
-        # Retrieve context from RAG
-        faiss_start = time.time()
-        context_chunks = retrieve_context(query_text)
-        faiss_latency = (time.time() - faiss_start) * 1000
-        metrics_collector.record_task_latency('faiss_query', faiss_latency / 1000)
-        
-        medical_context = "\n\n".join(context_chunks) if context_chunks else "No relevant context found"
-        
-        # TASK-1: Use LLM to classify shunt type and provide reasoning + treatment
+
+        rag_start = time.time()
+        context_chunks = retrieve_context(query_text, k=2)
+        faiss_latency = (time.time() - rag_start) * 1000  # kept name for metrics compat
+        metrics_collector.record_task_latency('qdrant_query', faiss_latency / 1000)
+
+        rag_context = "\n---\n".join(str(ch)[:600] for ch in context_chunks) if context_chunks else ""
+        rag_section = f"\n=== MEDICAL KNOWLEDGE BASE (RAG) ===\n{rag_context}\n" if rag_context else ""
+
+        # TASK-1: full CHIVA rules + RAG — Groq 70B can handle the full context
         llm_start = time.time()
-        
-        llm_prompt = f"""You are a vascular surgeon. Analyze ultrasound and generate DETAILED treatment using medical knowledge.
 
-PATIENT: Reflux={reflux_type}, Location={location}, Duration={reflux_duration}s, Description={description}
+        loc_hint = "SFJ" if pos_y <= 0.098 else ("Hunterian" if pos_y <= 0.353 else ("Knee" if pos_y <= 0.60 else "Calf/ankle"))
+        elim_line = f'eliminationTest="{elim}"' if elim else ""
 
-TYPES: Type 1|Type 2|Type 1+2|Type 3|Type 4 Pelvic|Type 4 Perforator|Type 5 Pelvic|Type 5 Perforator|Type 6
+        llm_prompt = f"""{CHIVA_RULES}
+{rag_section}
+=== SINGLE CLIP — {leg_side.upper()} LEG ===
+flow={flow}  {from_type}→{to_type}  posYRatio={pos_y:.3f} ({loc_hint})
+step={step}  confidence={conf:.2f}  reflux_duration={rdur}s  {elim_line}
+description="{desc}"
 
-===TEMPLATE WITH DETAILED TREATMENT===
+You are a vascular surgeon. Using the CHIVA classification rules above, analyse this single clip.
+Respond in EXACTLY this format — no other text, no preamble:
 
-Shunt Type Assessment Results: Type 3 detected
+Shunt Type Assessment Results: [Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected / Insufficient data — single clip]
 
-Reasoning: Dual network with N1-N2-N3 sequence forming complete loop at GSV level
+Reasoning: [one concise clinical sentence explaining what this clip indicates about the venous network]
 
-Proposed Litigation Treatment Plan: Thermal ablation of GSV trunk using EVLA at 80W power setting
-Sclerotherapy targeting N2 tributary branches with sodium tetradecyl sulfate
-Microfoam sclerotherapy for N3 perforating segments
-Graduated compression with 20-30mmHg stockings for 12 weeks
-Duplex ultrasound surveillance at 2 weeks post-intervention
+Proposed Litigation Treatment Plan: [specific ligation step 1]
+[specific ligation step 2]
+[specific ligation step 3]"""
 
-===YOUR RESPONSE MUST HAVE===
-Line 1: "Shunt Type Assessment Results: [one of 6 types] detected"
-Line 2: blank
-Line 3: "Reasoning: [one sentence about pathway]"
-Line 4: blank
-Line 5: "Proposed Litigation Treatment Plan: [specific intervention 1]"
-Line 6: [specific intervention 2]
-Line 7: [specific intervention 3]
-Line 8: [optional: specific intervention 4]
-Line 9: [optional: specific intervention 5]
-
-RULES:
-- Generate 3-5 DETAILED interventions based on shunt type
-- Each intervention is ONE LINE with specific technique, location, or parameter
-- NO generic responses - match shunt type pathway
-- NO special chars, NO line numbers, NO asterisks
-- Interventions for Type 1+2 must address BOTH pathways
-- Compression duration matches clinical standard (6-12 weeks)"""
-
-        response_text = call_llm(llm_prompt, stream=True)
+        response_text = call_llm(llm_prompt, temperature=0.2, max_tokens=400)
         llm_latency = (time.time() - llm_start) * 1000
         metrics_collector.record_task_latency('task1_classification', llm_latency / 1000)
         
@@ -518,7 +485,7 @@ RULES:
                 'rag_retrieval_ms': faiss_latency,
                 'llm_inference_ms': llm_latency,
                 'post_processing_ms': (total_elapsed_ms - faiss_latency - llm_latency),
-                'model_name': OLLAMA_MODEL,
+                'model_name': GROQ_MODEL,
                 'model_type': 'llama',
                 'input_size_bytes': input_size_bytes,
                 'output_size_bytes': output_size_bytes,
@@ -576,19 +543,12 @@ RULES:
                 metrics_collector.record_request('/api/analyze', elapsed, True)
                 return jsonify(cached_response)
         
-        # FALLBACK: If no cache exists, return a default/safe response
-        logger.info("⚠ No cache available, returning fallback response (error bypass)")
+        # No cache — return explicit LLM error
+        logger.error("LLM unavailable and no cache — returning error response")
         fallback_response = {
-            "shunt_type": "Type 3",
-            "reasoning": "Fallback response - LLM service unavailable. Default classification based on dual network architecture.",
-            "clinical_assessment": "Patient presents with venous reflux requiring intervention.",
-            "proposed_treatment": [
-                "Thermal ablation of superficial venous system",
-                "Sclerotherapy for tributary branches",
-                "Graduated compression therapy 20-30mmHg",
-                "Duplex ultrasound follow-up at 2 weeks"
-            ],
-            "warnings": ["LLM analysis failed - using fallback response"],
+            "shunt_type_assessment": "LLM service unavailable",
+            "reasoning": "Unable to classify — LLM did not respond. Please ensure Ollama is running.",
+            "treatment_plan": "",
             "error": str(e)
         }
         
@@ -867,53 +827,49 @@ def stream_data_analysis():
                 metrics_collector.record_task_latency('stream_buffer', buffer_latency)
             
             try:
-                reflux_type = ultrasound_data.get('reflux_type', 'unknown')
-                location = ultrasound_data.get('location', 'unknown')
-                reflux_duration = ultrasound_data.get('reflux_duration', 'N/A')
-                description = ultrasound_data.get('description', 'No description')
+                flow_s      = ultrasound_data.get('flow', 'EP')
+                from_type_s = ultrasound_data.get('fromType', 'N1')
+                to_type_s   = ultrasound_data.get('toType', 'N1')
+                pos_y_s     = ultrasound_data.get('posYRatio', 0.0)
+                step_s      = ultrasound_data.get('step', 'Unknown')
+                leg_side_s  = ultrasound_data.get('legSide', 'unknown')
+                conf_s      = ultrasound_data.get('confidence', 0.0)
+                rdur_s      = ultrasound_data.get('reflux_duration', 0.0)
+                desc_s      = ultrasound_data.get('description', '')
+                elim_s      = (ultrasound_data.get('eliminationTest') or '').strip()
                 input_size_bytes = len(json.dumps(ultrasound_data).encode())
-                
-                # Task-1: Use LLM to classify shunt type
+
+                # RAG retrieval — 3 chunks, Groq 70B handles full context
+                s_rag_start = time.time()
+                s_query = f"CHIVA venous shunt {flow_s} {from_type_s}→{to_type_s} posYRatio={pos_y_s} step={step_s} ligation treatment"
+                s_chunks = retrieve_context(s_query, k=3)
+                s_rag_latency_ms = (time.time() - s_rag_start) * 1000
+                s_rag = "\n---\n".join(str(ch)[:600] for ch in s_chunks) if s_chunks else ""
+                s_rag_section = f"\n=== MEDICAL KNOWLEDGE BASE (RAG) ===\n{s_rag}\n" if s_rag else ""
+
                 task1_start = time.time()
-                
-                llm_prompt = f"""You are a vascular surgeon. Analyze ultrasound and generate DETAILED treatment using medical knowledge.
+                s_loc = "SFJ" if pos_y_s <= 0.098 else ("Hunterian" if pos_y_s <= 0.353 else ("Knee" if pos_y_s <= 0.60 else "Calf/ankle"))
+                s_elim_line = f'eliminationTest="{elim_s}"' if elim_s else ""
 
-PATIENT: Reflux={reflux_type}, Location={location}, Duration={reflux_duration}s, Description={description}
+                llm_prompt = f"""{CHIVA_RULES}
+{s_rag_section}
+=== SINGLE CLIP — {leg_side_s.upper()} LEG ===
+flow={flow_s}  {from_type_s}→{to_type_s}  posYRatio={pos_y_s:.3f} ({s_loc})
+step={step_s}  confidence={conf_s:.2f}  reflux_duration={rdur_s}s  {s_elim_line}
+description="{desc_s}"
 
-TYPES: Type 1|Type 2|Type 1+2|Type 3|Type 4 Pelvic|Type 4 Perforator|Type 5 Pelvic|Type 5 Perforator|Type 6
+You are a vascular surgeon. Using the CHIVA classification rules above, analyse this single clip.
+Respond in EXACTLY this format — no other text, no preamble:
 
-===TEMPLATE WITH DETAILED TREATMENT===
+Shunt Type Assessment Results: [Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected / Insufficient data — single clip]
 
-Shunt Type Assessment Results: Type 3 detected
+Reasoning: [one concise clinical sentence explaining what this clip indicates about the venous network]
 
-Reasoning: Dual network with N1-N2-N3 sequence forming complete loop at GSV level
+Proposed Litigation Treatment Plan: [specific ligation step 1]
+[specific ligation step 2]
+[specific ligation step 3]"""
 
-Proposed Litigation Treatment Plan: Thermal ablation of GSV trunk using EVLA at 80W power setting
-Sclerotherapy targeting N2 tributary branches with sodium tetradecyl sulfate
-Microfoam sclerotherapy for N3 perforating segments
-Graduated compression with 20-30mmHg stockings for 12 weeks
-Duplex ultrasound surveillance at 2 weeks post-intervention
-
-===YOUR RESPONSE MUST HAVE===
-Line 1: "Shunt Type Assessment Results: [one of 6 types] detected"
-Line 2: blank
-Line 3: "Reasoning: [one sentence about pathway]"
-Line 4: blank
-Line 5: "Proposed Litigation Treatment Plan: [specific intervention 1]"
-Line 6: [specific intervention 2]
-Line 7: [specific intervention 3]
-Line 8: [optional: specific intervention 4]
-Line 9: [optional: specific intervention 5]
-
-RULES:
-- Generate 3-5 DETAILED interventions based on shunt type
-- Each intervention is ONE LINE with specific technique, location, or parameter
-- NO generic responses - match shunt type pathway
-- NO special chars, NO line numbers, NO asterisks
-- Interventions for Type 1+2 must address BOTH pathways
-- Compression duration matches clinical standard (6-12 weeks)"""
-
-                response_text = call_llm(llm_prompt, stream=False)
+                response_text = call_llm(llm_prompt, temperature=0.2, max_tokens=400)
                 llm_latency_ms = (time.time() - task1_start) * 1000
                 metrics_collector.record_task_latency('task1_classification', llm_latency_ms / 1000)
                 
@@ -942,15 +898,17 @@ RULES:
                         'start_time': datetime.now().isoformat(),
                         'end_time': datetime.now().isoformat(),
                         'response_time_ms': point_elapsed_ms,
+                        'rag_retrieval_ms': s_rag_latency_ms,
                         'llm_inference_ms': llm_latency_ms,
-                        'post_processing_ms': (point_elapsed_ms - llm_latency_ms),
-                        'model_name': OLLAMA_MODEL,
+                        'post_processing_ms': (point_elapsed_ms - s_rag_latency_ms - llm_latency_ms),
+                        'model_name': GROQ_MODEL,
                         'model_type': 'llama',
                         'input_size_bytes': input_size_bytes,
                         'output_size_bytes': output_size_bytes,
                         'memory_usage_mb': memory_mb,
                         'cpu_percent': cpu_percent,
-                        'memory_available_mb': memory_available_mb
+                        'memory_available_mb': memory_available_mb,
+                        'cached': False
                     }
                 )
                 
@@ -1115,7 +1073,7 @@ def get_probe_guidance():
                         'end_time': datetime.now().isoformat(),
                         'response_time_ms': elapsed_ms,
                         'cached': True,
-                        'model_name': OLLAMA_MODEL,
+                        'model_name': GROQ_MODEL,
                         'model_type': 'llama',
                         'input_size_bytes': len(json.dumps(ultrasound_data)),
                         'output_size_bytes': len(json.dumps(cached_response)),
@@ -1129,12 +1087,12 @@ def get_probe_guidance():
         metrics_collector.record_cache_miss()
         input_size_bytes = len(json.dumps(ultrasound_data).encode())
         
-        # Retrieve context from RAG (same as Task-1)
-        faiss_start = time.time()
+        # Retrieve context from RAG (Qdrant)
+        rag_start = time.time()
         query_text = f"Ultrasound probe guidance for {flow_type} at {step} location with {from_type} to {to_type} network. Duration: {reflux_duration}s. Confidence: {confidence}"
         context_chunks = retrieve_context(query_text)
-        faiss_latency = (time.time() - faiss_start) * 1000
-        metrics_collector.record_task_latency('faiss_query', faiss_latency / 1000)
+        faiss_latency = (time.time() - rag_start) * 1000  # kept name for metrics compat
+        metrics_collector.record_task_latency('qdrant_query', faiss_latency / 1000)
         
         medical_context = "\n\n".join(context_chunks) if context_chunks else "Standard ultrasound scanning protocol"
         
@@ -1150,6 +1108,9 @@ def get_probe_guidance():
             
             llm_prompt = f"""ULTRASOUND GUIDANCE (Training)
 REFLUX at {step} ({leg_side} leg, {from_type}→{to_type})
+
+=== MEDICAL KNOWLEDGE BASE (retrieved via RAG) ===
+{medical_context}
 
 EXAMPLES of CORRECT 1-line guidance:
 - "Move probe medially to locate SFJ junction"
@@ -1168,9 +1129,12 @@ Location: {probe_location}
                 next_region = "calf vein tributaries and perforators below knee"
             else:  # SPJ-Ankle
                 next_region = "complete popliteal vein and ankle perforators"
-            
+
             llm_prompt = f"""ULTRASOUND GUIDANCE (Training)
 NORMAL at {step} ({leg_side} leg, {from_type}→{to_type})
+
+=== MEDICAL KNOWLEDGE BASE (retrieved via RAG) ===
+{medical_context}
 
 EXAMPLES of CORRECT 1-line guidance:
 - "Continue scanning GSV distally to knee"
@@ -1182,62 +1146,14 @@ Next region: {next_region}
 
 <guidance_instruction>Write one clear instruction</guidance_instruction>"""
 
-        # Get LLM guidance with LOW temperature for consistency (0.1)
+        # Groq LLM — precise probe guidance
         llm_start = time.time()
-        
-        # Create temp override for low temp
-        original_call = call_llm
-        
-        # Call with modified approach
-        try:
-            llm_response_raw = requests.post(
-                f"{OLLAMA_BASE_URL}/api/generate",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "prompt": llm_prompt,
-                    "stream": False,
-                    "temperature": 0.1,  # Ultra-low for deterministic output
-                    "num_predict": 100,  # Even shorter
-                    "top_k": 5,
-                    "top_p": 0.5,
-                },
-                timeout=60
-            ).json().get("response", "").strip()
-        except Exception as e:
-            logger.warning(f"LLM call error: {e}, using fallback")
-            llm_response_raw = ""
-        
+        llm_response_raw = call_llm(llm_prompt, temperature=0.2, max_tokens=80)
         llm_latency_ms = (time.time() - llm_start) * 1000
-        
-        # Parse XML-style response
+
         import re
         guidance_match = re.search(r'<guidance_instruction>(.*?)</guidance_instruction>', llm_response_raw, re.DOTALL)
         guidance_instruction = guidance_match.group(1).strip() if guidance_match else llm_response_raw.strip()
-        
-        # Check for refusals and quality
-        refuse_patterns = [
-            r"can't|cannot|unable to|don't|won't|refuse|apologize|permission|ethical|concern|professional responsibility"
-        ]
-        is_refusal = any(re.search(pattern, guidance_instruction, re.IGNORECASE) for pattern in refuse_patterns)
-        
-        # Fallback guidance if refused or empty or poor quality
-        if not guidance_instruction or is_refusal or len(guidance_instruction) < 8:
-            if flow_type == 'RP':
-                # Specific reflux guidance based on location
-                if step == "SFJ-Knee":
-                    guidance_instruction = "Move probe medially to confirm SFJ reflux origin"
-                elif step == "Knee-Ankle":
-                    guidance_instruction = "Scan medial calf for perforator reflux source"
-                else:  # SPJ-Ankle
-                    guidance_instruction = "Position probe behind knee for SPJ junction assessment"
-            else:
-                # Normal flow - continue assessment
-                if step == "SFJ-Knee":
-                    guidance_instruction = "Continue tracing GSV distally toward knee"
-                elif step == "Knee-Ankle":
-                    guidance_instruction = "Assess calf tributaries and perforator system"
-                else:  # SPJ-Ankle
-                    guidance_instruction = "Scan popliteal region and ankle perforators"
         
         # Minimal cleaning - preserve real guidance, just clean formatting
         def clean_instruction(text):
@@ -1294,7 +1210,7 @@ Next region: {next_region}
                 'rag_retrieval_ms': faiss_latency,
                 'llm_inference_ms': llm_latency_ms,
                 'post_processing_ms': (total_elapsed_ms - llm_latency_ms - faiss_latency),
-                'model_name': OLLAMA_MODEL,
+                'model_name': GROQ_MODEL,
                 'model_type': 'llama',
                 'input_size_bytes': input_size_bytes,
                 'output_size_bytes': output_size_bytes,
@@ -1347,18 +1263,16 @@ Next region: {next_region}
                     end_active_run('Probe Guidance')
                 return jsonify(cached_response)
         
-        # Fallback response
-        fallback = {
-            "guidance_instruction": "Unable to generate guidance - please check flow data",
-            "clinical_reason": str(e),
+        error_response = {
+            "guidance_instruction": "LLM service unavailable — ensure Ollama is running.",
             "is_reflux_detected": False,
             "error": str(e)
         }
-        
+
         elapsed = time.time() - request_start
         metrics_collector.record_request('/api/probe-guidance', elapsed, False)
         metrics_collector.record_error('/api/probe-guidance', str(e))
-        
+
         if run_id:
             mlops_tracker.record_request_metric(
                 run_id=run_id,
@@ -1368,8 +1282,8 @@ Next region: {next_region}
             )
             if data.get('finalize_run', False):
                 end_active_run('Probe Guidance')
-        
-        return jsonify(fallback), 200
+
+        return jsonify(error_response), 503
 
 
 def determine_direction(dx, dy):
@@ -2286,6 +2200,8 @@ def classify_veins_realtime():
         
         # Record MLOps metrics
         if run_id:
+            _t3_inference_ms = response_data["inference_time_ms"]
+            _t3_post_ms = max(0.0, (time.time() - request_start) * 1000 - _t3_inference_ms)
             mlops_tracker.record_request_metric(
                 run_id=run_id,
                 task_name='Real-Time Vein Classification',
@@ -2293,7 +2209,10 @@ def classify_veins_realtime():
                 metric_dict={
                     'start_time': datetime.now().isoformat(),
                     'end_time': datetime.now().isoformat(),
-                    'response_time_ms': response_data["inference_time_ms"],
+                    'response_time_ms': _t3_inference_ms,
+                    'rag_retrieval_ms': 0.0,
+                    'llm_inference_ms': _t3_inference_ms,
+                    'post_processing_ms': _t3_post_ms,
                     'image_file': file.filename,
                     'veins_detected': result["num_veins"],
                     'model_name': 'YOLOv8m+Claude3.5',
@@ -2301,7 +2220,9 @@ def classify_veins_realtime():
                     'input_size_bytes': len(nparr),
                     'output_size_bytes': len(json.dumps(response_data).encode()),
                     'memory_usage_mb': psutil.Process().memory_info().rss / 1024 / 1024,
-                    'cpu_percent': psutil.cpu_percent()
+                    'cpu_percent': psutil.cpu_percent(),
+                    'memory_available_mb': psutil.virtual_memory().available / 1024 / 1024,
+                    'cached': False
                 }
             )
             
@@ -2538,10 +2459,20 @@ def reset_metrics():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
+    qdrant_ok = False
+    qdrant_points = 0
+    if qdrant_client is not None:
+        try:
+            info = qdrant_client.get_collection(QDRANT_COLLECTION)
+            qdrant_ok = True
+            qdrant_points = info.points_count
+        except Exception:
+            pass
     return jsonify({
         "status": "ok",
-        "faiss_loaded": faiss_index is not None,
-        "model": OLLAMA_MODEL,
+        "qdrant_loaded": qdrant_ok,
+        "qdrant_points": qdrant_points,
+        "model": GROQ_MODEL,
         "timestamp": datetime.now().isoformat()
     })
 
@@ -2550,18 +2481,25 @@ def health_check():
 @app.route('/api/info', methods=['GET'])
 def app_info():
     """Get app information"""
+    qdrant_points = 0
+    if qdrant_client is not None:
+        try:
+            qdrant_points = qdrant_client.get_collection(QDRANT_COLLECTION).points_count
+        except Exception:
+            pass
     return jsonify({
         "app": "Clinical Medical Decision Support with Streaming",
         "version": "2.0",
         "backend": "Flask",
         "llm": {
-            "provider": "Ollama",
-            "model": OLLAMA_MODEL,
-            "endpoint": OLLAMA_BASE_URL
+            "provider": "Groq",
+            "model": GROQ_MODEL,
+            "embeddings": f"Ollama ({OLLAMA_EMBEDDING_MODEL})"
         },
         "vector_db": {
-            "type": "FAISS",
-            "chunks_loaded": len(metadata)
+            "type": "Qdrant",
+            "collection": QDRANT_COLLECTION,
+            "chunks_loaded": qdrant_points
         },
         "features": [
             "Task-1: Shunt Type Classification (reflux_type + description)",
@@ -2781,32 +2719,13 @@ def shunt_classify_report():
     if not clip_list:
         return jsonify({"error": "clip_list is required"}), 400
 
-    def call_llm_narrative(prompt, stream=False):
-        """LLM call for short narrative sentence — low token budget, safe."""
-        try:
-            resp = requests.post(
-                f"{OLLAMA_BASE_URL}/api/generate",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "prompt": prompt,
-                    "stream": False,
-                    "temperature": 0.4,
-                    "num_predict": 80,
-                    "top_k": 20,
-                    "top_p": 0.85,
-                    "keep_alive": "10m",
-                },
-                timeout=60,
-            )
-            resp.raise_for_status()
-            return resp.json().get("response", "")
-        except Exception as e:
-            logger.warning(f"Narrative LLM error: {e}")
-            return ""
+    def call_llm_shunt(prompt, stream=False):
+        """LLM call for full JSON shunt classification via Groq."""
+        return call_llm(prompt, temperature=0.2, max_tokens=1024)
 
     try:
-        # Rule-based classification (deterministic) + LLM narrative summary
-        classification = classify_shunt_with_llm(clip_list, call_llm_narrative)
+        # LLM+RAG classification — pass retrieve_context so each leg gets relevant chunks
+        classification = classify_shunt_with_llm(clip_list, call_llm_shunt, retrieve_context)
 
         if fmt == "pdf":
             pdf_bytes = generate_shunt_report_pdf(classification, clip_list, patient_info or None)
@@ -2935,19 +2854,19 @@ if __name__ == '__main__':
         logger.info("To fix: npm install && npm run build in frontend/ directory")
         logger.info("API endpoints will still work at http://localhost:5000/api")
     
-    # Try loading FAISS at startup
+    # Connect to Qdrant at startup
     logger.info("\n[Step 2/3] Medical Database Setup")
-    if not load_faiss_index():
-        logger.warning("⚠ FAISS index not found. Run: python ingest.py")
+    if not load_qdrant_client():
+        logger.warning("⚠ Qdrant storage not found. Run: python ingest.py  (or python migrate_faiss_to_qdrant.py)")
         logger.warning("Continuing without RAG context...")
     else:
-        logger.info("✓ Medical knowledge base loaded")
+        logger.info("✓ Medical knowledge base loaded from Qdrant")
     
     logger.info("\n[Step 3/3] Starting Services")
     logger.info("" + "=" * 70)
     logger.info("✓ Frontend: Ready at http://localhost:5002")
     logger.info("✓ Backend: Ready at http://localhost:5002/api")
-    logger.info("✓ Medical DB: FAISS index loaded")
+    logger.info("✓ Medical DB: Qdrant collection loaded")
     
     # Check Claude API key
     if os.getenv('ANTHROPIC_API_KEY'):
