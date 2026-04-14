@@ -1,35 +1,124 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-// Default clip_list: 18 clips representing a Type 3 shunt assessment
-// (EP N1→N2 at SFJ, EP N2→N3, RP N3→N2, RP N2→N1, RP N3→N1 with No Reflux elim test)
-// This is the most clinically interesting / complex single-assessment pattern.
-const REPORT_DEFAULT_CLIPS = JSON.stringify([
-  {"flow":"EP","fromType":"N1","toType":"N2","posXRatio":0.30,"posYRatio":0.07,"eliminationTest":"","step":"SFJ","legSide":"left"},
-  {"flow":"EP","fromType":"N2","toType":"N2","posXRatio":0.50,"posYRatio":0.20,"eliminationTest":"","step":"SFJ-Knee","legSide":"left"},
-  {"flow":"EP","fromType":"N2","toType":"N3","posXRatio":0.33,"posYRatio":0.25,"eliminationTest":"","step":"SFJ-Knee","legSide":"left"},
-  {"flow":"RP","fromType":"N3","toType":"N2","posXRatio":0.36,"posYRatio":0.40,"eliminationTest":"","step":"Knee","legSide":"left"},
-  {"flow":"EP","fromType":"N1","toType":"N1","posXRatio":0.45,"posYRatio":0.10,"eliminationTest":"","step":"SFJ","legSide":"left"},
-  {"flow":"RP","fromType":"N2","toType":"N1","posXRatio":0.32,"posYRatio":0.15,"eliminationTest":"","step":"SFJ-Knee","legSide":"left"},
-  {"flow":"EP","fromType":"N3","toType":"N3","posXRatio":0.52,"posYRatio":0.68,"eliminationTest":"","step":"Knee-Ankle","legSide":"left"},
-  {"flow":"RP","fromType":"N3","toType":"N2","posXRatio":0.37,"posYRatio":0.55,"eliminationTest":"","step":"Knee-Ankle","legSide":"left"},
-  {"flow":"EP","fromType":"N2","toType":"N2","posXRatio":0.48,"posYRatio":0.22,"eliminationTest":"","step":"Knee","legSide":"left"},
-  {"flow":"RP","fromType":"N3","toType":"N1","posXRatio":0.38,"posYRatio":0.45,"eliminationTest":"No Reflux","step":"Knee-Ankle","legSide":"left"},
-  {"flow":"RP","fromType":"N2","toType":"N1","posXRatio":0.31,"posYRatio":0.18,"eliminationTest":"","step":"SFJ-Knee","legSide":"left"},
-  {"flow":"EP","fromType":"N1","toType":"N1","posXRatio":0.44,"posYRatio":0.75,"eliminationTest":"","step":"Ankle","legSide":"left"},
-  {"flow":"EP","fromType":"N2","toType":"N3","posXRatio":0.35,"posYRatio":0.30,"eliminationTest":"","step":"SFJ-Knee","legSide":"left"},
-  {"flow":"RP","fromType":"N3","toType":"N2","posXRatio":0.38,"posYRatio":0.50,"eliminationTest":"","step":"Knee","legSide":"left"},
-  {"flow":"EP","fromType":"N3","toType":"N3","posXRatio":0.50,"posYRatio":0.60,"eliminationTest":"","step":"Knee-Ankle","legSide":"left"},
-  {"flow":"RP","fromType":"N2","toType":"N1","posXRatio":0.34,"posYRatio":0.28,"eliminationTest":"","step":"Knee","legSide":"left"},
-  {"flow":"EP","fromType":"N1","toType":"N1","posXRatio":0.55,"posYRatio":0.95,"eliminationTest":"","step":"SPJ","legSide":"left"},
-  {"flow":"EP","fromType":"N2","toType":"N2","posXRatio":0.48,"posYRatio":0.65,"eliminationTest":"","step":"Ankle","legSide":"left"}
-], null, 2);
+// ── Dynamic mock clip generator ──────────────────────────────────────────────
+// Generates 15–20 clips with exactly 2 or 3 shunt patterns on random leg sides.
+// Called once per page load so every refresh produces a fresh assessment.
+
+const STEPS = ['SFJ', 'SFJ-Knee', 'Knee', 'Knee-Ankle', 'Ankle', 'SPJ'];
+const rnd = (min, max, dp = 2) => parseFloat((Math.random() * (max - min) + min).toFixed(dp));
+
+// Each template returns an array of clips for one shunt on one leg side.
+const SHUNT_TEMPLATES = {
+  type1: (leg, seqStart) => {
+    const sfj = rnd(0.05, 0.098);
+    return [
+      { sequenceNumber: seqStart,     flow: 'EP', fromType: 'N1', toType: 'N1', posXRatio: rnd(0.40, 0.55), posYRatio: rnd(0.05, 0.12), step: 'SFJ',      legSide: leg, confidence: rnd(0.90, 0.97), reflux_duration: 0.0, description: 'Baseline deep vein — normal forward flow', clipPath: `frame-${String(seqStart).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 1, flow: 'EP', fromType: 'N1', toType: 'N2', posXRatio: rnd(0.28, 0.38), posYRatio: sfj,             step: 'SFJ',      legSide: leg, confidence: rnd(0.90, 0.96), reflux_duration: 0.0, description: 'SFJ entry point — EP N1→N2', clipPath: `frame-${String(seqStart+1).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 2, flow: 'RP', fromType: 'N2', toType: 'N1', posXRatio: rnd(0.28, 0.36), posYRatio: rnd(0.12, 0.22), step: 'SFJ-Knee', legSide: leg, confidence: rnd(0.85, 0.93), reflux_duration: rnd(0.6, 1.4), description: 'RP N2→N1 proximal GSV reflux', clipPath: `frame-${String(seqStart+2).padStart(3,'0')}.png`, eliminationTest: '',
+        ligation: { procedure_name: 'SFJ Ligation (Crossectomy)', technique: 'Open groin incision, 4-0 Vicryl at SFJ', location: 'Saphenofemoral junction', vessels_ligated: ['GSV at SFJ', 'Superficial epigastric vein'], compression_post_op: 'Class III 40-50mmHg wk 1-2, Class II wk 3-6' } },
+      { sequenceNumber: seqStart + 3, flow: 'RP', fromType: 'N2', toType: 'N1', posXRatio: rnd(0.30, 0.38), posYRatio: rnd(0.25, 0.40), step: 'SFJ-Knee', legSide: leg, confidence: rnd(0.82, 0.90), reflux_duration: rnd(0.5, 1.2), description: 'RP N2→N1 mid-GSV reflux', clipPath: `frame-${String(seqStart+3).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 4, flow: 'EP', fromType: 'N2', toType: 'N2', posXRatio: rnd(0.44, 0.56), posYRatio: rnd(0.45, 0.60), step: 'Knee',     legSide: leg, confidence: rnd(0.90, 0.96), reflux_duration: 0.0, description: 'Normal GSV flow below knee', clipPath: `frame-${String(seqStart+4).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 5, flow: 'EP', fromType: 'N1', toType: 'N1', posXRatio: rnd(0.44, 0.58), posYRatio: rnd(0.88, 0.98), step: 'Ankle',    legSide: leg, confidence: rnd(0.91, 0.97), reflux_duration: 0.0, description: 'Normal deep system at ankle', clipPath: `frame-${String(seqStart+5).padStart(3,'0')}.png`, eliminationTest: '' },
+    ];
+  },
+  type3: (leg, seqStart) => {
+    const sfj = rnd(0.05, 0.098);
+    return [
+      { sequenceNumber: seqStart,     flow: 'EP', fromType: 'N1', toType: 'N2', posXRatio: rnd(0.28, 0.36), posYRatio: sfj,             step: 'SFJ',       legSide: leg, confidence: rnd(0.90, 0.96), reflux_duration: 0.0, description: 'SFJ entry — EP N1→N2', clipPath: `frame-${String(seqStart).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 1, flow: 'EP', fromType: 'N2', toType: 'N3', posXRatio: rnd(0.30, 0.40), posYRatio: rnd(0.22, 0.32), step: 'SFJ-Knee',  legSide: leg, confidence: rnd(0.89, 0.95), reflux_duration: 0.0, description: 'EP N2→N3 — tributary entry', clipPath: `frame-${String(seqStart+1).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 2, flow: 'RP', fromType: 'N3', toType: 'N2', posXRatio: rnd(0.33, 0.42), posYRatio: rnd(0.38, 0.48), step: 'Knee',       legSide: leg, confidence: rnd(0.84, 0.92), reflux_duration: rnd(0.8, 1.6), description: 'RP N3→N2 tributary reflux', clipPath: `frame-${String(seqStart+2).padStart(3,'0')}.png`, eliminationTest: '',
+        ligation: { procedure_name: 'Tributary Ligation at N2→N3', technique: 'Small 2cm incision, 3-0 Vicryl at tributary junction', location: 'Medial thigh tributary', vessels_ligated: ['N3 tributary at N2 junction'], compression_post_op: 'Class III wk 1-2, Class II wk 3-8' } },
+      { sequenceNumber: seqStart + 3, flow: 'RP', fromType: 'N3', toType: 'N1', posXRatio: rnd(0.35, 0.44), posYRatio: rnd(0.42, 0.54), step: 'Knee-Ankle', legSide: leg, confidence: rnd(0.82, 0.90), reflux_duration: rnd(0.7, 1.3), description: 'RP N3→N1 with elimination test', clipPath: `frame-${String(seqStart+3).padStart(3,'0')}.png`, eliminationTest: 'No Reflux' },
+      { sequenceNumber: seqStart + 4, flow: 'RP', fromType: 'N2', toType: 'N1', posXRatio: rnd(0.29, 0.36), posYRatio: rnd(0.16, 0.26), step: 'SFJ-Knee',  legSide: leg, confidence: rnd(0.81, 0.89), reflux_duration: rnd(0.9, 1.5), description: 'RP N2→N1 proximal GSV after tributary loop', clipPath: `frame-${String(seqStart+4).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 5, flow: 'EP', fromType: 'N3', toType: 'N3', posXRatio: rnd(0.48, 0.58), posYRatio: rnd(0.62, 0.72), step: 'Knee-Ankle', legSide: leg, confidence: rnd(0.90, 0.96), reflux_duration: 0.0, description: 'Normal distal tributary', clipPath: `frame-${String(seqStart+5).padStart(3,'0')}.png`, eliminationTest: '' },
+    ];
+  },
+  type2a: (leg, seqStart) => {
+    return [
+      { sequenceNumber: seqStart,     flow: 'EP', fromType: 'N2', toType: 'N3', posXRatio: rnd(0.32, 0.42), posYRatio: rnd(0.26, 0.36), step: 'SFJ-Knee',  legSide: leg, confidence: rnd(0.88, 0.95), reflux_duration: 0.0, description: 'EP N2→N3 — no SFJ incompetence', clipPath: `frame-${String(seqStart).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 1, flow: 'EP', fromType: 'N2', toType: 'N3', posXRatio: rnd(0.34, 0.44), posYRatio: rnd(0.36, 0.46), step: 'SFJ-Knee',  legSide: leg, confidence: rnd(0.87, 0.94), reflux_duration: 0.0, description: 'Second N2→N3 branch entry', clipPath: `frame-${String(seqStart+1).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 2, flow: 'RP', fromType: 'N3', toType: 'N2', posXRatio: rnd(0.36, 0.46), posYRatio: rnd(0.44, 0.54), step: 'Knee',       legSide: leg, confidence: rnd(0.83, 0.91), reflux_duration: rnd(0.7, 1.3), description: 'RP N3→N2 — Type 2A pattern', clipPath: `frame-${String(seqStart+2).padStart(3,'0')}.png`, eliminationTest: '',
+        ligation: { procedure_name: 'Ligate highest EP at N2→N3', technique: 'Small incision at highest EP entry, 3-0 absorbable sutures', location: 'Medial knee tributary entry', vessels_ligated: ['Highest N2→N3 entry point'], compression_post_op: 'Class II 23-32mmHg wk 1-4' } },
+      { sequenceNumber: seqStart + 3, flow: 'RP', fromType: 'N3', toType: 'N2', posXRatio: rnd(0.38, 0.48), posYRatio: rnd(0.52, 0.64), step: 'Knee-Ankle', legSide: leg, confidence: rnd(0.81, 0.89), reflux_duration: rnd(0.5, 1.1), description: 'RP N3→N2 distal tributary', clipPath: `frame-${String(seqStart+3).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 4, flow: 'EP', fromType: 'N2', toType: 'N2', posXRatio: rnd(0.44, 0.56), posYRatio: rnd(0.20, 0.30), step: 'Knee',       legSide: leg, confidence: rnd(0.90, 0.96), reflux_duration: 0.0, description: 'GSV competent — no SFJ reflux', clipPath: `frame-${String(seqStart+4).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 5, flow: 'EP', fromType: 'N1', toType: 'N1', posXRatio: rnd(0.40, 0.56), posYRatio: rnd(0.70, 0.82), step: 'Ankle',      legSide: leg, confidence: rnd(0.91, 0.97), reflux_duration: 0.0, description: 'Normal deep system', clipPath: `frame-${String(seqStart+5).padStart(3,'0')}.png`, eliminationTest: '' },
+    ];
+  },
+  type2c: (leg, seqStart) => {
+    return [
+      { sequenceNumber: seqStart,     flow: 'EP', fromType: 'N2', toType: 'N3', posXRatio: rnd(0.30, 0.40), posYRatio: rnd(0.28, 0.38), step: 'SFJ-Knee',  legSide: leg, confidence: rnd(0.88, 0.94), reflux_duration: 0.0, description: 'EP N2→N3 entry — Type 2C pattern', clipPath: `frame-${String(seqStart).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 1, flow: 'RP', fromType: 'N3', toType: 'N2', posXRatio: rnd(0.34, 0.44), posYRatio: rnd(0.42, 0.52), step: 'Knee',       legSide: leg, confidence: rnd(0.83, 0.91), reflux_duration: rnd(0.8, 1.4), description: 'RP N3→N2 tributary reflux', clipPath: `frame-${String(seqStart+1).padStart(3,'0')}.png`, eliminationTest: '',
+        ligation: { procedure_name: 'Ligate N2→N3 entry + SFJ', technique: 'Combined groin incision and tributary ligation', location: 'SFJ and medial knee', vessels_ligated: ['GSV at SFJ', 'N2→N3 entry point'], compression_post_op: 'Class III 40-50mmHg wk 1-2, Class II wk 3-8' } },
+      { sequenceNumber: seqStart + 2, flow: 'RP', fromType: 'N2', toType: 'N1', posXRatio: rnd(0.28, 0.36), posYRatio: rnd(0.12, 0.22), step: 'SFJ-Knee',  legSide: leg, confidence: rnd(0.82, 0.90), reflux_duration: rnd(0.7, 1.3), description: 'RP N2→N1 — additional GSV reflux (Type 2C)', clipPath: `frame-${String(seqStart+2).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 3, flow: 'EP', fromType: 'N2', toType: 'N2', posXRatio: rnd(0.44, 0.56), posYRatio: rnd(0.56, 0.68), step: 'Knee-Ankle', legSide: leg, confidence: rnd(0.89, 0.95), reflux_duration: 0.0, description: 'Normal below-knee GSV', clipPath: `frame-${String(seqStart+3).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 4, flow: 'EP', fromType: 'N1', toType: 'N1', posXRatio: rnd(0.42, 0.56), posYRatio: rnd(0.86, 0.98), step: 'Ankle',      legSide: leg, confidence: rnd(0.92, 0.97), reflux_duration: 0.0, description: 'Normal deep system at ankle', clipPath: `frame-${String(seqStart+4).padStart(3,'0')}.png`, eliminationTest: '' },
+    ];
+  },
+  type1plus2: (leg, seqStart) => {
+    const sfj = rnd(0.05, 0.098);
+    return [
+      { sequenceNumber: seqStart,     flow: 'EP', fromType: 'N1', toType: 'N2', posXRatio: rnd(0.28, 0.36), posYRatio: sfj,             step: 'SFJ',       legSide: leg, confidence: rnd(0.90, 0.96), reflux_duration: 0.0, description: 'SFJ entry EP N1→N2', clipPath: `frame-${String(seqStart).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 1, flow: 'EP', fromType: 'N2', toType: 'N3', posXRatio: rnd(0.30, 0.40), posYRatio: rnd(0.22, 0.32), step: 'SFJ-Knee',  legSide: leg, confidence: rnd(0.88, 0.94), reflux_duration: 0.0, description: 'EP N2→N3 — double entry pattern', clipPath: `frame-${String(seqStart+1).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 2, flow: 'RP', fromType: 'N3', toType: 'N2', posXRatio: rnd(0.33, 0.42), posYRatio: rnd(0.38, 0.50), step: 'Knee',       legSide: leg, confidence: rnd(0.84, 0.92), reflux_duration: rnd(0.9, 1.6), description: 'RP N3→N2 — reflux persists after compression', clipPath: `frame-${String(seqStart+2).padStart(3,'0')}.png`, eliminationTest: 'Reflux',
+        ligation: { procedure_name: 'SFJ + Tributary Ligation (Type 1+2)', technique: 'Groin crossectomy + medial tributary ligation', location: 'SFJ and medial thigh tributary', vessels_ligated: ['GSV at SFJ', 'N2→N3 entry point'], compression_post_op: 'Class III 40-50mmHg wk 1-3, Class II wk 4-8' } },
+      { sequenceNumber: seqStart + 3, flow: 'RP', fromType: 'N2', toType: 'N1', posXRatio: rnd(0.30, 0.38), posYRatio: rnd(0.14, 0.24), step: 'SFJ-Knee',  legSide: leg, confidence: rnd(0.82, 0.90), reflux_duration: rnd(0.8, 1.4), description: 'RP N2→N1 — dual shunt confirmed', clipPath: `frame-${String(seqStart+3).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 4, flow: 'EP', fromType: 'N3', toType: 'N3', posXRatio: rnd(0.48, 0.58), posYRatio: rnd(0.62, 0.74), step: 'Knee-Ankle', legSide: leg, confidence: rnd(0.90, 0.96), reflux_duration: 0.0, description: 'Normal distal tributary', clipPath: `frame-${String(seqStart+4).padStart(3,'0')}.png`, eliminationTest: '' },
+      { sequenceNumber: seqStart + 5, flow: 'EP', fromType: 'N1', toType: 'N1', posXRatio: rnd(0.42, 0.56), posYRatio: rnd(0.88, 0.98), step: 'SPJ',        legSide: leg, confidence: rnd(0.91, 0.97), reflux_duration: 0.0, description: 'Normal deep system at SPJ', clipPath: `frame-${String(seqStart+5).padStart(3,'0')}.png`, eliminationTest: '' },
+    ];
+  },
+};
+
+const TEMPLATE_KEYS = Object.keys(SHUNT_TEMPLATES);
+
+/**
+ * Generates 15–20 clips with 2 or 3 randomly chosen shunt patterns
+ * across left/right legs. Called once on page load — fresh every refresh.
+ */
+function generateMockClips() {
+  const numShunts = Math.random() < 0.5 ? 2 : 3;
+
+  // Pick random template names (allow repeats on different legs)
+  const legs = ['left', 'right'];
+  const assignments = [];
+  for (let i = 0; i < numShunts; i++) {
+    const template = TEMPLATE_KEYS[Math.floor(Math.random() * TEMPLATE_KEYS.length)];
+    // Alternate legs; if numShunts === 3, put 2 on one leg and 1 on the other
+    const leg = legs[i % 2];
+    assignments.push({ template, leg });
+  }
+
+  const allClips = [];
+  let seq = 1;
+  assignments.forEach(({ template, leg }) => {
+    const clips = SHUNT_TEMPLATES[template](leg, seq);
+    allClips.push(...clips);
+    seq += clips.length;
+  });
+
+  // Pad with EP normal clips if under 15
+  const padLegs = ['left', 'right'];
+  while (allClips.length < 15) {
+    const leg = padLegs[allClips.length % 2];
+    allClips.push({
+      sequenceNumber: seq++,
+      flow: 'EP', fromType: 'N1', toType: 'N1',
+      posXRatio: rnd(0.40, 0.58), posYRatio: rnd(0.70, 0.98),
+      step: STEPS[Math.floor(Math.random() * STEPS.length)],
+      legSide: leg, confidence: rnd(0.90, 0.97), reflux_duration: 0.0,
+      description: 'Normal deep system — no reflux', eliminationTest: '',
+      clipPath: `frame-${String(seq).padStart(3,'0')}.png`,
+    });
+  }
+
+  return JSON.stringify(allClips, null, 2);
+}
 
 const ClinicalReasoning = () => {
   const [mode, setMode] = useState('single'); // 'single', 'stream', or 'report'
 
-  // Post-assessment report state
-  const [reportClips, setReportClips] = useState(REPORT_DEFAULT_CLIPS);
+  // Post-assessment report state — new random clips on every page load
+  const [reportClips, setReportClips] = useState(() => generateMockClips());
   const [reportPatientInfo, setReportPatientInfo] = useState(JSON.stringify({
     "patient_id": "PAT-001",
     "assessor": "Dr. Smith",
@@ -178,68 +267,58 @@ const ClinicalReasoning = () => {
         }
 
         try {
-          // ONLY populate sections when abnormal flow (RP) detected
           const isAbnormal = dataPoint.flow === 'RP';
-          
-          // Generate dynamic LLM-based reasoning for this flow point
-          let dynamicReasoning = dataPoint.description || '';
-          if (dataPoint.flow === 'EP') {
-            dynamicReasoning = 'Normal forward flow without reflux features';
-          } else if (dataPoint.flow === 'RP') {
-            // For abnormal flows, call LLM to generate intelligent reasoning
-            try {
-              const reasoningRes = await axios.post('/api/generate-flow-reasoning', {
-                flow_data: dataPoint
-              });
-              dynamicReasoning = reasoningRes.data.reasoning || dataPoint.description || 'Abnormal reflux detected';
-            } catch (reasoningErr) {
-              console.warn('Failed to generate reasoning, using default:', reasoningErr);
-              dynamicReasoning = dataPoint.description || 'Abnormal reflux detected';
-            }
-          }
-          
-          // Send individual data point to /api/analyze for treatment plan
-          const res = await axios.post('/api/analyze', {
-            ultrasound_data: dataPoint
-          });
 
-          // Update results with the latest processing
-          results.processed_points.push({
-            point_number: i + 1,
-            sequence_number: dataPoint.sequenceNumber,
-            location: dataPoint.step,
-            reflux_duration: dataPoint.reflux_duration,
-            description: dynamicReasoning,  // Use LLM-generated reasoning
-            flow_type: dataPoint.flow,
-            ligation: isAbnormal ? dataPoint.ligation || null : null
-          });
-
-          // Update current display ONLY for abnormal flow (RP)
           if (isAbnormal) {
-            results.current_reasoning = res.data.reasoning || '';
+            // RP clip: single LLM call to /api/analyze for classification + ligation
+            const res = await axios.post('/api/analyze', { ultrasound_data: dataPoint });
+
+            results.processed_points.push({
+              point_number: i + 1,
+              sequence_number: dataPoint.sequenceNumber,
+              flow_type: dataPoint.flow,
+              location: dataPoint.step,
+              reflux_duration: dataPoint.reflux_duration,
+              description: dataPoint.description || 'Abnormal reflux detected',
+              ligation: dataPoint.ligation || null,
+            });
+
             results.current_assessment = res.data.shunt_type_assessment || '';
-            results.current_treatment = res.data.treatment_plan || '';
+            results.current_reasoning  = res.data.reasoning || '';
+            results.current_treatment  = res.data.treatment_plan || '';
             results.shunt_classifications.push({
               point: i + 1,
-              classification: res.data.shunt_classification
+              sequence: dataPoint.sequenceNumber,
+              flow: `${dataPoint.fromType}→${dataPoint.toType}`,
+              step: dataPoint.step,
+              assessment: res.data.shunt_type_assessment || '',
             });
           } else {
-            // Clear sections for normal flow (EP)
-            results.current_reasoning = '';
-            results.current_assessment = '';
-            results.current_treatment = '';
+            // EP clip: no LLM call — just log it
+            results.processed_points.push({
+              point_number: i + 1,
+              sequence_number: dataPoint.sequenceNumber,
+              flow_type: dataPoint.flow,
+              location: dataPoint.step,
+              reflux_duration: dataPoint.reflux_duration,
+              description: dataPoint.description || 'Normal forward flow',
+              ligation: null,
+            });
+            // Don't clear current sections — keep last RP result visible
           }
 
-          // Update UI in real-time after each point - CREATE NEW OBJECT to trigger React re-render
           setResponse({ ...results });
-          
+
         } catch (pointError) {
           console.error(`Error processing point ${i + 1}:`, pointError);
           results.processed_points.push({
             point_number: i + 1,
             sequence_number: dataStream[i].sequenceNumber,
-            error: pointError.response?.data?.error || pointError.message
+            flow_type: dataStream[i].flow,
+            location: dataStream[i].step,
+            error: pointError.response?.data?.error || pointError.message,
           });
+          setResponse({ ...results });
         }
       }
 
@@ -504,6 +583,13 @@ const ClinicalReasoning = () => {
                   style={{ backgroundColor: '#8B0000', borderColor: '#8B0000' }}
                 >
                   📄 Download PDF Report
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => { setReportClips(generateMockClips()); setReportResult(null); setReportError(null); }}
+                  title="Generate a new random 15–20 clip dataset"
+                >
+                  🔀 Regenerate Clips
                 </button>
                 {reportResult && (
                   <button
@@ -870,6 +956,21 @@ const ClinicalReasoning = () => {
             </div>
           </div>
 
+          {/* RP Classifications Summary */}
+          {response.shunt_classifications && response.shunt_classifications.length > 0 && (
+            <div className="output-container" style={{ borderLeft: '4px solid #C01C1C' }}>
+              <div className="output-header"><h3>🩺 RP Clip Assessments ({response.shunt_classifications.length} clips)</h3></div>
+              <div className="output-content">
+                {response.shunt_classifications.map((s, idx) => (
+                  <div key={idx} style={{ padding: '0.5rem 0', borderBottom: '1px solid #f0f0f0', fontSize: '0.9rem' }}>
+                    <strong>#{s.sequence}</strong> {s.flow} at {s.step} →&nbsp;
+                    <span style={{ color: '#C01C1C', fontWeight: 600 }}>{s.assessment || '...'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* All Processed Points Summary */}
           <details style={{ marginTop: '2rem' }}>
             <summary style={{ cursor: 'pointer', fontWeight: '600', color: '#666' }}>
@@ -878,19 +979,20 @@ const ClinicalReasoning = () => {
             <div style={{ marginTop: '1rem' }}>
               {response.processed_points.map((point, idx) => (
                 <div key={idx} style={{
-                  padding: '1rem',
-                  marginBottom: '0.75rem',
-                  backgroundColor: '#f9fafb',
-                  border: '1px solid #e5e7eb',
+                  padding: '0.75rem 1rem',
+                  marginBottom: '0.5rem',
+                  backgroundColor: point.flow_type === 'RP' ? '#fff5f5' : '#f9fafb',
+                  border: `1px solid ${point.flow_type === 'RP' ? '#fecaca' : '#e5e7eb'}`,
                   borderRadius: '0.375rem',
-                  fontSize: '0.9rem'
+                  fontSize: '0.88rem'
                 }}>
-                  <div><strong>Point #{point.point_number}:</strong> {point.timestamp}</div>
-                  <div><strong>Reflux Type:</strong> {point.reflux_type}</div>
-                  <div><strong>Location:</strong> {point.location}</div>
-                  <div><strong>Duration:</strong> {point.reflux_duration}s</div>
-                  <div><strong>Description:</strong> {point.description}</div>
-                  {point.error && <div style={{ color: '#dc2626', marginTop: '0.5rem' }}><strong>Error:</strong> {point.error}</div>}
+                  <div>
+                    <strong>#{point.point_number}</strong>
+                    &nbsp;<span style={{ color: point.flow_type === 'RP' ? '#dc2626' : '#059669', fontWeight: 600 }}>{point.flow_type}</span>
+                    &nbsp;· {point.location} · {point.reflux_duration != null ? `${point.reflux_duration}s` : ''}
+                  </div>
+                  <div style={{ color: '#555', marginTop: '0.2rem' }}>{point.description}</div>
+                  {point.error && <div style={{ color: '#dc2626', marginTop: '0.25rem' }}><strong>Error:</strong> {point.error}</div>}
                 </div>
               ))}
             </div>

@@ -40,3 +40,9 @@ build/
 *.pth
 backend/weights/
 backend/vision/segmentation/checkpoints/
+
+# Large data files
+Task_1_RAG_Knowledgebase.pdf
+
+# Qdrant local storage (binary data, not meant for VCS)
+backend/qdrant_storage/

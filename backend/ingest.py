@@ -1,29 +1,33 @@
 """
 Medical Book Ingestion Script
-Loads text, chunks it, generates embeddings, and stores in FAISS
+Loads text, chunks it, generates embeddings via Ollama,
+and stores everything in Qdrant (local file-based — no Docker required).
 """
 
 import os
-import json
 import numpy as np
-import faiss
-import pickle
 import requests
 import time
 import logging
 from pathlib import Path
 from PyPDF2 import PdfReader
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+
 from config import (
     CHUNK_SIZE,
     CHUNK_OVERLAP,
     OLLAMA_BASE_URL,
     OLLAMA_EMBEDDING_MODEL,
-    FAISS_INDEX_PATH,
-    FAISS_METADATA_PATH,
+    QDRANT_PATH,
+    QDRANT_HOST,
+    QDRANT_PORT,
+    QDRANT_API_KEY,
+    QDRANT_COLLECTION,
     EMBEDDING_DIMENSION,
     SAMPLE_DATA_PATH,
     LOG_FILE,
-    LOG_LEVEL
+    LOG_LEVEL,
 )
 
 # Configure logging
@@ -38,76 +42,91 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_embedding(text):
-    """Get embedding from Ollama"""
+# ─────────────────────────────────────────────────────────────────────────────
+# Qdrant client factory (local file-based or remote)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def get_qdrant_client() -> QdrantClient:
+    if QDRANT_HOST:
+        logger.info(f"Connecting to remote Qdrant at {QDRANT_HOST}:{QDRANT_PORT}")
+        return QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT, api_key=QDRANT_API_KEY)
+    os.makedirs(QDRANT_PATH, exist_ok=True)
+    logger.info(f"Using local Qdrant storage at {QDRANT_PATH}")
+    return QdrantClient(path=QDRANT_PATH)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Embedding
+# ─────────────────────────────────────────────────────────────────────────────
+
+def get_embedding(text: str) -> np.ndarray:
+    """Get embedding from Ollama."""
     try:
         response = requests.post(
-            f"{OLLAMA_BASE_URL}/api/embeddings",
-            json={"model": OLLAMA_EMBEDDING_MODEL, "prompt": text},
-            timeout=30
+            f"{OLLAMA_BASE_URL}/api/embed",
+            json={"model": OLLAMA_EMBEDDING_MODEL, "input": text},
+            timeout=30,
         )
         response.raise_for_status()
-        embedding = np.array(response.json()["embedding"], dtype=np.float32)
-        return embedding
+        return np.array(response.json()["embeddings"][0], dtype=np.float32)
     except Exception as e:
         logger.error(f"Embedding error: {e}")
         return np.zeros(EMBEDDING_DIMENSION, dtype=np.float32)
 
 
-def split_into_chunks(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
-    """
-    Split text into overlapping chunks by word count
-    chunk_size and overlap are approximate word counts
-    """
+# ─────────────────────────────────────────────────────────────────────────────
+# Chunking
+# ─────────────────────────────────────────────────────────────────────────────
+
+def split_into_chunks(text: str, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
+    """Split text into overlapping word-count chunks."""
     words = text.split()
     chunks = []
-    
     for i in range(0, len(words), chunk_size - overlap):
         chunk = ' '.join(words[i:i + chunk_size])
         if chunk.strip():
             chunks.append(chunk.strip())
-    
     return chunks
 
 
-def extract_pdf_text(pdf_path):
-    """Extract text from PDF file"""
+# ─────────────────────────────────────────────────────────────────────────────
+# PDF / text loading
+# ─────────────────────────────────────────────────────────────────────────────
+
+def extract_pdf_text(pdf_path: str) -> str:
+    """Extract all text from a PDF file."""
     try:
         logger.info(f"Extracting text from PDF: {pdf_path}")
         pdf_text = ""
         with open(pdf_path, 'rb') as f:
-            pdf_reader = PdfReader(f)
-            total_pages = len(pdf_reader.pages)
-            logger.info(f"  PDF has {total_pages} pages")
-            
-            for i, page in enumerate(pdf_reader.pages):
-                if (i + 1) % 10 == 0 or (i + 1) == total_pages:
-                    logger.info(f"  Extracting page {i + 1}/{total_pages}...")
+            reader = PdfReader(f)
+            total = len(reader.pages)
+            logger.info(f"  {total} pages")
+            for i, page in enumerate(reader.pages):
+                if (i + 1) % 10 == 0 or (i + 1) == total:
+                    logger.info(f"  Page {i + 1}/{total}...")
                 page_text = page.extract_text()
                 if page_text:
                     pdf_text += page_text + "\n"
-        
         if pdf_text.strip():
-            logger.info(f"✓ Extracted {len(pdf_text)} characters from PDF")
+            logger.info(f"✓ Extracted {len(pdf_text)} characters")
             return pdf_text
-        else:
-            logger.warning("PDF extraction resulted in empty text")
-            return ""
+        logger.warning("PDF extraction yielded empty text")
+        return ""
     except Exception as e:
-        logger.error(f"Error extracting PDF: {e}")
+        logger.error(f"PDF extraction error: {e}")
         return ""
 
 
-def load_medical_text():
-    """Load medical text from files (PDF + sample)"""
+def load_medical_text() -> str:
+    """Load all medical text: PDFs in project root + built-in knowledge base."""
     all_text = ""
-    
-    # Look for PDF files in project root
+
     project_root = os.path.join(os.path.dirname(__file__), '..')
-    pdf_files = [f for f in os.listdir(project_root) if f.endswith('.pdf')]
-    
+    pdf_files = sorted(f for f in os.listdir(project_root) if f.endswith('.pdf'))
+
     if pdf_files:
-        logger.info(f"Found {len(pdf_files)} PDF file(s) in project root")
+        logger.info(f"Found {len(pdf_files)} PDF(s) in project root: {pdf_files}")
         for pdf_file in pdf_files:
             pdf_path = os.path.join(project_root, pdf_file)
             pdf_text = extract_pdf_text(pdf_path)
@@ -116,24 +135,21 @@ def load_medical_text():
                 all_text += f"SOURCE: {pdf_file}\n"
                 all_text += "=" * 80 + "\n\n"
                 all_text += pdf_text
-    
-    # Also include sample data for reference
-    logger.info("Including sample medical knowledge base...")
+    else:
+        logger.info("No PDFs found in project root — using built-in knowledge base only")
+
+    logger.info("Including built-in medical knowledge base...")
     all_text += "\n\n" + "=" * 80 + "\n"
     all_text += "SOURCE: Built-in Medical Knowledge Base\n"
     all_text += "=" * 80 + "\n\n"
     all_text += create_sample_medical_text()
-    
-    if all_text.strip():
-        logger.info(f"✓ Loaded {len(all_text)} total characters from all sources")
-        return all_text
-    else:
-        logger.warning("No text loaded from any source. Using sample data only.")
-        return create_sample_medical_text()
+
+    logger.info(f"✓ Total text loaded: {len(all_text)} characters")
+    return all_text or create_sample_medical_text()
 
 
-def create_sample_medical_text():
-    """Create comprehensive sample medical text about venous disease"""
+def create_sample_medical_text() -> str:
+    """Built-in venous disease knowledge base."""
     sample_text = """
 VASCULAR MEDICINE AND HAEMODYNAMIC ASSESSMENT
 
@@ -285,17 +301,17 @@ For below-knee insufficiency:
 
 For recurrent varicose veins:
 1. Complete mapping of previous treatment site
-2. Assess for neo-vascularization
+2. Assess for neo-vascularisation
 3. Evaluate arteriovenous communications
 4. Plan revision strategy accordingly
 
 ULTRASOUND PROBE GUIDANCE PRINCIPLES
 
-Scanning technique for optimal visualization:
+Scanning technique for optimal visualisation:
 - Start with B-mode transverse view at known reference points
 - Systematically scan longitudinally along vein course
 - Use color Doppler to confirm vein identity
-- Optimize gain and frequency for target vein depth
+- Optimise gain and frequency for target vein depth
 - Use Valsalva to assess valve competence
 
 Navigation targets in lower extremity venous mapping:
@@ -323,80 +339,86 @@ Entry Point determination is critical for surgical planning:
 - Secondary pathways: Tributaries and perforators carrying reflux
 - Hemodynamic significance: Whether reflux affects outflow capacity
 
-The CHIVA principle emphasizes preservation of saphenous veins when possible while correcting hemodynamic abnormalities through strategic intervention at entry points and re-entry pathways.
+The CHIVA principle emphasises preservation of saphenous veins when possible while correcting hemodynamic abnormalities through strategic intervention at entry points and re-entry pathways.
 """
-    
-    # Save for future use
     os.makedirs(os.path.dirname(SAMPLE_DATA_PATH), exist_ok=True)
     with open(SAMPLE_DATA_PATH, 'w') as f:
         f.write(sample_text)
-    logger.info(f"Created sample medical text at {SAMPLE_DATA_PATH}")
+    logger.info(f"Built-in knowledge base written to {SAMPLE_DATA_PATH}")
     return sample_text
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Main ingestion pipeline
+# ─────────────────────────────────────────────────────────────────────────────
+
 def ingest_and_index():
-    """Main ingestion pipeline"""
     logger.info("=" * 70)
-    logger.info("MEDICAL TEXT INGESTION AND FAISS INDEXING")
+    logger.info("MEDICAL TEXT INGESTION → QDRANT INDEXING")
     logger.info("=" * 70)
-    
-    # Load text
-    logger.info("\n[1/4] Loading medical text...")
+
+    # 1. Load text
+    logger.info("\n[1/4] Loading medical text (PDFs + built-in knowledge base)...")
     text = load_medical_text()
-    logger.info(f"✓ Loaded {len(text)} characters")
-    
-    # Split into chunks
-    logger.info("\n[2/4] Chunking text (target: {}-{} words)...".format(
-        CHUNK_SIZE - CHUNK_OVERLAP, CHUNK_SIZE))
-    chunks = split_into_chunks(text, CHUNK_SIZE, CHUNK_OVERLAP)
-    logger.info(f"✓ Created {len(chunks)} chunks")
-    
-    # Generate embeddings
-    logger.info("\n[3/4] Generating embeddings with Ollama...")
-    logger.info(f"Using model: {OLLAMA_EMBEDDING_MODEL}")
-    
-    embeddings_list = []
-    start_time = time.time()
-    
+    logger.info(f"✓ {len(text)} characters loaded")
+
+    # 2. Chunk
+    logger.info(f"\n[2/4] Chunking (~{CHUNK_SIZE} words, {CHUNK_OVERLAP} overlap)...")
+    chunks = split_into_chunks(text)
+    logger.info(f"✓ {len(chunks)} chunks created")
+
+    # 3. Embed
+    logger.info(f"\n[3/4] Generating embeddings with Ollama ({OLLAMA_EMBEDDING_MODEL})...")
+    embeddings = []
+    t0 = time.time()
     for i, chunk in enumerate(chunks):
-        if (i + 1) % 5 == 0 or (i + 1) == len(chunks):
-            logger.info(f"  Processing chunk {i + 1}/{len(chunks)}...")
-        
-        embedding = get_embedding(chunk)
-        embeddings_list.append(embedding)
-        time.sleep(0.1)  # Small delay to avoid rate limiting
-    
-    elapsed = time.time() - start_time
-    logger.info(f"✓ Generated {len(embeddings_list)} embeddings in {elapsed:.2f}s")
-    
-    # Create FAISS index
-    logger.info("\n[4/4] Creating FAISS index...")
-    
-    # Convert to numpy array
-    embeddings_array = np.array(embeddings_list, dtype=np.float32)
-    logger.info(f"Embeddings shape: {embeddings_array.shape}")
-    
-    # Create index
-    index = faiss.IndexFlatL2(EMBEDDING_DIMENSION)
-    index.add(embeddings_array)
-    
-    # Save index and metadata
-    os.makedirs(os.path.dirname(FAISS_INDEX_PATH), exist_ok=True)
-    
-    faiss.write_index(index, FAISS_INDEX_PATH)
-    with open(FAISS_METADATA_PATH, 'wb') as f:
-        pickle.dump(chunks, f)
-    
-    logger.info(f"✓ Saved FAISS index: {FAISS_INDEX_PATH}")
-    logger.info(f"✓ Saved metadata: {FAISS_METADATA_PATH}")
-    
-    logger.info("\n" + "=" * 70)
+        if (i + 1) % 10 == 0 or (i + 1) == len(chunks):
+            logger.info(f"  {i + 1}/{len(chunks)} chunks embedded...")
+        embeddings.append(get_embedding(chunk))
+        time.sleep(0.05)
+    logger.info(f"✓ {len(embeddings)} embeddings in {time.time()-t0:.1f}s")
+
+    # 4. Upsert into Qdrant
+    logger.info("\n[4/4] Upserting into Qdrant...")
+    client = get_qdrant_client()
+
+    # (Re)create collection — wipes any previous data in this collection
+    existing = [c.name for c in client.get_collections().collections]
+    if QDRANT_COLLECTION in existing:
+        client.delete_collection(QDRANT_COLLECTION)
+        logger.info(f"  Dropped existing collection '{QDRANT_COLLECTION}'")
+
+    client.create_collection(
+        collection_name=QDRANT_COLLECTION,
+        vectors_config=VectorParams(size=EMBEDDING_DIMENSION, distance=Distance.COSINE),
+    )
+    logger.info(f"  Created collection '{QDRANT_COLLECTION}' (dim={EMBEDDING_DIMENSION}, Cosine)")
+
+    points = [
+        PointStruct(
+            id=i,
+            vector=embeddings[i].tolist(),
+            payload={"text": chunks[i], "chunk_index": i},
+        )
+        for i in range(len(chunks))
+    ]
+
+    # Upsert in batches of 100
+    batch_size = 100
+    for start in range(0, len(points), batch_size):
+        batch = points[start:start + batch_size]
+        client.upsert(collection_name=QDRANT_COLLECTION, points=batch)
+        logger.info(f"  Upserted {min(start + batch_size, len(points))}/{len(points)} points")
+
+    info = client.get_collection(QDRANT_COLLECTION)
+    logger.info(f"\n{'='*70}")
     logger.info("INGESTION COMPLETE")
-    logger.info("=" * 70)
-    logger.info(f"\nIndex Statistics:")
-    logger.info(f"  - Total chunks: {len(chunks)}")
-    logger.info(f"  - Embedding dimension: {EMBEDDING_DIMENSION}")
-    logger.info(f"  - Index type: FAISS IndexFlatL2")
+    logger.info(f"{'='*70}")
+    logger.info(f"  Collection : {QDRANT_COLLECTION}")
+    logger.info(f"  Points     : {info.points_count}")
+    logger.info(f"  Dimension  : {EMBEDDING_DIMENSION}")
+    logger.info(f"  Distance   : Cosine")
+    logger.info(f"  Storage    : {QDRANT_PATH}")
     logger.info(f"\nReady to use with Flask backend!")
 
 
