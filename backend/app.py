@@ -2912,7 +2912,8 @@ def mlops_get_run_details(run_id):
         response_times = [m['response_time_ms'] for m in formatted_metrics if m['response_time_ms']]
         memory_usage = [m['memory_usage_mb'] for m in formatted_metrics if m['memory_usage_mb']]
         cpu_usage = [m['cpu_percent'] for m in formatted_metrics if m['cpu_percent']]
-        
+        tokens = [m['total_tokens'] for m in formatted_metrics if m['total_tokens']]
+
         summary = {
             'avg_response_ms': sum(response_times) / len(response_times) if response_times else 0,
             'min_response_ms': min(response_times) if response_times else 0,
@@ -2920,6 +2921,8 @@ def mlops_get_run_details(run_id):
             'avg_memory_mb': sum(memory_usage) / len(memory_usage) if memory_usage else 0,
             'peak_memory_mb': max(memory_usage) if memory_usage else 0,
             'avg_cpu_percent': sum(cpu_usage) / len(cpu_usage) if cpu_usage else 0,
+            'avg_total_tokens': sum(tokens) / len(tokens) if tokens else 0,
+            'total_tokens_sum': sum(tokens) if tokens else 0,
             'total_cached': sum(1 for m in formatted_metrics if m['cached'])
         }
         
