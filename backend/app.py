@@ -750,11 +750,11 @@ def validate_shunt_type(shunt_text):
     return shunt_text  # Return as-is but log warning
 
 def parse_clinical_response(response_text):
-    """Parse LLM response — supports both old and new formats"""
+    """Parse LLM response — supports both old and new formats, handles preamble"""
     import re
 
     response_text = response_text.strip()
-    logger.info(f"DEBUG: Raw LLM response:\n{repr(response_text)}\n")
+    logger.info(f"DEBUG: Raw LLM response:\n{repr(response_text[:300])}\n")
 
     sections = {
         "shunt_type_assessment": "",
@@ -764,63 +764,71 @@ def parse_clinical_response(response_text):
     }
 
     try:
+        # Remove common preamble text
+        cleaned = re.sub(r'^[^S]*?(?=Shunt)', response_text, flags=re.IGNORECASE | re.DOTALL)
+        if not cleaned or cleaned == response_text:
+            cleaned = response_text
+
         # TRY NEW FORMAT FIRST: "Shunt Type: [...]\nConfidence: [...]\nReasoning: [...]\nLigation: [...]"
-        new_shunt = re.search(r'Shunt\s+Type\s*:\s*(.+?)(?=\n|$)', response_text, re.IGNORECASE)
-        new_conf = re.search(r'Confidence\s*:\s*(.+?)(?=\n|$)', response_text, re.IGNORECASE)
-        new_reason = re.search(r'Reasoning\s*:\s*(.+?)(?=\n|$)', response_text, re.IGNORECASE)
-        new_ligation = re.search(r'Ligation\s*:\s*(.+?)(?=\n|$)', response_text, re.IGNORECASE)
+        new_shunt = re.search(r'Shunt\s+Type\s*:\s*(.+?)(?=\n(?:Confidence|Reasoning|Ligation)|$)', cleaned, re.IGNORECASE)
+        new_conf = re.search(r'Confidence\s*:\s*([\d.]+)', cleaned, re.IGNORECASE)
+        new_reason = re.search(r'Reasoning\s*:\s*(.+?)(?=\n(?:Ligation)|$)', cleaned, re.IGNORECASE)
+        new_ligation = re.search(r'Ligation\s*:\s*(.+?)(?=\n|$)', cleaned, re.IGNORECASE)
 
         if new_shunt and new_reason and new_ligation:
             # Successfully matched new format
-            sections["shunt_type_assessment"] = clean_output_text(new_shunt.group(1).strip())
+            shunt_text = clean_output_text(new_shunt.group(1).strip())
+            # Extract type from brackets if present
+            bracket_match = re.search(r'\[(.*?)\]', shunt_text)
+            if bracket_match:
+                shunt_text = bracket_match.group(1).strip()
+            sections["shunt_type_assessment"] = shunt_text
             sections["reasoning"] = clean_output_text(new_reason.group(1).strip())
             sections["treatment_plan"] = clean_output_text(new_ligation.group(1).strip())
             if new_conf:
-                sections["confidence"] = clean_output_text(new_conf.group(1).strip())
+                sections["confidence"] = new_conf.group(1).strip()
             logger.info(f"✓ Parsed NEW format: {sections['shunt_type_assessment']}")
         else:
-            # FALLBACK TO OLD FORMAT: "Shunt Type Assessment Results: [...]\nReasoning: [...]\nProposed Litigation Treatment Plan: [...]"
+            # FALLBACK TO OLD FORMAT
             shunt_match = re.search(
-                r'Shunt\s+Type\s+Assessment\s+Results?\s*:\s*(.+?)(?=\n\s*(?:Reasoning|Proposed|$))',
-                response_text,
+                r'Shunt\s+Type\s+Assessment\s+Results?\s*:\s*\[?(.+?)(?:\])?(?=\n\s*(?:Reasoning|Proposed|$))',
+                cleaned,
                 re.IGNORECASE | re.DOTALL
             )
             if shunt_match:
-                text = shunt_match.group(1).strip()
-                text = clean_output_text(text)
+                text = clean_output_text(shunt_match.group(1).strip())
                 text = text.split('\n')[0].strip()
+                text = re.sub(r'[\[\]]', '', text)  # Remove brackets
                 if text and len(text) > 2:
                     sections["shunt_type_assessment"] = text
-                    logger.info(f"✓ Parsed OLD format (shunt): '{text}'")
+                    logger.info(f"✓ Parsed OLD format: '{text}'")
 
             reasoning_match = re.search(
-                r'Reasoning\s*:\s*(.+?)(?=\n\s*(?:Proposed|$))',
-                response_text,
+                r'Reasoning\s*:\s*(.+?)(?=\n\s*(?:Proposed|Ligation|$))',
+                cleaned,
                 re.IGNORECASE | re.DOTALL
             )
             if reasoning_match:
-                text = reasoning_match.group(1).strip()
-                text = clean_output_text(text)
+                text = clean_output_text(reasoning_match.group(1).strip())
                 text = text.split('\n')[0].strip()
                 if text and len(text) > 2:
                     sections["reasoning"] = text
-                    logger.info(f"✓ Parsed OLD format (reasoning): '{text}'")
 
             treatment_match = re.search(
-                r'Proposed\s+Litigation\s+Treatment\s+Plan\s*:\s*(.+?)$',
-                response_text,
+                r'(?:Proposed\s+Litigation\s+Treatment\s+Plan|Ligation)\s*:\s*(.+?)$',
+                cleaned,
                 re.IGNORECASE | re.DOTALL
             )
             if treatment_match:
-                text = treatment_match.group(1).strip()
-                text = clean_output_text(text)
+                text = clean_output_text(treatment_match.group(1).strip())
+                text = text.split('\n')[0].strip()
                 if text and len(text) > 2:
                     sections["treatment_plan"] = text
-                    logger.info(f"✓ Parsed OLD format (treatment): '{text[:50]}...'")
 
         # If still missing data, apply fallbacks
         if not sections["shunt_type_assessment"]:
             sections["shunt_type_assessment"] = "Unable to extract"
+            logger.warning("WARNING: Could not extract shunt type from LLM response")
         if not sections["reasoning"]:
             sections["reasoning"] = "Unable to extract"
         if not sections["treatment_plan"]:
@@ -828,7 +836,7 @@ def parse_clinical_response(response_text):
 
     except Exception as e:
         logger.error(f"CRITICAL PARSING ERROR: {e}")
-        logger.error(f"Response was:\n{response_text}")
+        logger.error(f"Response was:\n{response_text[:200]}")
         sections = {
             "shunt_type_assessment": "Parsing error",
             "reasoning": "Parsing error",
@@ -836,7 +844,7 @@ def parse_clinical_response(response_text):
             "confidence": "0.0"
         }
 
-    logger.info(f"DEBUG: Final sections: Shunt={sections['shunt_type_assessment']}, Conf={sections.get('confidence', 'N/A')}, Reasoning={sections['reasoning'][:50]}")
+    logger.info(f"DEBUG: Final: Shunt={sections['shunt_type_assessment']}, Conf={sections.get('confidence', 'N/A')}")
     return sections
 
 
