@@ -995,6 +995,10 @@ Proposed Litigation Treatment Plan: [specific ligation step 1]
                 llm_latency_ms = (time.time() - task1_start) * 1000
                 metrics_collector.record_task_latency('task1_classification', llm_latency_ms / 1000)
 
+                # Accumulate token counts for stream metrics
+                total_input_tokens += llm_usage.get('prompt_tokens', 0)
+                total_output_tokens += llm_usage.get('completion_tokens', 0)
+
                 # Parse all three sections from single LLM response
                 parsed_result = parse_clinical_response(response_text)
                 output_size_bytes = len(json.dumps(parsed_result).encode())
