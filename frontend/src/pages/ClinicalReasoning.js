@@ -654,10 +654,11 @@ const ClinicalReasoning = () => {
     setAccStreamLoading(prev => ({ ...prev, [stream.id]: true }));
     const t0 = Date.now();
     try {
-      const { data: { classification } } = await axios.post('/api/shunt/classify-report', {
+      const response = await axios.post('/api/shunt/classify-report', {
         clip_list: stream.clips,
         patient_info: { stream_id: stream.id, ground_truth: stream.groundTruth },
       });
+      const { classification, total_prompt_tokens = 0, total_completion_tokens = 0, total_tokens = 0 } = response.data;
 
       const findings = classification.findings || (classification.shunt_type ? [classification] : []);
       const llmLabel = findings.map(f => f.shunt_type).filter(Boolean).join(' + ') || 'No Shunt';
@@ -673,6 +674,9 @@ const ClinicalReasoning = () => {
         reasoning: findings.map(f => (f.reasoning || []).join(' ')).join(' | '),
         ligation: findings.flatMap(f => f.ligation || []),
         findings,
+        total_tokens,
+        total_prompt_tokens,
+        total_completion_tokens,
         duration_sec: ((Date.now() - t0) / 1000).toFixed(1),
         timestamp: new Date().toISOString(),
       };
@@ -684,6 +688,10 @@ const ClinicalReasoning = () => {
       });
 
       // Also save to metrics dashboard as an 'accuracy' source run
+      const avgTokensPerRp = stream.clips.filter(c => c.flow === 'RP').length > 0
+        ? Math.round(total_tokens / stream.clips.filter(c => c.flow === 'RP').length)
+        : 0;
+
       saveRun({
         id: `run-${Date.now()}`,
         source: 'accuracy',
@@ -696,8 +704,8 @@ const ClinicalReasoning = () => {
         duration_sec: parseFloat(result.duration_sec),
         accuracy_pct: isCorrect ? '100.0' : '0.0',
         rp_correct: isCorrect ? 1 : 0,
-        total_prompt_tokens: 0, total_completion_tokens: 0, total_tokens: 0,
-        avg_tokens_per_rp: 0,
+        total_prompt_tokens, total_completion_tokens, total_tokens,
+        avg_tokens_per_rp: avgTokensPerRp,
         predictions: findings.map(f => ({
           seq: 0,
           flow_type: 'batch',
@@ -709,7 +717,9 @@ const ClinicalReasoning = () => {
           assessment: f.shunt_type || '—',
           reasoning: (f.reasoning || []).join(' '),
           treatment: (f.ligation || []).join(', '),
-          prompt_tokens: 0, completion_tokens: 0, total_tokens: 0,
+          prompt_tokens: Math.round(total_prompt_tokens / findings.length),
+          completion_tokens: Math.round(total_completion_tokens / findings.length),
+          total_tokens: Math.round(total_tokens / findings.length),
         })),
       });
     } catch (err) {
@@ -1821,6 +1831,11 @@ const ClinicalReasoning = () => {
                                 Confidence: {(result.confidence * 100).toFixed(0)}%
                               </span>
                             )}
+                            {result.total_tokens > 0 && (
+                              <span style={{ fontSize: '0.75rem', color: '#059669', fontFamily: 'monospace' }}>
+                                📊 {result.total_tokens.toLocaleString()} tokens
+                              </span>
+                            )}
                             <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginLeft: 'auto' }}>
                               {new Date(result.timestamp).toLocaleTimeString()} · {result.duration_sec}s
                             </span>
@@ -1848,6 +1863,11 @@ const ClinicalReasoning = () => {
                           <div style={{ marginTop: '0.5rem', fontSize: '0.82rem' }}>
                             <span style={{ fontWeight: 600, color: '#374151' }}>Proposed Ligation: </span>
                             <span style={{ color: '#555' }}>{result.ligation.join(', ')}</span>
+                          </div>
+                        )}
+                        {result.total_tokens > 0 && (
+                          <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', color: '#059669', fontFamily: 'monospace', background: '#f0fdf4', padding: '0.4rem 0.6rem', borderRadius: '4px' }}>
+                            📊 Tokens: {result.total_prompt_tokens?.toLocaleString() || 0} prompt + {result.total_completion_tokens?.toLocaleString() || 0} completion = {result.total_tokens?.toLocaleString() || 0} total
                           </div>
                         )}
                       </div>
