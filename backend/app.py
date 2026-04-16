@@ -19,6 +19,7 @@ import requests
 import numpy as np
 import cv2
 import torch
+import sqlite3
 from flask import Flask, request, jsonify, send_from_directory, Response, session
 from flask_cors import CORS
 from pathlib import Path
@@ -2783,6 +2784,56 @@ def mlops_get_tasks():
             {"name": "Probe Guidance", "id": "probe-guidance"}
         ]
     })
+
+
+@app.route('/api/mlops/dashboard', methods=['GET'])
+def mlops_dashboard():
+    """Get MLOps dashboard data with latest metrics"""
+    try:
+        conn = sqlite3.connect('mlops_metrics.db')
+        cursor = conn.cursor()
+
+        # Get summary stats for each task
+        cursor.execute("""
+            SELECT
+                task_name,
+                COUNT(*) as total_requests,
+                AVG(response_time_ms) as avg_response_ms,
+                AVG(CAST(input_tokens AS FLOAT)) as avg_input_tokens,
+                AVG(CAST(output_tokens AS FLOAT)) as avg_output_tokens,
+                AVG(CAST(total_tokens AS FLOAT)) as avg_total_tokens,
+                AVG(llm_inference_ms) as avg_llm_ms,
+                MAX(created_at) as last_updated
+            FROM request_metrics
+            GROUP BY task_name
+            ORDER BY last_updated DESC
+        """)
+
+        tasks_data = []
+        for row in cursor.fetchall():
+            task_name, total, avg_resp, avg_in, avg_out, avg_total, avg_llm, updated = row
+            tasks_data.append({
+                "task_name": task_name,
+                "total_requests": total,
+                "avg_response_ms": round(avg_resp or 0, 2),
+                "avg_input_tokens": round(avg_in or 0),
+                "avg_output_tokens": round(avg_out or 0),
+                "avg_total_tokens": round(avg_total or 0),
+                "avg_llm_inference_ms": round(avg_llm or 0, 2),
+                "last_updated": updated
+            })
+
+        conn.close()
+
+        return jsonify({
+            "status": "ok",
+            "tasks": tasks_data,
+            "timestamp": datetime.now().isoformat()
+        })
+
+    except Exception as e:
+        logger.error(f"Dashboard error: {e}")
+        return jsonify({"error": str(e), "tasks": []}), 500
 
 
 @app.route('/api/mlops/run/end/<task_name>', methods=['POST'])
