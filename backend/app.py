@@ -3050,9 +3050,20 @@ def shunt_classify_report():
                 download_name=f"shunt_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
             )
 
+        # Aggregate token usage from all findings
+        total_prompt_tokens = 0
+        total_completion_tokens = 0
+        for finding in classification.get('findings', []):
+            usage = finding.get('_llm_usage', {})
+            total_prompt_tokens += usage.get('prompt_tokens', 0)
+            total_completion_tokens += usage.get('completion_tokens', 0)
+
         return jsonify({
             "classification": classification,
             "num_clips": len(clip_list),
+            "total_prompt_tokens": total_prompt_tokens,
+            "total_completion_tokens": total_completion_tokens,
+            "total_tokens": total_prompt_tokens + total_completion_tokens,
             "status": "success"
         })
 
