@@ -23,7 +23,7 @@ OLLAMA_EMBEDDING_MODEL = "llama3.2:1b"
 OLLAMA_KEEP_ALIVE = "20m"
 
 # Groq API — used for ALL LLM inference (70B model, high quality)
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "REDACTED")
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
 # Chunking parameters

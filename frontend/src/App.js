@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import ClinicalReasoning from './pages/ClinicalReasoning';
+import SonographerProfiles from './pages/SonographerProfiles';
 import ProbeGuidance from './pages/ProbeGuidance';
 import MLOpsDashboard from './pages/MLOpsDashboard';
 import VisionAnalyzer from './pages/VisionAnalyzer';
@@ -9,7 +10,6 @@ import VideoAnalysis from './pages/VideoAnalysis';
 import './App.css';
 
 function App() {
-  const [appInfo, setAppInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -17,8 +17,7 @@ function App() {
     // Fetch app info on startup
     fetch('/api/info')
       .then(res => res.json())
-      .then(data => {
-        setAppInfo(data);
+      .then(() => {
         setLoading(false);
       })
       .catch(err => {
@@ -71,7 +70,7 @@ function App() {
             📋 Clinical Reasoning (RAG)
           </Link>
           <Link to="/probe" className="nav-link">
-            🎯 Probe Guidance
+            🎯 Probe Guidance (Personalised)
           </Link>
           <Link to="/vision" className="nav-link">
             🩺 Vein Detection
@@ -91,7 +90,8 @@ function App() {
         <main className="app-main">
           <Routes>
             <Route path="/" element={<ClinicalReasoning />} />
-            <Route path="/probe" element={<ProbeGuidance />} />
+            <Route path="/probe" element={<SonographerProfiles />} />
+            <Route path="/probe/:sonographerId" element={<ProbeGuidance />} />
             <Route path="/vision" element={<VisionAnalyzer />} />
             <Route path="/classify-veins" element={<VeinClassification />} />
             <Route path="/video-analysis" element={<VideoAnalysis />} />

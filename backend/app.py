@@ -52,6 +52,7 @@ from groq import Groq as GroqClient
 _groq_client = GroqClient(api_key=GROQ_API_KEY)
 from monitoring import metrics_collector, resource_monitor, ollama_monitor, get_all_metrics
 from mlops_tracker import mlops_tracker
+import sonographer_db
 
 # Import Task-1 and Task-2 modules
 try:
@@ -117,8 +118,12 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", f"dev-secret-{uuid.uuid4()}")
 app.config['SESSION_TYPE'] = 'filesystem'
 CORS(app, supports_credentials=True)
 
+# Initialise sonographer DB tables (idempotent)
+sonographer_db.init_db()
+
 # Global state
 qdrant_client: QdrantClient | None = None
+_qdrant_init_attempted: bool = False  # prevent repeated retries on lock failure
 response_cache = {}   # Simple in-memory cache
 ACTIVE_RUNS = {}      # Track active runs: {session_id}:{task_name} -> run_id
 
@@ -167,7 +172,8 @@ def clean_numpy_for_json(obj):
 
 def load_qdrant_client() -> bool:
     """Connect to the Qdrant vector store (local file-based or remote)."""
-    global qdrant_client
+    global qdrant_client, _qdrant_init_attempted
+    _qdrant_init_attempted = True
     try:
         if QDRANT_HOST:
             qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT, api_key=QDRANT_API_KEY)
@@ -189,9 +195,9 @@ def load_qdrant_client() -> bool:
 
 @app.before_request
 def initialize():
-    """Initialize Qdrant client on first request."""
+    """Initialize Qdrant client on first request only — do not retry on lock failure."""
     global qdrant_client
-    if qdrant_client is None:
+    if qdrant_client is None and not _qdrant_init_attempted:
         load_qdrant_client()
         resource_monitor.set_index_paths(QDRANT_PATH, QDRANT_PATH)
 
@@ -223,14 +229,19 @@ def get_embedding(text):
 
 def retrieve_context(query: str, k: int = MAX_RETRIEVAL_RESULTS) -> list[str]:
     """Retrieve top-k relevant text chunks from Qdrant via semantic search."""
+    global qdrant_client
+
+    # Ensure client is initialized
     if qdrant_client is None:
-        logger.warning("Qdrant client not initialised")
-        return []
+        if not load_qdrant_client():
+            logger.warning("Qdrant client initialization failed")
+            return []
 
     try:
         start_time = time.time()
         query_embedding = get_embedding(query).tolist()
 
+        # Use the correct search method for qdrant-client
         results = qdrant_client.search(
             collection_name=QDRANT_COLLECTION,
             query_vector=query_embedding,
@@ -242,13 +253,24 @@ def retrieve_context(query: str, k: int = MAX_RETRIEVAL_RESULTS) -> list[str]:
         logger.info(f"Qdrant retrieval took {elapsed:.3f}s for {k} results")
 
         return [hit.payload.get("text", "") for hit in results]
+    except AttributeError as e:
+        # Client might be corrupted, reinitialize
+        logger.warning(f"Qdrant client error (reinitializing): {e}")
+        qdrant_client = None
+        load_qdrant_client()
+        return []
     except Exception as e:
         logger.error(f"Qdrant retrieval error: {e}")
         return []
 
 
-def call_llm(prompt, stream=False, temperature=0.3, max_tokens=1024):
-    """Call Groq LLM (llama-3.3-70b-versatile) — replaces local Ollama inference."""
+def call_llm(prompt, stream=False, temperature=0.3, max_tokens=1024, return_usage=False):
+    """Call Groq LLM (llama-3.3-70b-versatile) — replaces local Ollama inference.
+
+    Args:
+        return_usage: When True returns (text, usage_dict) instead of just text.
+                      usage_dict keys: prompt_tokens, completion_tokens, total_tokens.
+    """
     try:
         start_time = time.time()
         resp = _groq_client.chat.completions.create(
@@ -260,9 +282,19 @@ def call_llm(prompt, stream=False, temperature=0.3, max_tokens=1024):
         elapsed = time.time() - start_time
         text = resp.choices[0].message.content or ""
         logger.info(f"Groq inference took {elapsed:.3f}s ({len(text)} chars)")
+        if return_usage:
+            u = resp.usage
+            usage = {
+                'prompt_tokens':     getattr(u, 'prompt_tokens',     0) if u else 0,
+                'completion_tokens': getattr(u, 'completion_tokens', 0) if u else 0,
+                'total_tokens':      getattr(u, 'total_tokens',      0) if u else 0,
+            }
+            return text, usage
         return text
     except Exception as e:
         logger.error(f"Groq LLM error: {e}")
+        if return_usage:
+            return f"Error: {str(e)}", {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0}
         return f"Error: {str(e)}"
 
 
@@ -441,33 +473,70 @@ def analyze_clinical_case():
 
         loc_hint = "SFJ" if pos_y <= 0.098 else ("Hunterian" if pos_y <= 0.353 else ("Knee" if pos_y <= 0.60 else "Calf/ankle"))
         elim_line = f'eliminationTest="{elim}"' if elim else ""
+        is_rp = flow == 'RP'
+
+        # Vein-path → shunt type decision guide injected for RP clips
+        rp_decision_guide = ""
+        if is_rp:
+            rp_decision_guide = f"""
+=== RP CLIP — MANDATORY CLASSIFICATION RULES ===
+This is flow=RP (retrograde / reflux). A haemodynamic shunt IS present.
+You MUST return one of: Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2
+"No shunt detected" and "Insufficient data" are FORBIDDEN for RP clips.
+
+TYPE 2 SUBTYPE GUIDE (critical — LLM must distinguish these):
+  TYPE 2A: SFJ is COMPETENT (no EP N1→N2). Entry is EP N2→N3 (GSV into tributary).
+           RP at N3 only (N3→N2 or N3→N1). NO RP N2→N1.
+           This clip ({from_type}→{to_type}): {'matches 2A if N3 is involved and N2→N1 absent' if 'N3' in from_type or 'N3' in to_type else 'check for N2→N1 involvement'}
+
+  TYPE 2B: SFJ is COMPETENT (no EP N1→N2). Entry via CALF PERFORATOR or SPJ (EP N2→N2).
+           RP at N3 only. NO RP N2→N1. Step is usually SPJ/SPJ-Ankle/Knee-Ankle.
+           {'Matches 2B pattern (SPJ/calf step)' if step in ('SPJ','SPJ-Ankle','Knee-Ankle') else 'Check if entry was via perforator'}
+
+  TYPE 2C: SFJ is COMPETENT. BOTH RP N3 AND RP N2→N1 are present (secondary GSV reflux).
+           {'This clip is N2→N1 RP — if the stream also has N3 RP and NO EP N1→N2, this is 2C' if from_type=='N2' and to_type=='N1' else 'Check for co-existing N2→N1 reflux'}
+
+Quick decision table for this clip ({from_type}→{to_type} at {step}):
+  N2→N1  at SFJ/SFJ-Knee        → Type 1 (if EP N1→N2 exists) OR Type 2C (if no EP N1→N2)
+  N3→N2  at Knee/SFJ-Knee       → Type 2A (no SFJ entry) OR Type 3 (if EP N1→N2 also exists)
+  N3→N1  at SPJ/SPJ-Ankle       → Type 2B (no SFJ entry, calf perforator)
+  N3→N1  at SFJ-Knee/Knee       → Type 2A or 2C depending on N2→N1 presence
+  N2→N1  at Knee-Ankle          → Type 2C or Type 1 extension
+  eliminationTest=Reflux         → Type 1+2 or Type 3 (shunt persists under compression)
+  eliminationTest=No Reflux      → Type 3 (distal re-entry eliminated)
+
+Use the RAG context and CHIVA rules to choose the MOST LIKELY type for this single clip.
+If equally plausible, prefer the simpler type (Type 1 before Type 1+2, Type 2A before Type 2C).
+"""
 
         llm_prompt = f"""{CHIVA_RULES}
-{rag_section}
+{rag_section}{rp_decision_guide}
 === SINGLE CLIP — {leg_side.upper()} LEG ===
 flow={flow}  {from_type}→{to_type}  posYRatio={pos_y:.3f} ({loc_hint})
 step={step}  confidence={conf:.2f}  reflux_duration={rdur}s  {elim_line}
 description="{desc}"
 
-You are a vascular surgeon. Using the CHIVA classification rules above, analyse this single clip.
+You are a vascular surgeon. Using the CHIVA rules above, classify this clip.
+{"⚠ This is an RP (reflux) clip — you MUST name the shunt type. Hedging is not allowed." if is_rp else "If this EP clip provides insufficient context on its own, state 'No shunt detected'."}
 Respond in EXACTLY this format — no other text, no preamble:
 
-Shunt Type Assessment Results: [Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected / Insufficient data — single clip]
+Shunt Type Assessment Results: [{"Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2" if is_rp else "Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected"}]
 
-Reasoning: [one concise clinical sentence explaining what this clip indicates about the venous network]
+Reasoning: [one concise clinical sentence — name the specific vein path and why it indicates this shunt type]
 
 Proposed Litigation Treatment Plan: [specific ligation step 1]
 [specific ligation step 2]
 [specific ligation step 3]"""
 
-        response_text = call_llm(llm_prompt, temperature=0.2, max_tokens=400)
+        response_text, token_usage = call_llm(llm_prompt, temperature=0.1, max_tokens=400, return_usage=True)
         llm_latency = (time.time() - llm_start) * 1000
         metrics_collector.record_task_latency('task1_classification', llm_latency / 1000)
-        
-        # Parse LLM response
+
+        # Parse LLM response and inject token counts
         result = parse_clinical_response(response_text)
+        result['token_usage'] = token_usage
         output_size_bytes = len(json.dumps(result).encode())
-        
+
         # Cache and return
         cache_set(cache_key, result)
         logger.info("✓ Clinical reasoning analysis complete")
@@ -830,6 +899,7 @@ def stream_data_analysis():
                 flow_s      = ultrasound_data.get('flow', 'EP')
                 from_type_s = ultrasound_data.get('fromType', 'N1')
                 to_type_s   = ultrasound_data.get('toType', 'N1')
+                pos_x_s     = ultrasound_data.get('posXRatio', 0.5)
                 pos_y_s     = ultrasound_data.get('posYRatio', 0.0)
                 step_s      = ultrasound_data.get('step', 'Unknown')
                 leg_side_s  = ultrasound_data.get('legSide', 'unknown')
@@ -839,31 +909,83 @@ def stream_data_analysis():
                 elim_s      = (ultrasound_data.get('eliminationTest') or '').strip()
                 input_size_bytes = len(json.dumps(ultrasound_data).encode())
 
+                # Derive precise anatomical landmark from leg side + posX + posY
+                # Coordinate system: (0,0)=top-left, (1,1)=bottom-right
+                # Right leg occupies left side of image; Left leg occupies right side of image
+                # Right leg zones — SFJ-Knee: X 0.0931-0.475, Y 0-0.5497
+                #                   Knee-Ankle: X 0.105-0.2947, Y 0.5497-1
+                #                   SPJ-Ankle:  X 0.2827-0.4386, Y 0.5497-1
+                # Left leg zones  — SFJ-Knee: X 0.4985-0.909, Y 0-0.5497
+                #                   Knee-Ankle: X 0.7081-0.91, Y 0.5497-1
+                #                   SPJ-Ankle:  X 0.588-0.714, Y 0.5497-1
+                def get_anatomical_location(leg, px, py, step):
+                    in_upper = py <= 0.5497
+                    in_lower = py > 0.5497
+                    if leg == 'right':
+                        if in_upper:
+                            if py <= 0.098:
+                                sub = "SFJ (groin level — saphenofemoral junction)"
+                            elif py <= 0.353:
+                                sub = "upper-to-mid thigh (Hunterian canal region)"
+                            else:
+                                sub = "lower thigh approaching knee"
+                            return f"RIGHT leg SFJ-Knee zone — {sub}; probe at X={px:.3f} (medial side)"
+                        else:
+                            if 0.2827 <= px <= 0.4386:
+                                return f"RIGHT leg SPJ-Ankle zone — posterior calf / popliteal region; probe at X={px:.3f}"
+                            else:
+                                if py >= 0.85:
+                                    return f"RIGHT leg Knee-Ankle zone — distal calf near ankle; probe at X={px:.3f}"
+                                return f"RIGHT leg Knee-Ankle zone — mid-calf (Cockett/Boyd perforator region); probe at X={px:.3f}"
+                    else:  # left
+                        if in_upper:
+                            if py <= 0.098:
+                                sub = "SFJ (groin level — saphenofemoral junction)"
+                            elif py <= 0.353:
+                                sub = "upper-to-mid thigh (Hunterian canal region)"
+                            else:
+                                sub = "lower thigh approaching knee"
+                            return f"LEFT leg SFJ-Knee zone — {sub}; probe at X={px:.3f} (lateral side)"
+                        else:
+                            if 0.588 <= px <= 0.714:
+                                return f"LEFT leg SPJ-Ankle zone — posterior calf / popliteal region; probe at X={px:.3f}"
+                            else:
+                                if py >= 0.85:
+                                    return f"LEFT leg Knee-Ankle zone — distal calf near ankle; probe at X={px:.3f}"
+                                return f"LEFT leg Knee-Ankle zone — mid-calf (Cockett/Boyd perforator region); probe at X={px:.3f}"
+
+                s_loc = get_anatomical_location(leg_side_s, pos_x_s, pos_y_s, step_s)
+
                 # RAG retrieval — 3 chunks, Groq 70B handles full context
                 s_rag_start = time.time()
-                s_query = f"CHIVA venous shunt {flow_s} {from_type_s}→{to_type_s} posYRatio={pos_y_s} step={step_s} ligation treatment"
+                s_query = f"CHIVA venous shunt {flow_s} {from_type_s}→{to_type_s} {s_loc} step={step_s} ligation treatment"
                 s_chunks = retrieve_context(s_query, k=3)
                 s_rag_latency_ms = (time.time() - s_rag_start) * 1000
                 s_rag = "\n---\n".join(str(ch)[:600] for ch in s_chunks) if s_chunks else ""
                 s_rag_section = f"\n=== MEDICAL KNOWLEDGE BASE (RAG) ===\n{s_rag}\n" if s_rag else ""
 
                 task1_start = time.time()
-                s_loc = "SFJ" if pos_y_s <= 0.098 else ("Hunterian" if pos_y_s <= 0.353 else ("Knee" if pos_y_s <= 0.60 else "Calf/ankle"))
                 s_elim_line = f'eliminationTest="{elim_s}"' if elim_s else ""
 
                 llm_prompt = f"""{CHIVA_RULES}
 {s_rag_section}
 === SINGLE CLIP — {leg_side_s.upper()} LEG ===
-flow={flow_s}  {from_type_s}→{to_type_s}  posYRatio={pos_y_s:.3f} ({s_loc})
+flow={flow_s}  {from_type_s}→{to_type_s}
+posXRatio={pos_x_s:.3f}  posYRatio={pos_y_s:.3f}
+anatomical_location={s_loc}
 step={step_s}  confidence={conf_s:.2f}  reflux_duration={rdur_s}s  {s_elim_line}
 description="{desc_s}"
+
+COORDINATE REFERENCE: posXRatio and posYRatio are normalised image coordinates (0,0)=top-left,
+(1,1)=bottom-right. Right leg occupies X 0.09–0.48 (left side of image); Left leg occupies
+X 0.50–0.91 (right side). Y ≤ 0.55 = SFJ-to-knee zone; Y > 0.55 = knee-to-ankle/SPJ zone.
 
 You are a vascular surgeon. Using the CHIVA classification rules above, analyse this single clip.
 Respond in EXACTLY this format — no other text, no preamble:
 
 Shunt Type Assessment Results: [Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected / Insufficient data — single clip]
 
-Reasoning: [one concise clinical sentence explaining what this clip indicates about the venous network]
+Reasoning: [one concise clinical sentence explaining what this clip indicates about the venous network, referencing the anatomical location]
 
 Proposed Litigation Treatment Plan: [specific ligation step 1]
 [specific ligation step 2]
@@ -1034,7 +1156,11 @@ def get_probe_guidance():
     try:
         data = request.json
         ultrasound_data = data.get('ultrasound_data', {})
-        
+        sonographer_id = data.get('sonographer_id') or ultrasound_data.get('sonographer_id')
+
+        # Personalised context for this sonographer (empty string if not provided)
+        sono_context = sonographer_db.build_sonographer_context(sonographer_id) if sonographer_id else ""
+
         # Extract clinical parameters
         flow_type = ultrasound_data.get('flow', 'EP')  # EP=normal, RP=reflux
         step = ultrasound_data.get('step', 'Unknown')
@@ -1044,6 +1170,46 @@ def get_probe_guidance():
         to_type = ultrasound_data.get('toType', 'N1')
         leg_side = ultrasound_data.get('legSide', 'left')
         description = ultrasound_data.get('description', '')
+        pos_x = ultrasound_data.get('posXRatio', 0.5)
+        pos_y = ultrasound_data.get('posYRatio', 0.5)
+
+        # Derive anatomical zone from leg_side + posX/posY
+        # Coordinate system: (0,0)=top-left, (1,1)=bottom-right
+        # Right leg: SFJ-Knee X 0.0931-0.475 Y 0-0.5497 | Knee-Ankle X 0.105-0.2947 Y 0.5497-1 | SPJ-Ankle X 0.2827-0.4386 Y 0.5497-1
+        # Left leg:  SFJ-Knee X 0.4985-0.909 Y 0-0.5497 | Knee-Ankle X 0.7081-0.91 Y 0.5497-1  | SPJ-Ankle X 0.588-0.714 Y 0.5497-1
+        def _probe_zone(leg, px, py):
+            if leg == 'right':
+                if py <= 0.5497:
+                    if py <= 0.098:
+                        return "SFJ (groin) — saphenofemoral junction level"
+                    elif py <= 0.353:
+                        return "upper-to-mid right thigh (Hunterian canal region), GSV medial course"
+                    else:
+                        return "lower right thigh approaching popliteal fossa"
+                else:
+                    if 0.2827 <= px <= 0.4386:
+                        return "right popliteal fossa / SPJ region — posterior approach"
+                    elif py >= 0.85:
+                        return "right distal calf near ankle (distal Cockett perforator zone)"
+                    else:
+                        return "right mid-calf (Boyd/Cockett perforator zone)"
+            else:  # left
+                if py <= 0.5497:
+                    if py <= 0.098:
+                        return "SFJ (groin) — saphenofemoral junction level"
+                    elif py <= 0.353:
+                        return "upper-to-mid left thigh (Hunterian canal region), GSV medial course"
+                    else:
+                        return "lower left thigh approaching popliteal fossa"
+                else:
+                    if 0.588 <= px <= 0.714:
+                        return "left popliteal fossa / SPJ region — posterior approach"
+                    elif py >= 0.85:
+                        return "left distal calf near ankle (distal Cockett perforator zone)"
+                    else:
+                        return "left mid-calf (Boyd/Cockett perforator zone)"
+
+        probe_zone_desc = _probe_zone(leg_side, pos_x, pos_y)
         
         # Get or create run - reuse if stream is active, else create new
         run_id, request_number, is_new_run = get_or_create_run(
@@ -1089,7 +1255,7 @@ def get_probe_guidance():
         
         # Retrieve context from RAG (Qdrant)
         rag_start = time.time()
-        query_text = f"Ultrasound probe guidance for {flow_type} at {step} location with {from_type} to {to_type} network. Duration: {reflux_duration}s. Confidence: {confidence}"
+        query_text = f"Ultrasound probe guidance for {flow_type} at {step} location with {from_type} to {to_type} network. {probe_zone_desc}. Duration: {reflux_duration}s. Confidence: {confidence}"
         context_chunks = retrieve_context(query_text)
         faiss_latency = (time.time() - rag_start) * 1000  # kept name for metrics compat
         metrics_collector.record_task_latency('qdrant_query', faiss_latency / 1000)
@@ -1097,6 +1263,15 @@ def get_probe_guidance():
         medical_context = "\n\n".join(context_chunks) if context_chunks else "Standard ultrasound scanning protocol"
         
         # Construct clinical reasoning prompt for probe guidance
+        # Coordinate reference for LLM:
+        # Right leg: SFJ-Knee X 0.0931-0.475, Y 0-0.5497 | Knee-Ankle X 0.105-0.2947, Y 0.5497-1 | SPJ-Ankle X 0.2827-0.4386, Y 0.5497-1
+        # Left leg:  SFJ-Knee X 0.4985-0.909, Y 0-0.5497 | Knee-Ankle X 0.7081-0.91, Y 0.5497-1  | SPJ-Ankle X 0.588-0.714, Y 0.5497-1
+        pos_context = (
+            f"posXRatio={pos_x:.3f}, posYRatio={pos_y:.3f} → {probe_zone_desc}\n"
+            f"(Coordinate system: (0,0)=top-left, (1,1)=bottom-right; "
+            f"Right leg X 0.09–0.48 / Left leg X 0.50–0.91; Y≤0.55=SFJ-Knee zone, Y>0.55=Knee-Ankle/SPJ zone)"
+        )
+
         if flow_type == 'RP':
             # REFLUX DETECTED - Guide toward the source of reflux
             if step == "SFJ-Knee":
@@ -1105,22 +1280,25 @@ def get_probe_guidance():
                 probe_location = "medial calf for Hunt-Cockett perforator zone (5-20cm above ankle)"
             else:  # SPJ-Ankle
                 probe_location = "saphenopopliteal junction (SPJ) behind knee in popliteal fossa"
-            
-            llm_prompt = f"""ULTRASOUND GUIDANCE (Training)
+
+            llm_prompt = f"""ULTRASOUND GUIDANCE
 REFLUX at {step} ({leg_side} leg, {from_type}→{to_type})
+Probe position: {pos_context}
 
 === MEDICAL KNOWLEDGE BASE (retrieved via RAG) ===
 {medical_context}
-
+{f"{chr(10)}{sono_context}" if sono_context else ""}
 EXAMPLES of CORRECT 1-line guidance:
 - "Move probe medially to locate SFJ junction"
 - "Scan calf tributaries along medial surface"
 - "Position behind knee for popliteal depth assessment"
 
-TASK: Generate ONE line. Action verb + anatomical target.
-Location: {probe_location}
+TASK: Generate ONE personalised line. Action verb + anatomical target + clinical reasoning.
+⚠ IMPORTANT: Do NOT include raw coordinates (X=..., Y=...) in your guidance. Use the anatomical zone information above to give anatomically descriptive instructions instead.
+{f"IMPORTANT: Adapt guidance to this sonographer's experience level and known scanning style. Reference how they typically approach similar findings." if sono_context else ""}
+Confirmed location: {probe_location}
 
-<guidance_instruction>Write one clear instruction</guidance_instruction>"""
+<guidance_instruction>Write one clear instruction without coordinates</guidance_instruction>"""
         else:
             # NORMAL FLOW - Verify competence and continue assessment
             if step == "SFJ-Knee":
@@ -1130,25 +1308,28 @@ Location: {probe_location}
             else:  # SPJ-Ankle
                 next_region = "complete popliteal vein and ankle perforators"
 
-            llm_prompt = f"""ULTRASOUND GUIDANCE (Training)
+            llm_prompt = f"""ULTRASOUND GUIDANCE
 NORMAL at {step} ({leg_side} leg, {from_type}→{to_type})
+Probe position: {pos_context}
 
 === MEDICAL KNOWLEDGE BASE (retrieved via RAG) ===
 {medical_context}
-
+{f"{chr(10)}{sono_context}" if sono_context else ""}
 EXAMPLES of CORRECT 1-line guidance:
 - "Continue scanning GSV distally to knee"
 - "Assess next tributary junction below current location"
 - "Move to ankle perforators for complete assessment"
 
-TASK: Generate ONE line for next scan region.
+TASK: Generate ONE personalised line for next scan region.
+⚠ IMPORTANT: Do NOT include raw coordinates (X=..., Y=...) in your guidance. Use the anatomical zone information above to give anatomically descriptive instructions instead.
+{f"IMPORTANT: Adapt guidance to this sonographer's experience level and known scanning style. Reference how they typically approach similar assessments." if sono_context else ""}
 Next region: {next_region}
 
-<guidance_instruction>Write one clear instruction</guidance_instruction>"""
+<guidance_instruction>Write one clear instruction without coordinates</guidance_instruction>"""
 
         # Groq LLM — precise probe guidance
         llm_start = time.time()
-        llm_response_raw = call_llm(llm_prompt, temperature=0.2, max_tokens=80)
+        llm_response_raw = call_llm(llm_prompt, temperature=0.2, max_tokens=200)
         llm_latency_ms = (time.time() - llm_start) * 1000
 
         import re
@@ -1176,11 +1357,7 @@ Next region: {next_region}
             return text.strip()
         
         guidance_instruction = clean_instruction(guidance_instruction)
-        
-        # Strictly limit to max 2 lines
-        if len(guidance_instruction) > 120:
-            guidance_instruction = guidance_instruction[:117] + "..."
-        
+
         result = {
             "flow_type": flow_type,
             "anatomical_location": step,
@@ -2841,6 +3018,186 @@ def build_frontend():
         return False
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# SONOGRAPHER PROFILE & SESSION HISTORY ENDPOINTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route('/api/sonographers', methods=['GET'])
+def list_sonographers():
+    """Return all sonographer profiles with session counts."""
+    try:
+        return jsonify(sonographer_db.get_all_sonographers())
+    except Exception as e:
+        logger.error(f"Error listing sonographers: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/sonographers/<sono_id>', methods=['GET'])
+def get_sonographer(sono_id):
+    """Return a single sonographer profile."""
+    profile = sonographer_db.get_sonographer(sono_id)
+    if not profile:
+        return jsonify({"error": "Sonographer not found"}), 404
+    return jsonify(profile)
+
+
+@app.route('/api/sonographers/<sono_id>/sessions', methods=['GET'])
+def get_sonographer_sessions(sono_id):
+    """Return past sessions for a sonographer."""
+    try:
+        limit = int(request.args.get('limit', 10))
+        sessions = sonographer_db.get_sessions(sono_id, limit=limit)
+        return jsonify(sessions)
+    except Exception as e:
+        logger.error(f"Error fetching sessions for {sono_id}: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/sonographers/<sono_id>/sessions', methods=['POST'])
+def save_sonographer_session(sono_id):
+    """Save a completed probe guidance session for a sonographer."""
+    try:
+        body = request.json or {}
+        mode = body.get('mode', 'stream')
+        guidance_history = body.get('guidance_history', [])
+        session_summary = body.get('session_summary', '')
+        session_id = sonographer_db.save_session(sono_id, mode, guidance_history, session_summary)
+        return jsonify({"session_id": session_id, "saved": True})
+    except Exception as e:
+        logger.error(f"Error saving session for {sono_id}: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# =====================
+# TASK-3: VEIN DETECTION
+# =====================
+@app.route('/api/vein-detection/analyze-frame', methods=['POST'])
+def analyze_frame_vein_detection():
+    """Analyze single ultrasound frame with Vision Transformer + Echo VLM"""
+    try:
+        from vein_detection_service import get_vein_detection_service
+
+        service = get_vein_detection_service(retrieve_context_fn=retrieve_context)
+
+        # Get image from request
+        if 'file' not in request.files:
+            return jsonify({'error': 'No image file provided'}), 400
+
+        file = request.files['file']
+
+        # Read image
+        file_data = file.read()
+        nparr = np.frombuffer(file_data, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        if image is None:
+            return jsonify({'error': 'Failed to decode image'}), 400
+
+        # Get options
+        enable_vlm = request.form.get('enable_vlm', 'true').lower() == 'true'
+        return_visualizations = request.form.get('return_visualizations', 'true').lower() == 'true'
+
+        # Analyze
+        result = service.analyze_image_frame(
+            image,
+            enable_vlm=enable_vlm,
+            return_visualizations=return_visualizations
+        )
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        logger.error(f"Error in analyze_frame_vein_detection: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/vein-detection/analyze-video', methods=['POST'])
+def analyze_video_vein_detection():
+    """Analyze ultrasound video with Vision Transformer + Echo VLM"""
+    try:
+        from vein_detection_service import get_vein_detection_service
+
+        service = get_vein_detection_service(retrieve_context_fn=retrieve_context)
+
+        # Get video from request
+        if 'file' not in request.files:
+            return jsonify({'error': 'No video file provided'}), 400
+
+        file = request.files['file']
+
+        # Save to temp file
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp:
+            file.save(tmp.name)
+            temp_path = tmp.name
+
+        try:
+            # Get options
+            max_frames = request.form.get('max_frames', type=int)
+            skip_frames = request.form.get('skip_frames', 0, type=int)
+            save_output = request.form.get('save_output', 'true').lower() == 'true'
+
+            # Analyze
+            result = service.analyze_video_file(
+                temp_path,
+                max_frames=max_frames,
+                skip_frames=skip_frames,
+                save_output=save_output
+            )
+
+            return jsonify(result), 200
+
+        finally:
+            # Clean up temp file
+            import os
+            try:
+                os.remove(temp_path)
+            except:
+                pass
+
+    except Exception as e:
+        logger.error(f"Error in analyze_video_vein_detection: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/vein-detection/model-info', methods=['GET'])
+def vein_detection_model_info():
+    """Get vein detection model information"""
+    try:
+        from vein_detection_service import get_vein_detection_service
+
+        service = get_vein_detection_service(retrieve_context_fn=retrieve_context)
+        info = service.get_model_info()
+
+        return jsonify(info), 200
+
+    except Exception as e:
+        logger.error(f"Error in vein_detection_model_info: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/vein-detection/health', methods=['GET'])
+def vein_detection_health():
+    """Check vein detection service health"""
+    try:
+        from vein_detection_service import get_vein_detection_service
+
+        service = get_vein_detection_service(retrieve_context_fn=retrieve_context)
+        info = service.get_model_info()
+
+        return jsonify({
+            'status': 'healthy',
+            'service': 'vein_detection',
+            'model': 'CustomUltrasoundViT + Echo VLM',
+            'device': service.device,
+            'capabilities': info['capabilities']
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error in vein_detection_health: {e}")
+        return jsonify({'status': 'unhealthy', 'error': str(e)}), 503
+
+
 if __name__ == '__main__':
     logger.info("=" * 70)
     logger.info("Clinical Medical Decision Support | Full Stack Application")
@@ -2880,4 +3237,4 @@ if __name__ == '__main__':
     logger.info("Open http://localhost:5002 in your browser")
     logger.info("")
     
-    app.run(debug=True, host='0.0.0.0', port=5002, threaded=True)
+    app.run(debug=True, host='0.0.0.0', port=5002, threaded=True, use_reloader=False)
