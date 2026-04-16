@@ -2964,9 +2964,9 @@ def shunt_classify_report():
     if not clip_list:
         return jsonify({"error": "clip_list is required"}), 400
 
-    def call_llm_shunt(prompt, stream=False):
+    def call_llm_shunt(prompt, stream=False, return_usage=True):
         """LLM call for full JSON shunt classification via Groq."""
-        return call_llm(prompt, temperature=0.2, max_tokens=1024, return_usage=True)
+        return call_llm(prompt, temperature=0.2, max_tokens=1024, return_usage=return_usage)
 
     try:
         # LLM+RAG classification — pass retrieve_context so each leg gets relevant chunks
