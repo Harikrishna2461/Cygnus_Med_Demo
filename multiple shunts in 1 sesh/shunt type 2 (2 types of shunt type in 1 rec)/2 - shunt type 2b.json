@@ -1,0 +1,44 @@
+{
+  "clips": [
+    {
+      "algoSnapshot": null,
+      "clipPath": "SFJ-Knee_00_EP_N2-N2.mp4",
+      "ep_ligation_rect2": true,
+      "flow": "EP",
+      "fps": 30.0,
+      "fromType": "N2",
+      "fullPath": "C:/Users/Admin/AppData/Local/cygmed/vcube/st2/data_collection/SFJ-Knee_00_EP_N2-N2.mp4",
+      "legSide": "right",
+      "notes": "",
+      "posXRatio": 0.23,
+      "posYRatio": 0.05,
+      "processingProgress": 100,
+      "sequenceNumber": 0,
+      "step": "SFJ-Knee",
+      "toType": "N2"
+    },
+    {
+      "algoSnapshot": null,
+      "clipPath": "SFJ-Knee_01_RP_N3-N1.mp4",
+      "flow": "RP",
+      "fps": 30.0,
+      "fromType": "N3",
+      "fullPath": "C:/Users/Admin/AppData/Local/cygmed/vcube/st2/data_collection/SFJ-Knee_01_RP_N3-N1.mp4",
+      "legSide": "right",
+      "notes": "",
+      "posXRatio": 0.173,
+      "posYRatio": 0.132,
+      "processingProgress": 100,
+      "sequenceNumber": 1,
+      "step": "SFJ-Knee",
+      "toType": "N1"
+    }
+  ],
+  "ligation": {
+    "calibre": "",
+    "diameterChoice": "",
+    "distanceToPerf": "",
+    "hasDrainage": "",
+    "reflux": ""
+  }
+}

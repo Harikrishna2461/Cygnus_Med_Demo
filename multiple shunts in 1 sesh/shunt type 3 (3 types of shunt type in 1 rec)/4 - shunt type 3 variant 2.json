@@ -1,0 +1,76 @@
+{
+  "clips": [
+    {
+      "algoSnapshot": null,
+      "clipPath": "SFJ-Knee_00_EP_N1-N2.mp4",
+      "flow": "EP",
+      "fps": 30.0,
+      "fromType": "N1",
+      "fullPath": "C:/Users/Admin/AppData/Local/cygmed/vcube/st3/data_collection/SFJ-Knee_00_EP_N1-N2.mp4",
+      "legSide": "right",
+      "notes": "",
+      "posXRatio": 0.275,
+      "posYRatio": 0.05,
+      "processingProgress": 100,
+      "sequenceNumber": 0,
+      "step": "SFJ-Knee",
+      "toType": "N2"
+    },
+    {
+      "algoSnapshot": null,
+      "clipPath": "SFJ-Knee_01_EP_N2-N3.mp4",
+      "ep_ligation_rect2": true,
+      "flow": "EP",
+      "fps": 30.0,
+      "fromType": "N2",
+      "fullPath": "C:/Users/Admin/AppData/Local/cygmed/vcube/st3/data_collection/SFJ-Knee_01_EP_N2-N3.mp4",
+      "legSide": "right",
+      "notes": "",
+      "posXRatio": 0.219,
+      "posYRatio": 0.132,
+      "processingProgress": 100,
+      "sequenceNumber": 1,
+      "step": "SFJ-Knee",
+      "toType": "N3"
+    },
+    {
+      "algoSnapshot": null,
+      "clipPath": "SFJ-Knee_02_RP_N3-N1.mp4",
+      "flow": "RP",
+      "fps": 30.0,
+      "fromType": "N3",
+      "fullPath": "C:/Users/Admin/AppData/Local/cygmed/vcube/st3/data_collection/SFJ-Knee_02_RP_N3-N1.mp4",
+      "legSide": "right",
+      "notes": "",
+      "posXRatio": 0.164,
+      "posYRatio": 0.212,
+      "processingProgress": 100,
+      "sequenceNumber": 2,
+      "step": "SFJ-Knee",
+      "toType": "N1"
+    },
+    {
+      "algoSnapshot": null,
+      "clipPath": "SFJ-Knee_03_RP_N2-N1.mp4",
+      "flow": "RP",
+      "fps": 30.0,
+      "fromType": "N2",
+      "fullPath": "C:/Users/Admin/AppData/Local/cygmed/vcube/st3/data_collection/SFJ-Knee_03_RP_N2-N1.mp4",
+      "legSide": "right",
+      "notes": "",
+      "posXRatio": 0.204,
+      "posYRatio": 0.289,
+      "processingProgress": 100,
+      "sequenceNumber": 3,
+      "step": "SFJ-Knee",
+      "toType": "N1"
+    }
+  ],
+  "ligation": {
+    "calibre": "",
+    "diameterChoice": "",
+    "distanceToPerf": "",
+    "hasDrainage": "",
+    "reflux": ""
+  }
+}

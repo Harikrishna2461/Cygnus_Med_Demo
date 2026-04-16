@@ -60,10 +60,10 @@ const VisionAnalyzer = () => {
     try {
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('enable_llm', enableLLM.toString());
+      formData.append('enable_vlm', enableLLM.toString());
       formData.append('return_visualizations', 'true');
 
-      const response = await fetch('http://localhost:5002/api/vision/analyze-frame', {
+      const response = await fetch('/api/vein-detection/analyze-frame', {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -98,8 +98,9 @@ const VisionAnalyzer = () => {
       formData.append('file', videoFile);
       formData.append('max_frames', maxFrames.toString());
       formData.append('skip_frames', skipFrames.toString());
+      formData.append('save_output', 'true');
 
-      const response = await fetch('http://localhost:5002/api/vision/analyze-video-blobs', {
+      const response = await fetch('/api/vein-detection/analyze-video', {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -173,7 +174,7 @@ const VisionAnalyzer = () => {
                 setResults(null);
               }}
             >
-              🎬 Video Blob Detection
+              🎬 Video Analysis (N1/N2/N3)
             </button>
           </div>
         </div>
@@ -223,10 +224,10 @@ const VisionAnalyzer = () => {
                   checked={enableLLM}
                   onChange={(e) => setEnableLLM(e.target.checked)}
                 />
-                <span>Enable AI Analysis (GPT-4 Vision)</span>
+                <span>Enable Echo VLM Verification</span>
               </label>
               <p className="option-description">
-                Uses advanced Vision LLM for GSV identification and ambiguous cases
+                Uses Echo VLM (ultrasound-specialized) for vein classification verification and N1/N2/N3 reasoning
               </p>
             </div>
 
@@ -347,21 +348,21 @@ const VisionAnalyzer = () => {
                 </div>
                 <div className="stat">
                   <div className="stat-number">
-                    {results.veins?.filter(v => v.primary_classification === 'deep_vein').length || 0}
+                    {results.veins?.filter(v => v.n_level === 'N1').length || 0}
                   </div>
-                  <div className="stat-label">Deep Veins</div>
+                  <div className="stat-label">N1 (Deep)</div>
                 </div>
                 <div className="stat">
                   <div className="stat-number">
-                    {results.veins?.filter(v => v.primary_classification === 'superficial_vein').length || 0}
+                    {results.veins?.filter(v => v.n_level === 'N2').length || 0}
                   </div>
-                  <div className="stat-label">Superficial</div>
+                  <div className="stat-label">N2 (At Fascia)</div>
                 </div>
                 <div className="stat">
                   <div className="stat-number">
-                    {results.veins?.filter(v => v.primary_classification === 'perforator_vein').length || 0}
+                    {results.veins?.filter(v => v.n_level === 'N3').length || 0}
                   </div>
-                  <div className="stat-label">Perforators</div>
+                  <div className="stat-label">N3 (Superficial)</div>
                 </div>
               </div>
 

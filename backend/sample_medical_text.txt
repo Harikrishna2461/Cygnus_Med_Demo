@@ -1,190 +1,313 @@
+CHIVA VENOUS HAEMODYNAMIC CLASSIFICATION — CLINICAL REFERENCE
 
-VASCULAR MEDICINE AND HAEMODYNAMIC ASSESSMENT
+==========================================================================
+SECTION 1: VENOUS ANATOMY AND N1/N2/N3 NOTATION
+==========================================================================
 
-CHAPTER 1: VENOUS SYSTEM ANATOMY AND PHYSIOLOGY
+The CHIVA method uses a three-compartment model to describe venous reflux pathways:
 
-The venous system consists of superficial, deep and perforating veins. The superficial system includes the great saphenous vein (GSV), small saphenous vein (SSV), and their tributaries. The deep veins comprise the femoral, popliteal, tibial and peroneal veins. Perforating veins connect the superficial and deep systems.
+  N1 = Deep venous system (femoral vein, popliteal vein, deep calf veins).
+       Flow in N1 is always antegrade (toward the heart) in a healthy limb.
 
-The great saphenous vein runs from the medial ankle to the groin, joining the femoral vein at the saphenofemoral junction. The small saphenous vein ascends the posterior calf and typically joins the popliteal vein. Normal venous flow is centripetal (toward the heart) and unidirectional, maintained by bicuspid venous valves.
+  N2 = Saphenous trunks: Great Saphenous Vein (GSV) and Small Saphenous Vein (SSV).
+       The GSV runs medially from ankle to groin (saphenofemoral junction, SFJ).
+       The SSV runs posteriorly from ankle to popliteal fossa (saphenopopliteal junction, SPJ).
+       N2 carries antegrade flow in normal physiology.
 
-HAEMODYNAMIC PRINCIPLES IN VENOUS DISEASE
+  N3 = Tributary veins, collateral branches, and perforating veins branching off N2.
+       N3 vessels are downstream of N2 and drain into N1 or N2 in normal physiology.
 
-Three-compartment model: N1, N2, and N3 compartments.
-- N1: Normal veins with competent valves
-- N2: Veins with valve incompetence but no reflux below the entry point
-- N3: Veins with reflux extending into the deep system
+  EP (Entry Point): Location where deep blood (N1) enters the superficial system (N2 or N3).
+                    EP clips show ANTEGRADE (EP) flow.
 
-Entry Point (EP): The proximal location where reflux enters the incompetent superficial vein.
+  RP (Re-entry Point): Location where refluxing superficial blood re-enters the deep system.
+                       RP clips show RETROGRADE (RP / reflux) flow — always pathological.
 
-Re-entry Point (RP): Where the incompetent vein re-enters the deep system or competent superficial vein.
+SFJ (Saphenofemoral Junction): Upper thigh / groin. posYRatio ≤ 0.098 on image.
+Hunterian Perforator:          Mid-thigh. 0.099 < posYRatio ≤ 0.353.
+Knee / Popliteal region:       posYRatio 0.354 – 0.60.
+SPJ (Saphenopopliteal Junction): Posterior knee / upper calf. posYRatio ~ 0.55 – 0.72.
+Calf / Ankle:                  posYRatio > 0.60.
 
-CHAPTER 2: CLASSIFICATION OF VENOUS SHUNTS
+==========================================================================
+SECTION 2: CHIVA SHUNT CLASSIFICATION — COMPLETE TYPE DEFINITIONS
+==========================================================================
 
-TYPE 1 SHUNT (Simple Reflux)
-- Incompetent valve at the saphenofemoral junction
-- Reflux in the great saphenous vein extending into tributaries
-- No reflux in perforating veins
-- Treatment: CHIVA-type closure of tributaries or saphenofemoral ligation
+------------------------------------------------------------------
+TYPE 1 — SFJ incompetence, pure GSV reflux
+------------------------------------------------------------------
+Definition:
+  Blood enters N2 (GSV) from N1 (deep vein) at the SFJ or Hunterian perforator
+  and refluxes DOWN the GSV back into N1 at a distal point.
 
-TYPE 2 SHUNT (Reflux with Perforating Involvement)
-- Incompetence at saphenofemoral junction
-- Reflux in the GSV
-- Perforating veins in the medial thigh showing incompetence
-- Treatment: CHIVA with hemodynamic correction at perforators
+Clip pattern:
+  • EP N1→N2 at SFJ (posYRatio ≤ 0.10) or Hunterian level
+  • RP N2→N1 along the GSV trunk (medial thigh or knee level)
+  • NO EP N2→N3, NO RP at N3 tributaries
+  • SFJ is INCOMPETENT (EP N1→N2 present)
 
-TYPE 3 SHUNT (Perforating Vein Origin)
-- Incompetent perforating veins as primary entry point
-- Incompetence at the mid-thigh or knee level
-- Reflux in the saphenous vein secondary to perforator incompetence
-- Treatment: Perforator ligation at entry point
+Key distinguishing feature: Reflux stays within N2 (GSV), no tributaries involved.
 
-ULTRASOUND ASSESSMENT PARAMETERS
+Treatment: Ligate at the SFJ (groin crossectomy) if entry at SFJ.
+           Ligate at Hunterian perforator if entry at mid-thigh.
+           If multiple RP N2→N1, ligate below each RP along N2 except the most distal.
 
-1. Vein Diameter Measurement
-   - Measured in transverse section at rest
-   - GSV normal: < 3mm
-   - GSV abnormal: > 5mm
-   - Clinical significance: Progressive dilatation indicates disease progression
+------------------------------------------------------------------
+TYPE 2A — Tributary reflux via GSV entry, SFJ competent
+------------------------------------------------------------------
+Definition:
+  Blood enters the superficial system via GSV (N2), then escapes into a TRIBUTARY (N3),
+  and refluxes back out. The SFJ is COMPETENT — no EP N1→N2 at groin.
 
-2. Reflux Duration
-   - Normal: < 0.5 seconds
-   - Pathological: > 1 second
-   - Assessed with Valsalva or proximal compression
+Clip pattern:
+  • EP N2→N3: blood moves from GSV into a tributary (PRESENT)
+  • RP N3→N2 or RP N3→N1: tributary refluxes back
+  • NO EP N1→N2 at SFJ — SFJ is competent
+  • NO RP N2→N1 — GSV trunk itself does not reflux
 
-3. Flow Velocity
-   - Normal antegrade flow: 0.3-0.9 m/s
-   - Reflux velocity indicates severity
-   - Low velocity reflux (<0.2 m/s) suggests chronicity
+Key distinguishing feature: SFJ competent; EP is at N2→N3 junction; only N3 refluxes.
+This pattern is at mid-thigh or knee level along the GSV course.
 
-4. Valve Cusp Appearance
-   - Normal: Thin, echogenic, coapt completely
-   - Diseased: Thick, irregular, separated cusps
+Treatment: Ligate the HIGHEST EP at the N2→N3 junction.
+           Follow up 6–12 months; if N2 develops reflux, ligate SFJ then.
 
-HEMODYNAMIC CLASSIFICATION (Widmer)
+------------------------------------------------------------------
+TYPE 2B — Tributary reflux via calf perforator / SPJ entry, SFJ competent
+------------------------------------------------------------------
+Definition:
+  Similar to Type 2A but the entry point is a CALF PERFORATOR or SPJ (not the GSV/SFJ).
+  Blood enters N2 via a perforator or SPJ, feeds a tributary, which refluxes back.
+  The SFJ is COMPETENT.
 
-C0: No visible signs of venous disease
-C1: Telangiectasias or reticular veins
-C2: Varicose veins > 3mm
-C3: Edema without skin changes
-C4: Pigmentation or eczema
+Clip pattern:
+  • EP N2→N2 or EP N1→N2 at SPJ / calf perforator level (step = SPJ, SPJ-Ankle, Knee-Ankle)
+  • RP N3→N2 or RP N3→N1 at posterior or lateral calf
+  • NO EP N1→N2 at SFJ — SFJ is competent
+  • NO RP N2→N1 along the GSV trunk
+
+Key distinguishing feature: Entry is via SPJ or calf perforator (NOT SFJ); step is SPJ/calf.
+The SSV is often the N2 vessel involved. Posterior calf distribution.
+
+Treatment: Ligate the perforator entry point at SPJ or highest calf perforator.
+
+------------------------------------------------------------------
+TYPE 2C — Tributary reflux WITH secondary GSV reflux, SFJ competent
+------------------------------------------------------------------
+Definition:
+  Type 2A or 2B pattern (tributary reflux) PLUS secondary GSV (N2) reflux has developed.
+  Blood refluxes both in N3 (tributary) AND in N2 (GSV). SFJ remains COMPETENT.
+
+Clip pattern:
+  • EP N2→N3 or perforator entry (as in 2A or 2B)
+  • RP N3→N2 or RP N3→N1: tributary reflux (as in 2A/2B)
+  • RP N2→N1: ALSO present — secondary GSV reflux (this is the key addition vs 2A/2B)
+  • NO EP N1→N2 at SFJ — SFJ is still competent
+
+Key distinguishing feature: BOTH N3 reflux AND N2→N1 reflux present, but NO SFJ entry.
+If SFJ entry (EP N1→N2) were also present, this would be Type 1+2.
+
+Treatment: Ligate highest EP at N2→N3 AND each RP N2→N1 site along GSV.
+
+------------------------------------------------------------------
+TYPE 2A vs 2B vs 2C — QUICK DISTINCTION TABLE
+------------------------------------------------------------------
+
+  | Feature                   | Type 2A      | Type 2B          | Type 2C          |
+  |---------------------------|--------------|------------------|------------------|
+  | SFJ entry (EP N1→N2)      | ABSENT       | ABSENT           | ABSENT           |
+  | Entry type                | EP N2→N3     | EP N2→N2 (SPJ)   | EP N2→N3 or SPJ  |
+  | Entry location / step     | Mid-thigh    | SPJ / calf       | Mid-thigh / calf |
+  | RP at N3 (tributary)      | PRESENT      | PRESENT          | PRESENT          |
+  | RP N2→N1 (GSV reflux)     | ABSENT       | ABSENT           | PRESENT          |
+  | Key differentiation       | GSV-to-N3    | Perforator/SPJ   | N3 + N2 both RP  |
+
+------------------------------------------------------------------
+TYPE 3 — Tributary-to-tributary reflux with saphenous involvement, SFJ entry present
+------------------------------------------------------------------
+Definition:
+  Blood enters N2 (GSV) at SFJ AND also enters N3 (tributary). The tributary refluxes.
+  Both EP N1→N2 AND EP N2→N3 are present. The primary reflux is in N3.
+
+Clip pattern:
+  • EP N1→N2 at SFJ (SFJ entry present)
+  • EP N2→N3: GSV to tributary entry also present
+  • RP N3→N2 or RP N3→N1: tributary reflux
+  • RP N2→N1 MAY be present — if so, use elimination test to distinguish from Type 1+2
+  • eliminationTest = "No Reflux" → RP N2→N1 disappears when N3 compressed → TYPE 3
+  • eliminationTest = "Reflux"    → RP N2→N1 persists under compression → TYPE 1+2
+
+Key distinguishing feature:
+  SFJ entry present (like Type 1) AND tributary entry present (like Type 2A).
+  The N3 tributary is the primary source of symptoms.
+  Elimination test differentiates Type 3 from Type 1+2.
+
+Treatment:
+  Single RP at tributary: Ligate EP at N2→N3. Review at 6–12 months for GSV reflux.
+  Multiple RP: Ligate all refluxing tributaries at N2 junction (CHIVA 2 step 1).
+
+------------------------------------------------------------------
+TYPE 1+2 — Combined SFJ incompetence AND tributary reflux persisting on elimination test
+------------------------------------------------------------------
+Definition:
+  Both the SFJ entry (Type 1 component) and a tributary entry (Type 2 component) are present,
+  and the tributary reflux PERSISTS even when the saphenous trunk is compressed (elimination test positive).
+
+Clip pattern:
+  • EP N1→N2 at SFJ (SFJ entry present)
+  • EP N2→N3 (tributary entry present)
+  • RP N3→N2 or RP N3→N1: tributary reflux
+  • RP N2→N1: GSV reflux also present
+  • eliminationTest = "Reflux" — reflux persists → TYPE 1+2 confirmed
+
+Treatment:
+  Small N3 calibre: Ligate EP N2→N3 first (CHIVA 2), then SFJ if N2 persists.
+  Large RP N2→N1: Ligate SFJ + all refluxing tributaries simultaneously.
+
+------------------------------------------------------------------
+NO SHUNT (Normal Study)
+------------------------------------------------------------------
+All clips are EP (antegrade flow). No RP clips detected.
+No haemodynamic shunt is present. No ligation required.
+Normal venous return maintained throughout the limb.
+
+==========================================================================
+SECTION 3: ELIMINATION TEST
+==========================================================================
+
+The elimination test is performed during duplex ultrasound:
+  1. Compress the saphenous trunk (N2) manually at a proximal point.
+  2. Assess whether RP flow at the N3 tributary DISAPPEARS or PERSISTS.
+
+  eliminationTest = "No Reflux"  →  N3 reflux disappears → tributary is fed by N2 → TYPE 3
+  eliminationTest = "Reflux"     →  N3 reflux persists   → tributary has independent entry → TYPE 1+2
+
+==========================================================================
+SECTION 4: LIGATION PRINCIPLES SUMMARY
+==========================================================================
+
+Type 1:   Ligate at SFJ or Hunterian perforator (highest EP N1→N2 point).
+Type 2A:  Ligate highest EP N2→N3 junction. Follow-up for secondary N2 reflux.
+Type 2B:  Ligate SPJ or calf perforator entry. No SFJ ligation needed.
+Type 2C:  Ligate N2→N3 entry AND all RP N2→N1 sites along GSV.
+Type 3:   Ligate EP N2→N3 (CHIVA 2 step 1). SFJ if N2 reflux develops at follow-up.
+Type 1+2: Ligate SFJ + all tributary entries (combined procedure).
+
+Compression post-op:
+  Class III (40-50 mmHg): Week 1–2 after SFJ ligation
+  Class II  (23-32 mmHg): Week 3–8 post-operative
+
+==========================================================================
+SECTION 5: ULTRASOUND ASSESSMENT PARAMETERS
+==========================================================================
+
+Reflux duration:
+  Normal antegrade flow: no reflux
+  Pathological reflux: > 0.5 seconds duration
+  Significant reflux: > 1.0 second duration
+
+GSV diameter thresholds:
+  Normal: < 3 mm
+  Borderline: 3–5 mm
+  Abnormal (requires treatment): > 5 mm
+
+Probe positions for CHIVA mapping:
+  SFJ (groin): posYRatio ≤ 0.098 — identify EP N1→N2 here
+  Hunterian perforator (mid-thigh): posYRatio 0.10–0.35
+  Knee / popliteal: posYRatio 0.45–0.55
+  SPJ (posterior knee): posYRatio 0.55–0.72 — key for Type 2B
+  Mid-calf (Cockett/Boyd perforators): posYRatio 0.60–0.85
+  Ankle: posYRatio > 0.85
+
+Leg side conventions (image coordinates):
+  Right leg: LEFT side of image, posXRatio 0.09–0.48
+  Left leg:  RIGHT side of image, posXRatio 0.50–0.91
+
+==========================================================================
+SECTION 6: CLINICAL SCENARIOS AND EXAMPLES
+==========================================================================
+
+Scenario A — Type 1:
+  Clips: EP N1→N2 at SFJ (y=0.06), RP N2→N1 at Hunterian (y=0.25), RP N2→N1 at knee (y=0.47)
+  Interpretation: SFJ incompetent; GSV refluxes down to knee; pure Type 1.
+  Treatment: Crossectomy at SFJ; ligate below upper RP N2→N1.
+
+Scenario B — Type 2A:
+  Clips: EP N2→N3 at mid-thigh (y=0.20), RP N3→N2 at knee (y=0.47)
+  No EP N1→N2 at SFJ. No RP N2→N1.
+  Interpretation: SFJ competent; isolated tributary entry and reflux; Type 2A.
+  Treatment: Ligate N2→N3 at highest EP.
+
+Scenario C1 — Type 2B (calf/SPJ perforator entry):
+  Clips: EP N2→N2 at SPJ (y=0.63), RP N3→N2 at posterior calf (y=0.70)
+  No EP N1→N2 at SFJ. No RP N2→N1. SPJ-level entry.
+  Interpretation: SPJ-based perforator entry; isolated calf tributary reflux; Type 2B.
+  Treatment: Ligate SPJ perforator entry.
+
+Scenario C2 — Type 2B (perforator entry at SFJ-Knee step, upper thigh):
+  Clips: EP N2→N2 (y=0.050, step=SFJ-Knee, ligation-point-marker), RP N3→N1 (y=0.132)
+  CRITICAL: fromType=N2, toType=N2 — this is a PERFORATOR entry, NOT an SFJ entry.
+  No EP N1→N2 anywhere. No RP N2→N1. SFJ is COMPETENT.
+  Even though y=0.050 is in the "SFJ region", EP N2→N2 means the deep-to-GSV connection (SFJ) is intact.
+  Interpretation: Perforator entry at upper thigh; tributary reflux only; Type 2B.
+  Treatment: Ligate the perforator entry (highest EP N2→N2 point).
+
+Scenario C3 — Type 2C (perforator entry at SFJ-Knee step with secondary GSV reflux):
+  Clips: EP N2→N2 (y=0.050, step=SFJ-Knee, ligation-point-marker), RP N3→N1 (y=0.132), RP N2→N1 (y=0.212)
+  No EP N1→N2 anywhere. SFJ still COMPETENT.
+  Both N3 reflux (tributary) AND N2→N1 reflux (GSV trunk) present, but NO SFJ entry.
+  This is Type 2C, NOT Type 1+2 — the key difference is EP N1→N2 is absent.
+  Interpretation: Secondary GSV reflux has developed on top of 2B perforator pattern; Type 2C.
+  Treatment: Ligate perforator entry (EP N2→N2) AND all RP N2→N1 sites along GSV.
+
+Scenario D — Type 2C:
+  Clips: EP N2→N3 at thigh (y=0.20), RP N3→N1 (y=0.21), RP N2→N1 at knee (y=0.30)
+  No EP N1→N2 at SFJ. Both N3 reflux AND N2 reflux present.
+  Interpretation: Secondary GSV reflux added to tributary pattern; Type 2C.
+  Treatment: Ligate N2→N3 entry AND all N2→N1 RP sites.
+
+Scenario E — Type 3:
+  Clips: EP N1→N2 at SFJ (y=0.06), EP N2→N3 (y=0.18), RP N3→N2 (y=0.47), RP N2→N1 (y=0.33)
+  eliminationTest = "No Reflux" on the RP N2→N1 clip.
+  Interpretation: N2→N1 reflux disappears on compression → tributary-fed → Type 3.
+  Treatment: CHIVA 2 — ligate N2→N3.
+
+Scenario F — Type 1+2:
+  Same as Scenario E but eliminationTest = "Reflux" (N2→N1 persists).
+  Interpretation: Independent dual shunt; Type 1+2.
+  Treatment: Ligate SFJ and N2→N3 simultaneously.
+
+==========================================================================
+SECTION 7: HAEMODYNAMIC CLASSIFICATION (C-SCORE / CEAP)
+==========================================================================
+
+C0: No visible or palpable signs of venous disease
+C1: Telangiectasias or reticular veins (< 3 mm)
+C2: Varicose veins (≥ 3 mm)
+C3: Oedema without skin changes
+C4: Skin changes (pigmentation, eczema, lipodermatosclerosis)
 C5: Healed venous ulcer
 C6: Active venous ulcer
 
-ETIOLOGICAL CLASSIFICATION
+==========================================================================
+SECTION 8: TREATMENT MODALITIES
+==========================================================================
 
-Primary (Essential) Venous Insufficiency
-- Valve incompetence without prior thrombosis
-- Genetic predisposition
-- Environmental factors: prolonged standing, pressure
+CHIVA (Conservative Haemodynamic Treatment of Insufficiency in Outpatient Setting):
+  - Minimally invasive, haemodynamically targeted
+  - Preserves saphenous vein for future bypass grafting
+  - Entry point ligation with selective tributary treatment
+  - Requires precise duplex mapping before intervention
 
-Secondary Venous Insufficiency
-- Post-thrombotic syndrome
-- Iliac vein obstruction
-- Pelvic mass compression
+Endovenous Ablation:
+  - Radiofrequency ablation (RFA): 85°C, 120 seconds per segment
+  - Endovenous laser ablation (EVLA): 980 nm or 1470 nm
+  - Used for Type 1 GSV trunk ablation
 
-TREATMENT STRATEGIES
+Sclerotherapy:
+  - Foam sclerotherapy for tributaries (N3)
+  - Liquid for telangiectasias
 
-CONSERVATIVE MANAGEMENT
-- Compression therapy: 20-30 mmHg for C2-C4
-- Leg elevation
-- Exercise programs
-- Pharmacotherapy: Flavonoids, diosmin
-
-ABLATION TECHNIQUES
-- Radiofrequency ablation (RFA): 85° C, 120 seconds per segment
-- Endovenous laser ablation (EVLA): 980nm or 1470nm wavelength
-- Cyanoacrylate glue: VenaSeal system
-- Sclerotherapy: Sodium tetradecyl sulfate or polidocanol
-
-CHIVA METHOD (Conservative Hemodynamic Treatment)
-- Hemodynamically meaningful truncation
-- Preserves saphenous vein function for grafting
-- Addresses hypoplasia by creating preferential reflux pathways
-- Entry point treatment with tributary ligation
-- Often avoids saphenofemoral or saphenopopliteal junction closure
-
-INDICATIONS FOR TREATMENT
-- C2-C6 with hemodynamic abnormality
-- Progressive symptoms
-- Recurrent ulceration
-- Patient preference
-- Cosmetic concerns
-
-CONTRAINDICATIONS FOR ENDOVENOUS ABLATION
-- Deep venous thrombosis in target vein
-- Severe arterial insufficiency
-- Systemic infection
-- Pregnancy (relative)
-- Inability to comply with post-procedural care
-
-ASSESSMENT OF PROBE POSITIONING IN ULTRASOUND
-
-Optimal probe positioning for venous assessment:
-- Transverse (axial) view: Shows circular or oval vein cross-section
-- Sagittal (longitudinal) view: Shows valves and flow direction
-- Probe angulation: 15-30 degrees for optimal valve visualization
-- Compression maneuver: Gentle posterior pressure to assess compressibility
-- Dynamic assessment: Valsalva, limb elevation, muscle contraction
-
-Doppler mode selection:
-- B-mode (gray-scale): Structural assessment
-- PW-Doppler: Single-site velocity measurement
-- CW-Doppler: High-velocity flow assessment
-- Color Doppler: Flow mapping and reflux detection
-
-CLINICAL DECISION SUPPORT GUIDELINES
-
-For GSV incompetence with C2 symptoms:
-1. Confirm reflux duration > 1 second
-2. Assess diameter and degree of incompetence
-3. Evaluate for perforator involvement
-4. Classify as Type 1, 2, or 3 shunt
-5. Select treatment: CHIVA, ablation, or ligation
-
-For below-knee insufficiency:
-1. Assess small saphenous vein
-2. Evaluate medial and lateral calf perforators
-3. Determine if isolated perforator disease
-4. Consider endovenous ablation of SSV with selective perforator treatment
-
-For recurrent varicose veins:
-1. Complete mapping of previous treatment site
-2. Assess for neo-vascularization
-3. Evaluate arteriovenous communications
-4. Plan revision strategy accordingly
-
-ULTRASOUND PROBE GUIDANCE PRINCIPLES
-
-Scanning technique for optimal visualization:
-- Start with B-mode transverse view at known reference points
-- Systematically scan longitudinally along vein course
-- Use color Doppler to confirm vein identity
-- Optimize gain and frequency for target vein depth
-- Use Valsalva to assess valve competence
-
-Navigation targets in lower extremity venous mapping:
-- Saphenofemoral junction: Medial groin at skin crease
-- Saphenopopliteal junction: Popliteal fossa, medial aspect
-- Medial calf perforators: Located medial gastrocnemius
-- Lateral calf perforators: Located between peroneal and soleus
-- Hunter's canal perforators: Located along medial thigh
-
-Probe movement terminology:
-- Medial/Lateral: Toward midline or away from midline
-- Proximal/Distal: Toward heart or away from heart
-- Superficial/Deep: Toward skin or toward deep structures
-- Angular: Rotating probe plane
-
-SUMMARY OF KEY HAEMODYNAMIC CONCEPTS
-
-The N1-N2-N3 classification provides hemodynamic context:
-- N1 compartment: Normal veins with intact valves
-- N2 compartment: Incompetent vein with preserved distal valve
-- N3 compartment: Segmental reflux involving multiple valve levels
-
-Entry Point determination is critical for surgical planning:
-- Primary entry point: Most proximal location of incompetence
-- Secondary pathways: Tributaries and perforators carrying reflux
-- Hemodynamic significance: Whether reflux affects outflow capacity
-
-The CHIVA principle emphasizes preservation of saphenous veins when possible while correcting hemodynamic abnormalities through strategic intervention at entry points and re-entry pathways.
+Compression Therapy:
+  - 20–30 mmHg: C2–C4 conservative management
+  - 30–40 mmHg: Post-operative (Class II)
+  - 40–50 mmHg: Immediate post-operative, SFJ ligation (Class III)

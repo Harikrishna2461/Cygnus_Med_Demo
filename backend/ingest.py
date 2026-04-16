@@ -149,7 +149,14 @@ def load_medical_text() -> str:
 
 
 def create_sample_medical_text() -> str:
-    """Built-in venous disease knowledge base."""
+    """Read CHIVA knowledge base from sample_medical_text.txt (authoritative source)."""
+    if os.path.exists(SAMPLE_DATA_PATH):
+        with open(SAMPLE_DATA_PATH, 'r') as f:
+            text = f.read()
+        if text.strip():
+            logger.info(f"✓ Loaded knowledge base from {SAMPLE_DATA_PATH} ({len(text)} chars)")
+            return text
+    logger.warning(f"sample_medical_text.txt not found at {SAMPLE_DATA_PATH} — using fallback")
     sample_text = """
 VASCULAR MEDICINE AND HAEMODYNAMIC ASSESSMENT
 
