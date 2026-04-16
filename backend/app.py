@@ -991,10 +991,10 @@ Proposed Litigation Treatment Plan: [specific ligation step 1]
 [specific ligation step 2]
 [specific ligation step 3]"""
 
-                response_text = call_llm(llm_prompt, temperature=0.2, max_tokens=400)
+                response_text, llm_usage = call_llm(llm_prompt, temperature=0.2, max_tokens=400, return_usage=True)
                 llm_latency_ms = (time.time() - task1_start) * 1000
                 metrics_collector.record_task_latency('task1_classification', llm_latency_ms / 1000)
-                
+
                 # Parse all three sections from single LLM response
                 parsed_result = parse_clinical_response(response_text)
                 output_size_bytes = len(json.dumps(parsed_result).encode())
@@ -1011,7 +1011,7 @@ Proposed Litigation Treatment Plan: [specific ligation step 1]
                 # Record metrics for this point (NO error on success)
                 point_elapsed_ms = (time.time() - point_start) * 1000
                 point_latencies.append(point_elapsed_ms)
-                
+
                 mlops_tracker.record_request_metric(
                     run_id=run_id,
                     task_name='Clinical Reasoning',
@@ -1030,7 +1030,10 @@ Proposed Litigation Treatment Plan: [specific ligation step 1]
                         'memory_usage_mb': memory_mb,
                         'cpu_percent': cpu_percent,
                         'memory_available_mb': memory_available_mb,
-                        'cached': False
+                        'cached': False,
+                        'input_tokens': llm_usage.get('prompt_tokens', 0),
+                        'output_tokens': llm_usage.get('completion_tokens', 0),
+                        'total_tokens': llm_usage.get('total_tokens', 0)
                     }
                 )
                 
@@ -2898,7 +2901,7 @@ def shunt_classify_report():
 
     def call_llm_shunt(prompt, stream=False):
         """LLM call for full JSON shunt classification via Groq."""
-        return call_llm(prompt, temperature=0.2, max_tokens=1024)
+        return call_llm(prompt, temperature=0.2, max_tokens=1024, return_usage=True)
 
     try:
         # LLM+RAG classification — pass retrieve_context so each leg gets relevant chunks

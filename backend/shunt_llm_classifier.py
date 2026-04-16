@@ -338,10 +338,14 @@ def _call_llm_for_leg(group: list[dict], rag_context: str, leg_label: str, call_
     prompt = build_prompt(group, rag_context, leg_label)
     logger.info(f"Shunt LLM prompt for {leg_label}: {len(prompt)} chars")
     try:
-        raw = call_llm_fn(prompt, stream=False)
+        # Call LLM with token tracking enabled
+        raw, usage = call_llm_fn(prompt, stream=False, return_usage=True)
         logger.info(f"LLM raw response ({leg_label}): {raw[:300]!r}")
+        logger.info(f"LLM tokens ({leg_label}): prompt={usage.get('prompt_tokens', 0)}, completion={usage.get('completion_tokens', 0)}, total={usage.get('total_tokens', 0)}")
         result = _repair_and_parse(raw)
         if result and "shunt_type" in result:
+            # Store usage info in result
+            result['_llm_usage'] = usage
             return result
     except Exception as e:
         logger.error(f"LLM call failed for {leg_label}: {e}")
