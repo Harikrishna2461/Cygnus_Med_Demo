@@ -475,58 +475,115 @@ def analyze_clinical_case():
         elim_line = f'eliminationTest="{elim}"' if elim else ""
         is_rp = flow == 'RP'
 
-        # Vein-path → shunt type decision guide injected for RP clips
+        # Improved RP clip classification guide with clinical decision logic
         rp_decision_guide = ""
         if is_rp:
+            # Determine the most likely classification based on clip characteristics
+            vein_path = f"{from_type}→{to_type}"
+
             rp_decision_guide = f"""
-=== RP CLIP — MANDATORY CLASSIFICATION RULES ===
-This is flow=RP (retrograde / reflux). A haemodynamic shunt IS present.
-You MUST return one of: Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2
-"No shunt detected" and "Insufficient data" are FORBIDDEN for RP clips.
+═══════════════════════════════════════════════════════════════════════════════
+REFLUX CLIP CLASSIFICATION GUIDE (This is RP = pathological reflux)
+═══════════════════════════════════════════════════════════════════════════════
+A shunt IS present. MUST classify as one of: Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2
 
-TYPE 2 SUBTYPE GUIDE (critical — LLM must distinguish these):
-  TYPE 2A: SFJ is COMPETENT (no EP N1→N2). Entry is EP N2→N3 (GSV into tributary).
-           RP at N3 only (N3→N2 or N3→N1). NO RP N2→N1.
-           This clip ({from_type}→{to_type}): {'matches 2A if N3 is involved and N2→N1 absent' if 'N3' in from_type or 'N3' in to_type else 'check for N2→N1 involvement'}
+STEP 1: CLASSIFY THE VEIN PATHWAY
+This clip: {vein_path} at {step} (posYRatio={pos_y:.3f})
 
-  TYPE 2B: SFJ is COMPETENT (no EP N1→N2). Entry via CALF PERFORATOR or SPJ (EP N2→N2).
-           RP at N3 only. NO RP N2→N1. Step is usually SPJ/SPJ-Ankle/Knee-Ankle.
-           {'Matches 2B pattern (SPJ/calf step)' if step in ('SPJ','SPJ-Ankle','Knee-Ankle') else 'Check if entry was via perforator'}
+STEP 2: USE THIS CLINICAL DECISION TREE
+═══════════════════════════════════════════════════════════════════════════════
 
-  TYPE 2C: SFJ is COMPETENT. BOTH RP N3 AND RP N2→N1 are present (secondary GSV reflux).
-           {'This clip is N2→N1 RP — if the stream also has N3 RP and NO EP N1→N2, this is 2C' if from_type=='N2' and to_type=='N1' else 'Check for co-existing N2→N1 reflux'}
+IF N2→N1 REFLUX (GSV trunk reflux):
+  ├─ At SFJ/upper-thigh (posYRatio ≤ 0.098) → TYPE 1 (confidence 0.92)
+  │  └─ Deep SFJ incompetence with GSV reflux
+  ├─ At mid-thigh (0.098 < posYRatio ≤ 0.353) → TYPE 1 or Type 1+2 (0.90)
+  │  └─ Hunterian incompetence pattern
+  └─ Below Hunterian → TYPE 2C if posYRatio > 0.353 (confidence 0.85)
+     └─ Secondary GSV reflux, likely perforator entry
 
-Quick decision table for this clip ({from_type}→{to_type} at {step}):
-  N2→N1  at SFJ/SFJ-Knee        → Type 1 (if EP N1→N2 exists) OR Type 2C (if no EP N1→N2)
-  N3→N2  at Knee/SFJ-Knee       → Type 2A (no SFJ entry) OR Type 3 (if EP N1→N2 also exists)
-  N3→N1  at SPJ/SPJ-Ankle       → Type 2B (no SFJ entry, calf perforator)
-  N3→N1  at SFJ-Knee/Knee       → Type 2A or 2C depending on N2→N1 presence
-  N2→N1  at Knee-Ankle          → Type 2C or Type 1 extension
-  eliminationTest=Reflux         → Type 1+2 or Type 3 (shunt persists under compression)
-  eliminationTest=No Reflux      → Type 3 (distal re-entry eliminated)
+IF N3→N1 REFLUX (tributary to deep vein):
+  ├─ At SPJ/calf step (posYRatio > 0.60) → TYPE 2B (confidence 0.88)
+  │  └─ Calf perforator or SPJ incompetence
+  ├─ At knee level (0.353 < posYRatio ≤ 0.60) → TYPE 2A (confidence 0.84)
+  │  └─ Knee tributaries draining to deep system
+  └─ At SFJ-Knee (0.098 < posYRatio ≤ 0.353) → TYPE 2A or TYPE 3 (0.82)
+     └─ Could be mid-thigh tributary reflux
 
-Use the RAG context and CHIVA rules to choose the MOST LIKELY type for this single clip.
-If equally plausible, prefer the simpler type (Type 1 before Type 1+2, Type 2A before Type 2C).
+IF N3→N2 REFLUX (tributary to GSV):
+  ├─ At any level → TYPE 2A (confidence 0.85)
+  │  └─ Classic GSV tributary incompetence
+  └─ If SFJ involvement suspected → TYPE 3 (0.80)
+     └─ Only if context suggests EP N1→N2 exists
+
+STEP 3: ASSIGN CONFIDENCE BASED ON PATTERN CLARITY
+  • Clear single pattern (N2→N1 at SFJ) → confidence 0.92
+  • Clear single pattern (N3→N1 at SPJ) → confidence 0.88
+  • Ambiguous location/pattern → confidence 0.80-0.84
+  • Unusual combinations → confidence 0.75-0.80
+
+STEP 4: CHECK ELIMINATION TEST (if present)
+  • eliminationTest="Reflux" → Shunt persists, favor Type 1+2 or Type 3
+  • eliminationTest="No Reflux" → Distal re-entry, indicates Type 3
+
+═══════════════════════════════════════════════════════════════════════════════
+CRITICAL REMINDERS:
+  ✓ This is a SINGLE clip — you're determining the MOST LIKELY type
+  ✓ N2→N1 is almost always Type 1 or Type 2C (depends on upper clips)
+  ✓ N3→N1 is almost always Type 2A or Type 2B (depends on location)
+  ✓ N3→N2 is almost always Type 2A
+  ✓ Use RAG context to disambiguate if available
+  ✓ When in doubt, prefer the simpler/more common type
+═══════════════════════════════════════════════════════════════════════════════
+"""
+
+        # Add EP decision guide for antegrade/normal flow
+        ep_decision_guide = ""
+        if not is_rp:
+            ep_decision_guide = f"""
+═══════════════════════════════════════════════════════════════════════════════
+ANTEGRADE FLOW CLIP ASSESSMENT (This is EP = normal/physiological flow)
+═══════════════════════════════════════════════════════════════════════════════
+
+EP clips provide context on vein entries but may not reveal the full shunt pattern.
+
+CLASSIFICATIONS BASED ON EP N1→N2 (most critical):
+  • EP N1→N2 at SFJ (posYRatio ≤ 0.098) → SFJ INCOMPETENT → likely Type 1, 3, or 1+2
+  • EP N1→N2 at Hunterian (0.098 < posYRatio ≤ 0.353) → Hunterian entry → likely Type 1
+  • No EP N1→N2 present → SFJ COMPETENT → Type 2A, 2B, 2C, or no shunt
+
+BASED ON OTHER EP PATTERNS:
+  • EP N2→N3 with no EP N1→N2 → Entry is GSV to tributary → likely Type 2A
+  • EP N2→N2 with no EP N1→N2 → Perforator entry, SFJ competent → likely Type 2B/2C
+  • EP N1→N2 + EP N2→N3 together → Mixed pattern → likely Type 3 or Type 1+2
+
+ASSESSMENT FOR THIS CLIP:
+  {from_type}→{to_type} at {step}: Provides context on vein entry pattern.
+  Without reflux (RP) data, shunt classification may be incomplete.
+
+  If this is the ONLY clip available:
+    • State 'No shunt detected' (no reflux = no pathology confirmed)
+    • Unless this is EP N1→N2 (SFJ incompetent = requires investigation)
+═══════════════════════════════════════════════════════════════════════════════
 """
 
         llm_prompt = f"""{CHIVA_RULES}
-{rag_section}{rp_decision_guide}
+{rag_section}{rp_decision_guide if is_rp else ep_decision_guide}
 === SINGLE CLIP — {leg_side.upper()} LEG ===
 flow={flow}  {from_type}→{to_type}  posYRatio={pos_y:.3f} ({loc_hint})
 step={step}  confidence={conf:.2f}  reflux_duration={rdur}s  {elim_line}
 description="{desc}"
 
-You are a vascular surgeon. Using the CHIVA rules above, classify this clip.
-{"⚠ This is an RP (reflux) clip — you MUST name the shunt type. Hedging is not allowed." if is_rp else "If this EP clip provides insufficient context on its own, state 'No shunt detected'."}
-Respond in EXACTLY this format — no other text, no preamble:
+TASK: You are a vascular surgeon analyzing a single ultrasound clip.
+Using the classification guide above and CHIVA rules, determine the shunt type.
 
-Shunt Type Assessment Results: [{"Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2" if is_rp else "Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected"}]
+{"⚠ This is an RP clip — you MUST name the shunt type (reflux indicates pathology)." if is_rp else "⚠ This is an EP clip — only classify if SFJ/major entry is involved. Otherwise, state 'No shunt detected'."}
 
-Reasoning: [one concise clinical sentence — name the specific vein path and why it indicates this shunt type]
+Respond in EXACTLY this format — no other text:
 
-Proposed Litigation Treatment Plan: [specific ligation step 1]
-[specific ligation step 2]
-[specific ligation step 3]"""
+Shunt Type: [{"Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2" if is_rp else "Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected"}]
+Confidence: [0.0-1.0]
+Reasoning: [one clinical sentence explaining the classification]
+Ligation: [specific ligation target]"""
 
         response_text, token_usage = call_llm(llm_prompt, temperature=0.1, max_tokens=400, return_usage=True)
         llm_latency = (time.time() - llm_start) * 1000
@@ -690,89 +747,93 @@ def validate_shunt_type(shunt_text):
     return shunt_text  # Return as-is but log warning
 
 def parse_clinical_response(response_text):
-    """Parse LLM response with flexible matching and fallback logic"""
+    """Parse LLM response — supports both old and new formats"""
     import re
-    
+
     response_text = response_text.strip()
     logger.info(f"DEBUG: Raw LLM response:\n{repr(response_text)}\n")
-    
+
     sections = {
         "shunt_type_assessment": "",
         "reasoning": "",
-        "treatment_plan": ""
+        "treatment_plan": "",
+        "confidence": ""
     }
-    
+
     try:
-        # STRATEGY 1: Try to find sections using flexible regex patterns
-        # Pattern 1: Find "Shunt Type Assessment Results:" and capture until next header or end
-        shunt_match = re.search(
-            r'Shunt\s+Type\s+Assessment\s+Results?\s*:\s*(.+?)(?=\n\s*(?:Reasoning|Proposed|$))',
-            response_text,
-            re.IGNORECASE | re.DOTALL
-        )
-        if shunt_match:
-            text = shunt_match.group(1).strip()
-            text = clean_output_text(text)
-            text = text.split('\n')[0].strip()  # First line only
-            if text and len(text) > 2:
-                sections["shunt_type_assessment"] = text
-                logger.info(f"DEBUG: Found shunt type: '{text}'")
-        
-        # Pattern 2: Find "Reasoning:" and capture until next header or end
-        reasoning_match = re.search(
-            r'Reasoning\s*:\s*(.+?)(?=\n\s*(?:Proposed|$))',
-            response_text,
-            re.IGNORECASE | re.DOTALL
-        )
-        if reasoning_match:
-            text = reasoning_match.group(1).strip()
-            text = clean_output_text(text)
-            text = text.split('\n')[0].strip()  # First line only
-            if text and len(text) > 2:
-                sections["reasoning"] = text
-                logger.info(f"DEBUG: Found reasoning: '{text}'")
-        
-        # Pattern 3: Find "Proposed Litigation Treatment Plan:" and capture everything after
-        treatment_match = re.search(
-            r'Proposed\s+Litigation\s+Treatment\s+Plan\s*:\s*(.+?)$',
-            response_text,
-            re.IGNORECASE | re.DOTALL
-        )
-        if treatment_match:
-            text = treatment_match.group(1).strip()
-            text = clean_output_text(text)
-            if text and len(text) > 2:
-                sections["treatment_plan"] = text
-                logger.info(f"DEBUG: Found treatment plan: '{text}'")
-        
-        # Validate all sections are filled
-        all_filled = all(
-            sections[key] and len(sections[key]) > 2 
-            for key in sections.keys()
-        )
-        
-        if not all_filled:
-            logger.error(f"ERROR: Not all sections extracted! Shunt={bool(sections['shunt_type_assessment'])}, Reasoning={bool(sections['reasoning'])}, Treatment={bool(sections['treatment_plan'])}")
-            logger.error(f"Full response:\n{response_text}")
-            
-            # FALLBACK: If any section is empty, try alternative parsing
-            if not sections["shunt_type_assessment"]:
-                sections["shunt_type_assessment"] = "Unable to extract shunt type"
-            if not sections["reasoning"]:
-                sections["reasoning"] = "Unable to extract reasoning"
-            if not sections["treatment_plan"]:
-                sections["treatment_plan"] = "Unable to extract treatment plan"
-    
+        # TRY NEW FORMAT FIRST: "Shunt Type: [...]\nConfidence: [...]\nReasoning: [...]\nLigation: [...]"
+        new_shunt = re.search(r'Shunt\s+Type\s*:\s*(.+?)(?=\n|$)', response_text, re.IGNORECASE)
+        new_conf = re.search(r'Confidence\s*:\s*(.+?)(?=\n|$)', response_text, re.IGNORECASE)
+        new_reason = re.search(r'Reasoning\s*:\s*(.+?)(?=\n|$)', response_text, re.IGNORECASE)
+        new_ligation = re.search(r'Ligation\s*:\s*(.+?)(?=\n|$)', response_text, re.IGNORECASE)
+
+        if new_shunt and new_reason and new_ligation:
+            # Successfully matched new format
+            sections["shunt_type_assessment"] = clean_output_text(new_shunt.group(1).strip())
+            sections["reasoning"] = clean_output_text(new_reason.group(1).strip())
+            sections["treatment_plan"] = clean_output_text(new_ligation.group(1).strip())
+            if new_conf:
+                sections["confidence"] = clean_output_text(new_conf.group(1).strip())
+            logger.info(f"✓ Parsed NEW format: {sections['shunt_type_assessment']}")
+        else:
+            # FALLBACK TO OLD FORMAT: "Shunt Type Assessment Results: [...]\nReasoning: [...]\nProposed Litigation Treatment Plan: [...]"
+            shunt_match = re.search(
+                r'Shunt\s+Type\s+Assessment\s+Results?\s*:\s*(.+?)(?=\n\s*(?:Reasoning|Proposed|$))',
+                response_text,
+                re.IGNORECASE | re.DOTALL
+            )
+            if shunt_match:
+                text = shunt_match.group(1).strip()
+                text = clean_output_text(text)
+                text = text.split('\n')[0].strip()
+                if text and len(text) > 2:
+                    sections["shunt_type_assessment"] = text
+                    logger.info(f"✓ Parsed OLD format (shunt): '{text}'")
+
+            reasoning_match = re.search(
+                r'Reasoning\s*:\s*(.+?)(?=\n\s*(?:Proposed|$))',
+                response_text,
+                re.IGNORECASE | re.DOTALL
+            )
+            if reasoning_match:
+                text = reasoning_match.group(1).strip()
+                text = clean_output_text(text)
+                text = text.split('\n')[0].strip()
+                if text and len(text) > 2:
+                    sections["reasoning"] = text
+                    logger.info(f"✓ Parsed OLD format (reasoning): '{text}'")
+
+            treatment_match = re.search(
+                r'Proposed\s+Litigation\s+Treatment\s+Plan\s*:\s*(.+?)$',
+                response_text,
+                re.IGNORECASE | re.DOTALL
+            )
+            if treatment_match:
+                text = treatment_match.group(1).strip()
+                text = clean_output_text(text)
+                if text and len(text) > 2:
+                    sections["treatment_plan"] = text
+                    logger.info(f"✓ Parsed OLD format (treatment): '{text[:50]}...'")
+
+        # If still missing data, apply fallbacks
+        if not sections["shunt_type_assessment"]:
+            sections["shunt_type_assessment"] = "Unable to extract"
+        if not sections["reasoning"]:
+            sections["reasoning"] = "Unable to extract"
+        if not sections["treatment_plan"]:
+            sections["treatment_plan"] = "Unable to extract"
+
     except Exception as e:
         logger.error(f"CRITICAL PARSING ERROR: {e}")
         logger.error(f"Response was:\n{response_text}")
         sections = {
             "shunt_type_assessment": "Parsing error",
             "reasoning": "Parsing error",
-            "treatment_plan": "Parsing error"
+            "treatment_plan": "Parsing error",
+            "confidence": "0.0"
         }
-    
-    logger.info(f"DEBUG: Final extracted sections:\n  Shunt: {sections['shunt_type_assessment']}\n  Reasoning: {sections['reasoning']}\n  Treatment: {sections['treatment_plan'][:80]}...\n")
+
+    logger.info(f"DEBUG: Final sections: Shunt={sections['shunt_type_assessment']}, Conf={sections.get('confidence', 'N/A')}, Reasoning={sections['reasoning'][:50]}")
     return sections
 
 

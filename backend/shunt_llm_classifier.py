@@ -219,19 +219,80 @@ def build_prompt(clips: list[dict], rag_context: str, leg_label: str) -> str:
 === ASSESSMENT: {leg_label} ({len(clips)} clips) ===
 {clips_str}
 
+═══════════════════════════════════════════════════════════════
+STEP-BY-STEP DECISION GUIDE (Follow in order)
+═══════════════════════════════════════════════════════════════
+
+STEP 1: CHECK FOR EP N1→N2 (SFJ or Hunterian ENTRY)
+  Look for: "EP N1→N2" with y≤0.098 (SFJ) or y≤0.353 (Hunterian)
+  If YES with SFJ-ENTRY/Hunterian-ENTRY label → SFJ INCOMPETENT
+  If NO  → SFJ COMPETENT (go to Case C)
+  ✓ Found EP N1→N2? YES/NO
+
+STEP 2: IF YES to EP N1→N2, CHECK FOR REFLUX PATTERNS
+  2a) ANY RP N3→N2 or RP N3→N1? (tributary reflux)
+  2b) ANY RP N2→N1? (GSV reflux)
+  2c) ANY RP anywhere else?
+  2d) ANY EP N2→N3? (extra antegrade to tributary)
+
+STEP 3: MATCH PATTERN TO TYPE
+
+  ┌─ SFJ INCOMPETENT PATH (has EP N1→N2):
+  │
+  ├─ NO EP N2→N3:
+  │  └─ Has RP N2→N1, no RP at N3 → TYPE 1 (confidence 0.90)
+  │
+  └─ YES EP N2→N3 EXISTS:
+     ├─ Has RP N3 (at N2 or N1), NO RP N2→N1 → TYPE 3 (confidence 0.88)
+     ├─ Has RP N3 AND RP N2→N1:
+     │  ├─ eliminationTest absent → UNDETERMINED (confidence 0.55) [needs_elim_test=true]
+     │  ├─ eliminationTest="Reflux" → TYPE 1+2 (confidence 0.80) [ask_diameter=true]
+     │  └─ eliminationTest="No Reflux" → TYPE 3 (confidence 0.75)
+
+  ┌─ SFJ COMPETENT PATH (NO EP N1→N2):
+  │
+  ├─ EP N2→N3 EXISTS:
+  │  └─ TYPE 2A (confidence 0.85-0.92)
+  │     └─ Multiple RP at N3? → [ask_branching=true]
+  │
+  └─ ONLY EP N2→N2 (perforator entry):
+     ├─ Has RP N3, NO RP N2→N1 → TYPE 2B (confidence 0.84)
+     │  └─ Multiple RP at N3? → [ask_branching=true]
+     ├─ Has RP N3 AND RP N2→N1 → TYPE 2C (confidence 0.82)
+     │  └─ Multiple RP at N3? → [ask_branching=true]
+     └─ No RP at all → NO SHUNT (confidence 0.95)
+
+STEP 4: ASSIGN CONFIDENCE
+  Clear pattern, no ambiguity → 0.90–0.97
+  Pattern present, minor noise → 0.80–0.89
+  Ambiguous / needs elimination test → 0.50–0.65
+  Insufficient clips → 0.40–0.55
+
+STEP 5: LIGATION PLAN (from matched type)
+  [See detailed rules above under Case A/B/C for specific steps]
+
+═══════════════════════════════════════════════════════════════
+CRITICAL REMINDERS:
+  • EP N1→N2 is THE KEY decision point — check this FIRST
+  • EP N2→N2 means perforator (SFJ COMPETENT), never confuse with N1→N2
+  • Type 2A has EP N2→N3; Type 2B/2C have EP N2→N2 (NOT N2→N3)
+  • Type 2C differs from Type 1+2: 2C has EP N2→N2, Type 1+2 has EP N1→N2
+  • RP only at N3 (not N2→N1) + EP N1→N2 = TYPE 3 (not 1+2)
+═══════════════════════════════════════════════════════════════
+
 === TASK ===
-Using ONLY the Classification Rules above and the Medical Knowledge Base, classify the shunt type
-for this {leg_label} leg assessment. Output ONLY the JSON below — no other text, no markdown.
+Follow the Step-by-Step Decision Guide above. Classify the {leg_label} leg.
+Output ONLY the JSON below — no other text, no markdown.
 
 {{
-  "shunt_type": "<e.g. Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected / Undetermined>",
+  "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected / Undetermined>",
   "confidence": <0.0-1.0>,
-  "reasoning": ["<clinical bullet 1>", "<clinical bullet 2>", "..."],
+  "reasoning": ["<decision step 1>", "<decision step 2>", "..."],
   "ligation": ["<ligation step 1>", "<ligation step 2>", "..."],
   "needs_elim_test": <true/false>,
   "ask_diameter": <true/false>,
   "ask_branching": <true/false>,
-  "summary": "<1 sentence plain-English clinical summary>"
+  "summary": "<1 sentence clinical summary>"
 }}"""
 
 
