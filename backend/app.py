@@ -765,8 +765,8 @@ def parse_clinical_response(response_text):
 
     try:
         # Remove common preamble text
-        cleaned = re.sub(r'^[^S]*?(?=Shunt)', response_text, flags=re.IGNORECASE | re.DOTALL)
-        if not cleaned or cleaned == response_text:
+        cleaned = re.sub(r'^[^S]*?(?=Shunt)', '', response_text, flags=re.IGNORECASE | re.DOTALL)
+        if not cleaned:
             cleaned = response_text
 
         # TRY NEW FORMAT FIRST: "Shunt Type: [...]\nConfidence: [...]\nReasoning: [...]\nLigation: [...]"
