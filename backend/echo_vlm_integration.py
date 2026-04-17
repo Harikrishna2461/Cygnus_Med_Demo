@@ -1,6 +1,6 @@
 """
-Echo VLM Integration - Qwen2VLMOEForConditionalGeneration via HuggingFace Inference API
-Uses HuggingFace Inference API to call EchoVLM remotely
+Echo VLM Integration - Qwen2VLMOEForConditionalGeneration
+Uses exact code pattern from reference: local model with proper inference pipeline
 3-stage verification: Fascia → Vein Validation → N1/N2/N3 Classification
 Integrated with Qdrant-based RAG system (CHIVA knowledge base)
 """
@@ -9,14 +9,20 @@ import numpy as np
 import cv2
 import json
 import logging
-import os
-import base64
-import requests
+import torch
 from typing import Dict, List, Tuple, Optional, Callable
 from pathlib import Path
 from dataclasses import dataclass
 from PIL import Image
-from io import BytesIO
+
+try:
+    from transformers import AutoProcessor
+    from qwen_vl_utils import process_vision_info
+    from EchoVLM import Qwen2VLMOEForConditionalGeneration
+    HAS_ECHOVLM = True
+except ImportError as e:
+    logger.warning(f"EchoVLM dependencies not available: {e}")
+    HAS_ECHOVLM = False
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +49,7 @@ class FasciaDetectionResult:
 
 
 class EchoVLMIntegration:
-    """Integration with EchoVLM via HuggingFace Inference API (no local model needed)"""
+    """Integration with EchoVLM (Qwen2VLMOEForConditionalGeneration) - exact reference code pattern"""
 
     def __init__(
         self,
@@ -51,25 +57,48 @@ class EchoVLMIntegration:
         retrieve_context_fn: Optional[Callable] = None,
     ):
         """
-        Initialize Echo VLM using HuggingFace Inference API
+        Initialize EchoVLM with exact reference code pattern
 
         Args:
-            model_id: HuggingFace model ID for EchoVLM
+            model_id: HuggingFace model ID for EchoVLM (default: "chaoyinshe/EchoVLM")
             retrieve_context_fn: Function to retrieve RAG context from Qdrant
         """
         self.model_id = model_id
         self.retrieve_rag_context = retrieve_context_fn
-        self.hf_token = os.getenv("HF_TOKEN", None)
-        self.api_url = f"https://api-inference.huggingface.co/models/{model_id}"
-        self._initialized = True  # API-based, no local loading needed
+        self.model = None
+        self.processor = None
+        self._initialized = False
 
-        logger.info(f"✅ EchoVLM API Integration initialized (Model: {model_id})")
-        if not self.hf_token:
-            logger.warning("⚠️  HF_TOKEN not set - using free tier (may have rate limits). Set HF_TOKEN for faster access.")
+        if not HAS_ECHOVLM:
+            logger.warning("⚠️ EchoVLM not available - install: pip install transformers qwen_vl_utils torch")
+            return
+
+        self._initialize_model()
+
+    def _initialize_model(self):
+        """Load model & processor using exact reference code pattern"""
+        try:
+            logger.info(f"Loading EchoVLM from {self.model_id}...")
+
+            # ===== 1. Load model & processor (exact pattern from reference) =====
+            self.model = Qwen2VLMOEForConditionalGeneration.from_pretrained(
+                self.model_id,
+                torch_dtype=torch.bfloat16,
+                attn_implementation="flash_attention_2",  # faster & memory-efficient
+                device_map="auto",
+            )
+            self.processor = AutoProcessor.from_pretrained(self.model_id)
+
+            self._initialized = True
+            logger.info("✅ EchoVLM loaded successfully (bfloat16, flash_attention_2, device_map=auto)")
+
+        except Exception as e:
+            logger.error(f"Failed to load EchoVLM: {e}")
+            self._initialized = False
 
     def _call_echovlm_api(self, image: np.ndarray, prompt: str) -> str:
         """
-        Call EchoVLM via HuggingFace Inference API
+        Call EchoVLM using exact reference code pattern
 
         Args:
             image: Ultrasound image (numpy array, RGB)
@@ -78,50 +107,61 @@ class EchoVLMIntegration:
         Returns:
             VLM response text
         """
+        if not self._initialized or self.model is None or self.processor is None:
+            logger.error("EchoVLM not initialized")
+            return ""
+
         try:
-            # Convert image to PIL and then to bytes
+            # Convert numpy to PIL Image if needed
             if isinstance(image, np.ndarray):
                 image_pil = Image.fromarray(image.astype(np.uint8))
             else:
                 image_pil = image
 
-            # Encode image to bytes
-            img_byte_arr = BytesIO()
-            image_pil.save(img_byte_arr, format='PNG')
-            img_byte_arr.seek(0)
+            # ===== 2. Prepare messages (exact pattern from reference) =====
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "image": image_pil,
+                        },
+                        {"type": "text", "text": prompt},
+                    ],
+                }
+            ]
 
-            # Prepare headers
-            headers = {}
-            if self.hf_token:
-                headers["Authorization"] = f"Bearer {self.hf_token}"
+            # ===== 3. Preparation for inference (exact pattern from reference) =====
+            text = self.processor.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+            image_inputs, video_inputs = process_vision_info(messages)
+            inputs = self.processor(
+                text=[text],
+                images=image_inputs,
+                videos=video_inputs,
+                padding=True,
+                return_tensors="pt",
+            )
+            inputs = inputs.to(self.model.device)
 
-            # Call HuggingFace Inference API
-            logger.info(f"Calling EchoVLM API with prompt: {prompt[:50]}...")
-
-            response = requests.post(
-                self.api_url,
-                headers=headers,
-                files={"image": img_byte_arr},
-                data={"inputs": prompt},
-                timeout=30,
+            # ===== 4. Inference: Generation of the output (exact pattern from reference) =====
+            generated_ids = self.model.generate(**inputs, max_new_tokens=512)
+            generated_ids_trimmed = [
+                out_ids[len(in_ids) :]
+                for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+            ]
+            output_text = self.processor.batch_decode(
+                generated_ids_trimmed,
+                skip_special_tokens=True,
+                clean_up_tokenization_spaces=False,
             )
 
-            if response.status_code == 200:
-                result = response.json()
-                # API returns list of results
-                if isinstance(result, list) and len(result) > 0:
-                    output_text = result[0].get("generated_text", "")
-                else:
-                    output_text = str(result)
-
-                logger.info(f"EchoVLM API response received ({len(output_text)} chars)")
-                return output_text
-            else:
-                logger.error(f"EchoVLM API error {response.status_code}: {response.text}")
-                return ""
+            return output_text[0] if output_text else ""
 
         except Exception as e:
-            logger.error(f"EchoVLM API call failed: {e}")
+            logger.error(f"EchoVLM inference error: {e}")
             return ""
 
     def verify_fascia_detection(
