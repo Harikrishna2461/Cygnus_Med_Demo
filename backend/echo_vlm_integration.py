@@ -70,6 +70,7 @@ class EchoVLMIntegration:
         self.model_id = model_id
         self.retrieve_rag_context = retrieve_context_fn
         self.api_url = f"https://api-inference.huggingface.co/models/{model_id}"
+        self.hf_token = None  # Will be loaded from environment
         self.processor = None
         self._initialized = False
 
@@ -151,38 +152,49 @@ class EchoVLMIntegration:
             else:
                 img_base64 = None
 
-            # ===== 3. Call HuggingFace Inference API =====
-            logger.info(f"Calling EchoVLM API with prompt: {prompt[:50]}...")
+            # ===== 3. Call HuggingFace Inference API (Image-to-Text format) =====
+            logger.info(f"Calling EchoVLM HF API with prompt: {prompt[:50]}...")
 
+            hf_token = self._get_hf_token()
+            headers = {}
+            if hf_token:
+                headers["Authorization"] = f"Bearer {hf_token}"
+
+            # Prepare payload for HF Inference API (image-to-text format)
             payload = {
-                "inputs": text,
+                "inputs": {
+                    "image": img_base64,
+                    "prompt": prompt,
+                }
             }
 
-            headers = {
-                "Authorization": f"Bearer {self._get_hf_token()}",
-            } if self._get_hf_token() else {}
+            try:
+                # Send to HF Inference API
+                response = requests.post(
+                    self.api_url,
+                    headers=headers,
+                    json=payload,
+                    timeout=60,
+                )
 
-            # Send to HF Inference API
-            response = requests.post(
-                self.api_url,
-                headers=headers,
-                json=payload,
-                timeout=60,
-            )
-
-            if response.status_code == 200:
-                result = response.json()
-                # API returns array of results
-                if isinstance(result, list) and len(result) > 0:
-                    output_text = result[0].get("generated_text", "")
-                    # Clean up the output if needed
-                    if output_text.startswith(text):
-                        output_text = output_text[len(text):].strip()
-                    return output_text
+                if response.status_code == 200:
+                    result = response.json()
+                    # API returns array of results or direct text
+                    if isinstance(result, list) and len(result) > 0:
+                        output_text = result[0].get("generated_text", result[0] if isinstance(result[0], str) else str(result[0]))
+                        return output_text
+                    elif isinstance(result, dict):
+                        return result.get("generated_text", str(result))
+                    else:
+                        return str(result)
                 else:
-                    return str(result)
-            else:
-                logger.error(f"HF API error {response.status_code}: {response.text}")
+                    logger.error(f"HF API error {response.status_code}: {response.text[:200]}")
+                    return ""
+            except requests.exceptions.Timeout:
+                logger.error("HF API request timed out")
+                return ""
+            except Exception as e:
+                logger.error(f"HF API request failed: {e}")
                 return ""
 
         except Exception as e:
