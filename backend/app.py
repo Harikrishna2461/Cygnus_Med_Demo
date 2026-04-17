@@ -3248,6 +3248,9 @@ def analyze_frame_vein_detection():
             return_visualizations=return_visualizations
         )
 
+        # Convert numpy types to JSON-serializable types
+        result = clean_numpy_for_json(result)
+
         return jsonify(result), 200
 
     except Exception as e:
