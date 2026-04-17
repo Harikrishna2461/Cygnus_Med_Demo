@@ -3280,13 +3280,15 @@ def analyze_video_vein_detection():
             max_frames = request.form.get('max_frames', type=int)
             skip_frames = request.form.get('skip_frames', 0, type=int)
             save_output = request.form.get('save_output', 'true').lower() == 'true'
+            crop_mode = request.form.get('crop_mode', 'none')  # 'none', 'auto', or 'square'
 
-            # Analyze
+            # Analyze with ROI cropping support
             result = service.analyze_video_file(
                 temp_path,
                 max_frames=max_frames,
                 skip_frames=skip_frames,
-                save_output=save_output
+                save_output=save_output,
+                crop_mode=crop_mode
             )
 
             return jsonify(result), 200
