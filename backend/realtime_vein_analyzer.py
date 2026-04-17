@@ -16,6 +16,7 @@ from dataclasses import dataclass
 
 from vein_detector_vit import CustomUltrasoundViT, VeinDetectionConfig, VeinDetectionPostProcessor
 from echo_vlm_integration import EchoVLMIntegration
+from ultrasound_roi import apply_roi_to_frame
 
 logger = logging.getLogger(__name__)
 
@@ -347,6 +348,7 @@ class RealtimeVeinAnalyzer:
         output_video_path: Optional[str] = None,
         max_frames: Optional[int] = None,
         skip_frames: int = 0,
+        crop_mode: str = 'none',
     ) -> Dict:
         """
         Process video file and optionally save annotated output
@@ -356,6 +358,7 @@ class RealtimeVeinAnalyzer:
             output_video_path: Path to save output (optional)
             max_frames: Maximum frames to process
             skip_frames: Process every nth frame
+            crop_mode: 'none' (default), 'auto', or 'square' for ultrasound ROI cropping
 
         Returns:
             Dictionary with analysis summary
@@ -384,6 +387,7 @@ class RealtimeVeinAnalyzer:
         # Analysis results
         frame_results = []
         frame_count = 0
+        cached_roi = None  # Cache ROI for consistency across frames
 
         try:
             while True:
@@ -397,6 +401,10 @@ class RealtimeVeinAnalyzer:
                 if skip_frames > 0 and frame_count % (skip_frames + 1) != 0:
                     frame_count += 1
                     continue
+
+                # Apply ROI cropping if specified
+                if crop_mode != 'none':
+                    frame, cached_roi = apply_roi_to_frame(frame, crop_mode, cached_roi)
 
                 # Analyze frame
                 timestamp = frame_count / fps
