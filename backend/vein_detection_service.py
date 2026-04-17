@@ -149,6 +149,7 @@ class VeinDetectionService:
         max_frames: Optional[int] = None,
         skip_frames: int = 0,
         save_output: bool = False,
+        crop_mode: str = 'none',
     ) -> Dict:
         """
         Analyze ultrasound video file
@@ -158,11 +159,12 @@ class VeinDetectionService:
             max_frames: Maximum frames to process
             skip_frames: Skip every nth frame
             save_output: Save annotated video
+            crop_mode: 'none' (default), 'auto' (detect ROI), or 'square' (center square crop)
 
         Returns:
             Analysis summary with per-frame results
         """
-        logger.info(f"Analyzing video: {video_path}")
+        logger.info(f"Analyzing video: {video_path} (crop_mode={crop_mode})")
 
         try:
             # Determine output path
@@ -171,12 +173,13 @@ class VeinDetectionService:
                 input_path = Path(video_path)
                 output_path = str(input_path.parent / f"{input_path.stem}_analyzed.mp4")
 
-            # Process video
+            # Process video with ROI cropping support
             summary = self.analyzer.process_video(
                 video_path,
                 output_video_path=output_path,
                 max_frames=max_frames,
                 skip_frames=skip_frames,
+                crop_mode=crop_mode,
             )
 
             # Format output

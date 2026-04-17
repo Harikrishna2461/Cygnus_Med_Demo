@@ -19,6 +19,7 @@ const VisionAnalyzer = () => {
   const [videoError, setVideoError] = useState(null);
   const [maxFrames, setMaxFrames] = useState(300);
   const [skipFrames, setSkipFrames] = useState(1);
+  const [cropMode, setCropMode] = useState('none');  // 'none', 'auto', 'square'
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
@@ -99,6 +100,7 @@ const VisionAnalyzer = () => {
       formData.append('max_frames', maxFrames.toString());
       formData.append('skip_frames', skipFrames.toString());
       formData.append('save_output', 'true');
+      formData.append('crop_mode', cropMode);
 
       const response = await fetch('/api/vein-detection/analyze-video', {
         method: 'POST',
@@ -509,8 +511,20 @@ const VisionAnalyzer = () => {
                 </div>
               </div>
 
+              <div className="option-group">
+                <label>Ultrasound Region Cropping:</label>
+                <div className="option-input">
+                  <select value={cropMode} onChange={(e) => setCropMode(e.target.value)}>
+                    <option value="none">❌ No Cropping</option>
+                    <option value="auto">🔍 Auto-Detect (Recommended)</option>
+                    <option value="square">◾ Center Square Crop</option>
+                  </select>
+                  <span className="help-text">Crop to the ultrasound region to remove black borders and improve detection</span>
+                </div>
+              </div>
+
               <p className="option-description">
-                🤖 Uses KLT optical flow tracking to detect and follow two blobs (veins) across frames
+                🤖 Vision Transformer with N1/N2/N3 vein classification. Optional ultrasound ROI cropping improves accuracy by removing black borders.
               </p>
             </div>
 
