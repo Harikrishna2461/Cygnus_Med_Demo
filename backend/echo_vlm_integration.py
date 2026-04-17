@@ -1,36 +1,22 @@
 """
-Echo VLM Integration - Qwen2VLMOEForConditionalGeneration
-Actual ultrasound-specialized VLM for clinical decision support
+Echo VLM Integration - Qwen2VLMOEForConditionalGeneration via HuggingFace Inference API
+Uses HuggingFace Inference API to call EchoVLM remotely
 3-stage verification: Fascia → Vein Validation → N1/N2/N3 Classification
 Integrated with Qdrant-based RAG system (CHIVA knowledge base)
 """
 
-import torch
 import numpy as np
 import cv2
 import json
 import logging
+import os
+import base64
+import requests
 from typing import Dict, List, Tuple, Optional, Callable
 from pathlib import Path
 from dataclasses import dataclass
 from PIL import Image
-
-try:
-    from transformers import AutoProcessor
-    from qwen_vl_utils import process_vision_info
-    HAS_QWEN = True
-except ImportError:
-    HAS_QWEN = False
-    AutoProcessor = None
-    process_vision_info = None
-
-try:
-    from EchoVLM import Qwen2VLMOEForConditionalGeneration
-except ImportError:
-    try:
-        from transformers import Qwen2VLMOEForConditionalGeneration
-    except ImportError:
-        Qwen2VLMOEForConditionalGeneration = None
+from io import BytesIO
 
 logger = logging.getLogger(__name__)
 
@@ -57,83 +43,33 @@ class FasciaDetectionResult:
 
 
 class EchoVLMIntegration:
-    """Integration with Qwen2VLM (EchoVLM) for ultrasound interpretation"""
+    """Integration with EchoVLM via HuggingFace Inference API (no local model needed)"""
 
     def __init__(
         self,
         model_id: str = "chaoyinshe/EchoVLM",
-        device_map: str = "auto",
-        torch_dtype: str = "bfloat16",
-        use_flash_attention_2: bool = True,
         retrieve_context_fn: Optional[Callable] = None,
     ):
         """
-        Initialize Echo VLM (Qwen2VLMOEForConditionalGeneration)
+        Initialize Echo VLM using HuggingFace Inference API
 
         Args:
             model_id: HuggingFace model ID for EchoVLM
-            device_map: Device mapping ("auto", "cuda", "cpu")
-            torch_dtype: Data type (bfloat16, float16, float32)
-            use_flash_attention_2: Use Flash Attention 2 for efficiency
             retrieve_context_fn: Function to retrieve RAG context from Qdrant
         """
         self.model_id = model_id
-        self.device_map = device_map
-        self.torch_dtype = torch_dtype
-        self.use_flash_attention_2 = use_flash_attention_2
         self.retrieve_rag_context = retrieve_context_fn
+        self.hf_token = os.getenv("HF_TOKEN", None)
+        self.api_url = f"https://api-inference.huggingface.co/models/{model_id}"
+        self._initialized = True  # API-based, no local loading needed
 
-        # Initialize model and processor
-        self.model = None
-        self.processor = None
-        self._initialized = False
+        logger.info(f"✅ EchoVLM API Integration initialized (Model: {model_id})")
+        if not self.hf_token:
+            logger.warning("⚠️  HF_TOKEN not set - using free tier (may have rate limits). Set HF_TOKEN for faster access.")
 
-        if not HAS_QWEN:
-            logger.warning("Qwen VL utilities not available - VLM will not work")
-            return
-
-        if Qwen2VLMOEForConditionalGeneration is None:
-            logger.warning("Qwen2VLMOEForConditionalGeneration not found - install EchoVLM")
-            return
-
-        self._initialize_model()
-
-    def _initialize_model(self):
-        """Load model and processor"""
-        try:
-            logger.info(f"Loading EchoVLM from {self.model_id}...")
-
-            # Map dtype string to torch dtype
-            dtype_map = {
-                "bfloat16": torch.bfloat16,
-                "float16": torch.float16,
-                "float32": torch.float32,
-            }
-            dtype = dtype_map.get(self.torch_dtype, torch.bfloat16)
-
-            # Load model
-            attn_impl = "flash_attention_2" if self.use_flash_attention_2 else None
-
-            self.model = Qwen2VLMOEForConditionalGeneration.from_pretrained(
-                self.model_id,
-                torch_dtype=dtype,
-                attn_implementation=attn_impl,
-                device_map=self.device_map,
-            )
-
-            # Load processor
-            self.processor = AutoProcessor.from_pretrained(self.model_id)
-
-            self._initialized = True
-            logger.info("✅ EchoVLM model initialized successfully")
-
-        except Exception as e:
-            logger.error(f"Failed to initialize EchoVLM: {e}")
-            self._initialized = False
-
-    def _call_echovlm(self, image: np.ndarray, prompt: str) -> str:
+    def _call_echovlm_api(self, image: np.ndarray, prompt: str) -> str:
         """
-        Call actual EchoVLM (Qwen2VLM) with image and prompt
+        Call EchoVLM via HuggingFace Inference API
 
         Args:
             image: Ultrasound image (numpy array, RGB)
@@ -142,71 +78,50 @@ class EchoVLMIntegration:
         Returns:
             VLM response text
         """
-        if not self._initialized or self.model is None or self.processor is None:
-            logger.error("EchoVLM not initialized")
-            return ""
-
         try:
-            # Convert numpy to PIL Image if needed
+            # Convert image to PIL and then to bytes
             if isinstance(image, np.ndarray):
-                image = Image.fromarray(image.astype(np.uint8))
+                image_pil = Image.fromarray(image.astype(np.uint8))
+            else:
+                image_pil = image
 
-            # Prepare message for EchoVLM
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "image": image,
-                        },
-                        {"type": "text", "text": prompt},
-                    ],
-                }
-            ]
+            # Encode image to bytes
+            img_byte_arr = BytesIO()
+            image_pil.save(img_byte_arr, format='PNG')
+            img_byte_arr.seek(0)
 
-            # Apply chat template
-            text = self.processor.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True
+            # Prepare headers
+            headers = {}
+            if self.hf_token:
+                headers["Authorization"] = f"Bearer {self.hf_token}"
+
+            # Call HuggingFace Inference API
+            logger.info(f"Calling EchoVLM API with prompt: {prompt[:50]}...")
+
+            response = requests.post(
+                self.api_url,
+                headers=headers,
+                files={"image": img_byte_arr},
+                data={"inputs": prompt},
+                timeout=30,
             )
 
-            # Process vision info
-            image_inputs, video_inputs = process_vision_info(messages)
+            if response.status_code == 200:
+                result = response.json()
+                # API returns list of results
+                if isinstance(result, list) and len(result) > 0:
+                    output_text = result[0].get("generated_text", "")
+                else:
+                    output_text = str(result)
 
-            # Prepare inputs
-            inputs = self.processor(
-                text=[text],
-                images=image_inputs,
-                videos=video_inputs,
-                padding=True,
-                return_tensors="pt",
-            )
-            inputs = inputs.to(self.model.device)
-
-            # Generate response
-            with torch.no_grad():
-                generated_ids = self.model.generate(
-                    **inputs,
-                    max_new_tokens=512,
-                    temperature=0.3,
-                    top_p=0.9,
-                )
-
-            # Decode response
-            generated_ids_trimmed = [
-                out_ids[len(in_ids) :]
-                for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-            ]
-            output_text = self.processor.batch_decode(
-                generated_ids_trimmed,
-                skip_special_tokens=True,
-                clean_up_tokenization_spaces=False,
-            )
-
-            return output_text[0] if output_text else ""
+                logger.info(f"EchoVLM API response received ({len(output_text)} chars)")
+                return output_text
+            else:
+                logger.error(f"EchoVLM API error {response.status_code}: {response.text}")
+                return ""
 
         except Exception as e:
-            logger.error(f"EchoVLM inference error: {e}")
+            logger.error(f"EchoVLM API call failed: {e}")
             return ""
 
     def verify_fascia_detection(
@@ -241,7 +156,7 @@ Respond with ONLY this JSON:
 or
 {"fascia_detected": false, "confidence": 75, "reasoning": "line looks like artifact"}"""
 
-        response = self._call_echovlm(vis_image, prompt)
+        response = self._call_echovlm_api(vis_image, prompt)
 
         try:
             # Try to extract JSON from response
@@ -326,7 +241,7 @@ For each vein (V0, V1, V2...):
 Respond with ONLY JSON:
 {{"veins": [{{"id": 0, "is_valid": true, "confidence": 90, "notes": "real vein"}}], "total_valid": {num_veins}}}"""
 
-        response = self._call_echovlm(vis_image, prompt)
+        response = self._call_echovlm_api(vis_image, prompt)
 
         try:
             if not response:
@@ -462,7 +377,7 @@ OR
 OR
 {{"classification": "N3", "confidence": 88, "reasoning": "bright vein 35mm above fascia"}}"""
 
-        response = self._call_echovlm(zoomed, prompt)
+        response = self._call_echovlm_api(zoomed, prompt)
 
         try:
             if not response:
