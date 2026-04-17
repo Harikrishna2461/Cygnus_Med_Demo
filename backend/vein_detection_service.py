@@ -115,7 +115,7 @@ class VeinDetectionService:
                     if clf.get('vein_id') == vein['id']:
                         vein_info.update({
                             'n_level': clf.get('classification', 'N2'),
-                            'primary_classification': cls._map_n_level_to_classification(
+                            'primary_classification': self._map_n_level_to_classification(
                                 clf.get('classification', 'N2')
                             ),
                             'confidence': float(clf.get('confidence', 0.5)),

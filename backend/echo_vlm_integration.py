@@ -143,11 +143,15 @@ class EchoVLMIntegration:
             )
             image_inputs, video_inputs = process_vision_info(messages)
 
-            # Convert image to base64 for API
+            # Convert image to base64 for API (compress to reduce size)
             if image_inputs:
                 img_pil = image_inputs[0] if isinstance(image_inputs, list) else image_inputs
+                # Resize to reduce payload size for HF API
+                max_size = 512
+                if img_pil.width > max_size or img_pil.height > max_size:
+                    img_pil.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
                 img_byte_arr = BytesIO()
-                img_pil.save(img_byte_arr, format='PNG')
+                img_pil.save(img_byte_arr, format='JPEG', quality=75)  # JPEG for smaller size
                 img_base64 = base64.b64encode(img_byte_arr.getvalue()).decode()
             else:
                 img_base64 = None
