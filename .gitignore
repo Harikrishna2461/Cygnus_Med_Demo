@@ -38,11 +38,14 @@ build/
 
 # Large model weights and checkpoints (> 100 MB)
 *.pth
+*.pt
 backend/weights/
+backend/checkpoints/
 backend/vision/segmentation/checkpoints/
 
 # Large data files
 Task_1_RAG_Knowledgebase.pdf
+Sample_Data/
 
 # Qdrant local storage (binary data, not meant for VCS)
 backend/qdrant_storage/
