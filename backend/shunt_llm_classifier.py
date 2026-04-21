@@ -380,14 +380,8 @@ _LEG_ORDER = {"Left": 0, "Right": 1}
 
 def _retrieve_rag_context(group: list[dict], leg_label: str, retrieve_fn: Callable) -> str:
     try:
-        rp_flows = [f"{c['fromType']}→{c['toType']}" for c in group if c.get("flow") == "RP"]
-        ep_flows = [f"{c['fromType']}→{c['toType']}" for c in group if c.get("flow") == "EP"]
-        query = (
-            f"CHIVA shunt classification venous reflux "
-            f"RP flows: {', '.join(rp_flows) or 'none'}. "
-            f"EP flows: {', '.join(ep_flows[:4]) or 'none'}. "
-            f"saphenofemoral junction GSV tributary ligation treatment"
-        )
+        # Query = raw clip JSON exactly as received, no interpretation added
+        query = "CHIVA shunt classification " + json.dumps(group)
         if chunks := retrieve_fn(query, k=3):
             return "\n\n---\n\n".join(str(ch)[:600] for ch in chunks)
     except Exception as e:

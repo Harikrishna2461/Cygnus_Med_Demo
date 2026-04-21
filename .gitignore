@@ -46,6 +46,15 @@ backend/vision/segmentation/checkpoints/
 # Large data files
 Task_1_RAG_Knowledgebase.pdf
 Sample_Data/
+backend/Task_1_Shunt_Classification_Knowledgebase.pdf
+
+# SQLite / metrics databases
+backend/*.db
+
+# Generated report documents
+backend/shunt_classification_rag_report*.docx
+backend/rag_relevance_report*.docx
+backend/~$*.docx
 
 # Qdrant local storage (binary data, not meant for VCS)
 backend/qdrant_storage/

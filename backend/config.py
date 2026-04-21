@@ -15,15 +15,18 @@ QDRANT_HOST = os.getenv("QDRANT_HOST", None)            # set for remote/cloud
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", None)      # set for Qdrant Cloud
 QDRANT_COLLECTION = "medical_knowledge"
+QDRANT_SHUNT_COLLECTION = "shunt_classification_db"
+QDRANT_LIGATION_COLLECTION = "ligation_knowledgebase_db"
 
 # LLM Configuration — Ollama (local, used for embeddings only)
 OLLAMA_BASE_URL = "http://localhost:11434"
 OLLAMA_MODEL = "llama3.2:1b"           # kept for embeddings
 OLLAMA_EMBEDDING_MODEL = "llama3.2:1b"
 OLLAMA_KEEP_ALIVE = "20m"
+OLLAMA_SETUP_MODELS = [OLLAMA_EMBEDDING_MODEL]  # models to ensure are installed
 
 # Groq API — used for ALL LLM inference (70B model, high quality)
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "REDACTED")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
 # Chunking parameters
