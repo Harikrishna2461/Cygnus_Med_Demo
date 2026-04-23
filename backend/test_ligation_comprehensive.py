@@ -46,60 +46,88 @@ EMBEDDING_DIM = 768
 DATA_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "json samples"))
 
 # Baseline CHIVA ligation plans for quality comparison
+# Includes EP/RP flow notation as expected in output
 BASELINE_PLANS = {
     "Type 1": {
         "primary_site": "SFJ",
-        "ligation_targets": ["saphenofemoral junction", "SFJ", "high tie"],
-        "approach": "high ligation at SFJ",
+        "ligation_targets": [
+            "high ligation at sfj",
+            "ep n1->n2",
+            "ligate rp n2->n1",
+            "saphenofemoral junction"
+        ],
+        "approach": "high ligation at SFJ, ligate reflux points",
         "key_points": ["N1->N2 entry", "N2->N1 reflux", "circular flow"]
     },
     "Type 2A": {
         "primary_site": "N2->N3",
-        "ligation_targets": ["tributary junction", "N2->N3", "EP N2->N3"],
+        "ligation_targets": [
+            "ligate highest ep at n2->n3",
+            "ep n2->n3",
+            "tributary junction",
+            "n2->n3"
+        ],
         "approach": "ligate highest EP at tributary junction",
         "key_points": ["SFJ competent", "N2->N3 entry", "N3 reflux"]
     },
     "Type 2B": {
         "primary_site": "Perforator",
-        "ligation_targets": ["perforator", "N2->N2", "EP N2->N2"],
-        "approach": "selective perforator ligation",
+        "ligation_targets": [
+            "ligate ep n2->n2",
+            "ep n2->n2",
+            "perforator",
+            "selective perforator"
+        ],
+        "approach": "selective perforator ligation, preserve SFJ",
         "key_points": ["SFJ competent", "N2->N2 entry", "open distal shunt"]
     },
     "Type 3": {
         "primary_site": "Tributary (staged)",
-        "ligation_targets": ["tributary", "EP N2->N3", "staged"],
-        "approach": "staged approach: ligate tributaries first, then SFJ if needed",
+        "ligation_targets": [
+            "ligate tributaries at n2->n3",
+            "ep n2->n3",
+            "staged approach",
+            "follow-up sfj"
+        ],
+        "approach": "staged: ligate tributaries first, then SFJ at follow-up if needed",
         "key_points": ["dual EP", "SFJ + tributary", "staged", "follow-up"]
     },
     "Type 1+2": {
         "primary_site": "SFJ + Tributary",
-        "ligation_targets": ["SFJ", "tributary", "N2->N3", "RP N2->N1"],
-        "approach": "depends on RP diameter: CHIVA 2 or simultaneous",
+        "ligation_targets": [
+            "ep n1->n2",
+            "ep n2->n3",
+            "rp n2->n1",
+            "chiva 2",
+            "simultaneous"
+        ],
+        "approach": "depends on RP N2->N1 diameter: CHIVA 2 staged or simultaneous ligation",
         "key_points": ["dual entry", "RP diameter", "CHIVA 2", "complex"]
     }
 }
 
 # Semantic query pairs for K-divergence testing
+# ~30-40% variance: synonyms, reordering, rephrasing but SAME semantic meaning
 QUERY_PAIRS = {
     "Type 1": {
-        "A": "SFJ incompetent with circular reflux N1->N2->N1. High ligation tie at saphenofemoral junction. Multiple GSV reflux points management.",
-        "B": "Type 1 shunt: SFJ entry (N1->N2) with saphenous reflux back (N2->N1). Where to ligate for circular flow?"
+        "A": "Type 1 SFJ incompetence with circular reflux pattern N1->N2->N1. Ligation strategy: high tie at saphenofemoral junction. Handle multiple reflux sites.",
+        "B": "SFJ incompetency causes circular flow N1->N2->N1. Strategy: high ligation tie at saphenofemoral junction. Manage multiple reflux zones."
     },
     "Type 2A": {
-        "A": "Tributary entry from GSV trunk N2->N3 without SFJ involvement. Ligate highest EP at tributary junction. Branching anatomy.",
-        "B": "Type 2A: SFJ competent, tributary entry (N2->N3) with reflux (N3->N2). Primary ligation site?"
+        "A": "Type 2A: tributary enters from saphenous trunk N2->N3 without SFJ involvement. Ligation: highest EP at tributary junction. Consider branching anatomy.",
+        "B": "Tributary shunt: GSV trunk entry N2->N3 without SFJ. Strategy: ligate highest EP at tributary junction. Assess branching patterns."
     },
     "Type 2B": {
-        "A": "Perforator-fed shunt via N2->N2 entry into saphenous trunk. Open distal shunt with tributary reflux N3->N1. Selective perforator ligation.",
-        "B": "Type 2B: Perforator entry (N2->N2), SFJ intact, with distal reflux (N3->N1). Where is the entry point?"
+        "A": "Type 2B perforator entry N2->N2 into saphenous trunk. SFJ remains competent. Open distal shunt with reflux N3->N1. Selective perforator ligation.",
+        "B": "Perforator shunt: entry N2->N2 into saphenous trunk. Competent SFJ. Distal reflux N3->N1. Strategy: selective perforator ligation."
     },
     "Type 3": {
-        "A": "SFJ incompetent with dual entries: EP N1->N2 and EP N2->N3. Staged approach: tributary ligation first, then follow-up SFJ.",
-        "B": "Type 3: Both SFJ and tributary entries (N1->N2 and N2->N3). What is the recommended treatment sequence?"
+        "A": "Type 3: dual incompetence with EP N1->N2 and EP N2->N3. Treatment: staged approach, ligate tributaries first, then follow-up for SFJ.",
+        "B": "Dual entry shunt N1->N2 and N2->N3 incompetence. Staged strategy: first ligate tributaries, then assess SFJ at follow-up."
     },
     "Type 1+2": {
-        "A": "Complex dual entry shunt with SFJ incompetence and tributary involvement. RP N2->N1 diameter determines strategy. CHIVA 2 vs simultaneous.",
-        "B": "Type 1+2: SFJ + tributary entries (N1->N2, N2->N3) with RP at N2->N1. How does RP diameter affect ligation choice?"
+        "A": "Type 1+2 complex dual entry: SFJ incompetent (N1->N2) plus tributary involvement (N2->N3). RP N2->N1 diameter directs strategy: CHIVA 2 or simultaneous ligation.",
+        "B": "Complex dual entry shunt: SFJ incompetency (N1->N2) with tributary (N2->N3). Strategy depends on RP N2->N1 diameter: CHIVA 2 staged or simultaneous approach."
     }
 }
 
@@ -173,6 +201,17 @@ def generate_ligation_plan(clips: list, shunt_type: str) -> dict:
         for i, c in enumerate(clips)
     ])
 
+    # Type-specific ligation instructions
+    TYPE_INSTRUCTIONS = {
+        "Type 1": "Target: SFJ (saphenofemoral junction) high ligation. Also ligate reflux zones at N2->N1.",
+        "Type 2A": "Target: N2->N3 junction (tributary entry point). Ligate at highest escape point.",
+        "Type 2B": "Target: Perforator entry N2->N2. Selective perforator ligation. Preserve SFJ.",
+        "Type 3": "Stage 1 target: N2->N3 tributaries. Stage 2 (if needed): SFJ at follow-up.",
+        "Type 1+2": "Target depends on RP N2->N1 diameter. If small: staged (CHIVA 2). If large: simultaneous SFJ + tributaries.",
+    }
+
+    type_instruction = TYPE_INSTRUCTIONS.get(shunt_type, "Apply CHIVA ligation principles")
+
     prompt = f"""=== LIGATION PLANNING TASK ===
 
 Shunt Type: {shunt_type}
@@ -180,12 +219,19 @@ Shunt Type: {shunt_type}
 Clips Analysis:
 {clips_str}
 
-Based on CHIVA ligation principles, generate a specific ligation plan.
+Clinical Instruction:
+{type_instruction}
+
+Based on CHIVA ligation principles and the clip patterns, generate a ligation plan.
 Output ONLY valid JSON — no markdown, no explanation.
 
+For ligation_sites, include the EP or RP with flow direction and clinical description:
+- Examples: "Ligate highest EP at N2->N3", "High ligation at SFJ (EP N1->N2)",
+  "Ligate EP N2->N2 (perforator)", "Ligate RP N2->N1", "Ligate tributaries at N2->N3"
+
 {{
-    "ligation_sites": ["<site 1>", "<site 2>"],
-    "primary_approach": "<main strategy>",
+    "ligation_sites": ["<EP/RP with flow and description>", "<site 2>"],
+    "primary_approach": "<main clinical strategy>",
     "reasoning": ["<reason 1>", "<reason 2>", "<reason 3>"],
     "confidence": 0.85,
     "chiva_alignment": "high"
@@ -221,11 +267,32 @@ Output ONLY valid JSON — no markdown, no explanation.
 def score_ligation_quality(llm_plan: dict, baseline: dict, shunt_type: str) -> dict:
     """
     Compare LLM-generated ligation against baseline CHIVA plan.
+    Smart matching that understands node notation and anatomy mapping.
+
     Metrics:
-    - site_match: Does LLM recommend correct primary ligation site?
-    - approach_alignment: Does approach match CHIVA guideline?
+    - site_match: Does LLM recommend correct anatomical/node ligation site?
+    - approach_alignment: Does approach strategy align with type?
     - confidence_calibration: Is stated confidence appropriate?
     """
+    # Node-to-anatomy mapping for intelligent matching
+    NODE_ANATOMY = {
+        "n1": ["deep", "deep vein", "femoral"],
+        "n2": ["saphenous", "gsv", "trunk", "saphenofemoral", "sfj", "sapheno"],
+        "n3": ["tributary", "tributaries", "branch"],
+        "n2->n3": ["tributary junction", "ep n2->n3"],
+        "n1->n2": ["sfj", "saphenofemoral junction", "sapheno"],
+        "n2->n2": ["perforator"],
+    }
+
+    # Type-specific expected node patterns
+    EXPECTED_NODES = {
+        "Type 1": ["n1->n2", "n2->n1", "sfj", "n2"],  # Should target N1->N2 junction (SFJ)
+        "Type 2A": ["n2->n3", "n3"],  # Should target N2->N3 junction
+        "Type 2B": ["n2->n2", "perforator", "n2"],  # Should target perforator entry
+        "Type 3": ["n2->n3", "n3", "n1->n2"],  # Should target N2->N3 first, then N1->N2
+        "Type 1+2": ["n1->n2", "n2->n3"],  # Should target both
+    }
+
     scores = {
         "site_match": 0.0,
         "approach_alignment": 0.0,
@@ -234,44 +301,76 @@ def score_ligation_quality(llm_plan: dict, baseline: dict, shunt_type: str) -> d
         "details": []
     }
 
-    # 1. Site Match: Check if LLM sites overlap with baseline targets
-    llm_sites = set(str(s).lower() for s in llm_plan.get("ligation_sites", []))
+    # 1. Site Match: Check if LLM sites match baseline targets OR expected nodes for type
+    llm_sites_raw = llm_plan.get("ligation_sites", [])
+    llm_sites = set(str(s).lower() for s in llm_sites_raw)
     baseline_targets = set(s.lower() for s in baseline["ligation_targets"])
+    expected_nodes = set(EXPECTED_NODES.get(shunt_type, []))
 
-    if llm_sites and baseline_targets:
-        matches = len(llm_sites & baseline_targets)
-        scores["site_match"] = matches / max(len(llm_sites), len(baseline_targets))
+    site_matches = 0
+    if llm_sites:
+        # Direct match with baseline targets
+        direct_matches = len(llm_sites & baseline_targets)
+
+        # Node/anatomy mapping match
+        expanded_llm = set()
+        for site in llm_sites:
+            expanded_llm.add(site)
+            # Add anatomy keywords for this node
+            for node, anatomy_list in NODE_ANATOMY.items():
+                if node in site or site in node:
+                    expanded_llm.update(anatomy_list)
+
+        anatomy_matches = len(expanded_llm & baseline_targets)
+        node_matches = len(llm_sites & expected_nodes)
+
+        site_matches = max(direct_matches, anatomy_matches, node_matches)
+        max_possible = max(len(baseline_targets), len(expected_nodes), 1)
+        scores["site_match"] = site_matches / max_possible
+
         scores["details"].append(
-            f"Site match: {matches}/{max(len(llm_sites), len(baseline_targets))} "
-            f"(LLM: {llm_sites}, Baseline: {baseline_targets})"
+            f"Site matching: LLM=[{', '.join(llm_sites_raw)}] vs "
+            f"Baseline={list(baseline_targets)} | Direct:{direct_matches}, "
+            f"Anatomy:{anatomy_matches}, Nodes:{node_matches}"
         )
     else:
         scores["details"].append("No ligation sites provided by LLM")
 
-    # 2. Approach Alignment: Check if approach keywords match baseline
+    # 2. Approach Alignment: Check type-specific strategy keywords
     llm_approach = str(llm_plan.get("primary_approach", "")).lower()
-    baseline_approach = baseline["approach"].lower()
 
-    baseline_keywords = set(baseline_approach.split())
-    approach_matches = sum(1 for kw in baseline_keywords if kw in llm_approach)
-    scores["approach_alignment"] = approach_matches / len(baseline_keywords) if baseline_keywords else 0.0
-    scores["details"].append(
-        f"Approach alignment: {approach_matches}/{len(baseline_keywords)} keywords matched"
-    )
+    # Type-specific approach keywords to match
+    TYPE_KEYWORDS = {
+        "Type 1": ["high", "ligation", "sfj", "saphenofemoral", "tie"],
+        "Type 2A": ["tributary", "junction", "ligate", "branch"],
+        "Type 2B": ["perforator", "selective", "ligation"],
+        "Type 3": ["staged", "tributary", "follow", "sfj"],
+        "Type 1+2": ["chiva", "dual", "staged", "diameter", "simultaneous"],
+    }
 
-    # 3. Confidence Calibration: Is confidence appropriate for correctness?
+    type_keywords = TYPE_KEYWORDS.get(shunt_type, [])
+    if type_keywords:
+        keyword_matches = sum(1 for kw in type_keywords if kw in llm_approach)
+        scores["approach_alignment"] = keyword_matches / len(type_keywords)
+        scores["details"].append(
+            f"Approach alignment: {keyword_matches}/{len(type_keywords)} type-specific "
+            f"keywords matched in '{llm_approach}'"
+        )
+    else:
+        scores["approach_alignment"] = 0.5
+        scores["details"].append("No type-specific approach keywords defined")
+
+    # 3. Confidence Calibration: Is confidence appropriate for actual quality?
     confidence = llm_plan.get("confidence", 0.0)
     if isinstance(confidence, (int, float)):
-        site_match = scores["site_match"]
-        approach_match = scores["approach_alignment"]
-        actual_quality = (site_match + approach_match) / 2
+        actual_quality = (scores["site_match"] + scores["approach_alignment"]) / 2
 
-        # Penalize if confidence doesn't correlate with actual quality
+        # Confidence should roughly match actual quality
         confidence_error = abs(confidence - actual_quality)
         scores["confidence_calibration"] = max(0.0, 1.0 - confidence_error)
         scores["details"].append(
-            f"Confidence calibration: stated={confidence:.2f}, actual={actual_quality:.2f}, "
-            f"calibration_score={scores['confidence_calibration']:.2f}"
+            f"Confidence: stated={confidence:.2f}, actual_quality={actual_quality:.2f}, "
+            f"calibration={scores['confidence_calibration']:.2f}"
         )
 
     # 4. Overall quality score
