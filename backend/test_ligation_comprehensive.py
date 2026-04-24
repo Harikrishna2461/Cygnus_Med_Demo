@@ -193,24 +193,140 @@ def calculate_stability(qa_results: dict, qb_results: dict, k: int) -> float:
     return intersection / union if union > 0 else 0.0
 
 
+def analyze_clip_patterns(clips: list, shunt_type: str) -> dict:
+    """Extract clinical decision parameters from clips without hardcoding outcomes."""
+    analysis = {
+        "primary_eps": [],
+        "primary_rps": [],
+        "secondary_decision_points": [],
+        "ep_positions": [],
+        "rp_positions": []
+    }
+
+    # Collect all EPs and RPs with positions
+    for clip in clips:
+        flow = clip.get('flow', '')
+        from_type = clip.get('fromType', '')
+        to_type = clip.get('toType', '')
+        pos_y = clip.get('posYRatio', 0.0)
+
+        if flow == 'EP':
+            analysis["primary_eps"].append(f"{from_type}->{to_type}")
+            analysis["ep_positions"].append(pos_y)
+        elif flow == 'RP':
+            analysis["primary_rps"].append(f"{from_type}->{to_type}")
+            analysis["rp_positions"].append(pos_y)
+
+    # Identify secondary decision points based on pattern
+    unique_eps = set(analysis["primary_eps"])
+    unique_rps = set(analysis["primary_rps"])
+
+    # Type 1+2 specific: check RP N2->N1 characteristics for staged vs simultaneous decision
+    if shunt_type == "Type 1+2" and "N2->N1" in unique_rps:
+        n2_n1_positions = [p for i, p in enumerate(analysis["rp_positions"])
+                          if analysis["primary_rps"][i] == "N2->N1"]
+        analysis["secondary_decision_points"].append({
+            "point": "RP N2->N1 diameter assessment (inferred from presence/count)",
+            "clinical_significance": "Determines CHIVA 2 staged vs simultaneous approach",
+            "consideration": "Small/single RP N2->N1 suggests staged approach (ligate tributaries first, reassess), large/multiple suggests simultaneous ligation"
+        })
+
+    # Type 2A/2B specific: check for multiple tributaries (EP N2->N3 counts)
+    ep_n2_n3_count = analysis["primary_eps"].count("N2->N3")
+    if shunt_type in ["Type 2A", "Type 2B"] and ep_n2_n3_count > 1:
+        analysis["secondary_decision_points"].append({
+            "point": f"Multiple tributaries at N3 detected (count: {ep_n2_n3_count})",
+            "clinical_significance": "Need to evaluate which tributaries to ligate",
+            "consideration": "Consider anatomical factors: calibre differences, distance to perforator, drainage patterns through larger/smaller vessels"
+        })
+
+    # Type 3 specific: dual entries (SFJ + tributaries) = staged approach
+    if shunt_type == "Type 3" and "N1->N2" in unique_eps and "N2->N3" in unique_eps:
+        analysis["secondary_decision_points"].append({
+            "point": "Dual entries detected (SFJ + tributaries)",
+            "clinical_significance": "Staged approach indicated by CHIVA guidelines",
+            "consideration": "Stage 1: ligate tributaries (EP N2->N3). Stage 2 (at 6-12 month follow-up): assess SFJ reflux and ligate if needed"
+        })
+
+    # Any multiple RPs suggest multiple reflux zones to assess
+    if len(unique_rps) > 1:
+        analysis["secondary_decision_points"].append({
+            "point": f"Multiple reflux zones detected ({len(unique_rps)} types)",
+            "clinical_significance": "Each reflux zone may require specific management",
+            "consideration": "Determine which reflux zones need ligation vs which may resolve after primary ligation"
+        })
+
+    return analysis
+
+
 def generate_ligation_plan(clips: list, shunt_type: str) -> dict:
-    """Generate ligation plan using LLM with RAG context."""
+    """Generate ligation plan using LLM with enhanced CHIVA principles and clinical context."""
+
+    # Extract clinical patterns from clips
+    clip_analysis = analyze_clip_patterns(clips, shunt_type)
+
     clips_str = "\n".join([
         f"  Clip {i+1}: {c.get('flow', '?')} {c.get('fromType', '?')}->"
         f"{c.get('toType', '?')} (y={c.get('posYRatio', 0.0):.3f})"
         for i, c in enumerate(clips)
     ])
 
-    # Type-specific ligation instructions
-    TYPE_INSTRUCTIONS = {
-        "Type 1": "Target: SFJ (saphenofemoral junction) high ligation. Also ligate reflux zones at N2->N1.",
-        "Type 2A": "Target: N2->N3 junction (tributary entry point). Ligate at highest escape point.",
-        "Type 2B": "Target: Perforator entry N2->N2. Selective perforator ligation. Preserve SFJ.",
-        "Type 3": "Stage 1 target: N2->N3 tributaries. Stage 2 (if needed): SFJ at follow-up.",
-        "Type 1+2": "Target depends on RP N2->N1 diameter. If small: staged (CHIVA 2). If large: simultaneous SFJ + tributaries.",
+    # Build clinical context from analysis
+    clinical_context = ""
+    if clip_analysis["secondary_decision_points"]:
+        clinical_context += "\nKey Decision Points Identified from Clips:\n"
+        for dp in clip_analysis["secondary_decision_points"]:
+            clinical_context += f"  - {dp['point']}\n    Clinical significance: {dp['clinical_significance']}\n    Consideration: {dp['consideration']}\n"
+
+    # CHIVA ligation principles for each type (guidance, not hardcoded outcomes)
+    CHIVA_PRINCIPLES = {
+        "Type 1": """
+CHIVA Principle for Type 1:
+- PRIMARY TARGET: Entry point (EP N1->N2) at SFJ or Hunterian junction
+- SECONDARY TARGETS: Reflux zones (RP N2->N1) - ligate below each except most distal
+- DECISION FACTOR: posYRatio determines location (SFJ if y<=0.098, Hunterian if y<=0.353)
+- GOAL: Interrupt circular flow N1->N2->N1 by high ligation at entry
+- APPROACH: High ligation to prevent thrombosis and maintain venous return""",
+
+        "Type 2A": """
+CHIVA Principle for Type 2A:
+- PRIMARY TARGET: Highest escape point (EP N2->N3 at tributary junction)
+- SECONDARY DECISION: If multiple tributaries, assess anatomical factors
+  * Calibre: Equal vs Unequal vessel sizes
+  * Distance to perforator: Affects which tributary drains better
+  * Drainage: Presence of drainage through thinner vessel
+- GOAL: Selectively interrupt escape route while preserving GSV function
+- APPROACH: Ligate at junction level, preserve trunk if diameter is normal""",
+
+        "Type 2B": """
+CHIVA Principle for Type 2B:
+- PRIMARY TARGET: Perforator entry point (EP N2->N2)
+- SECONDARY DECISION: Location along saphenous trunk (SFJ-Knee vs Hunterian vs Calf)
+- DECISION FACTOR: posYRatio helps determine location for surgical approach
+- GOAL: Selective perforator ligation while preserving SFJ competence
+- CONSTRAINT: Do NOT ligate SFJ - it is competent and must remain patent""",
+
+        "Type 3": """
+CHIVA Principle for Type 3:
+- PRIMARY TARGET (Stage 1): Tributaries at EP N2->N3
+- SECONDARY TARGET (Stage 2): SFJ only if reflux develops at follow-up
+- DECISION LOGIC: Conservative staged approach - avoid unnecessary SFJ intervention
+- TIMING: Initial ligation of tributaries, reassess at 6-12 months
+- GOAL: If tributaries alone resolves N2 reflux, avoid SFJ ligation entirely""",
+
+        "Type 1+2": """
+CHIVA Principle for Type 1+2:
+- PRIMARY DECISION: RP N2->N1 characteristics (inferred from clip count/presence)
+  * SMALL/SINGLE RP N2->N1 → CHIVA 2 STAGED APPROACH:
+    Stage 1: Ligate EP N2->N3 (tributaries) first
+    Stage 2: At follow-up, reassess N2 reflux and ligate SFJ if needed
+  * LARGE/MULTIPLE RP N2->N1 → SIMULTANEOUS APPROACH:
+    Ligate both EP N1->N2 (SFJ) and EP N2->N3 (tributaries) together
+- SECONDARY TARGETS: Ligate below each RP N2->N1 except most distal
+- GOAL: Hemodynamic correction with minimal unnecessary intervention""",
     }
 
-    type_instruction = TYPE_INSTRUCTIONS.get(shunt_type, "Apply CHIVA ligation principles")
+    chiva_guidance = CHIVA_PRINCIPLES.get(shunt_type, "Apply standard CHIVA ligation principles")
 
     prompt = f"""=== LIGATION PLANNING TASK ===
 
@@ -218,21 +334,22 @@ Shunt Type: {shunt_type}
 
 Clips Analysis:
 {clips_str}
+{clinical_context}
 
-Clinical Instruction:
-{type_instruction}
+{chiva_guidance}
 
-Based on CHIVA ligation principles and the clip patterns, generate a ligation plan.
+Based on the CHIVA principles above and the clip patterns provided, generate a specific ligation plan.
+Use the secondary decision points to inform your approach selection.
 Output ONLY valid JSON — no markdown, no explanation.
 
-For ligation_sites, include the EP or RP with flow direction and clinical description:
+For ligation_sites, include the EP/RP flow and clinical strategy:
 - Examples: "Ligate highest EP at N2->N3", "High ligation at SFJ (EP N1->N2)",
-  "Ligate EP N2->N2 (perforator)", "Ligate RP N2->N1", "Ligate tributaries at N2->N3"
+  "Stage 1: Ligate EP N2->N3", "Ligate EP N2->N2 (perforator)"
 
 {{
-    "ligation_sites": ["<EP/RP with flow and description>", "<site 2>"],
-    "primary_approach": "<main clinical strategy>",
-    "reasoning": ["<reason 1>", "<reason 2>", "<reason 3>"],
+    "ligation_sites": ["<EP/RP with flow and clinical action>", "<site 2>"],
+    "primary_approach": "<chosen clinical strategy>",
+    "reasoning": ["<reason 1: which clips guided this>", "<reason 2>", "<reason 3>"],
     "confidence": 0.85,
     "chiva_alignment": "high"
 }}"""
@@ -246,8 +363,16 @@ For ligation_sites, include the EP or RP with flow direction and clinical descri
             max_tokens=512,
         )
         raw = resp.choices[0].message.content or ""
+
+        # Strip markdown code blocks if present
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        raw = raw.strip()
+
         return json.loads(raw)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
         return {
             "ligation_sites": [],
             "primary_approach": "PARSE_ERROR",
