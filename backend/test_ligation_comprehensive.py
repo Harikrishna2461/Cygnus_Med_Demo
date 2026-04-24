@@ -259,7 +259,144 @@ def analyze_clip_patterns(clips: list, shunt_type: str) -> dict:
     return analysis
 
 
-def generate_ligation_plan(clips: list, shunt_type: str) -> dict:
+def generate_ligation_plan_with_rag(clips: list, shunt_type: str, retrieved_chunks: list) -> dict:
+    """Generate ligation plan WITH RAG context from knowledge base chunks."""
+
+    # Extract clinical patterns from clips
+    clip_analysis = analyze_clip_patterns(clips, shunt_type)
+
+    clips_str = "\n".join([
+        f"  Clip {i+1}: {c.get('flow', '?')} {c.get('fromType', '?')}->"
+        f"{c.get('toType', '?')} (y={c.get('posYRatio', 0.0):.3f})"
+        for i, c in enumerate(clips)
+    ])
+
+    # Build clinical context from analysis
+    clinical_context = ""
+    if clip_analysis["secondary_decision_points"]:
+        clinical_context += "\nKey Decision Points Identified from Clips:\n"
+        for dp in clip_analysis["secondary_decision_points"]:
+            clinical_context += f"  - {dp['point']}\n    Clinical significance: {dp['clinical_significance']}\n    Consideration: {dp['consideration']}\n"
+
+    # Include RAG chunks
+    rag_context = ""
+    if retrieved_chunks:
+        rag_context = "\nKnowledge Base References (RAG Retrieved):\n"
+        for i, chunk in enumerate(retrieved_chunks[:2], 1):  # Use top 2 chunks
+            text_preview = chunk.get("text", "")[:200]
+            rag_context += f"  {i}. {text_preview}...\n"
+
+    # CHIVA ligation principles for each type
+    CHIVA_PRINCIPLES = {
+        "Type 1": """
+CHIVA Principle for Type 1:
+- PRIMARY TARGET: Entry point (EP N1->N2) at SFJ or Hunterian junction
+- SECONDARY TARGETS: Reflux zones (RP N2->N1) - ligate below each except most distal
+- DECISION FACTOR: posYRatio determines location (SFJ if y<=0.098, Hunterian if y<=0.353)
+- GOAL: Interrupt circular flow N1->N2->N1 by high ligation at entry
+- APPROACH: High ligation to prevent thrombosis and maintain venous return""",
+
+        "Type 2A": """
+CHIVA Principle for Type 2A:
+- PRIMARY TARGET: Highest escape point (EP N2->N3 at tributary junction)
+- SECONDARY DECISION: If multiple tributaries, assess anatomical factors
+  * Calibre: Equal vs Unequal vessel sizes
+  * Distance to perforator: Affects which tributary drains better
+  * Drainage: Presence of drainage through thinner vessel
+- GOAL: Selectively interrupt escape route while preserving GSV function
+- APPROACH: Ligate at junction level, preserve trunk if diameter is normal""",
+
+        "Type 2B": """
+CHIVA Principle for Type 2B:
+- PRIMARY TARGET: Perforator entry point (EP N2->N2)
+- SECONDARY DECISION: Location along saphenous trunk (SFJ-Knee vs Hunterian vs Calf)
+- DECISION FACTOR: posYRatio helps determine location for surgical approach
+- GOAL: Selective perforator ligation while preserving SFJ competence
+- CONSTRAINT: Do NOT ligate SFJ - it is competent and must remain patent""",
+
+        "Type 3": """
+CHIVA Principle for Type 3:
+- PRIMARY TARGET (Stage 1): Tributaries at EP N2->N3
+- SECONDARY TARGET (Stage 2): SFJ only if reflux develops at follow-up
+- DECISION LOGIC: Conservative staged approach - avoid unnecessary SFJ intervention
+- TIMING: Initial ligation of tributaries, reassess at 6-12 months
+- GOAL: If tributaries alone resolves N2 reflux, avoid SFJ ligation entirely""",
+
+        "Type 1+2": """
+CHIVA Principle for Type 1+2:
+- PRIMARY DECISION: RP N2->N1 characteristics (inferred from clip count/presence)
+  * SMALL/SINGLE RP N2->N1 → CHIVA 2 STAGED APPROACH:
+    Stage 1: Ligate EP N2->N3 (tributaries) first
+    Stage 2: At follow-up, reassess N2 reflux and ligate SFJ if needed
+  * LARGE/MULTIPLE RP N2->N1 → SIMULTANEOUS APPROACH:
+    Ligate both EP N1->N2 (SFJ) and EP N2->N3 (tributaries) together
+- SECONDARY TARGETS: Ligate below each RP N2->N1 except most distal
+- GOAL: Hemodynamic correction with minimal unnecessary intervention""",
+    }
+
+    chiva_guidance = CHIVA_PRINCIPLES.get(shunt_type, "Apply standard CHIVA ligation principles")
+
+    prompt = f"""=== LIGATION PLANNING TASK (WITH RAG) ===
+
+Shunt Type: {shunt_type}
+
+Clips Analysis:
+{clips_str}
+{clinical_context}
+
+{rag_context}
+
+{chiva_guidance}
+
+Based on the CHIVA principles above, the retrieved knowledge base references, and the clip patterns provided, generate a specific ligation plan.
+Output ONLY valid JSON — no markdown, no explanation.
+
+For ligation_sites, include the EP/RP flow and clinical strategy.
+
+{{
+    "ligation_sites": ["<EP/RP with flow and clinical action>", "<site 2>"],
+    "primary_approach": "<chosen clinical strategy>",
+    "reasoning": ["<reason 1: which clips guided this>", "<reason 2>", "<reason 3>"],
+    "confidence": 0.85,
+    "chiva_alignment": "high"
+}}"""
+
+    try:
+        client = GroqClient(api_key=GROQ_API_KEY)
+        resp = client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,
+            max_tokens=512,
+        )
+        raw = resp.choices[0].message.content or ""
+
+        # Strip markdown code blocks if present
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        raw = raw.strip()
+
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return {
+            "ligation_sites": [],
+            "primary_approach": "PARSE_ERROR",
+            "reasoning": ["JSON parsing failed"],
+            "confidence": 0.0,
+            "chiva_alignment": "unknown"
+        }
+    except Exception as e:
+        return {
+            "ligation_sites": [],
+            "error": str(e),
+            "confidence": 0.0,
+            "chiva_alignment": "unknown"
+        }
+
+
+def generate_ligation_plan_without_rag(clips: list, shunt_type: str) -> dict:
     """Generate ligation plan using LLM with enhanced CHIVA principles and clinical context."""
 
     # Extract clinical patterns from clips
@@ -688,18 +825,18 @@ def main():
             # Retrieve chunks
             query = QUERY_PAIRS.get(inferred_type, {}).get("A", f"Ligation planning for {inferred_type}")
             qa_results = retrieve_chunks_at_k(client, query, k_max=3)
-            chunks = qa_results[3]
+            chunks = [{"id": c[0], "score": c[1], "text": c[2]} for c in qa_results[3]]
 
-            # Generate LLM plan
-            llm_plan = generate_ligation_plan(clips, inferred_type)
-            print(f"  LLM sites: {llm_plan.get('ligation_sites', [])}")
+            # Generate LLM plan WITH RAG
+            llm_plan_with_rag = generate_ligation_plan_with_rag(clips, inferred_type, chunks)
+            print(f"  LLM (WITH RAG) sites: {llm_plan_with_rag.get('ligation_sites', [])}")
 
             # Score quality
             baseline = BASELINE_PLANS.get(inferred_type, {})
-            quality_scores = score_ligation_quality(llm_plan, baseline, inferred_type)
-            quality_summary[inferred_type].append(quality_scores["overall_quality"])
+            quality_with_rag = score_ligation_quality(llm_plan_with_rag, baseline, inferred_type)
+            quality_summary[inferred_type].append(quality_with_rag["overall_quality"])
 
-            print(f"  Quality score: {quality_scores['overall_quality']:.2f}")
+            print(f"  Quality (WITH RAG): {quality_with_rag['overall_quality']:.2f}")
 
             # Add to document
             doc.add_heading(sample_name, level=2)
@@ -707,27 +844,248 @@ def main():
             doc.add_paragraph(f"Clips count: {len(clips)}", style="List Bullet")
 
             doc.add_heading("Retrieved Chunks (k=3)", level=3)
-            for i, (chunk_id, score, text) in enumerate(chunks, 1):
+            for i, chunk in enumerate(chunks, 1):
                 doc.add_paragraph(
-                    f"Chunk {i}: ID={chunk_id}, Score={score:.4f}",
+                    f"Chunk {i}: ID={chunk['id']}, Score={chunk['score']:.4f}",
                     style="List Bullet"
                 )
-                doc.add_paragraph(f"{text}...", style="List Bullet 2")
+                doc.add_paragraph(f"{chunk['text']}...", style="List Bullet 2")
 
-            add_llm_output_to_doc(doc, llm_plan, quality_scores)
+            add_llm_output_to_doc(doc, llm_plan_with_rag, quality_with_rag)
             doc.add_paragraph("")  # Spacing
 
         except Exception as e:
             print(f"  ERROR: {e}")
 
-    client.close()
-
-    # Section 3: Summary & Metrics
+    # Section 3: RAG vs No-RAG Comparison
     print("\n" + "=" * 90)
-    print("SECTION 3: SUMMARY & QUALITY METRICS")
+    print("SECTION 3: RAG vs NO-RAG COMPARISON")
     print("=" * 90)
 
-    doc.add_heading("Section 3: Summary & Quality Metrics", level=1)
+    doc.add_heading("Section 3: RAG vs No-RAG Comparison", level=1)
+    doc.add_paragraph(
+        "This section compares ligation planning with RAG (knowledge base chunks retrieved) "
+        "vs without RAG (CHIVA principles only) to assess if RAG actually improves LLM output."
+    )
+
+    json_files_for_comparison = sorted(glob.glob(os.path.join(DATA_FOLDER, "*.json")))[:3]
+    rag_no_rag_results = []
+
+    for json_file in json_files_for_comparison:
+        sample_name = os.path.basename(json_file).replace(".json", "")
+        print(f"\nRAG vs No-RAG Comparison: {sample_name}")
+
+        try:
+            with open(json_file) as f:
+                data = json.load(f)
+
+            clips = data.get("clips", [])
+            if not clips:
+                continue
+
+            # Infer shunt type
+            flows = {(c.get('flow'), c.get('fromType'), c.get('toType')) for c in clips if c.get('flow')}
+            has_ep_n1_n2 = any(f[0] == 'EP' and f[1] == 'N1' and f[2] == 'N2' for f in flows)
+            has_ep_n2_n3 = any(f[0] == 'EP' and f[1] == 'N2' and f[2] == 'N3' for f in flows)
+            has_ep_n2_n2 = any(f[0] == 'EP' and f[1] == 'N2' and f[2] == 'N2' for f in flows)
+            has_rp_n2_n1 = any(f[0] == 'RP' and f[1] == 'N2' and f[2] == 'N1' for f in flows)
+            has_rp_n3 = any(f[0] == 'RP' and f[1] == 'N3' for f in flows)
+
+            if has_ep_n1_n2 and not has_ep_n2_n3 and has_rp_n2_n1 and not has_rp_n3:
+                inferred_type = "Type 1"
+            elif not has_ep_n1_n2 and has_ep_n2_n3 and not has_ep_n2_n2:
+                inferred_type = "Type 2A"
+            elif has_ep_n2_n2 and not has_ep_n1_n2 and has_rp_n3 and not has_rp_n2_n1:
+                inferred_type = "Type 2B"
+            elif has_ep_n1_n2 and has_ep_n2_n3 and has_rp_n3 and not has_rp_n2_n1:
+                inferred_type = "Type 3"
+            elif has_ep_n1_n2 and has_ep_n2_n3 and has_rp_n2_n1 and has_rp_n3:
+                inferred_type = "Type 1+2"
+            else:
+                continue
+
+            # Retrieve chunks for WITH RAG
+            query = QUERY_PAIRS.get(inferred_type, {}).get("A", f"Ligation planning for {inferred_type}")
+            qa_results = retrieve_chunks_at_k(client, query, k_max=3)
+            chunks = [{"id": c[0], "score": c[1], "text": c[2]} for c in qa_results[3]]
+
+            # WITH RAG
+            plan_with_rag = generate_ligation_plan_with_rag(clips, inferred_type, chunks)
+            # WITHOUT RAG
+            plan_without_rag = generate_ligation_plan_without_rag(clips, inferred_type)
+
+            # Score both
+            baseline = BASELINE_PLANS.get(inferred_type, {})
+            quality_with_rag = score_ligation_quality(plan_with_rag, baseline, inferred_type)
+            quality_without_rag = score_ligation_quality(plan_without_rag, baseline, inferred_type)
+
+            rag_no_rag_results.append({
+                "sample": sample_name,
+                "type": inferred_type,
+                "plan_with_rag": plan_with_rag,
+                "plan_without_rag": plan_without_rag,
+                "quality_with_rag": quality_with_rag,
+                "quality_without_rag": quality_without_rag
+            })
+
+            print(f"  Type: {inferred_type}")
+            print(f"  WITH RAG: {plan_with_rag.get('ligation_sites', [])} (quality: {quality_with_rag['overall_quality']:.2f})")
+            print(f"  NO RAG:   {plan_without_rag.get('ligation_sites', [])} (quality: {quality_without_rag['overall_quality']:.2f})")
+            print(f"  RAG Impact: {quality_with_rag['overall_quality'] - quality_without_rag['overall_quality']:+.2f}")
+
+        except Exception as e:
+            print(f"  ERROR: {e}")
+
+    # Add RAG vs No-RAG analysis to document
+    doc.add_heading("RAG vs No-RAG Detailed Comparison", level=2)
+
+    for result in rag_no_rag_results:
+        doc.add_heading(f"{result['sample']} ({result['type']})", level=3)
+
+        # WITH RAG
+        doc.add_heading("WITH RAG (Knowledge Base Chunks)", level=4)
+        doc.add_paragraph(f"Ligation Sites: {result['plan_with_rag'].get('ligation_sites', [])}", style="List Bullet")
+        doc.add_paragraph(f"Approach: {result['plan_with_rag'].get('primary_approach', '?')}", style="List Bullet")
+        doc.add_paragraph(f"Quality Score: {result['quality_with_rag']['overall_quality']:.2f}", style="List Bullet")
+        doc.add_paragraph(f"Site Match: {result['quality_with_rag']['site_match']:.2f}, "
+                         f"Approach Alignment: {result['quality_with_rag']['approach_alignment']:.2f}", style="List Bullet 2")
+
+        # WITHOUT RAG
+        doc.add_heading("WITHOUT RAG (CHIVA Principles Only)", level=4)
+        doc.add_paragraph(f"Ligation Sites: {result['plan_without_rag'].get('ligation_sites', [])}", style="List Bullet")
+        doc.add_paragraph(f"Approach: {result['plan_without_rag'].get('primary_approach', '?')}", style="List Bullet")
+        doc.add_paragraph(f"Quality Score: {result['quality_without_rag']['overall_quality']:.2f}", style="List Bullet")
+        doc.add_paragraph(f"Site Match: {result['quality_without_rag']['site_match']:.2f}, "
+                         f"Approach Alignment: {result['quality_without_rag']['approach_alignment']:.2f}", style="List Bullet 2")
+
+        # Comparison
+        doc.add_heading("RAG Impact Analysis", level=4)
+        impact = result['quality_with_rag']['overall_quality'] - result['quality_without_rag']['overall_quality']
+        impact_text = "POSITIVE (RAG helps)" if impact > 0.05 else "NEGATIVE (RAG hurts)" if impact < -0.05 else "NEUTRAL"
+        doc.add_paragraph(f"Quality Difference: {impact:+.2f} ({impact_text})", style="List Bullet")
+        doc.add_paragraph(
+            f"Sites match baseline: WITH RAG={result['quality_with_rag']['site_match']:.2f}, "
+            f"WITHOUT RAG={result['quality_without_rag']['site_match']:.2f}",
+            style="List Bullet"
+        )
+
+        doc.add_paragraph("")  # Spacing
+
+    client.close()
+
+    # Section 4: RAG Effectiveness Conclusion
+    print("\n" + "=" * 90)
+    print("SECTION 4: RAG EFFECTIVENESS CONCLUSION")
+    print("=" * 90)
+
+    doc.add_heading("Section 4: RAG Effectiveness Conclusion", level=1)
+
+    # Analyze RAG impact
+    rag_impacts = [r['quality_with_rag']['overall_quality'] - r['quality_without_rag']['overall_quality']
+                   for r in rag_no_rag_results]
+
+    if rag_impacts:
+        avg_impact = sum(rag_impacts) / len(rag_impacts)
+        positive_cases = sum(1 for x in rag_impacts if x > 0.05)
+        negative_cases = sum(1 for x in rag_impacts if x < -0.05)
+        neutral_cases = sum(1 for x in rag_impacts if -0.05 <= x <= 0.05)
+
+        print(f"RAG Impact Analysis:")
+        print(f"  Average impact: {avg_impact:+.2f}")
+        print(f"  Positive cases: {positive_cases}/{len(rag_impacts)}")
+        print(f"  Negative cases: {negative_cases}/{len(rag_impacts)}")
+        print(f"  Neutral cases: {neutral_cases}/{len(rag_impacts)}")
+
+        doc.add_heading("Quantitative Analysis", level=2)
+        doc.add_paragraph(f"Average RAG Impact on Quality Score: {avg_impact:+.2f}", style="List Bullet")
+        doc.add_paragraph(f"Cases where RAG improved output: {positive_cases}/{len(rag_impacts)}", style="List Bullet")
+        doc.add_paragraph(f"Cases where RAG hurt output: {negative_cases}/{len(rag_impacts)}", style="List Bullet")
+        doc.add_paragraph(f"Cases where RAG was neutral: {neutral_cases}/{len(rag_impacts)}", style="List Bullet")
+
+        doc.add_heading("Semantic Analysis vs Baseline", level=2)
+        doc.add_paragraph(
+            "Comparison with clinical ligation plans from Shunt Classification Cheatsheet "
+            "and knowledge base document:",
+            style="List Bullet"
+        )
+
+        # Detailed comparison for each result
+        for result in rag_no_rag_results:
+            shunt_type = result["type"]
+            baseline = BASELINE_PLANS.get(shunt_type, {})
+
+            doc.add_heading(f"{shunt_type} Analysis", level=3)
+
+            # Extract site recommendations
+            with_rag_sites = result['plan_with_rag'].get('ligation_sites', [])
+            without_rag_sites = result['plan_without_rag'].get('ligation_sites', [])
+            baseline_targets = baseline.get('ligation_targets', [])
+
+            doc.add_paragraph(
+                f"Baseline CHIVA targets: {', '.join(baseline_targets[:3])}",
+                style="List Bullet"
+            )
+            doc.add_paragraph(
+                f"WITH RAG output: {', '.join(with_rag_sites) if with_rag_sites else 'No sites'}",
+                style="List Bullet"
+            )
+            doc.add_paragraph(
+                f"WITHOUT RAG output: {', '.join(without_rag_sites) if without_rag_sites else 'No sites'}",
+                style="List Bullet"
+            )
+
+            impact = result['quality_with_rag']['overall_quality'] - result['quality_without_rag']['overall_quality']
+            if impact > 0.05:
+                assessment = f"RAG IMPROVED output (Δ {impact:+.2f})"
+            elif impact < -0.05:
+                assessment = f"RAG DEGRADED output (Δ {impact:+.2f})"
+            else:
+                assessment = f"RAG NEUTRAL (Δ {impact:+.2f})"
+
+            doc.add_paragraph(assessment, style="List Bullet")
+
+        doc.add_heading("Conclusion", level=2)
+
+        # Generate conclusion based on empirical results
+        if avg_impact > 0.1:
+            conclusion = (
+                "RAG is CLEARLY BENEFICIAL. Knowledge base chunks help the LLM generate more "
+                "clinically accurate ligation plans that align better with CHIVA guidelines. "
+                "The retrieved chunks provide valuable contextual information that improves "
+                "both site selection and treatment approach reasoning."
+            )
+            rag_verdict = "POSITIVE"
+        elif avg_impact > 0:
+            conclusion = (
+                "RAG provides MODEST BENEFIT. While RAG improves some cases, the improvement "
+                "is marginal. This suggests the knowledge base chunks contain useful information, "
+                "but the LLM is already making reasonable decisions with CHIVA principles alone. "
+                "The current knowledge base could be enhanced with more specific clinical decision trees."
+            )
+            rag_verdict = "MARGINALLY POSITIVE"
+        elif avg_impact > -0.05:
+            conclusion = (
+                "RAG is NEUTRAL to SLIGHTLY NEGATIVE. The knowledge base doesn't meaningfully "
+                "improve LLM output quality, and in some cases may introduce noise or conflicting "
+                "information. The CHIVA principles alone are sufficient for this task, or the "
+                "current knowledge base chunks are too generic and not type-specific enough."
+            )
+            rag_verdict = "NEUTRAL/NEGATIVE"
+        else:
+            conclusion = (
+                "RAG is HARMFUL. Retrieved knowledge base chunks degrade ligation planning quality. "
+                "This suggests the current knowledge base contains outdated, conflicting, or "
+                "incorrectly chunked information that misleads the LLM. The system should either "
+                "drop RAG entirely or substantially revise the knowledge base with more precise, "
+                "clinically validated ligation protocols."
+            )
+            rag_verdict = "CLEARLY NEGATIVE"
+
+        doc.add_paragraph(f"RAG Verdict: {rag_verdict}", style="List Bullet")
+        doc.add_paragraph("")
+        doc.add_paragraph(conclusion)
+
+    # Section 5: Summary & Metrics
 
     # K-divergence summary
     doc.add_heading("K-Divergence Summary", level=2)
