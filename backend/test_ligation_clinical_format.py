@@ -171,6 +171,16 @@ def retrieve_chunks(client: QdrantClient, query: str, k: int = 3) -> list[dict]:
         raise
 
 
+# Type-specific, discriminative ligation queries
+LIGATION_QUERIES = {
+    "Type 1": "SFJ incompetent with circular reflux N1->N2->N1. High ligation tie at saphenofemoral junction. Multiple GSV reflux points management strategy.",
+    "Type 2A": "Tributary entry from GSV trunk N2->N3 without SFJ involvement. Ligate highest EP at tributary junction. Branching anatomy considerations.",
+    "Type 2B": "Perforator-fed shunt via N2->N2 entry into saphenous trunk. Open distal shunt with tributary reflux N3->N1. Selective perforator ligation.",
+    "Type 3": "SFJ incompetent with dual entries: EP N1->N2 and EP N2->N3. Staged approach: tributary ligation first, then follow-up for SFJ. Six to twelve month reassessment.",
+    "Type 1+2": "Complex dual entry shunt with SFJ incompetence and tributary involvement. RP N2->N1 diameter determines strategy. CHIVA 2 staged vs simultaneous ligation.",
+}
+
+
 def infer_shunt_type(clips: list[dict]) -> tuple[str, dict]:
     """
     Infer shunt type from clips.
@@ -282,9 +292,10 @@ def main():
             print(f"Reasoning steps: {len(plan.get('reasoning', []))}")
             print(f"Ligation steps: {len(plan.get('ligation_steps', []))}")
 
-            # Retrieve supporting chunks
-            query = f"Ligation planning for {shunt_type} venous shunt"
-            chunks = retrieve_chunks(client, query, k=2)
+            # Retrieve supporting chunks using TYPE-SPECIFIC query
+            query = LIGATION_QUERIES.get(shunt_type, f"Ligation planning for {shunt_type}")
+            print(f"Query: {query[:80]}...")
+            chunks = retrieve_chunks(client, query, k=3)
 
             # Add to document in clinical format
             add_clinical_format_to_doc(doc, sample_name, clips, shunt_type, plan, chunks)

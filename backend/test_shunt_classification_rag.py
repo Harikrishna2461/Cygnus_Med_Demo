@@ -365,7 +365,6 @@ Output ONLY the JSON below — no other text, no markdown fences.
     "reasoning": ["<step 1>", "<step 2>"],
     "ligation": ["<ligation step 1>"],
     "needs_elim_test": <true/false>,
-    "ask_diameter": <true/false>,
     "ask_branching": <true/false>,
     "summary": "<1 sentence clinical summary>"
 }}"""
