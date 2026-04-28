@@ -41,7 +41,6 @@ from config import (
     QDRANT_PORT,
     QDRANT_API_KEY,
     QDRANT_COLLECTION,
-    QDRANT_LIGATION_COLLECTION,
     MAX_RETRIEVAL_RESULTS,
     CACHE_TTL,
     LOG_FILE,
@@ -82,7 +81,7 @@ except ImportError as e:
     LIGATION_GENERATOR_AVAILABLE = False
 
 try:
-    from shunt_classification_and_ligation_llm import classify_and_plan_ligation_with_llm, CHIVA_RULES
+    from shunt_llm_classifier import classify_shunt_with_llm, CHIVA_RULES
     from shunt_report_pdf import generate_shunt_report_pdf
     SHUNT_REPORT_AVAILABLE = True
 except ImportError as e:
@@ -263,40 +262,6 @@ def retrieve_context(query: str, k: int = MAX_RETRIEVAL_RESULTS) -> list[str]:
         return []
     except Exception as e:
         logger.error(f"Qdrant retrieval error: {e}")
-        return []
-
-
-def retrieve_ligation_context(query: str, k: int = MAX_RETRIEVAL_RESULTS) -> list[str]:
-    """Retrieve top-k relevant chunks from ligation knowledge base (RAG for ligation planning)."""
-    global qdrant_client
-
-    if qdrant_client is None:
-        if not load_qdrant_client():
-            logger.warning("Qdrant client initialization failed")
-            return []
-
-    try:
-        start_time = time.time()
-        query_embedding = get_embedding(query).tolist()
-
-        results = qdrant_client.search(
-            collection_name=QDRANT_LIGATION_COLLECTION,
-            query_vector=query_embedding,
-            limit=k,
-            with_payload=True,
-        )
-
-        elapsed = time.time() - start_time
-        logger.info(f"Ligation RAG retrieval took {elapsed:.3f}s for {k} results")
-
-        return [hit.payload.get("text", "") for hit in results]
-    except AttributeError as e:
-        logger.warning(f"Qdrant client error (reinitializing): {e}")
-        qdrant_client = None
-        load_qdrant_client()
-        return []
-    except Exception as e:
-        logger.error(f"Ligation RAG retrieval error: {e}")
         return []
 
 
@@ -3065,14 +3030,12 @@ def shunt_classify_report():
         return jsonify({"error": "clip_list is required"}), 400
 
     def call_llm_shunt(prompt, stream=False, return_usage=True):
-        """LLM call for shunt classification and ligation planning via Groq."""
+        """LLM call for full JSON shunt classification via Groq."""
         return call_llm(prompt, temperature=0.2, max_tokens=1024, return_usage=return_usage)
 
     try:
-        # Unified classification + ligation planning
-        # Shunt classification: NO RAG (only CHIVA rules)
-        # Ligation planning: WITH RAG from ligation database
-        classification = classify_and_plan_ligation_with_llm(clip_list, call_llm_shunt, retrieve_ligation_context)
+        # LLM+RAG classification — pass retrieve_context so each leg gets relevant chunks
+        classification = classify_shunt_with_llm(clip_list, call_llm_shunt, retrieve_context)
 
         if fmt == "pdf":
             pdf_bytes = generate_shunt_report_pdf(classification, clip_list, patient_info or None)

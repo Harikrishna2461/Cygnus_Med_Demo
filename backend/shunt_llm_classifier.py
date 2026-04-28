@@ -262,6 +262,11 @@ STEP 3: MATCH PATTERN TO TYPE
         │  └─ Multiple RP at N3? → [ask_branching=true]
         └─ No RP at all → NO SHUNT (confidence 0.95)
 
+    ┌─ N1→N3 PATH SHUNT:
+    │
+    ├─ EP N1→N3 with RP N2→N1 → TYPE 4 (confidence 0.80-0.90)
+    └─ EP N1→N3 with RP N3→N2 or RP N3→N1 → TYPE 5 (confidence 0.80-0.90)
+
 STEP 4: ASSIGN CONFIDENCE
     Clear pattern, no ambiguity → 0.90–0.97
     Pattern present, minor noise → 0.80–0.89
@@ -277,6 +282,7 @@ CRITICAL REMINDERS:
     • EP N2→N2 means perforator (SFJ COMPETENT), never confuse with N1→N2
     • Type 2A has EP N2→N3; Type 2B/2C have EP N2→N2 (NOT N2→N3)
     • Type 2C differs from Type 1+2: 2C has EP N2→N2, Type 1+2 has EP N1→N2
+    • Type 4/5 are N1→N3 path shunts and should be classified explicitly when present
     • RP only at N3 (not N2→N1) + EP N1→N2 = TYPE 3 (not 1+2)
 ═══════════════════════════════════════════════════════════════
 
@@ -285,7 +291,7 @@ Follow the Step-by-Step Decision Guide above. Classify the {leg_label} leg.
 Output ONLY the JSON below — no other text, no markdown.
 
 {{
-    "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected / Undetermined>",
+    "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 4 / Type 5 / Type 1+2 / No shunt detected / Undetermined>",
     "confidence": <0.0-1.0>,
     "reasoning": ["<decision step 1>", "<decision step 2>", "..."],
     "ligation": ["<ligation step 1>", "<ligation step 2>", "..."],

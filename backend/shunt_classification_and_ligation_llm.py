@@ -65,7 +65,7 @@ Case B — EP N1→N2 EXISTS (SFJ or Hunterian) AND EP N2→N3 EXISTS
         Single RP at N3: Ligate EP at N2→N3. Follow up 6–12 months; if N2 reflux develops, ligate SFJ.
         Multiple RP at N3: Ligate every refluxing tributary at N2 junction (CHIVA 2 step 1). Same follow-up.
 
-    TYPE 1+2 Ligation — depends on RP N2→N1 calibre (set ask_diameter=true):
+    TYPE 1+2 Ligation — depends on RP N2→N1 calibre:
         Small RP N2→N1: Apply CHIVA 2 (ligate EP N2→N3 first, then SFJ/Hunterian).
                         OR ligate SFJ first + all tributaries except one; once N2 normalises ligate last.
         Large / multiple RP N2→N1: Ligate SFJ/Hunterian + every refluxing tributary simultaneously.
@@ -116,6 +116,8 @@ QUICK DECISION TABLE (commit this to memory):
     No EP N1→N2  + EP N2→N2 + RP N3 + NO RP N2→N1         → TYPE 2B
     No EP N1→N2  + EP N2→N2 + RP N3 + RP N2→N1            → TYPE 2C
     No EP N1→N2  + EP N2→N2 + NO RP                        → NO SHUNT
+    EP N1→N3 + RP N2→N1                                    → TYPE 4
+    EP N1→N3 + RP N3→N2 or RP N3→N1                         → TYPE 5
     No RP at all                                            → NO SHUNT
 
 CONCRETE EXAMPLES (match these patterns exactly):
@@ -129,6 +131,10 @@ CONCRETE EXAMPLES (match these patterns exactly):
             → No EP N1→N2, EP N2→N2 = perforator, RP N3 + RP N2→N1 → TYPE 2C
     Type 3:  [EP N1→N2 y=0.05 SFJ-ENTRY, EP N2→N3 y=0.132 ligation-point-marker, RP N3→N1 y=0.212]
             → EP N1→N2 + EP N2→N3 + RP N3→N1, no RP N2→N1 → TYPE 3
+        Type 4:  [EP N1→N3 y=0.60, RP N2→N1 y=0.40]
+            → EP N1→N3 with N2 return → TYPE 4
+        Type 5:  [EP N1→N3 y=0.65, RP N3→N2 y=0.50, RP N3→N1 y=0.75]
+            → EP N1→N3 with looping N3 return → TYPE 5
     Type 3 variant 2 (no elim test):
             [EP N1→N2, EP N2→N3, RP N3→N1, RP N2→N1, no eliminationTest] → UNDETERMINED
     Type 1+2:[EP N1→N2, EP N2→N3 eliminationTest="Reflux", RP N3→N1, RP N2→N1] → TYPE 1+2
@@ -152,7 +158,6 @@ COORDINATE HINTS (secondary — always check fromType/toType first):
 
 OUTPUT FLAGS:
     needs_elim_test : true when RP N3→N1 + RP N2→N1 present but eliminationTest is absent (B3)
-    ask_diameter    : true for Type 1+2 (need RP N2→N1 calibre to choose ligation strategy)
     ask_branching   : true for Type 2A/2B/2C with multiple RP at N3
 
 CONFIDENCE GUIDE:
@@ -244,7 +249,7 @@ STEP 3: MATCH PATTERN TO TYPE
         ├─ Has RP N3 (at N2 or N1), NO RP N2→N1 → TYPE 3 (confidence 0.88)
         ├─ Has RP N3 AND RP N2→N1:
         │  ├─ eliminationTest absent → UNDETERMINED (confidence 0.55) [needs_elim_test=true]
-        │  ├─ eliminationTest="Reflux" → TYPE 1+2 (confidence 0.80) [ask_diameter=true]
+        │  ├─ eliminationTest="Reflux" → TYPE 1+2 (confidence 0.80) 
         │  └─ eliminationTest="No Reflux" → TYPE 3 (confidence 0.75)
 
     ┌─ SFJ COMPETENT PATH (NO EP N1→N2):
@@ -272,6 +277,7 @@ CRITICAL REMINDERS:
     • EP N2→N2 means perforator (SFJ COMPETENT), never confuse with N1→N2
     • Type 2A has EP N2→N3; Type 2B/2C have EP N2→N2 (NOT N2→N3)
     • Type 2C differs from Type 1+2: 2C has EP N2→N2, Type 1+2 has EP N1→N2
+    • Type 4/5 are N1→N3 path shunts and should be classified explicitly when present
     • RP only at N3 (not N2→N1) + EP N1→N2 = TYPE 3 (not 1+2)
 ═══════════════════════════════════════════════════════════════
 
@@ -280,11 +286,9 @@ Follow the Step-by-Step Decision Guide above. Classify the {leg_label} leg.
 Output ONLY the JSON below — no other text, no markdown.
 
 {{
-    "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 1+2 / No shunt detected / Undetermined>",
+    "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 4 / Type 5 / Type 1+2 / No shunt detected / Undetermined>",
     "confidence": <0.0-1.0>,
     "reasoning": ["<decision step 1>", "<decision step 2>", "..."],
-    "needs_elim_test": <true/false>,
-    "ask_diameter": <true/false>,
     "ask_branching": <true/false>,
     "summary": "<1 sentence clinical summary>"
 }}"""
@@ -294,14 +298,29 @@ Output ONLY the JSON below — no other text, no markdown.
 # TASK 2: LIGATION PLANNING (With RAG)
 # ─────────────────────────────────────────────────────────────────────────────
 
-LIGATION_QUERIES = {
+LIGATION_QUERIES_OLD = {
     "Type 1": "SFJ incompetent with circular reflux N1->N2->N1. High ligation tie at saphenofemoral junction. Multiple GSV reflux points management strategy.",
     "Type 2A": "Tributary entry from GSV trunk N2->N3 without SFJ involvement. Ligate highest EP at tributary junction. Branching anatomy considerations.",
     "Type 2B": "Perforator-fed shunt via N2->N2 entry into saphenous trunk. Open distal shunt with tributary reflux N3->N1. Selective perforator ligation.",
     "Type 2C": "Perforator-fed shunt via N2->N2 entry with secondary GSV reflux N2->N1. Selective perforator ligation combined with GSV segment treatment.",
     "Type 3": "SFJ incompetent with dual entries: EP N1->N2 and EP N2->N3. Staged approach: tributary ligation first, then follow-up for SFJ. Six to twelve month reassessment.",
+    "Type 4": "N1->N3 perforator or pelvic-point shunt with N2 return via N2->N1. Target the N1->N3 escape/perforator entry and the return path through N2.",
+    "Type 5": "N1->N3 shunt with looping return through N3 and complex re-entry path. Target the N1->N3 escape entry and all refluxing N3 return segments.",
     "Type 1+2": "Complex dual entry shunt with SFJ incompetence and tributary involvement. RP N2->N1 diameter determines strategy. CHIVA 2 staged vs simultaneous ligation.",
     "No shunt detected": "No significant shunt detected. Standard compression therapy. No surgical intervention required.",
+    "Undetermined": "Unclear shunt classification. Elimination test required to determine type. Defer ligation planning until classification confirmed.",
+}
+
+LIGATION_QUERIES = {
+    "Type 1": "SFJ incompetent with circular reflux N1->N2->N1.",
+    "Type 2A": "Tributary entry from GSV trunk N2->N3 without SFJ involvement.",
+    "Type 2B": "Perforator-fed shunt via N2->N2 entry into saphenous trunk.",
+    "Type 2C": "Perforator-fed shunt via N2->N2 entry with secondary GSV reflux N2->N1.",
+    "Type 3": "SFJ incompetent with dual entries: EP N1->N2 and EP N2->N3.",
+    "Type 4": "N1->N3 perforator or pelvic-point shunt with N2 return via N2->N1.",
+    "Type 5": "N1->N3 shunt with looping return through N3 and complex re-entry path.",
+    "Type 1+2": "Complex dual entry shunt with SFJ incompetence and tributary involvement.",
+    "No shunt detected": "No significant shunt detected.",
     "Undetermined": "Unclear shunt classification. Elimination test required to determine type. Defer ligation planning until classification confirmed.",
 }
 
@@ -333,6 +352,13 @@ Based on the shunt type "{shunt_type}", the clinical findings above, and the med
 3. Consider complications and contraindications
 4. Provide follow-up and monitoring recommendations
 5. Consider CHIVA principles (hemodynamic, saphenous-vein-sparing when appropriate)
+
+Important formatting rules:
+1. ligation_steps must be a JSON array with one clear action per item.
+2. Each ligation step must name the ligation point or vessel segment explicitly.
+3. clinical_rationale must explain why that plan fits the shunt anatomy.
+4. additional_info_needed must be [] when there is no meaningful extra information to request.
+5. chiva_approach must describe the hemodynamic CHIVA reasoning, even if brief.
 
 Output ONLY the JSON below — no other text, no markdown:
 
@@ -415,7 +441,6 @@ _CLASSIFICATION_ERROR_RESULT: dict = {
     "confidence": 0.0,
     "reasoning": ["The LLM did not return a parseable classification response. Please retry."],
     "needs_elim_test": False,
-    "ask_diameter": False,
     "ask_branching": False,
     "summary": "Classification unavailable.",
     "_llm_error": True,
@@ -451,7 +476,7 @@ def _call_llm_for_shunt_classification(group: list[dict], leg_label: str, call_l
     except Exception as e:
         logger.error(f"Shunt classification LLM call failed for {leg_label}: {e}")
     logger.error(f"Shunt classification failed for {leg_label}")
-    return dict(_CLASSIFICATION_ERROR_RESULT)
+    raise RuntimeError(f"Shunt classification failed for {leg_label}")
 
 
 def _call_llm_for_ligation(shunt_type: str, group: list[dict], rag_context: str, leg_label: str, call_llm_fn: Callable) -> dict:
@@ -469,7 +494,7 @@ def _call_llm_for_ligation(shunt_type: str, group: list[dict], rag_context: str,
     except Exception as e:
         logger.error(f"Ligation planning LLM call failed for {leg_label}: {e}")
     logger.error(f"Ligation planning failed for {leg_label}")
-    return dict(_LIGATION_ERROR_RESULT)
+    raise RuntimeError(f"Ligation planning failed for {leg_label}")
 
 
 def _retrieve_rag_context_for_ligation(shunt_type: str, retrieve_fn: Callable) -> str:
@@ -511,7 +536,6 @@ def classify_and_plan_ligation_with_llm(
                     "confidence": float,
                     "reasoning": [...],
                     "needs_elim_test": bool,
-                    "ask_diameter": bool,
                     "ask_branching": bool,
                     "summary": str,
                     "ligation_steps": [...],
@@ -536,9 +560,12 @@ def classify_and_plan_ligation_with_llm(
         groups.setdefault(side, []).append(c)
 
     findings = []
+    total_prompt_tokens = 0
+    total_completion_tokens = 0
     for leg_label, group in groups.items():
         # Step 1: Shunt Classification (NO RAG)
         classification = _call_llm_for_shunt_classification(group, leg_label, call_llm_fn)
+        classification_usage = classification.pop("_llm_usage", {})
         shunt_type = classification.get("shunt_type", "Unknown")
 
         # Step 2: Ligation Planning (WITH RAG from ligation database)
@@ -547,6 +574,10 @@ def classify_and_plan_ligation_with_llm(
             if retrieve_ligation_context_fn else "No RAG context available."
         )
         ligation = _call_llm_for_ligation(shunt_type, group, rag_context, leg_label, call_llm_fn)
+        ligation_usage = ligation.pop("_llm_usage", {})
+
+        total_prompt_tokens += classification_usage.get("prompt_tokens", 0) + ligation_usage.get("prompt_tokens", 0)
+        total_completion_tokens += classification_usage.get("completion_tokens", 0) + ligation_usage.get("completion_tokens", 0)
 
         # Merge both results
         finding = {
@@ -555,36 +586,49 @@ def classify_and_plan_ligation_with_llm(
 
             # Classification results
             "shunt_type": classification.get("shunt_type"),
+            "assessment": classification.get("shunt_type"),
             "confidence": classification.get("confidence", 0.0),
             "reasoning": classification.get("reasoning", []),
             "needs_elim_test": classification.get("needs_elim_test", False),
-            "ask_diameter": classification.get("ask_diameter", False),
+            #"ask_diameter": classification.get("ask_diameter", False),
             "ask_branching": classification.get("ask_branching", False),
             "summary": classification.get("summary", ""),
 
             # Ligation results
             "ligation_steps": ligation.get("ligation_steps", []),
+            "point_of_ligation": ligation.get("ligation_steps", [""])[0] if ligation.get("ligation_steps") else "",
             "clinical_rationale": ligation.get("clinical_rationale", ""),
             "additional_info_needed": ligation.get("additional_info_needed", []),
             "complications_contraindications": ligation.get("complications_contraindications", []),
             "followup_schedule": ligation.get("followup_schedule", ""),
             "chiva_approach": ligation.get("chiva_approach", ""),
+            "classification_llm_usage": classification_usage,
+            "ligation_llm_usage": ligation_usage,
         }
         findings.append(finding)
 
     findings.sort(key=lambda f: _LEG_ORDER.get(f["leg"], 2))
 
-    primary = findings[0] if findings else {}
+    if not findings:
+        raise RuntimeError("Combined shunt classifier returned no findings")
+
+    primary = findings[0]
     return {
         "findings": findings,
-        "shunt_type": primary.get("shunt_type", "No shunt detected"),
+        "shunt_type": primary.get("shunt_type"),
         "confidence": primary.get("confidence", 0.0),
         "reasoning": primary.get("reasoning", []),
         "ligation": primary.get("ligation_steps", []),  # For backward compat with old API
+        "point_of_ligation": primary.get("point_of_ligation", primary.get("ligation_steps", [""])[0] if primary.get("ligation_steps") else ""),
         "summary": primary.get("summary", ""),
         "needs_elim_test": primary.get("needs_elim_test", False),
-        "ask_diameter": primary.get("ask_diameter", False),
+        #"ask_diameter": primary.get("ask_diameter", False),
         "ask_branching": primary.get("ask_branching", False),
         "num_clips": len(clip_list),
         "num_findings": len(findings),
+        "token_usage": {
+            "prompt_tokens": total_prompt_tokens,
+            "completion_tokens": total_completion_tokens,
+            "total_tokens": total_prompt_tokens + total_completion_tokens,
+        },
     }

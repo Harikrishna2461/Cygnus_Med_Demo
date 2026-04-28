@@ -212,6 +212,30 @@ function shuntLabelMatch(groundTruth, llmText) {
   return false;
 }
 
+const normalizeLigationSteps = (finding = {}) => {
+  const steps = Array.isArray(finding.ligation_steps) && finding.ligation_steps.length > 0
+    ? finding.ligation_steps
+    : Array.isArray(finding.ligation)
+      ? finding.ligation
+      : [];
+
+  return steps
+    .map((step) => String(step).replace(/^[•\-\s]+/, '').trim())
+    .filter(Boolean);
+};
+
+const getPointOfLigation = (finding = {}) => {
+  const explicitPoint = String(finding.point_of_ligation || '').trim();
+  if (explicitPoint) return explicitPoint;
+
+  const steps = normalizeLigationSteps(finding);
+  if (steps.length > 0) return steps[0];
+
+  return String(finding.primary_target || finding.ligation_target || finding.location || '').trim();
+};
+
+const getLigationApproach = (finding = {}) => String(finding.chiva_approach || finding.approach || '').trim();
+
 
 const ClinicalReasoning = () => {
   const [mode, setMode] = useState('single'); // 'single', 'stream', 'report', or 'accuracy'
@@ -512,32 +536,7 @@ const ClinicalReasoning = () => {
 
         } catch (pointErr) {
           console.error(`Error processing point ${i + 1}:`, pointErr);
-          results.processed_points.push({
-            point_number: i + 1,
-            sequence_number: dataStream[i].sequenceNumber,
-            flow_type: dataStream[i].flow,
-            location: dataStream[i].step,
-            error: pointErr.response?.data?.error || pointErr.message,
-          });
-          // Record failed RP in predictions with zeroed tokens
-          if (dataStream[i].flow === 'RP') {
-            rpCount++;
-            runPredictions.push({
-              seq: dataStream[i].sequenceNumber,
-              flow_type: 'RP',
-              step: dataStream[i].step,
-              leg_side: dataStream[i].legSide,
-              vein_path: `${dataStream[i].fromType}→${dataStream[i].toType}`,
-              reflux_duration: dataStream[i].reflux_duration,
-              description: dataStream[i].description || '',
-              ground_truth: dataStream[i].groundTruth || '—',
-              assessment: 'Error',
-              reasoning: pointErr.response?.data?.error || pointErr.message,
-              treatment: '',
-              prompt_tokens: 0, completion_tokens: 0, total_tokens: 0,
-            });
-          }
-          setResponse({ ...results });
+          throw pointErr;
         }
       }
 
@@ -599,6 +598,10 @@ const ClinicalReasoning = () => {
         shunt_type: f.shunt_type || '—',
         confidence: f.confidence != null ? ((f.confidence * 100).toFixed(0) + '%') : '—',
         reasoning: (f.reasoning || []).join(' | '),
+        point_of_ligation: getPointOfLigation(f),
+        approach: getLigationApproach(f),
+        clinical_rationale: String(f.clinical_rationale || '').trim(),
+        ligation_steps: normalizeLigationSteps(f).join(' | '),
       }));
       // accuracy: did LLM detect a concrete shunt type (report mode has no per-finding GT)
       const noShuntRe = /no\s*shunt|normal|insufficient/i;
@@ -672,7 +675,11 @@ const ClinicalReasoning = () => {
         isCorrect,
         confidence: findings[0]?.confidence ?? null,
         reasoning: findings.map(f => (f.reasoning || []).join(' ')).join(' | '),
-        ligation: findings.flatMap(f => f.ligation || []),
+        ligation: findings.flatMap(f => normalizeLigationSteps(f)),
+        ligation_steps: findings.flatMap(f => normalizeLigationSteps(f)),
+        point_of_ligation: findings.map(f => getPointOfLigation(f)).filter(Boolean).join(' | '),
+        chiva_approach: findings.map(f => getLigationApproach(f)).filter(Boolean).join(' | '),
+        clinical_rationale: findings.map(f => String(f.clinical_rationale || '').trim()).filter(Boolean).join(' | '),
         findings,
         total_tokens,
         total_prompt_tokens,
@@ -733,7 +740,7 @@ const ClinicalReasoning = () => {
   };
 
   return (
-    <div className="page-container">
+  <><div className="page-container">
       {/* Mode Selection */}
       <div className="section">
         <h2 className="section-title">🔄 Analysis Mode</h2>
@@ -744,8 +751,7 @@ const ClinicalReasoning = () => {
                 type="radio"
                 value="single"
                 checked={mode === 'single'}
-                onChange={(e) => setMode(e.target.value)}
-              />
+                onChange={(e) => setMode(e.target.value)} />
               Single Data Point
             </label>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
@@ -753,8 +759,7 @@ const ClinicalReasoning = () => {
                 type="radio"
                 value="stream"
                 checked={mode === 'stream'}
-                onChange={(e) => setMode(e.target.value)}
-              />
+                onChange={(e) => setMode(e.target.value)} />
               Continuous Stream (with buffer)
             </label>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
@@ -762,8 +767,7 @@ const ClinicalReasoning = () => {
                 type="radio"
                 value="report"
                 checked={mode === 'report'}
-                onChange={(e) => setMode(e.target.value)}
-              />
+                onChange={(e) => setMode(e.target.value)} />
               Assess Captured Clips (Post-Assessment)
             </label>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
@@ -771,8 +775,7 @@ const ClinicalReasoning = () => {
                 type="radio"
                 value="accuracy"
                 checked={mode === 'accuracy'}
-                onChange={(e) => setMode(e.target.value)}
-              />
+                onChange={(e) => setMode(e.target.value)} />
               🎯 Shunt Classification Accuracy Testing
             </label>
           </div>
@@ -793,8 +796,7 @@ const ClinicalReasoning = () => {
                 className="form-textarea"
                 value={inputData}
                 onChange={(e) => setInputData(e.target.value)}
-                placeholder="Enter ultrasound JSON data"
-              />
+                placeholder="Enter ultrasound JSON data" />
             </div>
 
             <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
@@ -802,16 +804,16 @@ const ClinicalReasoning = () => {
             </p>
 
             <div style={{ display: 'flex', gap: '1rem' }}>
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 onClick={handleAnalyze}
                 disabled={loading}
               >
                 {loading ? '🔄 Analyzing...' : '🔍 Analyze'}
               </button>
               {response && (
-                <button 
-                  className="btn btn-secondary" 
+                <button
+                  className="btn btn-secondary"
                   onClick={handleClear}
                 >
                   Clear Results
@@ -853,8 +855,7 @@ const ClinicalReasoning = () => {
                 value={streamData}
                 onChange={(e) => setStreamData(e.target.value)}
                 placeholder="Enter array of ultrasound data points"
-                style={{ minHeight: '300px' }}
-              />
+                style={{ minHeight: '300px' }} />
             </div>
 
             <div className="form-group">
@@ -869,8 +870,7 @@ const ClinicalReasoning = () => {
                 step="0.1"
                 value={bufferInterval}
                 onChange={(e) => setBufferInterval(parseFloat(e.target.value))}
-                style={{ padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #ddd', width: '100px' }}
-              />
+                style={{ padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #ddd', width: '100px' }} />
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -879,7 +879,7 @@ const ClinicalReasoning = () => {
               </button>
               <button
                 className="btn btn-secondary"
-                onClick={() => { setStreamData(generateMockClips()); setResponse(null); setError(null); setAnalysisTime(null); }}
+                onClick={() => { setStreamData(generateMockClips()); setResponse(null); setError(null); setAnalysisTime(null); } }
                 disabled={loading}
                 title="Generate a fresh random stream (0–3 shunts, 15–20 clips)"
               >
@@ -914,14 +914,14 @@ const ClinicalReasoning = () => {
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                 {runs.length > 0 && (
                   <button
-                    onClick={() => { if (window.confirm('Clear all run history?')) { setRuns([]); localStorage.removeItem('task1_runs'); setSelectedRunId(null); } }}
+                    onClick={() => { if (window.confirm('Clear all run history?')) { setRuns([]); localStorage.removeItem('task1_runs'); setSelectedRunId(null); } } }
                     style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.4)', color: '#fff', borderRadius: '6px', padding: '0.3rem 0.7rem', cursor: 'pointer', fontSize: '0.78rem' }}
                   >
                     🗑 Clear History
                   </button>
                 )}
                 <button
-                  onClick={() => { setMetricsOpen(false); setSelectedRunId(null); }}
+                  onClick={() => { setMetricsOpen(false); setSelectedRunId(null); } }
                   style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', borderRadius: '6px', padding: '0.3rem 0.8rem', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 700 }}
                 >✕</button>
               </div>
@@ -930,20 +930,19 @@ const ClinicalReasoning = () => {
             {/* Mode Tabs */}
             {(() => {
               const tabDefs = [
-                { key: 'stream',   label: '🌊 Stream',   desc: 'Continuous Stream' },
-                { key: 'single',   label: '📍 Single',   desc: 'Single Data Point' },
-                { key: 'report',   label: '📋 Report',   desc: 'Assess Captured Clips' },
+                { key: 'stream', label: '🌊 Stream', desc: 'Continuous Stream' },
+                { key: 'single', label: '📍 Single', desc: 'Single Data Point' },
+                { key: 'report', label: '📋 Report', desc: 'Assess Captured Clips' },
                 { key: 'accuracy', label: '🎯 Accuracy', desc: 'Accuracy Testing' },
               ];
               return (
                 <div style={{ display: 'flex', borderBottom: '2px solid #f0d0d0', background: '#fdf9f9' }}>
                   {tabDefs.map(t => {
-                    const count = runs.filter(r => r.source === t.key).length;
                     const active = metricsTab === t.key;
                     return (
                       <button
                         key={t.key}
-                        onClick={() => { setMetricsTab(t.key); setSelectedRunId(null); }}
+                        onClick={() => { setMetricsTab(t.key); setSelectedRunId(null); } }
                         style={{
                           flex: 1, padding: '0.65rem 0.5rem', border: 'none', cursor: 'pointer',
                           background: active ? '#fff' : 'transparent',
@@ -970,224 +969,224 @@ const ClinicalReasoning = () => {
                   <p>No runs recorded for this mode yet.</p>
                 </div>
               ) : (
-              <div style={{ display: 'flex', minHeight: '520px' }}>
-                {/* Run list sidebar */}
-                <div style={{ width: '280px', borderRight: '1px solid #eee', overflowY: 'auto', flexShrink: 0 }}>
-                  {(() => {
-                    // Summary stats for this tab's runs
-                    const totalRuns = tabRuns.length;
-                    const avgAcc = (() => {
-                      const accRuns = tabRuns.filter(r => r.accuracy_pct !== null);
-                      return accRuns.length ? (accRuns.reduce((s, r) => s + parseFloat(r.accuracy_pct), 0) / accRuns.length).toFixed(1) : 'N/A';
-                    })();
-                    const totalTok = tabRuns.reduce((s, r) => s + (r.total_tokens || 0), 0);
-                    const avgTokPerRun = totalRuns ? Math.round(totalTok / totalRuns) : 0;
-                    return (
-                      <div style={{ padding: '0.75rem 1rem', background: '#fdf2f2', borderBottom: '1px solid #eee' }}>
-                        <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#888', marginBottom: '0.4rem' }}>Summary — {metricsTab} mode</div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
-                          {[['Total runs', totalRuns], ['Avg accuracy', avgAcc !== 'N/A' ? `${avgAcc}%` : 'N/A'], ['Total tokens', totalTok.toLocaleString()], ['Avg tok/run', avgTokPerRun.toLocaleString()]].map(([k, v]) => (
-                            <div key={k} style={{ background: '#fff', borderRadius: '6px', padding: '0.35rem 0.5rem', border: '1px solid #f0d0d0' }}>
-                              <div style={{ fontSize: '0.65rem', color: '#999' }}>{k}</div>
-                              <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#C01C1C' }}>{v}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
-                  {tabRuns.map((run, idx) => {
-                    const isSelected = selectedRunId === run.id;
-                    const ts = new Date(run.timestamp);
-                    return (
-                      <div
-                        key={run.id}
-                        onClick={() => setSelectedRunId(isSelected ? null : run.id)}
-                        style={{
-                          padding: '0.75rem 1rem', cursor: 'pointer', borderBottom: '1px solid #f5f5f5',
-                          background: isSelected ? '#fdf2f2' : '#fff',
-                          borderLeft: isSelected ? '3px solid #C01C1C' : '3px solid transparent',
-                          transition: 'background 0.15s'
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
-                          <span style={{ fontWeight: 600, fontSize: '0.82rem', color: isSelected ? '#C01C1C' : '#333' }}>
-                            Run #{tabRuns.length - idx}
-                          </span>
-                          <span style={{ fontSize: '0.7rem', color: '#999' }}>{ts.toLocaleTimeString()}</span>
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: '#555' }}>
-                          {ts.toLocaleDateString()} · {run.total_clips} clips · {run.rp_clips} RP
-                          {run.source === 'accuracy' && run.stream_name && (
-                            <span style={{ marginLeft: '0.3rem', color: '#7c3aed' }}>· {run.stream_name}</span>
-                          )}
-                        </div>
-                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
-                          {run.accuracy_pct !== null && (
-                            <span style={{ background: parseFloat(run.accuracy_pct) >= 80 ? '#dcfce7' : parseFloat(run.accuracy_pct) >= 50 ? '#fef9c3' : '#fee2e2', color: parseFloat(run.accuracy_pct) >= 80 ? '#166534' : parseFloat(run.accuracy_pct) >= 50 ? '#854d0e' : '#991b1b', borderRadius: '999px', padding: '1px 7px', fontSize: '0.7rem', fontWeight: 600 }}>
-                              {run.accuracy_pct}% acc
-                            </span>
-                          )}
-                          <span style={{ background: '#f3f4f6', color: '#374151', borderRadius: '999px', padding: '1px 7px', fontSize: '0.7rem' }}>
-                            {(run.total_tokens || 0).toLocaleString()} tok
-                          </span>
-                          <span style={{ background: '#f3f4f6', color: '#374151', borderRadius: '999px', padding: '1px 7px', fontSize: '0.7rem' }}>
-                            {run.duration_sec}s
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Run detail panel */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1.5rem' }}>
-                  {selectedRunId ? (() => {
-                    const run = runs.find(r => r.id === selectedRunId);
-                    if (!run) return null;
-                    const runNo = runs.length - runs.findIndex(r => r.id === selectedRunId);
-                    const accVal = run.accuracy_pct !== null ? parseFloat(run.accuracy_pct) : null;
-                    const accColor = accVal === null ? '#888' : accVal >= 80 ? '#166534' : accVal >= 50 ? '#854d0e' : '#991b1b';
-                    const accBg   = accVal === null ? '#f3f4f6' : accVal >= 80 ? '#dcfce7' : accVal >= 50 ? '#fef9c3' : '#fee2e2';
-
-                    return (
-                      <>
-                        {/* KPI cards */}
-                        <h3 style={{ margin: '0 0 0.75rem', fontSize: '1rem', color: '#C01C1C' }}>
-                          Run #{runNo} — {new Date(run.timestamp).toLocaleString()}
-                        </h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.6rem', marginBottom: '1.25rem' }}>
-                          {[
-                            ['Total clips', run.total_clips, '#e0e7ff', '#3730a3'],
-                            ['RP clips', run.rp_clips, '#fee2e2', '#991b1b'],
-                            ['EP clips', run.ep_clips, '#d1fae5', '#065f46'],
-                            ['Duration', `${run.duration_sec}s`, '#f3f4f6', '#374151'],
-                          ].map(([label, val, bg, fg]) => (
-                            <div key={label} style={{ background: bg, borderRadius: '8px', padding: '0.6rem 0.8rem' }}>
-                              <div style={{ fontSize: '0.65rem', color: fg, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
-                              <div style={{ fontWeight: 700, fontSize: '1.1rem', color: fg }}>{val}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Accuracy + token summary */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                          {/* Accuracy */}
-                          <div style={{ background: accBg, borderRadius: '10px', padding: '1rem 1.2rem', border: `1px solid ${accColor}30` }}>
-                            <div style={{ fontSize: '0.7rem', color: accColor, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Shunt Detection Accuracy</div>
-                            <div style={{ fontSize: '2.2rem', fontWeight: 800, color: accColor, lineHeight: 1 }}>
-                              {run.accuracy_pct !== null ? `${run.accuracy_pct}%` : 'N/A'}
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: accColor, marginTop: '0.3rem', opacity: 0.8 }}>
-                              {run.source === 'accuracy'
-                                ? `Stream: ${run.stream_name || run.stream_id} — ${run.rp_correct ? 'Correct' : 'Incorrect'}`
-                                : run.rp_clips > 0
-                                  ? `${run.rp_correct ?? '?'}/${run.rp_clips} RP clips matched ground truth`
-                                  : 'No RP clips in this run'}
-                            </div>
-                            <div style={{ fontSize: '0.68rem', color: '#888', marginTop: '0.2rem' }}>
-                              Metric: RP clips where LLM matched ground-truth shunt type
-                            </div>
-                          </div>
-                          {/* Token summary */}
-                          <div style={{ background: '#f0f9ff', borderRadius: '10px', padding: '1rem 1.2rem', border: '1px solid #bae6fd' }}>
-                            <div style={{ fontSize: '0.7rem', color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Token Usage</div>
-                            {[
-                              ['Prompt tokens', (run.total_prompt_tokens || 0).toLocaleString()],
-                              ['Completion tokens', (run.total_completion_tokens || 0).toLocaleString()],
-                              ['Total tokens (run)', (run.total_tokens || 0).toLocaleString()],
-                              ['Avg tokens / RP call', (run.avg_tokens_per_rp || 0).toLocaleString()],
-                            ].map(([k, v]) => (
-                              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.2rem' }}>
-                                <span style={{ color: '#555' }}>{k}</span>
-                                <span style={{ fontWeight: 700, color: '#0369a1' }}>{v}</span>
+                <div style={{ display: 'flex', minHeight: '520px' }}>
+                  {/* Run list sidebar */}
+                  <div style={{ width: '280px', borderRight: '1px solid #eee', overflowY: 'auto', flexShrink: 0 }}>
+                    {(() => {
+                      // Summary stats for this tab's runs
+                      const totalRuns = tabRuns.length;
+                      const avgAcc = (() => {
+                        const accRuns = tabRuns.filter(r => r.accuracy_pct !== null);
+                        return accRuns.length ? (accRuns.reduce((s, r) => s + parseFloat(r.accuracy_pct), 0) / accRuns.length).toFixed(1) : 'N/A';
+                      })();
+                      const totalTok = tabRuns.reduce((s, r) => s + (r.total_tokens || 0), 0);
+                      const avgTokPerRun = totalRuns ? Math.round(totalTok / totalRuns) : 0;
+                      return (
+                        <div style={{ padding: '0.75rem 1rem', background: '#fdf2f2', borderBottom: '1px solid #eee' }}>
+                          <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#888', marginBottom: '0.4rem' }}>Summary — {metricsTab} mode</div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+                            {[['Total runs', totalRuns], ['Avg accuracy', avgAcc !== 'N/A' ? `${avgAcc}%` : 'N/A'], ['Total tokens', totalTok.toLocaleString()], ['Avg tok/run', avgTokPerRun.toLocaleString()]].map(([k, v]) => (
+                              <div key={k} style={{ background: '#fff', borderRadius: '6px', padding: '0.35rem 0.5rem', border: '1px solid #f0d0d0' }}>
+                                <div style={{ fontSize: '0.65rem', color: '#999' }}>{k}</div>
+                                <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#C01C1C' }}>{v}</div>
                               </div>
                             ))}
                           </div>
                         </div>
+                      );
+                    })()}
+                    {tabRuns.map((run, idx) => {
+                      const isSelected = selectedRunId === run.id;
+                      const ts = new Date(run.timestamp);
+                      return (
+                        <div
+                          key={run.id}
+                          onClick={() => setSelectedRunId(isSelected ? null : run.id)}
+                          style={{
+                            padding: '0.75rem 1rem', cursor: 'pointer', borderBottom: '1px solid #f5f5f5',
+                            background: isSelected ? '#fdf2f2' : '#fff',
+                            borderLeft: isSelected ? '3px solid #C01C1C' : '3px solid transparent',
+                            transition: 'background 0.15s'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.82rem', color: isSelected ? '#C01C1C' : '#333' }}>
+                              Run #{tabRuns.length - idx}
+                            </span>
+                            <span style={{ fontSize: '0.7rem', color: '#999' }}>{ts.toLocaleTimeString()}</span>
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#555' }}>
+                            {ts.toLocaleDateString()} · {run.total_clips} clips · {run.rp_clips} RP
+                            {run.source === 'accuracy' && run.stream_name && (
+                              <span style={{ marginLeft: '0.3rem', color: '#7c3aed' }}>· {run.stream_name}</span>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
+                            {run.accuracy_pct !== null && (
+                              <span style={{ background: parseFloat(run.accuracy_pct) >= 80 ? '#dcfce7' : parseFloat(run.accuracy_pct) >= 50 ? '#fef9c3' : '#fee2e2', color: parseFloat(run.accuracy_pct) >= 80 ? '#166534' : parseFloat(run.accuracy_pct) >= 50 ? '#854d0e' : '#991b1b', borderRadius: '999px', padding: '1px 7px', fontSize: '0.7rem', fontWeight: 600 }}>
+                                {run.accuracy_pct}% acc
+                              </span>
+                            )}
+                            <span style={{ background: '#f3f4f6', color: '#374151', borderRadius: '999px', padding: '1px 7px', fontSize: '0.7rem' }}>
+                              {(run.total_tokens || 0).toLocaleString()} tok
+                            </span>
+                            <span style={{ background: '#f3f4f6', color: '#374151', borderRadius: '999px', padding: '1px 7px', fontSize: '0.7rem' }}>
+                              {run.duration_sec}s
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
 
-                        {/* Predictions table */}
-                        <h4 style={{ fontSize: '0.85rem', color: '#555', margin: '0 0 0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                          Per-Clip Predictions ({run.predictions?.length || 0} RP clips processed)
-                        </h4>
-                        {(!run.predictions || run.predictions.length === 0) ? (
-                          <p style={{ color: '#aaa', fontSize: '0.85rem' }}>No RP clips were in this stream — all clips had normal forward flow (EP).</p>
-                        ) : (
-                          <div style={{ overflowX: 'auto' }}>
-                            {run.predictions.map((p, i) => {
-                              const noShunt = /no shunt|insufficient/i.test(p.assessment);
-                              return (
-                                <div key={i} style={{
-                                  border: '1px solid #e5e7eb', borderRadius: '8px', marginBottom: '0.75rem',
-                                  overflow: 'hidden'
-                                }}>
-                                  {/* Clip header */}
-                                  <div style={{
-                                    background: noShunt ? '#f3f4f6' : '#fdf2f2',
-                                    padding: '0.5rem 0.75rem',
-                                    display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap',
-                                    borderBottom: '1px solid #e5e7eb'
+                  {/* Run detail panel */}
+                  <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1.5rem' }}>
+                    {selectedRunId ? (() => {
+                      const run = runs.find(r => r.id === selectedRunId);
+                      if (!run) return null;
+                      const runNo = runs.length - runs.findIndex(r => r.id === selectedRunId);
+                      const accVal = run.accuracy_pct !== null ? parseFloat(run.accuracy_pct) : null;
+                      const accColor = accVal === null ? '#888' : accVal >= 80 ? '#166534' : accVal >= 50 ? '#854d0e' : '#991b1b';
+                      const accBg = accVal === null ? '#f3f4f6' : accVal >= 80 ? '#dcfce7' : accVal >= 50 ? '#fef9c3' : '#fee2e2';
+
+                      return (
+                        <>
+                          {/* KPI cards */}
+                          <h3 style={{ margin: '0 0 0.75rem', fontSize: '1rem', color: '#C01C1C' }}>
+                            Run #{runNo} — {new Date(run.timestamp).toLocaleString()}
+                          </h3>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.6rem', marginBottom: '1.25rem' }}>
+                            {[
+                              ['Total clips', run.total_clips, '#e0e7ff', '#3730a3'],
+                              ['RP clips', run.rp_clips, '#fee2e2', '#991b1b'],
+                              ['EP clips', run.ep_clips, '#d1fae5', '#065f46'],
+                              ['Duration', `${run.duration_sec}s`, '#f3f4f6', '#374151'],
+                            ].map(([label, val, bg, fg]) => (
+                              <div key={label} style={{ background: bg, borderRadius: '8px', padding: '0.6rem 0.8rem' }}>
+                                <div style={{ fontSize: '0.65rem', color: fg, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+                                <div style={{ fontWeight: 700, fontSize: '1.1rem', color: fg }}>{val}</div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Accuracy + token summary */}
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                            {/* Accuracy */}
+                            <div style={{ background: accBg, borderRadius: '10px', padding: '1rem 1.2rem', border: `1px solid ${accColor}30` }}>
+                              <div style={{ fontSize: '0.7rem', color: accColor, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Shunt Detection Accuracy</div>
+                              <div style={{ fontSize: '2.2rem', fontWeight: 800, color: accColor, lineHeight: 1 }}>
+                                {run.accuracy_pct !== null ? `${run.accuracy_pct}%` : 'N/A'}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: accColor, marginTop: '0.3rem', opacity: 0.8 }}>
+                                {run.source === 'accuracy'
+                                  ? `Stream: ${run.stream_name || run.stream_id} — ${run.rp_correct ? 'Correct' : 'Incorrect'}`
+                                  : run.rp_clips > 0
+                                    ? `${run.rp_correct ?? '?'}/${run.rp_clips} RP clips matched ground truth`
+                                    : 'No RP clips in this run'}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#888', marginTop: '0.2rem' }}>
+                                Metric: RP clips where LLM matched ground-truth shunt type
+                              </div>
+                            </div>
+                            {/* Token summary */}
+                            <div style={{ background: '#f0f9ff', borderRadius: '10px', padding: '1rem 1.2rem', border: '1px solid #bae6fd' }}>
+                              <div style={{ fontSize: '0.7rem', color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Token Usage</div>
+                              {[
+                                ['Prompt tokens', (run.total_prompt_tokens || 0).toLocaleString()],
+                                ['Completion tokens', (run.total_completion_tokens || 0).toLocaleString()],
+                                ['Total tokens (run)', (run.total_tokens || 0).toLocaleString()],
+                                ['Avg tokens / RP call', (run.avg_tokens_per_rp || 0).toLocaleString()],
+                              ].map(([k, v]) => (
+                                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.2rem' }}>
+                                  <span style={{ color: '#555' }}>{k}</span>
+                                  <span style={{ fontWeight: 700, color: '#0369a1' }}>{v}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Predictions table */}
+                          <h4 style={{ fontSize: '0.85rem', color: '#555', margin: '0 0 0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Per-Clip Predictions ({run.predictions?.length || 0} RP clips processed)
+                          </h4>
+                          {(!run.predictions || run.predictions.length === 0) ? (
+                            <p style={{ color: '#aaa', fontSize: '0.85rem' }}>No RP clips were in this stream — all clips had normal forward flow (EP).</p>
+                          ) : (
+                            <div style={{ overflowX: 'auto' }}>
+                              {run.predictions.map((p, i) => {
+                                const noShunt = /no shunt|insufficient/i.test(p.assessment);
+                                return (
+                                  <div key={i} style={{
+                                    border: '1px solid #e5e7eb', borderRadius: '8px', marginBottom: '0.75rem',
+                                    overflow: 'hidden'
                                   }}>
-                                    <span style={{ fontWeight: 700, fontSize: '0.78rem', color: '#444' }}>Clip #{p.seq}</span>
-                                    <span style={{ fontSize: '0.72rem', background: '#fee2e2', color: '#991b1b', borderRadius: '4px', padding: '1px 6px' }}>RP · {p.vein_path}</span>
-                                    <span style={{ fontSize: '0.72rem', color: '#666' }}>{p.step} · {p.leg_side}</span>
-                                    <span style={{ fontSize: '0.72rem', color: '#888' }}>reflux {p.reflux_duration}s</span>
-                                    <span style={{ marginLeft: 'auto', fontSize: '0.7rem', background: '#f0f9ff', color: '#0369a1', borderRadius: '4px', padding: '1px 6px' }}>
-                                      {p.total_tokens} tok (↑{p.prompt_tokens} ↓{p.completion_tokens})
-                                    </span>
-                                  </div>
-                                  {/* Prediction body */}
-                                  <div style={{ padding: '0.6rem 0.75rem', fontSize: '0.8rem' }}>
-                                    {/* Ground truth vs LLM assessment row */}
-                                    <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '0.45rem', flexWrap: 'wrap' }}>
-                                      {p.ground_truth && p.ground_truth !== '—' && (
+                                    {/* Clip header */}
+                                    <div style={{
+                                      background: noShunt ? '#f3f4f6' : '#fdf2f2',
+                                      padding: '0.5rem 0.75rem',
+                                      display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap',
+                                      borderBottom: '1px solid #e5e7eb'
+                                    }}>
+                                      <span style={{ fontWeight: 700, fontSize: '0.78rem', color: '#444' }}>Clip #{p.seq}</span>
+                                      <span style={{ fontSize: '0.72rem', background: '#fee2e2', color: '#991b1b', borderRadius: '4px', padding: '1px 6px' }}>RP · {p.vein_path}</span>
+                                      <span style={{ fontSize: '0.72rem', color: '#666' }}>{p.step} · {p.leg_side}</span>
+                                      <span style={{ fontSize: '0.72rem', color: '#888' }}>reflux {p.reflux_duration}s</span>
+                                      <span style={{ marginLeft: 'auto', fontSize: '0.7rem', background: '#f0f9ff', color: '#0369a1', borderRadius: '4px', padding: '1px 6px' }}>
+                                        {p.total_tokens} tok (↑{p.prompt_tokens} ↓{p.completion_tokens})
+                                      </span>
+                                    </div>
+                                    {/* Prediction body */}
+                                    <div style={{ padding: '0.6rem 0.75rem', fontSize: '0.8rem' }}>
+                                      {/* Ground truth vs LLM assessment row */}
+                                      <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '0.45rem', flexWrap: 'wrap' }}>
+                                        {p.ground_truth && p.ground_truth !== '—' && (
+                                          <div>
+                                            <span style={{ fontWeight: 600, color: '#444' }}>Ground Truth: </span>
+                                            <span style={{ fontWeight: 700, color: '#059669', background: '#d1fae5', padding: '1px 8px', borderRadius: '4px' }}>
+                                              {p.ground_truth}
+                                            </span>
+                                          </div>
+                                        )}
                                         <div>
-                                          <span style={{ fontWeight: 600, color: '#444' }}>Ground Truth: </span>
-                                          <span style={{ fontWeight: 700, color: '#059669', background: '#d1fae5', padding: '1px 8px', borderRadius: '4px' }}>
-                                            {p.ground_truth}
-                                          </span>
+                                          <span style={{ fontWeight: 600, color: '#444' }}>LLM Assessment: </span>
+                                          <span style={{
+                                            fontWeight: 700,
+                                            color: noShunt ? '#6b7280' : '#C01C1C',
+                                            background: noShunt ? '#f3f4f6' : '#fdf2f2',
+                                            padding: '1px 8px', borderRadius: '4px'
+                                          }}>{p.assessment || '—'}</span>
+                                        </div>
+                                      </div>
+                                      {p.reasoning && (
+                                        <div style={{ marginBottom: '0.35rem', color: '#555' }}>
+                                          <span style={{ fontWeight: 600, color: '#444' }}>Reasoning: </span>{p.reasoning}
                                         </div>
                                       )}
-                                      <div>
-                                        <span style={{ fontWeight: 600, color: '#444' }}>LLM Assessment: </span>
-                                        <span style={{
-                                          fontWeight: 700,
-                                          color: noShunt ? '#6b7280' : '#C01C1C',
-                                          background: noShunt ? '#f3f4f6' : '#fdf2f2',
-                                          padding: '1px 8px', borderRadius: '4px'
-                                        }}>{p.assessment || '—'}</span>
-                                      </div>
+                                      {p.treatment && (
+                                        <div style={{ color: '#555' }}>
+                                          <span style={{ fontWeight: 600, color: '#444' }}>Treatment: </span>
+                                          <span style={{ whiteSpace: 'pre-wrap' }}>{p.treatment}</span>
+                                        </div>
+                                      )}
+                                      {p.description && (
+                                        <div style={{ marginTop: '0.25rem', fontSize: '0.72rem', color: '#888', fontStyle: 'italic' }}>{p.description}</div>
+                                      )}
                                     </div>
-                                    {p.reasoning && (
-                                      <div style={{ marginBottom: '0.35rem', color: '#555' }}>
-                                        <span style={{ fontWeight: 600, color: '#444' }}>Reasoning: </span>{p.reasoning}
-                                      </div>
-                                    )}
-                                    {p.treatment && (
-                                      <div style={{ color: '#555' }}>
-                                        <span style={{ fontWeight: 600, color: '#444' }}>Treatment: </span>
-                                        <span style={{ whiteSpace: 'pre-wrap' }}>{p.treatment}</span>
-                                      </div>
-                                    )}
-                                    {p.description && (
-                                      <div style={{ marginTop: '0.25rem', fontSize: '0.72rem', color: '#888', fontStyle: 'italic' }}>{p.description}</div>
-                                    )}
                                   </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </>
-                    );
-                  })() : (
-                    <div style={{ color: '#aaa', textAlign: 'center', marginTop: '4rem' }}>
-                      <div style={{ fontSize: '2rem' }}>👈</div>
-                      <p style={{ marginTop: '0.5rem' }}>Select a run to view details</p>
-                    </div>
-                  )}
+                                );
+                              })}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })() : (
+                      <div style={{ color: '#aaa', textAlign: 'center', marginTop: '4rem' }}>
+                        <div style={{ fontSize: '2rem' }}>👈</div>
+                        <p style={{ marginTop: '0.5rem' }}>Select a run to view details</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
               );
             })()}
           </div>
@@ -1226,8 +1225,7 @@ const ClinicalReasoning = () => {
                   value={reportClips}
                   onChange={(e) => setReportClips(e.target.value)}
                   style={{ minHeight: '280px', fontFamily: 'monospace', fontSize: '0.82rem' }}
-                  placeholder='[{"flow":"EP","fromType":"N1","toType":"N2","posXRatio":0.30,"posYRatio":0.07,...}]'
-                />
+                  placeholder='[{"flow":"EP","fromType":"N1","toType":"N2","posXRatio":0.30,"posYRatio":0.07,...}]' />
               </div>
 
               <div className="form-group">
@@ -1236,8 +1234,7 @@ const ClinicalReasoning = () => {
                   className="form-textarea"
                   value={reportPatientInfo}
                   onChange={(e) => setReportPatientInfo(e.target.value)}
-                  style={{ minHeight: '100px', fontFamily: 'monospace', fontSize: '0.82rem' }}
-                />
+                  style={{ minHeight: '100px', fontFamily: 'monospace', fontSize: '0.82rem' }} />
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1259,7 +1256,7 @@ const ClinicalReasoning = () => {
                 </button>
                 <button
                   className="btn btn-secondary"
-                  onClick={() => { setReportClips(generateMockClips()); setReportResult(null); setReportError(null); }}
+                  onClick={() => { setReportClips(generateMockClips()); setReportResult(null); setReportError(null); } }
                   disabled={reportLoading}
                   title="Generate a fresh random dataset (0–3 shunts, 15–20 clips)"
                 >
@@ -1268,7 +1265,7 @@ const ClinicalReasoning = () => {
                 {reportResult && (
                   <button
                     className="btn btn-secondary"
-                    onClick={() => { setReportResult(null); setReportError(null); }}
+                    onClick={() => { setReportResult(null); setReportError(null); } }
                   >
                     Clear
                   </button>
@@ -1301,7 +1298,7 @@ const ClinicalReasoning = () => {
                         <div key={i} style={{ flex: 1, minWidth: 160, background: '#C01C1C', color: 'white', borderRadius: 8, padding: '0.9rem 1.1rem', textAlign: 'center' }}>
                           <div style={{ fontSize: '0.75rem', opacity: 0.85, textTransform: 'uppercase', letterSpacing: 1 }}>{f.leg} Leg</div>
                           <div style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0.3rem 0' }}>{f.shunt_type}</div>
-                          <div style={{ fontSize: '0.78rem', opacity: 0.85 }}>Confidence: {((f.confidence||0)*100).toFixed(0)}%</div>
+                          <div style={{ fontSize: '0.78rem', opacity: 0.85 }}>Confidence: {((f.confidence || 0) * 100).toFixed(0)}%</div>
                         </div>
                       ))}
                     </div>
@@ -1314,31 +1311,88 @@ const ClinicalReasoning = () => {
                 <div key={fi} className="output-container" style={{ borderLeft: '4px solid #C01C1C' }}>
                   <div className="output-header">
                     <h3>🦵 {f.leg} Leg — {f.shunt_type}</h3>
-                    <span className="output-status success">Confidence: {((f.confidence||0)*100).toFixed(0)}%</span>
+                    <span className="output-status success">Confidence: {((f.confidence || 0) * 100).toFixed(0)}%</span>
                   </div>
                   <div className="output-content">
                     {f.summary && <p style={{ marginBottom: '0.8rem', color: '#333', fontStyle: 'italic', fontSize: '0.92rem' }}>{f.summary}</p>}
 
-                    {(f.needs_elim_test || f.ask_diameter || f.ask_branching) && (
+                    {/*{(f.needs_elim_test || f.ask_diameter || f.ask_branching) && (*/}
+                    {(f.needs_elim_test || f.ask_branching) && (
                       <div style={{ background: '#FFFBEB', border: '1px solid #F59E0B', borderRadius: 4, padding: '0.5rem 0.8rem', marginBottom: '0.8rem', fontSize: '0.85rem', color: '#92400E' }}>
                         {f.needs_elim_test && <div>⚠ Elimination test required before ligation decision</div>}
-                        {f.ask_diameter    && <div>ℹ Specify RP diameter at N2: Small or Large</div>}
-                        {f.ask_branching   && <div>ℹ Specify N3 branching pattern</div>}
+                        {/* {f.ask_diameter    && <div>ℹ Specify RP diameter at N2: Small or Large</div>} */}
+                        {f.ask_branching && <div>ℹ Specify N3 branching pattern</div>}
                       </div>
                     )}
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                       <div style={{ background: '#eff6ff', borderLeft: '3px solid #C01C1C', borderRadius: 4, padding: '0.75rem' }}>
                         <div style={{ fontWeight: 600, color: '#C01C1C', fontSize: '0.85rem', marginBottom: '0.4rem' }}>Clinical Reasoning</div>
-                        {(f.reasoning||[]).map((r,i) => <div key={i} style={{ fontSize: '0.82rem', marginBottom: '0.2rem' }}>• {String(r).replace(/^[•\-\s]+/,'')}</div>)}
-                        {(!f.reasoning||f.reasoning.length===0) && <div style={{ fontSize: '0.82rem', color: '#888' }}>No pattern detected.</div>}
+                        {(f.reasoning || []).map((r, i) => <div key={i} style={{ fontSize: '0.82rem', marginBottom: '0.2rem' }}>• {String(r).replace(/^[•\-\s]+/, '')}</div>)}
+                        {(!f.reasoning || f.reasoning.length === 0) && <div style={{ fontSize: '0.82rem', color: '#888' }}>No pattern detected.</div>}
                       </div>
                       <div style={{ background: '#fff5f5', borderLeft: '3px solid #8B0000', borderRadius: 4, padding: '0.75rem' }}>
                         <div style={{ fontWeight: 600, color: '#8B0000', fontSize: '0.85rem', marginBottom: '0.4rem' }}>Proposed Ligation</div>
-                        {(f.ligation||[]).map((l,i) => <div key={i} style={{ fontSize: '0.82rem', marginBottom: '0.2rem', fontWeight: i===0?600:400 }}>• {String(l).replace(/^[•\-\s]+/,'')}</div>)}
-                        {(!f.ligation||f.ligation.length===0) && <div style={{ fontSize: '0.82rem', color: '#888' }}>No ligation required.</div>}
+                        {(() => {
+                          const ligationSteps = normalizeLigationSteps(f);
+                          const pointOfLigation = getPointOfLigation(f);
+                          const approach = getLigationApproach(f);
+
+                          return (
+                            <>
+                              {pointOfLigation && (
+                                <div style={{ fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                                  <span style={{ fontWeight: 600 }}>Point of ligation:</span> {pointOfLigation}
+                                </div>
+                              )}
+                              {approach && (
+                                <div style={{ fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                                  <span style={{ fontWeight: 600 }}>Approach:</span> {approach}
+                                </div>
+                              )}
+                              {ligationSteps.length > 0
+                                ? ligationSteps.map((l, i) => <div key={i} style={{ fontSize: '0.82rem', marginBottom: '0.2rem', fontWeight: i === 0 ? 600 : 400 }}>• {l}</div>)
+                                : <div style={{ fontSize: '0.82rem', color: '#888' }}>No ligation required.</div>}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
+
+                    {String(f.chiva_approach || '').trim() && String(f.chiva_approach).trim().toLowerCase() !== 'unable to determine.' && (
+                      <div style={{ marginTop: '0.75rem', background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 4, padding: '0.75rem' }}>
+                        <div style={{ fontWeight: 600, color: '#374151', fontSize: '0.85rem', marginBottom: '0.35rem' }}>CHIVA Approach</div>
+                        <div style={{ fontSize: '0.82rem', color: '#555' }}>{f.chiva_approach}</div>
+                      </div>
+                    )}
+
+                    {String(f.clinical_rationale || '').trim() && (
+                      <div style={{ marginTop: '0.75rem', background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 4, padding: '0.75rem' }}>
+                        <div style={{ fontWeight: 600, color: '#374151', fontSize: '0.85rem', marginBottom: '0.35rem' }}>Clinical Rationale</div>
+                        <div style={{ fontSize: '0.82rem', color: '#555' }}>{f.clinical_rationale}</div>
+                      </div>
+                    )}
+
+                    {Array.isArray(f.additional_info_needed) && f.additional_info_needed.length > 0 && (
+                      <div style={{ marginTop: '0.75rem', background: '#fffbeb', border: '1px solid #f59e0b', borderRadius: 4, padding: '0.75rem' }}>
+                        <div style={{ fontWeight: 600, color: '#92400e', fontSize: '0.85rem', marginBottom: '0.35rem' }}>Additional Info Needed</div>
+                        {f.additional_info_needed.map((item, i) => <div key={i} style={{ fontSize: '0.82rem', color: '#92400e' }}>• {String(item).replace(/^[•\-\s]+/, '')}</div>)}
+                      </div>
+                    )}
+
+                    {Array.isArray(f.complications_contraindications) && f.complications_contraindications.length > 0 && (
+                      <div style={{ marginTop: '0.75rem', background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 4, padding: '0.75rem' }}>
+                        <div style={{ fontWeight: 600, color: '#9f1239', fontSize: '0.85rem', marginBottom: '0.35rem' }}>Complications / Contraindications</div>
+                        {f.complications_contraindications.map((item, i) => <div key={i} style={{ fontSize: '0.82rem', color: '#9f1239' }}>• {String(item).replace(/^[•\-\s]+/, '')}</div>)}
+                      </div>
+                    )}
+
+                    {String(f.followup_schedule || '').trim() && (
+                      <div style={{ marginTop: '0.75rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 4, padding: '0.75rem' }}>
+                        <div style={{ fontWeight: 600, color: '#166534', fontSize: '0.85rem', marginBottom: '0.35rem' }}>Follow-Up Schedule</div>
+                        <div style={{ fontSize: '0.82rem', color: '#166534' }}>{f.followup_schedule}</div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1384,102 +1438,53 @@ const ClinicalReasoning = () => {
       {/* Single Mode Response Display */}
       {mode === 'single' && response && !response.results && (
         <>
-          {/* Shunt Classification */}
           <div className="output-container">
             <div className="output-header">
-              <h3>🔬 Shunt Type Classification (Task-1)</h3>
+              <h3>🔬 Clinical Reasoning</h3>
               <span className="output-status success">✓ Complete</span>
             </div>
             <div className="output-content">
-              {response.shunt_classification ? (
-                <div style={{ 
-                  padding: '1rem', 
-                  backgroundColor: '#f0fdf4', 
-                  borderLeft: '4px solid #059669',
-                  borderRadius: '0.25rem',
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'system-ui'
-                }}>
-                  <div><strong>Type:</strong> {response.shunt_classification.shunt_type}</div>
-                  <div><strong>Pathway:</strong> {response.shunt_classification.vein_path}</div>
-                  <div><strong>Confidence:</strong> {(response.shunt_classification.confidence * 100).toFixed(0)}%</div>
-                  <div style={{ marginTop: '0.5rem' }}><strong>Analysis:</strong> {response.shunt_classification.reasoning}</div>
-                </div>
-              ) : (
-                <p className="text-muted">No classification available</p>
-              )}
-            </div>
-          </div>
+              <div style={{ display: 'grid', gap: '0.85rem' }}>
+                {response.shunt_type_assessment ? (
+                  <div style={{ padding: '1rem', backgroundColor: '#f0fdf4', borderLeft: '4px solid #059669', borderRadius: '0.25rem', whiteSpace: 'pre-wrap', fontFamily: 'system-ui' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.35rem' }}>Shunt Type Assessment</div>
+                    {response.shunt_type_assessment}
+                  </div>
+                ) : null}
 
-          {/* Shunt Type Assessment */}
-          <div className="output-container">
-            <div className="output-header">
-              <h3>🔍 Shunt Type Assessment (RAG)</h3>
-              <span className="output-status success">✓ Complete</span>
-            </div>
-            <div className="output-content">
-              {response.shunt_type_assessment ? (
-                <div style={{ 
-                  padding: '1rem', 
-                  backgroundColor: '#f0fdf4', 
-                  borderLeft: '4px solid #059669',
-                  borderRadius: '0.25rem',
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'system-ui'
-                }}>
-                  {response.shunt_type_assessment}
-                </div>
-              ) : (
-                <p className="text-muted">No assessment available</p>
-              )}
-            </div>
-          </div>
+                {response.reasoning ? (
+                  <div style={{ padding: '1rem', backgroundColor: '#eff6ff', borderLeft: '4px solid #1e40af', borderRadius: '0.25rem', whiteSpace: 'pre-wrap', fontFamily: 'system-ui' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.35rem' }}>Reasoning</div>
+                    {response.reasoning}
+                  </div>
+                ) : null}
 
-          {/* Reasoning */}
-          <div className="output-container">
-            <div className="output-header">
-              <h3>💭 Reasoning (Task-2)</h3>
-              <span className="output-status success">✓ Complete</span>
-            </div>
-            <div className="output-content">
-              {response.reasoning ? (
-                <div style={{ 
-                  padding: '1rem', 
-                  backgroundColor: '#eff6ff', 
-                  borderLeft: '4px solid #1e40af',
-                  borderRadius: '0.25rem',
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'system-ui'
-                }}>
-                  {response.reasoning}
-                </div>
-              ) : (
-                <p className="text-muted">No reasoning available</p>
-              )}
-            </div>
-          </div>
+                {response.treatment_plan ? (
+                  <div style={{ padding: '1rem', backgroundColor: '#fef3c7', borderLeft: '4px solid #d97706', borderRadius: '0.25rem', whiteSpace: 'pre-wrap', fontFamily: 'system-ui' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.35rem' }}>Treatment Plan</div>
+                    {response.treatment_plan}
+                  </div>
+                ) : null}
 
-          {/* Treatment Plan */}
-          <div className="output-container">
-            <div className="output-header">
-              <h3>💊 Treatment Plan</h3>
-              <span className="output-status success">✓ Complete</span>
-            </div>
-            <div className="output-content">
-              {response.treatment_plan ? (
-                <div style={{ 
-                  padding: '1rem', 
-                  backgroundColor: '#fef3c7', 
-                  borderLeft: '4px solid #d97706',
-                  borderRadius: '0.25rem',
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'system-ui'
-                }}>
-                  {response.treatment_plan}
-                </div>
-              ) : (
-                <p className="text-muted">No treatment plan available</p>
-              )}
+                {(response.ligation_steps?.length > 0 || response.point_of_ligation || response.chiva_approach || response.clinical_rationale) && (
+                  <div style={{ padding: '1rem', backgroundColor: '#fff5f5', borderLeft: '4px solid #8B0000', borderRadius: '0.25rem', whiteSpace: 'pre-wrap', fontFamily: 'system-ui' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.35rem', color: '#8B0000' }}>Ligation Details</div>
+                    {response.point_of_ligation && <div><strong>Point of ligation:</strong> {response.point_of_ligation}</div>}
+                    {response.chiva_approach && <div><strong>Approach:</strong> {response.chiva_approach}</div>}
+                    {response.ligation_steps?.length > 0 && (
+                      <div style={{ marginTop: '0.4rem' }}>
+                        <strong>Ligation steps:</strong>
+                        <div style={{ marginTop: '0.25rem' }}>
+                          {response.ligation_steps.map((step, index) => (
+                            <div key={index}>• {String(step).replace(/^[•\-\s]+/, '')}</div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {response.clinical_rationale && <div style={{ marginTop: '0.4rem' }}><strong>Clinical rationale:</strong> {response.clinical_rationale}</div>}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -1488,7 +1493,7 @@ const ClinicalReasoning = () => {
             <summary style={{ cursor: 'pointer', fontWeight: '600', color: '#666' }}>
               Show Raw LLM Response
             </summary>
-            <div style={{ 
+            <div style={{
               marginTop: '1rem',
               padding: '1rem',
               backgroundColor: '#f3f4f6',
@@ -1530,9 +1535,9 @@ const ClinicalReasoning = () => {
             <div className="output-content">
               {response.processed_points.length > 0 && (
                 <>
-                  <div style={{ 
-                    padding: '0.75rem', 
-                    backgroundColor: '#f0fdf4', 
+                  <div style={{
+                    padding: '0.75rem',
+                    backgroundColor: '#f0fdf4',
                     borderLeft: '4px solid #059669',
                     borderRadius: '0.25rem',
                     marginBottom: '1rem',
@@ -1555,9 +1560,9 @@ const ClinicalReasoning = () => {
             <div className="output-content">
               {response.processed_points.length > 0 && response.processed_points[response.processed_points.length - 1].flow_type === 'RP' ? (
                 response.current_assessment ? (
-                  <div style={{ 
-                    padding: '1rem', 
-                    backgroundColor: '#f0fdf4', 
+                  <div style={{
+                    padding: '1rem',
+                    backgroundColor: '#f0fdf4',
                     borderLeft: '4px solid #059669',
                     borderRadius: '0.25rem',
                     whiteSpace: 'pre-wrap',
@@ -1583,9 +1588,9 @@ const ClinicalReasoning = () => {
             <div className="output-content">
               {response.processed_points.length > 0 && response.processed_points[response.processed_points.length - 1].flow_type === 'RP' ? (
                 response.current_reasoning ? (
-                  <div style={{ 
-                    padding: '1rem', 
-                    backgroundColor: '#eff6ff', 
+                  <div style={{
+                    padding: '1rem',
+                    backgroundColor: '#eff6ff',
                     borderLeft: '4px solid #1e40af',
                     borderRadius: '0.25rem',
                     whiteSpace: 'pre-wrap',
@@ -1611,9 +1616,9 @@ const ClinicalReasoning = () => {
             <div className="output-content">
               {response.processed_points.length > 0 && response.processed_points[response.processed_points.length - 1].flow_type === 'RP' ? (
                 response.current_treatment ? (
-                  <div style={{ 
-                    padding: '1rem', 
-                    backgroundColor: '#fdf2f8', 
+                  <div style={{
+                    padding: '1rem',
+                    backgroundColor: '#fdf2f8',
                     borderLeft: '4px solid #8b5cf6',
                     borderRadius: '0.25rem',
                     whiteSpace: 'pre-wrap',
@@ -1674,264 +1679,244 @@ const ClinicalReasoning = () => {
         </>
       )}
 
-      {/* Placeholder when no response */}
-      {!response && !error && !loading && (
-        <div className="output-container" style={{ textAlign: 'center', opacity: 0.6 }}>
-          {mode === 'single' ? (
-            <>
-              <p>Enter ultrasound data with reflux_type and description, then click "Analyze"</p>
-              <p className="text-muted mt-2">Task-1: Shunt classification → Task-2: Clinical reasoning & treatment</p>
-            </>
-          ) : (
-            <>
-              <p>Enter a JSON array of data points and click "Process Stream"</p>
-              <p className="text-muted mt-2">Each data point will be processed with the specified buffer interval (0.2-3s, default 0.5s)</p>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Loading State */}
-      {loading && (
-        <div className="output-container" style={{ textAlign: 'center' }}>
-          <div style={{ marginBottom: '1rem' }}>
-            <div className="spinner"></div>
-          </div>
-          {mode === 'single' ? (
-            <>
-              <p>🔄 Analyzing single data point...</p>
-              <p className="text-muted mt-1">Task-1: Classifying shunt type | Task-2: Retrieving medical context...</p>
-            </>
-          ) : (
-            <>
-              <p>🌊 Processing continuous data stream...</p>
-              <p className="text-muted mt-1">Applying {bufferInterval}s buffer between each data point</p>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* ── Shunt Classification Accuracy Testing Mode ── */}
       {mode === 'accuracy' && (
-        <div className="section">
-          <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <span>🎯 Shunt Classification Accuracy Testing</span>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <button
-                className="btn btn-secondary"
-                onClick={() => { setMetricsTab('accuracy'); setMetricsOpen(true); }}
-                style={{ fontSize: '0.85rem', padding: '0.35rem 0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-              >
-                📊 View Model Metrics
-              </button>
-              {Object.keys(accStreamResults).length > 0 && (
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => { if (window.confirm('Clear all stream results?')) { setAccStreamResults({}); localStorage.removeItem('acc_stream_results'); } }}
-                  style={{ fontSize: '0.82rem', padding: '0.3rem 0.75rem' }}
-                >
-                  🗑 Clear Results
-                </button>
-              )}
-            </div>
-          </h2>
-          <div className="section-content">
-            <p className="text-muted" style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-              10 streams (3 real clinical sessions + 7 synthesised) each with a defined ground-truth shunt type.
-              Classify each stream with the LLM and compare against ground truth to measure model accuracy.
-              Streams 1–3 are real data; Streams 4–10 are anatomically-grounded synthetic data.
-            </p>
+        <div className="section-content">
+        <p className="text-muted" style={{ marginBottom: '1.25rem', fontSize: '0.9rem' }}>
+          10 streams (3 real clinical sessions + 7 synthesised) each with a defined ground-truth shunt type.
+          Classify each stream with the LLM and compare against ground truth to measure model accuracy.
+          Streams 1–3 are real data; Streams 4–10 are anatomically-grounded synthetic data.
+        </p>
 
-            {/* Stream list */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-              {ACCURACY_TEST_STREAMS.map((stream) => {
-                const result = accStreamResults[stream.id];
-                const isLoading = accStreamLoading[stream.id];
-                const rpCount = stream.clips.filter(c => c.flow === 'RP').length;
-                const epCount = stream.clips.filter(c => c.flow === 'EP').length;
+        {/* Stream list */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          {ACCURACY_TEST_STREAMS.map((stream) => {
+            const result = accStreamResults[stream.id];
+            const isLoading = accStreamLoading[stream.id];
+            const rpCount = stream.clips.filter(c => c.flow === 'RP').length;
+            const epCount = stream.clips.filter(c => c.flow === 'EP').length;
 
-                return (
-                  <div key={stream.id} style={{
-                    border: result
-                      ? (result.isCorrect ? '2px solid #10b981' : result.error ? '2px solid #f87171' : '2px solid #f59e0b')
-                      : '2px solid #e5e7eb',
-                    borderRadius: '10px', overflow: 'hidden',
-                    background: result?.isCorrect ? '#f0fdf4' : result?.error ? '#fef2f2' : result ? '#fffbeb' : '#fff',
-                  }}>
-                    {/* Stream header row */}
-                    <div style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                      {/* Name + source badge */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '100px' }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1f2937' }}>{stream.name}</span>
-                        <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '999px', fontWeight: 600,
-                          background: stream.source === 'real' ? '#dbeafe' : '#f3e8ff',
-                          color: stream.source === 'real' ? '#1e40af' : '#6b21a8' }}>
-                          {stream.source === 'real' ? '🏥 Real' : '🔬 Synthetic'}
-                        </span>
-                      </div>
-                      {/* Description */}
-                      <span style={{ fontSize: '0.8rem', color: '#6b7280', flex: 1 }}>{stream.description}</span>
-                      {/* Clip stats */}
-                      <div style={{ display: 'flex', gap: '0.4rem', fontSize: '0.75rem' }}>
-                        <span style={{ background: '#f3f4f6', borderRadius: '4px', padding: '2px 6px', color: '#374151' }}>
-                          {stream.clips.length} clips
-                        </span>
-                        <span style={{ background: '#fee2e2', borderRadius: '4px', padding: '2px 6px', color: '#991b1b' }}>
-                          {rpCount} RP
-                        </span>
-                        <span style={{ background: '#d1fae5', borderRadius: '4px', padding: '2px 6px', color: '#065f46' }}>
-                          {epCount} EP
-                        </span>
-                      </div>
-                      {/* Ground truth */}
-                      <div style={{ fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                        <span style={{ color: '#888' }}>GT:</span>
-                        <span style={{ fontWeight: 700, color: '#059669', background: '#d1fae5', borderRadius: '4px', padding: '1px 8px' }}>
-                          {stream.groundTruth}
-                        </span>
-                      </div>
-                      {/* Classify button */}
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => handleAccuracyClassify(stream)}
-                        disabled={isLoading}
-                        style={{ fontSize: '0.82rem', padding: '0.35rem 0.9rem', whiteSpace: 'nowrap', background: '#C01C1C', border: 'none' }}
-                      >
-                        {isLoading ? '⏳ Classifying…' : result ? '🔄 Re-Classify' : '▶ Classify'}
-                      </button>
-                      {/* Expand toggle */}
-                      {result && !result.error && (
-                        <button
-                          onClick={() => setAccExpandedStream(accExpandedStream === stream.id ? null : stream.id)}
-                          style={{ background: 'none', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem', padding: '0.3rem 0.6rem', color: '#555' }}
-                        >
-                          {accExpandedStream === stream.id ? '▲ Hide' : '▼ Details'}
-                        </button>
-                      )}
-                    </div>
+            return (
+              <div key={stream.id} style={{
+                border: result
+                  ? (result.isCorrect ? '2px solid #10b981' : result.error ? '2px solid #f87171' : '2px solid #f59e0b')
+                  : '2px solid #e5e7eb',
+                borderRadius: '10px', overflow: 'hidden',
+                background: result?.isCorrect ? '#f0fdf4' : result?.error ? '#fef2f2' : result ? '#fffbeb' : '#fff',
+              }}>
+                {/* Stream header row */}
+                <div style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  {/* Name + source badge */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '100px' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1f2937' }}>{stream.name}</span>
+                    <span style={{
+                      fontSize: '0.68rem', padding: '1px 6px', borderRadius: '999px', fontWeight: 600,
+                      background: stream.source === 'real' ? '#dbeafe' : '#f3e8ff',
+                      color: stream.source === 'real' ? '#1e40af' : '#6b21a8'
+                    }}>
+                      {stream.source === 'real' ? '🏥 Real' : '🔬 Synthetic'}
+                    </span>
+                  </div>
+                  {/* Description */}
+                  <span style={{ fontSize: '0.8rem', color: '#6b7280', flex: 1 }}>{stream.description}</span>
+                  {/* Clip stats */}
+                  <div style={{ display: 'flex', gap: '0.4rem', fontSize: '0.75rem' }}>
+                    <span style={{ background: '#f3f4f6', borderRadius: '4px', padding: '2px 6px', color: '#374151' }}>
+                      {stream.clips.length} clips
+                    </span>
+                    <span style={{ background: '#fee2e2', borderRadius: '4px', padding: '2px 6px', color: '#991b1b' }}>
+                      {rpCount} RP
+                    </span>
+                    <span style={{ background: '#d1fae5', borderRadius: '4px', padding: '2px 6px', color: '#065f46' }}>
+                      {epCount} EP
+                    </span>
+                  </div>
+                  {/* Ground truth */}
+                  <div style={{ fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <span style={{ color: '#888' }}>GT:</span>
+                    <span style={{ fontWeight: 700, color: '#059669', background: '#d1fae5', borderRadius: '4px', padding: '1px 8px' }}>
+                      {stream.groundTruth}
+                    </span>
+                  </div>
+                  {/* Classify button */}
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleAccuracyClassify(stream)}
+                    disabled={isLoading}
+                    style={{ fontSize: '0.82rem', padding: '0.35rem 0.9rem', whiteSpace: 'nowrap', background: '#C01C1C', border: 'none' }}
+                  >
+                    {isLoading ? '⏳ Classifying…' : result ? '🔄 Re-Classify' : '▶ Classify'}
+                  </button>
+                  {/* Expand toggle */}
+                  {result && !result.error && (
+                    <button
+                      onClick={() => setAccExpandedStream(accExpandedStream === stream.id ? null : stream.id)}
+                      style={{ background: 'none', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem', padding: '0.3rem 0.6rem', color: '#555' }}
+                    >
+                      {accExpandedStream === stream.id ? '▲ Hide' : '▼ Details'}
+                    </button>
+                  )}
+                </div>
 
-                    {/* Result row */}
-                    {result && (
-                      <div style={{ borderTop: '1px solid #e5e7eb', padding: '0.6rem 1rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.02)' }}>
-                        {result.error ? (
-                          <span style={{ color: '#dc2626', fontSize: '0.82rem' }}>❌ Error: {result.error}</span>
-                        ) : (
-                          <>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <span style={{ fontSize: '0.78rem', color: '#888' }}>LLM:</span>
-                              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#C01C1C', background: '#fdf2f2', borderRadius: '4px', padding: '1px 8px' }}>
-                                {result.llmLabel}
-                              </span>
-                            </div>
-                            <span style={{ fontWeight: 800, fontSize: '1rem', color: result.isCorrect ? '#059669' : '#dc2626' }}>
-                              {result.isCorrect ? '✅ Correct' : '❌ Incorrect'}
-                            </span>
-                            {result.confidence != null && (
-                              <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>
-                                Confidence: {(result.confidence * 100).toFixed(0)}%
-                              </span>
-                            )}
-                            {result.total_tokens > 0 && (
-                              <span style={{ fontSize: '0.75rem', color: '#059669', fontFamily: 'monospace' }}>
-                                📊 {result.total_tokens.toLocaleString()} tokens
-                              </span>
-                            )}
-                            <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginLeft: 'auto' }}>
-                              {new Date(result.timestamp).toLocaleTimeString()} · {result.duration_sec}s
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Expanded detail */}
-                    {result && !result.error && accExpandedStream === stream.id && (
-                      <div style={{ borderTop: '1px solid #e5e7eb', padding: '0.75rem 1rem', background: '#fafafa' }}>
-                        {result.findings?.map((f, i) => (
-                          <div key={i} style={{ marginBottom: '0.5rem', fontSize: '0.82rem' }}>
-                            <span style={{ fontWeight: 600, color: '#374151' }}>{f.leg || 'Finding'}: </span>
-                            <span style={{ color: '#C01C1C', fontWeight: 700 }}>{f.shunt_type}</span>
-                            {f.confidence != null && <span style={{ color: '#6b7280', marginLeft: '0.5rem' }}>({(f.confidence*100).toFixed(0)}% confidence)</span>}
-                            {f.reasoning?.length > 0 && (
-                              <div style={{ marginTop: '0.25rem', color: '#555', paddingLeft: '1rem', borderLeft: '2px solid #e5e7eb' }}>
-                                {f.reasoning.map((r, j) => <div key={j}>• {r}</div>)}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        {result.ligation?.length > 0 && (
-                          <div style={{ marginTop: '0.5rem', fontSize: '0.82rem' }}>
-                            <span style={{ fontWeight: 600, color: '#374151' }}>Proposed Ligation: </span>
-                            <span style={{ color: '#555' }}>{result.ligation.join(', ')}</span>
-                          </div>
+                {/* Result row */}
+                {result && (
+                  <div style={{ borderTop: '1px solid #e5e7eb', padding: '0.6rem 1rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.02)' }}>
+                    {result.error ? (
+                      <span style={{ color: '#dc2626', fontSize: '0.82rem' }}>❌ Error: {result.error}</span>
+                    ) : (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.78rem', color: '#888' }}>LLM:</span>
+                          <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#C01C1C', background: '#fdf2f2', borderRadius: '4px', padding: '1px 8px' }}>
+                            {result.llmLabel}
+                          </span>
+                        </div>
+                        <span style={{ fontWeight: 800, fontSize: '1rem', color: result.isCorrect ? '#059669' : '#dc2626' }}>
+                          {result.isCorrect ? '✅ Correct' : '❌ Incorrect'}
+                        </span>
+                        {result.confidence != null && (
+                          <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>
+                            Confidence: {(result.confidence * 100).toFixed(0)}%
+                          </span>
                         )}
                         {result.total_tokens > 0 && (
-                          <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', color: '#059669', fontFamily: 'monospace', background: '#f0fdf4', padding: '0.4rem 0.6rem', borderRadius: '4px' }}>
-                            📊 Tokens: {result.total_prompt_tokens?.toLocaleString() || 0} prompt + {result.total_completion_tokens?.toLocaleString() || 0} completion = {result.total_tokens?.toLocaleString() || 0} total
+                          <span style={{ fontSize: '0.75rem', color: '#059669', fontFamily: 'monospace' }}>
+                            📊 {result.total_tokens.toLocaleString()} tokens
+                          </span>
+                        )}
+                        <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginLeft: 'auto' }}>
+                          {new Date(result.timestamp).toLocaleTimeString()} · {result.duration_sec}s
+                        </span>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Expanded detail */}
+                {result && !result.error && accExpandedStream === stream.id && (
+                  <div style={{ borderTop: '1px solid #e5e7eb', padding: '0.75rem 1rem', background: '#fafafa' }}>
+                    {result.findings?.map((f, i) => (
+                      <div key={i} style={{ marginBottom: '0.5rem', fontSize: '0.82rem' }}>
+                        <span style={{ fontWeight: 600, color: '#374151' }}>{f.leg || 'Finding'}: </span>
+                        <span style={{ color: '#C01C1C', fontWeight: 700 }}>{f.shunt_type}</span>
+                        {f.confidence != null && <span style={{ color: '#6b7280', marginLeft: '0.5rem' }}>({(f.confidence * 100).toFixed(0)}% confidence)</span>}
+                        {f.reasoning?.length > 0 && (
+                          <div style={{ marginTop: '0.25rem', color: '#555', paddingLeft: '1rem', borderLeft: '2px solid #e5e7eb' }}>
+                            {f.reasoning.map((r, j) => <div key={j}>• {r}</div>)}
+                          </div>
+                        )}
+                        {(normalizeLigationSteps(f).length > 0 || getPointOfLigation(f) || getLigationApproach(f) || f.clinical_rationale) && (
+                          <div style={{ marginTop: '0.35rem', paddingLeft: '1rem', borderLeft: '2px solid #fca5a5' }}>
+                            {getPointOfLigation(f) && (
+                              <div style={{ color: '#7f1d1d' }}><span style={{ fontWeight: 600 }}>Point of ligation:</span> {getPointOfLigation(f)}</div>
+                            )}
+                            {getLigationApproach(f) && (
+                              <div style={{ color: '#7f1d1d' }}><span style={{ fontWeight: 600 }}>Approach:</span> {getLigationApproach(f)}</div>
+                            )}
+                            {normalizeLigationSteps(f).length > 0 && (
+                              <div style={{ color: '#7f1d1d' }}>
+                                <span style={{ fontWeight: 600 }}>Ligation steps:</span>
+                                <div style={{ marginTop: '0.2rem' }}>
+                                  {normalizeLigationSteps(f).map((step, j) => <div key={j}>• {step}</div>)}
+                                </div>
+                              </div>
+                            )}
+                            {String(f.clinical_rationale || '').trim() && (
+                              <div style={{ color: '#7f1d1d' }}><span style={{ fontWeight: 600 }}>Clinical rationale:</span> {f.clinical_rationale}</div>
+                            )}
                           </div>
                         )}
                       </div>
+                    ))}
+                    {(result.ligation_steps?.length > 0 || result.ligation?.length > 0) && (
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.82rem' }}>
+                        <span style={{ fontWeight: 600, color: '#374151' }}>Proposed Ligation: </span>
+                        <span style={{ color: '#555' }}>{(result.ligation_steps || result.ligation).join(', ')}</span>
+                      </div>
+                    )}
+                    {String(result.point_of_ligation || '').trim() && (
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.82rem' }}>
+                        <span style={{ fontWeight: 600, color: '#374151' }}>Point of Ligation: </span>
+                        <span style={{ color: '#555' }}>{result.point_of_ligation}</span>
+                      </div>
+                    )}
+                    {String(result.chiva_approach || '').trim() && (
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.82rem' }}>
+                        <span style={{ fontWeight: 600, color: '#374151' }}>Approach: </span>
+                        <span style={{ color: '#555' }}>{result.chiva_approach}</span>
+                      </div>
+                    )}
+                    {String(result.clinical_rationale || '').trim() && (
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.82rem' }}>
+                        <span style={{ fontWeight: 600, color: '#374151' }}>Clinical Rationale: </span>
+                        <span style={{ color: '#555' }}>{result.clinical_rationale}</span>
+                      </div>
+                    )}
+                    {result.total_tokens > 0 && (
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', color: '#059669', fontFamily: 'monospace', background: '#f0fdf4', padding: '0.4rem 0.6rem', borderRadius: '4px' }}>
+                        📊 Tokens: {result.total_prompt_tokens?.toLocaleString() || 0} prompt + {result.total_completion_tokens?.toLocaleString() || 0} completion = {result.total_tokens?.toLocaleString() || 0} total
+                      </div>
                     )}
                   </div>
-                );
-              })}
-            </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
-            {/* Overall Accuracy Button */}
-            {(() => {
-              const classified = ACCURACY_TEST_STREAMS.filter(s => accStreamResults[s.id] && !accStreamResults[s.id].error);
-              const correct = classified.filter(s => accStreamResults[s.id].isCorrect).length;
-              const total = classified.length;
-              const overallPct = total > 0 ? ((correct / total) * 100).toFixed(1) : null;
+        {/* Overall Accuracy Button */}
+        {(() => {
+          const classified = ACCURACY_TEST_STREAMS.filter(s => accStreamResults[s.id] && !accStreamResults[s.id].error);
+          const correct = classified.filter(s => accStreamResults[s.id].isCorrect).length;
+          const total = classified.length;
+          const overallPct = total > 0 ? ((correct / total) * 100).toFixed(1) : null;
 
-              return (
-                <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                  <div style={{
-                    display: 'inline-block', padding: '1.5rem 2.5rem',
-                    border: '2px solid #C01C1C', borderRadius: '12px',
-                    background: overallPct !== null ? (parseFloat(overallPct) >= 70 ? '#f0fdf4' : parseFloat(overallPct) >= 40 ? '#fffbeb' : '#fef2f2') : '#f9fafb',
-                    minWidth: '320px',
-                  }}>
-                    <div style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
-                      Overall LLM Accuracy — {total}/{ACCURACY_TEST_STREAMS.length} streams classified
-                    </div>
-                    {overallPct !== null ? (
-                      <>
-                        <div style={{ fontSize: '3rem', fontWeight: 900, color: parseFloat(overallPct) >= 70 ? '#059669' : parseFloat(overallPct) >= 40 ? '#d97706' : '#dc2626', lineHeight: 1 }}>
-                          {overallPct}%
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.4rem' }}>
-                          {correct} correct out of {total} classified streams
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.3rem' }}>
-                          (Uses most recent classification run per stream)
-                        </div>
-                      </>
-                    ) : (
-                      <div style={{ color: '#aaa', fontSize: '0.9rem' }}>Classify at least one stream to see overall accuracy</div>
-                    )}
-                    <button
-                      className="btn btn-primary"
-                      style={{ marginTop: '1rem', background: '#C01C1C', border: 'none', fontSize: '0.9rem', padding: '0.5rem 1.5rem' }}
-                      onClick={() => {
-                        // Trigger classify on all unclassified streams
-                        ACCURACY_TEST_STREAMS.forEach(s => {
-                          if (!accStreamResults[s.id] && !accStreamLoading[s.id]) {
-                            handleAccuracyClassify(s);
-                          }
-                        });
-                      }}
-                    >
-                      🚀 Get Overall Accuracy (Classify All Remaining)
-                    </button>
-                  </div>
+          return (
+            <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+              <div style={{
+                display: 'inline-block', padding: '1.5rem 2.5rem',
+                border: '2px solid #C01C1C', borderRadius: '12px',
+                background: overallPct !== null ? (parseFloat(overallPct) >= 70 ? '#f0fdf4' : parseFloat(overallPct) >= 40 ? '#fffbeb' : '#fef2f2') : '#f9fafb',
+                minWidth: '320px',
+              }}>
+                <div style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
+                  Overall LLM Accuracy — {total}/{ACCURACY_TEST_STREAMS.length} streams classified
                 </div>
-              );
-            })()}
-          </div>
+                {overallPct !== null ? (
+                  <>
+                    <div style={{ fontSize: '3rem', fontWeight: 900, color: parseFloat(overallPct) >= 70 ? '#059669' : parseFloat(overallPct) >= 40 ? '#d97706' : '#dc2626', lineHeight: 1 }}>
+                      {overallPct}%
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.4rem' }}>
+                      {correct} correct out of {total} classified streams
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.3rem' }}>
+                      (Uses most recent classification run per stream)
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ color: '#aaa', fontSize: '0.9rem' }}>Classify at least one stream to see overall accuracy</div>
+                )}
+                <button
+                  className="btn btn-primary"
+                  style={{ marginTop: '1rem', background: '#C01C1C', border: 'none', fontSize: '0.9rem', padding: '0.5rem 1.5rem' }}
+                  onClick={() => {
+                    // Trigger classify on all unclassified streams
+                    ACCURACY_TEST_STREAMS.forEach(s => {
+                      if (!accStreamResults[s.id] && !accStreamLoading[s.id]) {
+                        handleAccuracyClassify(s);
+                      }
+                    });
+                  } }
+                >
+                  🚀 Get Overall Accuracy (Classify All Remaining)
+                </button>
+              </div>
+            </div>
+          );
+        })()}
         </div>
       )}
-    </div>
+    </div></>
   );
 };
 
