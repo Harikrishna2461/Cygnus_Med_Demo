@@ -26,7 +26,10 @@ OLLAMA_KEEP_ALIVE = "20m"
 OLLAMA_SETUP_MODELS = [OLLAMA_EMBEDDING_MODEL]  # models to ensure are installed
 
 # Groq API — used for ALL LLM inference (70B model, high quality)
+# Set GROQ_API_KEY environment variable before running
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    raise RuntimeError("GROQ_API_KEY environment variable not set. Please set it before starting the app.")
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
 # Chunking parameters
