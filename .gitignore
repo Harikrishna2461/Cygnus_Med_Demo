@@ -58,3 +58,5 @@ backend/~$*.docx
 
 # Qdrant local storage (binary data, not meant for VCS)
 backend/qdrant_storage/
+cmed_demo/backend/qdrant_storage/
+**/qdrant_storage/

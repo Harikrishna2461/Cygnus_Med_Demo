@@ -632,6 +632,8 @@ const ClinicalReasoning = () => {
   };
 
   const handleDownloadPDF = async () => {
+    setReportError(null);
+    setReportLoading(true);
     try {
       let clips, patientInfo;
       try { clips = JSON.parse(reportClips); } catch(e) { throw new Error('Invalid clip_list JSON'); }
@@ -649,6 +651,8 @@ const ClinicalReasoning = () => {
       window.URL.revokeObjectURL(url);
     } catch(err) {
       setReportError('PDF download failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      setReportLoading(false);
     }
   };
 

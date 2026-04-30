@@ -128,6 +128,10 @@ def generate_shunt_report_pdf(
             "confidence": classification.get("confidence", 0),
             "reasoning":  classification.get("reasoning", []),
             "ligation":   classification.get("ligation", []),
+            "ligation_steps": classification.get("ligation_steps", classification.get("ligation", [])),
+            "point_of_ligation": classification.get("point_of_ligation", ""),
+            "clinical_rationale": classification.get("clinical_rationale", ""),
+            "chiva_approach": classification.get("chiva_approach", ""),
             "needs_elim_test": classification.get("needs_elim_test", False),
             "ask_diameter":    classification.get("ask_diameter", False),
             "ask_branching":   classification.get("ask_branching", False),
@@ -252,7 +256,10 @@ def generate_shunt_report_pdf(
         shunt_type  = finding.get("shunt_type", "Unknown")
         confidence  = finding.get("confidence", 0)
         reasoning   = finding.get("reasoning", [])
-        ligation    = finding.get("ligation", [])
+        ligation    = finding.get("ligation_steps", finding.get("ligation", []))
+        point_of_ligation = finding.get("point_of_ligation", "")
+        chiva_approach = finding.get("chiva_approach", "")
+        clinical_rationale = finding.get("clinical_rationale", "")
         summary_txt = finding.get("summary", "")
         n_clips     = finding.get("num_clips", 0)
 
@@ -315,11 +322,15 @@ def generate_shunt_report_pdf(
                       [Paragraph("Clinical Reasoning", S["h3"]),
                        Paragraph("No pathological pattern detected.", S["body"])])
 
-        right_items = ([Paragraph("Proposed Ligation", S["h3"])] +
-                       [bullet_para(l) for l in ligation]
-                       if ligation else
-                       [Paragraph("Proposed Ligation", S["h3"]),
-                        Paragraph("No ligation required.", S["body"])])
+        right_items = [Paragraph("Proposed Ligation", S["h3"])]
+        if point_of_ligation:
+            right_items.append(Paragraph(f"<b>Point of ligation:</b> {point_of_ligation}", S["body"]))
+        if chiva_approach:
+            right_items.append(Paragraph(f"<b>Approach:</b> {chiva_approach}", S["body"]))
+        if ligation:
+            right_items.extend([bullet_para(l) for l in ligation])
+        else:
+            right_items.append(Paragraph("No ligation required.", S["body"]))
 
         two_col = Table(
             [[left_items, right_items]],
@@ -333,6 +344,10 @@ def generate_shunt_report_pdf(
             ("BACKGROUND",   (0,0),(0,-1),  hex_c(_GREY_BG)),
         ]))
         elems.append(two_col)
+        if clinical_rationale:
+            elems.append(Spacer(1, 1.5 * mm))
+            elems.append(Paragraph("Clinical Rationale", S["h3"]))
+            elems.append(Paragraph(clinical_rationale, S["body"]))
         elems.append(Spacer(1, 4*mm))
 
         story.append(KeepTogether(elems))
