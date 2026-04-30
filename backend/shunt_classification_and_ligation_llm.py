@@ -466,7 +466,7 @@ def _call_llm_for_shunt_classification(group: list[dict], leg_label: str, call_l
     prompt = build_shunt_classification_prompt(group, leg_label)
     logger.info(f"Shunt classification LLM prompt for {leg_label}: {len(prompt)} chars")
     try:
-        raw, usage = call_llm_fn(prompt, stream=False, return_usage=True)
+        raw, usage = call_llm_fn(prompt, return_usage=True)
         logger.info(f"Shunt classification LLM response ({leg_label}): {raw[:300]!r}")
         logger.info(f"Shunt classification tokens ({leg_label}): prompt={usage.get('prompt_tokens', 0)}, completion={usage.get('completion_tokens', 0)}")
         result = _repair_and_parse(raw)
@@ -484,7 +484,7 @@ def _call_llm_for_ligation(shunt_type: str, group: list[dict], rag_context: str,
     prompt = build_ligation_prompt(shunt_type, group, rag_context, leg_label)
     logger.info(f"Ligation planning LLM prompt for {leg_label}: {len(prompt)} chars")
     try:
-        raw, usage = call_llm_fn(prompt, stream=False, return_usage=True)
+        raw, usage = call_llm_fn(prompt, return_usage=True)
         logger.info(f"Ligation planning LLM response ({leg_label}): {raw[:300]!r}")
         logger.info(f"Ligation planning tokens ({leg_label}): prompt={usage.get('prompt_tokens', 0)}, completion={usage.get('completion_tokens', 0)}")
         result = _repair_and_parse(raw)
