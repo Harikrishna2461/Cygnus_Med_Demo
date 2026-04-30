@@ -26,21 +26,21 @@ TEST SET RESULTS:
     - Std prediction: 3.3570
 
   Fine-tuned:
-    - MSE: 3.9686 (+78.2%)
-    - MAE: 1.5678 (+57.4%)
-    - Spearman: 0.5384 (+134.2%)
-    - Mean prediction: 0.5426
-    - Std prediction: 2.2070
+    - MSE: 4.1586 (+77.1%)
+    - MAE: 1.5726 (+57.3%)
+    - Spearman: 0.5340 (+132.3%)
+    - Mean prediction: 0.3990
+    - Std prediction: 2.2412
 
 VALIDATION SET RESULTS:
   Baseline MAE: 4.5321
-  Fine-tuned MAE: 1.9033
-  Baseline Spearman: 0.3937
-  Fine-tuned Spearman: 0.6363
+  Fine-tuned MAE: 1.9994
+  Baseline Spearman: 0.3936
+  Fine-tuned Spearman: 0.6521
 
 CASE ANALYSIS:
-  Cases improved: 83/116 (71.6%)
-  Cases worse: 33/116 (28.4%)
+  Cases improved: 79/116 (68.1%)
+  Cases worse: 37/116 (31.9%)
   Cases equal: 0/116 (0.0%)
 
 RECOMMENDATION:
