@@ -1,0 +1,943 @@
+Dy.
+
+FOUNDING MEMBER SALE /mo 1,500+ Questions - 15 Domains - Unlimited Audio 492 spots left Claim Your Spot >
+
+Ay Blog GenAl & LLMs
+
+Fine-Tuning LLMs with LoRA and QLoRA:
+Complete Guide
+
+ps LDS Team = March 17,2026 23minread 62 Audio - 7 listens (2) Read summary v
+Let's Data Science
+17:41
+>
+Al VOICE « 15 15 » 6120
+
+Training a 7-billion-parameter model from scratch costs hundreds of thousands of dollars and
+requires a cluster of A100s. But adapting that same model to answer medical questions
+accurately? With LoRA and QLoRA, you can do that on a single consumer GPU in a few hours
+f oughly $10. This guide walks through exactly on @ th, the 2026 variant
+scape, the code, the hyperparameters, and ti. -ssons about what goes wrong.
+
+x
+
+
+--- PAGE BREAK ---
+
+Dy.
+Inere are Tour ways to Customize an LLM: prompt engineering, Tew-snot examples, RAG, and
+
+fine-tuning. The first three require zero model changes. They're fast to try and easy to update.
+So why fine-tune at all?
+
+Three situations tip the scales toward fine-tuning:
+
+Behavioral consistency at scale. Prompt engineering produces variable results. At a thousand
+requests per day, "mostly follows the format" becomes hundreds of malformed outputs. Fine-
+tuning bakes the behavior into weights — it fires reliably on every request.
+
+Style and tone beyond what prompting can reach. A hospital wants responses that sound
+exactly like their clinical documentation standards. No prompt reliably replicates a specific
+writing register across arbitrary topics.
+
+Latency and cost. Long system prompts add tokens on every call. A fine-tuned model carries
+the "expertise" in its weights and needs no prompt scaffolding.
+
+That said, fine-tuning is not always the answer. If your primary need is fresh external
+knowledge (current drug interactions, live pricing, recent clinical trials), Retrieval-Augmented
+Generation is almost always cheaper and more maintainable. The decision framework is in a
+dedicated section later.
+
+
+--- PAGE BREAK ---
+
+Py
+
+Full Tine-tuning means updating every one oT the model's weignts. For a /b parameter model
+stored in 16-bit floats, that's 14 GB just for the weights. Add optimizer states (Adam needs two
+momentum values per parameter) and you're looking at around 56 GB — which exceeds the
+memory of a single A100 80GB GPU when you factor in activations and batch data.
+
+The cost scales brutally: a 70B model in full fine-tuning needs multiple nodes. For most teams,
+it's simply not viable.
+
+Full fine-tuning also risks catastrophic forgetting: the model's general knowledge and
+instruction-following behavior can degrade when you push hard on a narrow domain. You
+spend resources making the model better at one thing while inadvertently making it worse at
+everything else.
+
+LoRA was designed to sidestep both problems.
+
+How LoRA Works: Low-Rank Weight Updates
+
+LoRA (Low-Rank Adaptation), introduced by Hu et al. in 2021 (arXiv:2106.09685), rests ona
+simple but powerful observation: the changes needed to adapt a pretrained model to a new
+task have low intrinsic dimensionality. You don't need to shift all 4096 x 4096 values in an
+attention weight matrix. A much smaller update c yu need.
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+becomes:
+
+W'=Wo+"-BA
+
+Where:
+
+« Wo € R% ‘is the original frozen pretrained weight matrix
+
+- Bel
+
+IR¢xr
+
+is the up-projection matrix (initialized to zeros)
+
+- AER 4 is the down-projection matrix (initialized from a Gaussian)
+
+e ris the rank — a small integer (typically 8 to 64) much smaller than d
+
+* qisa scaling constant that controls the magnitude of the update
+
+¢ dis the weight matrix dimension (e.g., 4096 for Llama 3.1 8B attention layers)
+
+In Plain English: Imagine your Llama 3.1 8B model knows general medicine from
+pretraining — it can discuss symptoms, drugs, and anatomy. To specialize it for your
+hospital's Q&A style, you don't rewrite its entire medical knowledge. You add two thin
+"adapter layers" (B and A) that nudge its outputs toward your target behavior. The
+original knowledge stays frozen. Only the adapters train.
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+rxa ona axr =
+(trainable) (trainable)
+
+Input x Add updates Output
+(d-dim) Wo + BA wx
+FROZEN (NO GRADIENT)
+
+Wo (frozen)
+ia dxd
+
+~16.8M params
+LoRA weight decomposition: frozen WO plus trainable low-rank BA matrices
+
+Why Low Rank Works
+
+A 4096 x 4096 weight matrix has 16.7 million parameters. With rank $r = 16$, the LoRA
+matrices A and B together have only 131,072 parameters — 128x fewer. The key insight is that
+adaptation tasks don't require full-rank updates. Research by Aghajanyan et al. (2020)
+showed that the "intrinsic dimensionality" of fine-tuning is surprisingly low, validating this
+design.
+
+The initialization also matters. B starts at zeros, so at the beginning of training, the LoRA
+branch contributes exactly nothing to the output. Training starts from the same pretrained
+behavior and diverges gradually — a much more stable starting point than random
+initialization.
+
+
+--- PAGE BREAK ---
+
+[Bf Let's Data Science
+import numpy as np
+
+np.xrandom.seed(42)
+
+Qa
+"
+
+4096 # Llama 3.1 8B attention dimension
+r= 16 # LORA rank
+
+# Parameter count comparison
+lora_params = (d * r) + (r * d) # A: r*d, B: d*r
+full_params = d * d
+
+print(f"Full fine-tuning: {full_params:,} params per weight matrix")
+print(f"LoRA (rank {r}): {lora_params:,} params per weight matrix")
+print(f"Reduction: {full_params // lora_params}x fewer trainable parameters")
+
+# Scaling factor behavior
+for r_val, alpha_val in [(8, 16), (16, 16), (32, 16), (64, 64)]:
+scale = alpha_val / r_val
+params = 2 * d * r_val
+print(f" xr={r_val:2d}, alpha={alpha_val:2d} — scale={scale:.2f}, params={params: ,}")
+
+code Copy
+
+Full fine-tuning: 16,777,216 params per weight matr*~
+LoRA (rank 16): 131,072 params per weight matri>
+Reduction: 128x fewer trainable parameters
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+r=64, alpha=64 — scale=1.00, params=524, 288
+
+After training, the matrices B and A can be merged back into Wo with a single addition. The
+resulting model has the same architecture and inference speed as the base model — there's
+no runtime overhead.
+
+The 2026 LoRA Variant Landscape
+
+The original LoRA paper spawned a family of improvements. Knowing which variant to reach
+for saves a lot of trial and error.
+
+rsLoRA: Fixing the Scaling Problem
+
+Standard LoRA scales the adapter contribution by alpha / r . This works at low ranks but
+causes instability and stunted learning as rank increases. rsLoRA (Rank-Stabilized LoRA,
+arXiv:2312.03732) proves the correct scaling is alpha / sqrt(r) .
+
+The fix is mathematically elegant: dividing by sqrt(xz) rather than xr preserves the gradient
+signal at higher ranks, enabling stable training up *- ~-~' ~~“ "*2 or 2048 where standard
+LoRA would plateau. In PEFT, you enable it with je . For most tasks at rank 16
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+DoRA: Decomposing Magnitude and Direction
+
+DoRA (Weight-Decomposed Low-Rank Adaptation, arXiv:2402.09353) takes a different angle.
+Instead of adding a low-rank matrix directly, DoRA first decomposes the weight into its
+magnitude (a scalar per output dimension) and direction (a unit-norm matrix), then applies
+LoRA updates only to the directional component.
+
+The result is consistent accuracy improvements over standard LoRA: +3.7% on LLaMA-7B, +1
+to 4.4% on LLaMA-13B and LLaMA3-8B on commonsense reasoning benchmarks (Liu et al.,
+2024). Crucially, DoRA introduces no extra inference overhead — the magnitude vector and
+low-rank direction update merge back into the base weights like standard LoRA.
+
+In PEFT, it's a single flag: use_dora=True .
+
+PiSSA and LoftQ: Better Initialization
+
+Both address a subtle weakness: when you quantize the base model to 4-bit (as in QLORA),
+the quantization introduces error that standard LoRA random initialization doesn't account for.
+
+LoftQ jointly optimizes the quantization and the ir ‘ces to minimize this
+approximation error. PiSSA (Principal Singular val. _ «ar vectors Adaptation)
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+weights.
+
+In practice: if you're doing QLORA on a model where quality degradation from quantization is
+visible, try LoftQ or PiSSA initialization before increasing rank.
+
+Variant Key Change Best For PEFT Flag
+
+Standard LoRA Baseline General fine-tuning _—
+
+rsLoRA alpha / sqrt(x) scaling High-rank experiments use_rslora=True
+DoRA Magnitude + direction decomposition Quality-critical tasks use_dora=True
+QLoRA 4-bit NF4 base + fp16 adapters Consumer GPU fine-tuning load_in_4bit=True
+LoftQ Quantization-aware init Minimizing quantization error Custom init
+
+PiSSA SVD-based adapter init Faster convergence Custom init
+
+Pro Tip: For a new project, start with QLORA + DoRA ( load_in_4bit=True,
+use_dora=Ttue ). It's the current best-practice combination for quality within consumer
+VRAM budgets.
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+¥
+
+Limited VRAM
+(<12 GB)?
+
+Yt ¥
+atona
+P Priority? ~6 GB for 8B
+
+N
+
+Y
+DoRA
+Nees re +1-4% over LORA
+> 64?
+no extra inference cost
+
+y
+rsLoRA,
+alpha / sqrt(e)
+stable at any rank
+
+LoRA variant decision guide: choosing between QLoRA, DoRA, rsLoRA, and standard LoRA
+
+LoRA Hyperparameters in Practice
+
+These four hyperparameters determine almost everything about how LoRA behaves.
+
+Rank (r)
+Rank controls the capacity of the adapter. A higher rank means more expressive updates at
+the cost of more parameters. The relationship is k 64 is not eight times better
+
+than rank 8.
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+guidance. In practice, r=16 remains a reliable starting point that covers most instruction-
+following and style adaptation tasks. Reach for r=32 or r=64 when your task involves
+significant domain shift — teaching a model a new medical specialty it barely encountered
+during pretraining, for example.
+
+The practical upper bound is around r=64 for standard LoRA. Above that, use rsLoRA to
+maintain stable gradients.
+
+Alpha
+
+Alpha scales the LoRA contribution by alpha / r . The convention "set alpha to twice the
+rank" (e.g., r=16, alpha=32) keeps the scaling factor at 2.0. Setting alpha equal to rank
+(scale=1.0) is more conservative. Going much higher than 2x causes unstable training.
+
+With rsLoRA enabled, the effective scaling becomes alpha / sqrt(r) . The convention there
+is to set alpha equal to rank (giving a scale of 1.0 in the sqrt formula, which is well-behaved at
+all ranks).
+
+Dropout
+
+LoRA dropout applies between the A and B matri ation. For datasets of 1K to
+100K examples, 0.05 to 0.1is safe. With very smal: uuuserw yuiider 500 examples), increase to
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+Target Modules
+
+This is the hyperparameter most people get wrong. LoRA can be applied to any linear layer:
+attention projections (Q, K, V, output), feed-forward layers, and embedding layers. The original
+LoRA paper targeted only Q and V attention matrices. Current best practice has moved toward
+
+applying LoRA to all linear layers.
+
+Hugging Face PEFT lets you do this with target_modules="all-linear" . Applying to all
+linear layers increases parameter count but consistently improves task performance,
+particularly for instruction-following and domain adaptation tasks.
+
+Module Scope Default?
+q_proj , v_proj LoRA paper default
+q_proj , k_proj , v_proj , o_proj Common setting
+All linear layers Current best practice
+Embedding layers Rare
+
+Pro Tip: Start with target_modules="all-lin
+
+Effect
+
+Good baseline, fewest params
+Stronger attention adaptation
+Best adaptation quality
+
+Needed for new token vocabularies
+
+.e only if you're hitting
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+QLoRA: Fine-Tuning at 4-Bit Precision
+
+LoRA solves the trainable parameter problem. QLoRA, introduced by Dettmers et al.
+(arXiv:2305.14314), solves the memory storage problem. Even if you only train the LoRA
+adapters, you still need to hold the frozen base model in GPU memory. For an 8B model, that's
+roughly 15 GB in fp16.
+
+QLOoRA combines three techniques to shrink that footprint dramatically:
+
+4-bit NF4 Quantization. NF4 (NormalFloat4) is a data type designed specifically for neural
+network weights, which follow a roughly normal distribution. It's information-theoretically
+optimal for this distribution — it places quantization boundaries where they minimize expected
+error given Gaussian-distributed values. This is different from standard int4 (which assumes
+uniform distribution) and produces noticeably better quality.
+
+Double Quantization. The 4-bit quantization process requires quantization constants (one per
+small block of weights). Double quantization quantizes those constants too, saving an
+additional 0.37 bits per parameter on average.
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+computation without crashing.
+
+The net effect:
+
+Configuration 8B Model Memory
+Full fine-tuning (fp16) ~60 GB
+
+LoRA in fp16 ~18 GB
+
+QLOoRA (4-bit NF4) ~6 GB
+
+Training Cost
+
+~$40 on A100
+
+~$15 on A100
+
+~$8 on A100, free on Colab
+
+In Plain English: Llama 3.1 8B has 8 billion parameters. In 16-bit floats, that's about 15 GB.
+Compress to 4-bit and the weights shrink to roughly 3.7 GB. Add LoRA adapters and
+optimizer states and you land around 6 GB. A consumer GPU with 8 GB of VRAM can
+handle it — and on RunPod, an RTX 4090 runs about $0.74/hr, so a full fine-tuning job
+
+costs under $5.
+
+QLORA does have a trade-off: training takes rough’: 2% *~ 4%% longer than standard LoRA in
+
+fp16, because the forward pass must dequantize
+cases, the memory savings outweigh the speed penalty.
+
+computation. For most use
+
+
+--- PAGE BREAK ---
+
+CRITERIA FULL FINE-TUNING LORA QLORA RAG
+
+Le
+~<
+«
+
+Method Full Fine-Tuning LORA (fp16) QLORA (4-bit) RAG (no training)
+
+‘ompare
+
+i
+GPU Memory
+
+(8B model) 76068 “188
+
+Inference only
+
+% Params
+
+Trained tees ~0.5%
+
+0%
+
+Y y y
+
+Best Near-full Fact-heavy tasks
+
+Comparison of fine-tuning approaches: full fine-tuning, LoRA, QLoRA, and RAG
+
+Implementation with PEFT and Unsloth
+
+Setting Up the Base Model
+
+For our running example — fine-tuning Llama 3.1 | Q&A assistant — here's the
+standard QLoRA setup using Hugging Face PEFT and bitsandbytes :
+
+
+--- PAGE BREAK ---
+
+[Bf Let's Data Science
+
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from peft import LoraConfig, get_peft_model, TaskType
+import torch
+
+# 4-bit NF4 quantization config
+
+bnb_config = BitsAndBytesConfig(
+load_in_4bit=True,
+bnb_4bit_quant_type="nf4",
+bnb_4bit_compute_dtype=torch.bfloati6,
+bnb_4bit_use_double_quant=True, # double quantization
+
+model = AutoModelForCausalLM. from_pretrained(
+"meta-llama/Llama-3.1-8B-Instruct",
+quantization_config=bnb_config,
+device_map="auto",
+
+)
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct" )
+tokenizer.pad_token = tokenizer.eos_token
+
+Configuring LoRA
+
+python
+
+Copy
+
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+lora_alpha=32, # scaling: alpha/r = 2.0
+lora_dropout=0.05,
+target_modules="all-linear", # apply to all linear layers
+
+task_type=TaskType.CAUSAL_LM,
+bias="none",
+use_dora=True, # DoRA: weight-decomposed adaptation
+
+model = get_peft_model(model, lora_config)
+model. print_trainable_parameters( )
+# trainable params: 41,943,040 || all params: 8,072,204,288 || trainable%: @.5195
+
+Notice: 0.52% of parameters are trainable. The other 99.48% stay frozen.
+
+Unsloth for Faster Training
+
+Unsloth is an open-source library with custom Triton kernels for LoRA fine-tuning. By fusing
+the LoRA computation directly into the forward pass and rewriting backward pass logic,
+Unsloth delivers 2 to 2.7x faster training with 60 to 74% less VRAM compared to standard
+PEFT. For MoE architectures like Qwen3-235B, the speedup reaches 12x with 35% less VRAM.
+Training jobs that previously took 12 hours now finish in under 2 hours.
+
+python Copy
+
+
+
+--- PAGE BREAK ---
+
+model, tokenizer = FastLanguageModel. from_pretrained (
+model_name="unsloth/Meta-Llama-3.1-8B-Instruct",
+max_seq_length=2048,
+load_in_4bit=True,
+
+model = FastLanguageModel.get_peft_model(
+model,
+r=16,
+lora_alpha=32,
+lora_dropout=0.05,
+
+target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
+"gate_proj", "up_proj", "down_proj"],
+use_gradient_checkpointing="unsloth", # 30% more memory savings
+
+For fine-tuning on consumer or mid-range GPU hardware in 2026, Unsloth is the default
+choice — there's rarely a reason not to use it.
+
+Dataset Preparation and Training
+
+Preparing Medical Q&A Data
+
+
+--- PAGE BREAK ---
+
+[Bf Let's Data Science
+
+python Copy
+
+from datasets import load_dataset
+from trl import SFTTrainer, SFTConfig
+
+# Format your data with the model's chat template
+def format_example(example):
+messages = [
+
+{"role": "system", "content": "You are a medical Q&A assistant. Answer clinical questions a
+{"role": "user", "content": example["question"]},
+{"role": "assistant", "content": example[ "answer" ]},
+
+]
+
+return {"text": tokenizer.apply_chat_template(messages, tokenize=False) }
+
+dataset
+
+load_dataset("medmcqa", split="train[ :10000]")
+dataset = dataset.map(format_example)
+
+ON >
+
+Training Configuration
+
+python Copy
+
+
+
+--- PAGE BREAK ---
+
+[Bf Let's Data Science
+
+num_train_epochs=3,
+
+per_device_train_batch_size=2,
+
+gradient_accumulation_steps=4, # effective batch size = 8
+
+learning_rate=2e-4, # higher than full fine-tuning (typical: 1e-4 to 3e-4)
+warmup_ratio=0.05,
+
+ir_scheduler_type="cosine",
+
+fpi6=False,
+
+bfi6=True,
+
+logging_steps=25,
+
+save_strategy="epoch" ,
+
+max_seq_length=2048,
+
+packing=True, # pack short sequences to reduce padding waste
+
+trainer = SFTTrainer(
+model=model,
+args=training_args,
+train_dataset=dataset,
+tokenizer=tokenizer,
+
+)
+
+trainer.train()
+
+Saving and Loading LoRA Adapters
+
+After training, save only the adapter weights — n del:
+
+
+--- PAGE BREAK ---
+
+[Bf Let's Data Science
+
+# Save just the adapter (a few MB, not the full 8B model)
+model.save_pretrained("./medical-lora-adapters" )
+tokenizer.save_pretrained("./medical-lora-adapters" )
+
+# Load adapter on top of base model later
+from peft import PeftModel
+
+base_model = AutoModelForCausalLM. from_pretrained (
+"meta-llama/Llama-3.1-8B-Instruct",
+quantization_config=bnb_config,
+
+)
+model = PeftModel.from_pretrained(base_model, "./medical-lora-adapters")
+
+# Or merge into base for zero-latency inference
+merged_model = model.merge_and_unload( )
+merged_model.save_pretrained("./llama-3.1-8b-medical-merged" )
+
+The adapter files are typically 50 to 200 MB depending on rank and target modules. The base
+model download is a one-time cost shared across all adapters.
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+1 Train Save Adapter
+‘Adapters Only ~(-100MB
+~6GBVRAM rot full mode)
+
+Training Data
+(medical 8
+instruction pairs)
+
+QLoRA fine-tuning pipeline from base model to merged fine-tuned model
+
+LoRA for Reasoning Models
+
+One of the bigger 2025 developments is using LoRA to fine-tune for reasoning behaviors, not
+just instruction-following. The recipe, popularized by DeepSeek R11 and its derivatives, is GRPO
+(Group Relative Policy Optimization) — a form of reinforcement learning that rewards correct
+reasoning chains.
+
+The workflow looks like this:
+
+1. Start with an instruction-tuned model (not a base model)
+
+N
+
+. Attach LoRA adapters as usual
+
+3. Instead of SFT with (question, answer) pairs, use GRPO with (question, reward_fn) pairs
+
+iN
+
+. The reward function checks mathematical correctr yn, or format compliance
+
+nn
+
+. The model learns to generate better reasoning chains uuvugu wie and error
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+style to smaller models — at a total compute cost under $25.
+
+This matters for the LoRA hyperparameter discussion too: reasoning fine-tuning typically
+benefits from higher ranks (r=32 to r=64) because the behavioral shift is more fundamental
+than style adaptation. The model isn't just learning to format responses differently; it's
+learning to generate extended reasoning traces it may have rarely produced before.
+
+Key Insight: Reasoning fine-tuning and instruction fine-tuning have different rank
+requirements. Use r=16 for style/format tasks. Use r=32 to r=64 for reasoning transfer.
+
+When to Use Fine-Tuning vs RAG (and When to Skip Both)
+
+This is the decision most teams get wrong. Both techniques improve LLM outputs. They solve
+different problems.
+
+Use fine-tuning (LoRA/QLoRA) when:
+
+¢ You need consistent output format or writing style (~~~ --*----*'~ by prompting alone)
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+e You're processing high volumes where token costs matter
+
+e The "knowledge" is about how to respond, not what facts to include
+
+Use RAG when:
+
+e Your knowledge base changes frequently (treatment guidelines, drug databases, internal policies)
+e You need to cite sources or show your reasoning
+e You're dealing with a large document corpus (thousands of PDFs)
+
+e Data freshness matters (live inventory, current regulations)
+
+Use both when:
+
+e You want consistent behavior AND access to external knowledge
+
+e The model needs to retrieve specialized facts AND format them in a specific clinical style
+
+Use neither (prompting is enough) when:
+
+e The task is general and the base model already handles it well
+e You have fewer than 200 high-quality examples (too little data to avoid overfitting)
+
+e Your knowledge update frequency is too high for r > times per day)
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+standards, while RAG provides current drug interactions and clinical guidelines. See RAG vs
+Fine-Tuning: When to Use Which for a full decision tree.
+
+Key Insight: Fine-tuning teaches the model HOW to respond. RAG gives it WHAT to say.
+They're complementary, not competing.
+
+Common Mistakes and How to Avoid Them
+
+Rank too high without rsLoRA. Setting r=128 without use_rslora=True causes gradient
+instability because the standard alpha / r scaling becomes too small at high ranks. Either
+stay at r=64 or below with standard LoRA, or use rsLoRA for anything higher.
+
+Wrong target modules. Applying LoRA only to g_proj and v_proj (the original paper's
+default) consistently underperforms applying it to all linear layers for instruction-following
+tasks. The difference is measurable and the parameter cost is manageable.
+
+Learning rate too high. LoRA adapters are sensitive to learning rate. Rates above 5e-4
+commonly cause the adapters to overshoot and ¢ ring. Start at 2e-4 with a
+cosine scheduler and warmup. If loss doesn't dec ie first 50 steps, lower to 1e-4.
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+Forgetting the base model's capabilities. LORA mitigates catastrophic forgetting better than
+full fine-tuning, but aggressive fine-tuning on a narrow domain still degrades general abilities.
+If your evaluation shows regression on general tasks, reduce learning rate or add diverse
+general instruction data to the training mix.
+
+Not merging adapters before deployment. Serving with separate base + adapter requires two
+forward passes internally. Always call merge_and_unload() before deploying to production —
+same output, standard inference latency.
+
+Skipping evaluation on out-of-domain examples. After fine-tuning, always run your model on
+questions it wasn't trained on. A model that scores 95% on the training distribution but can't
+handle rephrased questions has overfit. Evaluation breadth matters as much as held-out
+accuracy.
+
+Conclusion
+
+LoRA and QLoRA have made LLM fine-tuning accessible to anyone with a consumer GPU —
+and the 2025-2026 variant ecosystem has made them better yet. The core insight remains the
+same: adaptation has low intrinsic dimensionality, so vai don't need to update all the weights
+to change the behavior. A rank-16 DoRA configur ar layers trains only 0.5% of
+parameters but captures the behavioral changes that matter. QLoRA's 4-bit NF4 quantization
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+The practical guidance for 2026: use r=16 with DoRA and target_modules="all-linear" as
+your starting configuration. Enable rsLoRA if you're experimenting with high ranks. Use
+Unsloth on consumer hardware. Keep learning rate at 2e-4 with cosine warmup. Evaluate on
+out-of-domain examples, not just the held-out split.
+
+For the underlying architecture that makes LoRA possible — why attention weight matrices are
+the right target — start with Attention Is All You Need: The Transformer Revolution. For the full
+
+RAG vs fine-tuning decision framework, RAG vs Fine-Tuning: When to Use Which covers every
+scenario in detail. And if you want to understand all the quantization options beyond NF4, LLM
+Quantization for Consumer Hardware explains the tradeoffs.
+
+Build the adapter, merge it, and ship it. Your medical Q&A assistant is waiting.
+
+Interview Questions
+
+What is the difference between LoRA and full fine-tuning?
+
+Full fine-tuning updates all of the model's weights, requiring memory proportional to the
+number of parameters times the optimizer state (often 4 to 8x the model size). LoRA freezes
+the original weights and adds small trainable ran! 1 matrices (B and A) whose
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+Why is the B matrix initialized to zeros in LORA?
+
+Initializing B to zeros ensures that at the start of training, the LoRA contribution (BA) is exactly
+
+zero. This means the model begins fine-tuning from the exact pretrained behavior rather than
+
+from a random perturbation. A starts with a small Gaussian — it provides the gradient signal —
+but the overall output is unchanged until training updates B away from zero.
+
+What does the LoRA rank parameter control, and how do you choose it?
+
+Rank controls the capacity of the adapter — specifically, the inner dimension of the B and A
+matrices. Lower rank means fewer parameters and less expressive adaptation; higher rank
+means more capacity but diminishing returns above about 64. For style and instruction-
+following tasks, r=16 works well. Use r=32 to r=64 for complex domain adaptation or
+reasoning transfer. Above rank 64, consider rsLoRA to maintain stable gradients.
+
+Explain what QLoRA adds on top of LoRA.
+
+QLOoRA quantizes the frozen base model to 4-bit NF4 precision, which reduces the memory
+needed to store those weights by roughly 4x. LoRA adapters still train in higher precision
+(bfloat16). QLoRA also introduces double quantization (quantizing the quantization constants)
+and paged optimizers (swapping optimizer state: uring memory spikes).
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+What is DoRA and how does it improve on standard LoRA?
+
+DoRA (Weight-Decomposed Low-Rank Adaptation) decomposes the pretrained weight into
+magnitude and direction components, then applies LoRA updates only to the directional part.
+This separates the two types of changes a fine-tuning task requires — rescaling important
+output directions versus rotating the weight to cover new patterns. Empirically, DoRA
+consistently outperforms LoRA by 1 to 4% on commonsense reasoning benchmarks across
+LLaMA models, with no extra inference overhead since the magnitude vector and direction
+update merge back into base weights post-training.
+
+What is rsLoRA and when should you use it?
+
+RsLoRA changes the LoRA scaling factor from alpha / x to alpha / sqrt(x) . The original
+scaling causes gradient magnitude to shrink as rank increases, limiting useful fine-tuning to
+low ranks. The sqrt scaling preserves gradient flow at any rank, enabling stable training up to
+ranks of 512 or higher. Use rsLoRA whenever you're experimenting with ranks above 64, or if
+you find that increasing rank beyond 32 stops helping — it's a single flag ( use_rslora=True )
+in PEFT with no downside.
+
+What is NF4 and why is it better than standard int4 for | | M weights?
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+uniform quantization boundaries match the data much better than int4, which assumes
+uniform distribution. In practice, NF4 quantization preserves model quality noticeably better
+than int4 at the same bit width.
+
+When should you use RAG instead of LoRA for improving LLM outputs?
+
+Use RAG when your knowledge needs to be frequently updated, citations are required, or the
+information lives in a large document corpus. Use LoRA when you need consistent behavioral
+patterns, specific output formats, or task-specific reasoning that prompting alone can't reliably
+achieve. In production systems, RAG and LoRA are often complementary: RAG handles
+dynamic knowledge retrieval, LoRA handles consistent response style and structure.
+
+</>
+1,500+ SQL & Python problems across 15 industry datasets — the exact type of data you work with.
+
+Try 250 free problems >
+
+Ss 8 PATHS
+
+Step-by-step roadmaps from zero to job-ready — curated courses, salar’
+data, and the exact learning order that gets you hired.
+
+
+--- PAGE BREAK ---
+
+[Bf Let's Data Science
+
+Explore all career paths >
+
+FOUNDING MEMBER SALE
+
+$9.99/mo
+
+/mo
+
+Vv Save 60% — Limited Time
+
+
+--- PAGE BREAK ---
+
+Dy.
+
+Written by LDS Team More articles >
+
+Recommended Reading
+
+Curated articles related to this topic
+
+MULTIMODAL Al Intermediate 26 min LLMOPS Intermediate 22 min PROMP1
+Multimodal Al: How Vision-Language LLM Evaluation: RAGAS, LLM-as- Advat
+Models Work Judge, and Production Evals Chain
+Multimodal Al systems integrate text and visual Effective LLM evaluation requires moving beyond Advanc
+data processing into a single architecture, traditional metrics like BLEU and ROUGE to adopt Langua
+enabling applications like receipt scanning and... semantic measurement frameworks designed f... questio
+
+63 Audio 63 Audio 63 Auc
+Mar 18, 2026 Mar 17, 2026 Mar 17, 2
+
+© 2026 Let's Data Science
+
+
+--- PAGE BREAK ---
+
+[Bf Let's Data Science

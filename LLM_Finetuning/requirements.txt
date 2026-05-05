@@ -1,0 +1,33 @@
+# ── Script 1: Data Preparation ───────────────────────────────────────────────
+pymupdf>=1.24
+pytesseract>=0.3.10
+Pillow>=10.0
+tiktoken>=0.7
+tqdm>=4.66
+
+# ── Script 2: Fine-Tuning (install PyTorch separately — see note below) ───────
+transformers>=4.40
+datasets>=2.19
+peft>=0.10
+trl>=0.8
+bitsandbytes>=0.43
+accelerate>=0.29
+wandb>=0.17
+scipy>=1.13
+sentencepiece>=0.2
+
+# ── Scripts 3 & 4 ────────────────────────────────────────────────────────────
+requests>=2.32
+
+# NOTE: Install PyTorch with CUDA 12.8 support (for RTX 5090) separately:
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+#
+# NOTE: Tesseract OCR binary (for scanned PDFs):
+#   Download installer from https://github.com/UB-Mannheim/tesseract/wiki
+#   Add installation folder to PATH or set: pytesseract.pytesseract.tesseract_cmd = r"C:\...\tesseract.exe"
+#
+# NOTE: Ollama (Script 4):
+#   Download from https://ollama.com/download  (Windows installer)
+#
+# NOTE: Flash Attention 2 (optional but recommended for RTX 5090 — faster training):
+#   pip install flash-attn --no-build-isolation

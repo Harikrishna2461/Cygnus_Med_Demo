@@ -1,0 +1,34 @@
+{
+  "os":  "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python":  "CPython 3.12.3",
+  "startedAt":  "2026-05-04T06:00:50.156491Z",
+  "program":  "venv_pytorch/Include/script2_finetuning_training.ipynb",
+  "codePath":  "venv_pytorch/Include/script2_finetuning_training.ipynb",
+  "email":  "claudekumar07@gmail.com",
+  "root":  "/home/krish/finetuning/venv_pytorch/Include",
+  "host":  "DESKTOP-92IMVDR",
+  "executable":  "/home/krish/pytorch_env/bin/python3.12",
+  "cpu_count":  20,
+  "cpu_count_logical":  20,
+  "gpu":  "NVIDIA GeForce RTX 5090",
+  "gpu_count":  1,
+  "disk":  {
+    "/":  {
+      "total":  "1081101176832",
+      "used":  "74387632128"
+    }
+  },
+  "memory":  {
+    "total":  "16512102400"
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA GeForce RTX 5090",
+      "memoryTotal":  "34190917632",
+      "architecture":  "Blackwell",
+      "uuid":  "GPU-79ccb310-e557-c9f5-8b5a-a92cc79601de"
+    }
+  ],
+  "cudaVersion":  "12.9",
+  "writerId":  "hkb921fmz8qlt5ztlxos5cx5kqsa1bgf"
+}

@@ -1,0 +1,338 @@
+================================================================================
+COPY-PASTE NOTEBOOK CELLS
+================================================================================
+
+Copy each cell below and paste into a Jupyter notebook cell. Run in order.
+
+================================================================================
+CELL 1: IMPORTS
+================================================================================
+
+import torch
+import json
+from pathlib import Path
+from datasets import Dataset
+from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, Trainer, DataCollatorForLanguageModeling
+from peft import get_peft_model, LoraConfig, TaskType
+
+print("Libraries imported successfully")
+print(f"CUDA available: {torch.cuda.is_available()}")
+
+
+================================================================================
+CELL 2: LOAD DATA
+================================================================================
+
+TRAIN_FILE = "./training_datasets/training_data.jsonl"
+VAL_FILE = "./training_datasets/validation_data.jsonl"
+
+def load_jsonl(filepath):
+    data = []
+    with open(filepath, 'r') as f:
+        for line in f:
+            if line.strip():
+                data.append(json.loads(line))
+    return data
+
+train_pairs = load_jsonl(TRAIN_FILE)
+val_pairs = load_jsonl(VAL_FILE)
+
+print(f"Loaded {len(train_pairs)} training pairs")
+print(f"Loaded {len(val_pairs)} validation pairs")
+
+train_types = {}
+for pair in train_pairs:
+    ptype = pair.get('type', 'unknown')
+    train_types[ptype] = train_types.get(ptype, 0) + 1
+
+print("\nData distribution:")
+for ptype, count in sorted(train_types.items()):
+    print(f"  {ptype}: {count}")
+
+
+================================================================================
+CELL 3: SHOW SAMPLES
+================================================================================
+
+print("Sample 1 - Classification:")
+print(f"Type: {train_pairs[0].get('type')}")
+print(f"Instruction: {train_pairs[0].get('instruction')[:100]}...")
+print(f"Output: {train_pairs[0].get('output')[:100]}...")
+
+print("\nSample 2 - Ligation:")
+sample2 = [p for p in train_pairs if p.get('type') == 'ligation'][0]
+print(f"Type: {sample2.get('type')}")
+print(f"Instruction: {sample2.get('instruction')[:100]}...")
+
+
+================================================================================
+CELL 4: FORMAT AND PREPARE DATA
+================================================================================
+
+def format_instruction_response(pair):
+    instruction = pair.get("instruction", "").strip()
+    input_text = pair.get("input", "").strip()
+    output = pair.get("output", "").strip()
+
+    if input_text:
+        prompt = f"[INST] {instruction}\n\n{input_text} [/INST]"
+    else:
+        prompt = f"[INST] {instruction} [/INST]"
+
+    full_text = f"{prompt} {output}"
+    return full_text
+
+train_texts = [format_instruction_response(p) for p in train_pairs]
+val_texts = [format_instruction_response(p) for p in val_pairs]
+
+print(f"Formatted {len(train_texts)} training texts")
+print(f"Formatted {len(val_texts)} validation texts")
+
+
+================================================================================
+CELL 5: LOAD MODEL AND TOKENIZER
+================================================================================
+
+MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
+
+print(f"Loading {MODEL_NAME}...")
+
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_NAME,
+    torch_dtype=torch.bfloat16,
+    device_map="auto",
+)
+
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+tokenizer.pad_token = tokenizer.eos_token
+
+total_params = sum(p.numel() for p in model.parameters())
+print(f"Model loaded. Total parameters: {total_params:,}")
+
+
+================================================================================
+CELL 6: CREATE DATASETS
+================================================================================
+
+def tokenize_function(examples, tokenizer, max_length=512):
+    outputs = tokenizer(
+        examples["text"],
+        truncation=True,
+        max_length=max_length,
+        padding="max_length",
+    )
+    outputs["labels"] = outputs["input_ids"].copy()
+    return outputs
+
+train_dataset = Dataset.from_dict({"text": train_texts})
+train_dataset = train_dataset.map(
+    lambda ex: tokenize_function(ex, tokenizer, 512),
+    batched=True,
+    remove_columns=["text"]
+)
+
+val_dataset = Dataset.from_dict({"text": val_texts})
+val_dataset = val_dataset.map(
+    lambda ex: tokenize_function(ex, tokenizer, 512),
+    batched=True,
+    remove_columns=["text"]
+)
+
+print(f"Training dataset: {len(train_dataset)} examples")
+print(f"Validation dataset: {len(val_dataset)} examples")
+
+
+================================================================================
+CELL 7: SETUP LORA
+================================================================================
+
+lora_config = LoraConfig(
+    r=16,
+    lora_alpha=32,
+    target_modules=["q_proj", "v_proj"],
+    lora_dropout=0.05,
+    bias="none",
+    task_type=TaskType.CAUSAL_LM,
+)
+
+model = get_peft_model(model, lora_config)
+
+trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+total_params = sum(p.numel() for p in model.parameters())
+pct = 100 * trainable_params / total_params
+
+print(f"Trainable parameters: {trainable_params:,}")
+print(f"Total parameters: {total_params:,}")
+print(f"Percentage trainable: {pct:.4f}%")
+
+
+================================================================================
+CELL 8: SETUP TRAINING
+================================================================================
+
+LORA_OUTPUT_DIR = "./lora_chiva_classifier_final"
+
+training_args = TrainingArguments(
+    output_dir=LORA_OUTPUT_DIR,
+    num_train_epochs=5,
+    per_device_train_batch_size=4,
+    per_device_eval_batch_size=4,
+    gradient_accumulation_steps=4,
+    eval_strategy="steps",
+    eval_steps=5,
+    save_steps=10,
+    save_total_limit=3,
+    logging_steps=2,
+    learning_rate=1e-4,
+    bf16=True,
+    gradient_checkpointing=True,
+    optim="paged_adamw_8bit",
+    warmup_steps=5,
+    weight_decay=0.01,
+    max_grad_norm=1.0,
+    logging_dir="./logs",
+    report_to=["tensorboard"],
+)
+
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+    eval_dataset=val_dataset,
+    data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=False),
+)
+
+print("Trainer created. Ready to train.")
+
+
+================================================================================
+CELL 9: TRAIN (MAIN - 10-20 MINUTES)
+================================================================================
+
+print("Starting training...")
+print("="*80)
+
+train_result = trainer.train()
+
+print("="*80)
+print("Training complete!")
+print(f"Final training loss: {train_result.training_loss:.4f}")
+
+
+================================================================================
+CELL 10: SAVE MODEL
+================================================================================
+
+print(f"Saving to {LORA_OUTPUT_DIR}...")
+
+model.save_pretrained(LORA_OUTPUT_DIR)
+tokenizer.save_pretrained(LORA_OUTPUT_DIR)
+
+output_path = Path(LORA_OUTPUT_DIR)
+saved_files = list(output_path.glob("*"))
+
+print(f"Saved {len(saved_files)} files:")
+for f in saved_files:
+    size = f.stat().st_size / (1024 * 1024)
+    print(f"  {f.name} ({size:.2f} MB)")
+
+
+================================================================================
+CELL 11: TEST THE MODEL
+================================================================================
+
+from peft import PeftModel
+
+base_model = AutoModelForCausalLM.from_pretrained(
+    MODEL_NAME,
+    torch_dtype=torch.bfloat16,
+    device_map="auto",
+)
+
+test_tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+test_tokenizer.pad_token = test_tokenizer.eos_token
+
+test_model = PeftModel.from_pretrained(base_model, LORA_OUTPUT_DIR)
+test_model.eval()
+
+test_prompt = """[INST] Analyze the following ultrasound clips and classify the CHIVA venous shunt type:
+
+Clips:
+  - Clip 1: EP N1 to N2 (position=0.080)
+  - Clip 2: RP N2 to N1 (position=0.300)
+
+Based on the flow patterns, determine the CHIVA shunt type, confidence, and reasoning. [/INST]"""
+
+inputs = test_tokenizer(test_prompt, return_tensors="pt").to(test_model.device)
+
+with torch.no_grad():
+    outputs = test_model.generate(
+        **inputs,
+        max_new_tokens=300,
+        do_sample=False,
+        pad_token_id=test_tokenizer.eos_token_id,
+    )
+
+response = test_tokenizer.decode(outputs[0], skip_special_tokens=True)
+if "[/INST]" in response:
+    response = response.split("[/INST]")[1].strip()
+
+print("Model Output:")
+print(response)
+
+
+================================================================================
+CELL 12: USE WITH CLASSIFIER API
+================================================================================
+
+from chiva_classifier_api import CHIVAShuntClassifier
+
+classifier = CHIVAShuntClassifier(
+    use_lora=True,
+    lora_path=LORA_OUTPUT_DIR
+)
+
+clips = [
+    {"flow": "EP", "fromType": "N1", "toType": "N2", "posYRatio": 0.080},
+    {"flow": "RP", "fromType": "N2", "toType": "N1", "posYRatio": 0.300},
+]
+
+result = classifier.classify(clips, leg_label="Left")
+
+print(f"Shunt Type: {result['shunt_type']}")
+print(f"Confidence: {result['confidence']:.1%}")
+print(f"Status: {result['status']}")
+print(f"\nReasoning:\n{result['reasoning']}")
+
+
+================================================================================
+CELL 13: SUMMARY
+================================================================================
+
+print("="*80)
+print("TRAINING COMPLETE")
+print("="*80)
+print(f"\nModel saved to: {LORA_OUTPUT_DIR}/")
+print(f"Training pairs: {len(train_pairs)}")
+print(f"Validation pairs: {len(val_pairs)}")
+print(f"Trainable parameters: {pct:.4f}%")
+print(f"\nTo use:")
+print(f"  classifier = CHIVAShuntClassifier(")
+print(f"      use_lora=True,")
+print(f"      lora_path='{LORA_OUTPUT_DIR}'")
+print(f"  )")
+print(f"\nYour model is ready for production!")
+
+
+================================================================================
+HOW TO USE:
+================================================================================
+
+1. Open Jupyter: jupyter notebook
+2. Create new notebook
+3. Copy each cell (from CELL 1 to CELL 13) into notebook cells
+4. Run cells in order with Shift+Enter
+5. Cell 9 is the main training (10-20 minutes)
+6. After completion, use Cell 12 to integrate with your API
+
+Total time: 45-50 minutes
