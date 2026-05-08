@@ -39,7 +39,7 @@ print("="*80)
 # CONFIGURATION
 # ============================================================
 
-GROQ_API_KEY = "YOUR_GROQ_API_KEY_HERE"
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "YOUR_GROQ_API_KEY_HERE")
 QWEN_MODEL_PATH = "Qwen/Qwen2.5-7B"
 QWEN_LORA_PATH = r'.\lora_finetuned_model'
 GROQ_MODEL = "mixtral-8x7b-32768"  # Default, will be updated if available

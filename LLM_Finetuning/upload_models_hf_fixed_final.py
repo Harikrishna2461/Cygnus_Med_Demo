@@ -11,7 +11,7 @@ import subprocess
 from pathlib import Path
 
 # Configuration
-HF_TOKEN = "YOUR_HF_TOKEN_HERE"
+HF_TOKEN = os.getenv("HF_TOKEN", "YOUR_HF_TOKEN_HERE")
 HF_USERNAME = "HariKrishna1824"
 
 print("="*80)
