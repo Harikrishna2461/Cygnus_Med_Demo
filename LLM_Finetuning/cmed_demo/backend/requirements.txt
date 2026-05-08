@@ -1,0 +1,19 @@
+# CHIVA Clinical Assistant — Python dependencies
+# Install with: pip install -r requirements.txt
+
+flask>=3.0.0
+flask-cors>=4.0.0
+groq>=0.15.0
+qdrant-client>=1.9.0
+requests>=2.31.0
+numpy>=1.26.0
+
+# RAG Stage 1b: BM25 keyword search
+rank-bm25>=0.2.2
+
+# RAG Stage 2: cross-encoder reranking (~80MB model downloaded on first use)
+sentence-transformers>=3.0.0
+
+# Knowledge base ingestion
+PyPDF2>=3.0.0
+python-docx>=1.1.0

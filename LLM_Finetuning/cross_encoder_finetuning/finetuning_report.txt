@@ -1,0 +1,55 @@
+
+CROSS-ENCODER FINE-TUNING REPORT
+========================================
+
+DATA SUMMARY:
+  Total samples: 770
+  Training: 539 (70.0%)
+  Validation: 115 (14.9%)
+  Test: 116 (15.1%)
+  Source documents: 10
+
+TRAINING CONFIG:
+  Base model: cross-encoder/ms-marco-MiniLM-L-6-v2
+  Batch size: 16
+  Epochs: 10
+  Learning rate: 2e-5
+  Warmup steps: 100
+  Loss function: CosineSimilarityLoss
+
+TEST SET RESULTS:
+  Baseline:
+    - MSE: 18.1677
+    - MAE: 3.6832
+    - Spearman: 0.2298
+    - Mean prediction: 3.3447
+    - Std prediction: 3.3570
+
+  Fine-tuned:
+    - MSE: 4.1586 (+77.1%)
+    - MAE: 1.5726 (+57.3%)
+    - Spearman: 0.5340 (+132.3%)
+    - Mean prediction: 0.3990
+    - Std prediction: 2.2412
+
+VALIDATION SET RESULTS:
+  Baseline MAE: 4.5321
+  Fine-tuned MAE: 1.9994
+  Baseline Spearman: 0.3936
+  Fine-tuned Spearman: 0.6521
+
+CASE ANALYSIS:
+  Cases improved: 79/116 (68.1%)
+  Cases worse: 37/116 (31.9%)
+  Cases equal: 0/116 (0.0%)
+
+RECOMMENDATION:
+  INTEGRATE FINE-TUNED MODEL
+
+ARTIFACTS:
+  - chiva_crossencoder_finetuned/ : Fine-tuned model weights and config
+  - synthetic_training_data.json : Training/val/test data with 770 samples
+  - 01_data_exploration.png : Data statistics and distributions
+  - 02_baseline_vs_finetuned.png : Performance comparison
+  - 03_prediction_analysis.png : Prediction scatter plots and errors
+  - 04_validation_performance.png : Validation set performance

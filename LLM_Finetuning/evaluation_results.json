@@ -1,0 +1,180 @@
+{
+  "timestamp": "2026-05-08T15:26:11.391731",
+  "models": {
+    "llama": "Groq API (Mixtral/Llama)",
+    "qwen": "HF Inference API (HariKrishna1824/qwen25_chiva_v2)"
+  },
+  "test_count": 12,
+  "shunt_classification": [
+    {
+      "test": "shunt type 1+2 - large diameter",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 1+2 - small diameter",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 1",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2 - equal calibre, equal distance",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2 - equal calibre, unequal distance",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2 - unequal calibre, no drainage",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2 - unequal calibre, yes drainage",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2a",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2b",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2c",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 3 variant 1",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 3 variant 2",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    }
+  ],
+  "ligation": [
+    {
+      "test": "shunt type 1+2 - large diameter",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 1+2 - small diameter",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 1",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2 - equal calibre, equal distance",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2 - equal calibre, unequal distance",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2 - unequal calibre, no drainage",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2 - unequal calibre, yes drainage",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2a",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2b",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 2c",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 3 variant 1",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    },
+    {
+      "test": "shunt type 3 variant 2",
+      "llama_v1": "[GROQ: No available models]",
+      "llama_v2": "[GROQ: No available models]",
+      "qwen_v1": "[HF unavailable]",
+      "qwen_v2": "[HF unavailable]"
+    }
+  ]
+}
