@@ -1,0 +1,636 @@
+2026-05-19 15:30:34 | INFO | Found 14 book file(s) in C:\Users\Krish\Downloads\llm_continued_pretraining\books_articles
+2026-05-19 15:30:34 | INFO | Extracting: 0-duplex-ultrasound-of-superficial-leg-veins-2014.pdf
+2026-05-19 15:30:35 | DEBUG | Page 2: quality=1.00, falling back to OCR
+2026-05-19 15:30:37 | WARNING | OCR failed on page 2: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:37 | DEBUG | Page 3: quality=0.00, falling back to OCR
+2026-05-19 15:30:38 | WARNING | OCR failed on page 3: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:38 | DEBUG | Page 9: quality=0.00, falling back to OCR
+2026-05-19 15:30:38 | WARNING | OCR failed on page 9: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:38 | DEBUG | Page 11: quality=0.00, falling back to OCR
+2026-05-19 15:30:39 | WARNING | OCR failed on page 11: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:39 | DEBUG | Page 13 appears to be an index page – skipping
+2026-05-19 15:30:39 | DEBUG | Page 316: quality=0.00, falling back to OCR
+2026-05-19 15:30:40 | WARNING | OCR failed on page 316: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:40 | DEBUG | Page 324: quality=0.00, falling back to OCR
+2026-05-19 15:30:40 | WARNING | OCR failed on page 324: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:40 | DEBUG | Page 326 appears to be an index page – skipping
+2026-05-19 15:30:40 | DEBUG | Page 327 appears to be an index page – skipping
+2026-05-19 15:30:40 | DEBUG | Page 328 appears to be an index page – skipping
+2026-05-19 15:30:40 | DEBUG | Page 329 appears to be an index page – skipping
+2026-05-19 15:30:40 | DEBUG | Page 330 appears to be an index page – skipping
+2026-05-19 15:30:40 | DEBUG | Page 331 appears to be an index page – skipping
+2026-05-19 15:30:40 | DEBUG | Page 332 appears to be an index page – skipping
+2026-05-19 15:30:40 | DEBUG | Page 333 appears to be an index page – skipping
+2026-05-19 15:30:40 | DEBUG | Page 334 appears to be an index page – skipping
+2026-05-19 15:30:40 | DEBUG | Page 335 appears to be an index page – skipping
+2026-05-19 15:30:40 | DEBUG | Removing 75 repeated header/footer lines
+2026-05-19 15:30:40 | INFO |   Saved: 0-duplex-ultrasound-of-superficial-leg-veins-2014.txt | pages=335 | ocr_pages=0 | words=122,480 | chapters=15
+2026-05-19 15:30:40 | INFO | Extracting: 0-Handbook of Venous and Lymphatic Disorders Guidelines of the American Venous Forum by Peter Gloviczki et al. (eds.) (z-lib.org).pdf
+2026-05-19 15:30:41 | DEBUG | Page 1: quality=0.00, falling back to OCR
+2026-05-19 15:30:41 | WARNING | OCR failed on page 1: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:41 | DEBUG | Page 2: quality=1.00, falling back to OCR
+2026-05-19 15:30:42 | WARNING | OCR failed on page 2: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:42 | DEBUG | Page 3: quality=0.00, falling back to OCR
+2026-05-19 15:30:43 | WARNING | OCR failed on page 3: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:43 | DEBUG | Page 7: quality=0.00, falling back to OCR
+2026-05-19 15:30:43 | WARNING | OCR failed on page 7: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:43 | DEBUG | Page 13: quality=0.00, falling back to OCR
+2026-05-19 15:30:44 | WARNING | OCR failed on page 13: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:44 | DEBUG | Page 15: quality=0.00, falling back to OCR
+2026-05-19 15:30:45 | WARNING | OCR failed on page 15: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:45 | DEBUG | Page 21: quality=0.00, falling back to OCR
+2026-05-19 15:30:45 | WARNING | OCR failed on page 21: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:45 | DEBUG | Page 25: quality=0.00, falling back to OCR
+2026-05-19 15:30:46 | WARNING | OCR failed on page 25: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:46 | DEBUG | Page 31: quality=0.00, falling back to OCR
+2026-05-19 15:30:47 | WARNING | OCR failed on page 31: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:47 | DEBUG | Page 33: quality=0.00, falling back to OCR
+2026-05-19 15:30:47 | WARNING | OCR failed on page 33: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:47 | DEBUG | Page 81: quality=0.00, falling back to OCR
+2026-05-19 15:30:48 | WARNING | OCR failed on page 81: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:48 | DEBUG | Page 121: quality=0.00, falling back to OCR
+2026-05-19 15:30:49 | WARNING | OCR failed on page 121: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:49 | DEBUG | Page 137: quality=0.00, falling back to OCR
+2026-05-19 15:30:50 | WARNING | OCR failed on page 137: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:50 | DEBUG | Page 151: quality=0.00, falling back to OCR
+2026-05-19 15:30:50 | WARNING | OCR failed on page 151: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:50 | DEBUG | Page 155 appears to be an index page – skipping
+2026-05-19 15:30:50 | DEBUG | Page 156 appears to be an index page – skipping
+2026-05-19 15:30:50 | DEBUG | Page 159: quality=0.00, falling back to OCR
+2026-05-19 15:30:51 | WARNING | OCR failed on page 159: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:51 | DEBUG | Page 161: quality=0.00, falling back to OCR
+2026-05-19 15:30:52 | WARNING | OCR failed on page 161: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:52 | DEBUG | Page 195: quality=0.00, falling back to OCR
+2026-05-19 15:30:52 | WARNING | OCR failed on page 195: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:52 | DEBUG | Page 235: quality=0.00, falling back to OCR
+2026-05-19 15:30:53 | WARNING | OCR failed on page 235: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:53 | DEBUG | Page 251: quality=0.00, falling back to OCR
+2026-05-19 15:30:54 | WARNING | OCR failed on page 251: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:54 | DEBUG | Page 269: quality=0.00, falling back to OCR
+2026-05-19 15:30:55 | WARNING | OCR failed on page 269: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:55 | DEBUG | Page 295: quality=0.00, falling back to OCR
+2026-05-19 15:30:55 | WARNING | OCR failed on page 295: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:55 | DEBUG | Page 307: quality=0.00, falling back to OCR
+2026-05-19 15:30:56 | WARNING | OCR failed on page 307: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:56 | DEBUG | Page 319: quality=0.00, falling back to OCR
+2026-05-19 15:30:57 | WARNING | OCR failed on page 319: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:57 | DEBUG | Page 347: quality=0.00, falling back to OCR
+2026-05-19 15:30:57 | WARNING | OCR failed on page 347: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:57 | DEBUG | Page 389: quality=0.00, falling back to OCR
+2026-05-19 15:30:58 | WARNING | OCR failed on page 389: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:58 | DEBUG | Page 409: quality=0.00, falling back to OCR
+2026-05-19 15:30:59 | WARNING | OCR failed on page 409: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:30:59 | DEBUG | Page 439: quality=0.00, falling back to OCR
+2026-05-19 15:31:00 | WARNING | OCR failed on page 439: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:00 | DEBUG | Page 451: quality=0.00, falling back to OCR
+2026-05-19 15:31:00 | WARNING | OCR failed on page 451: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:00 | DEBUG | Page 473: quality=0.00, falling back to OCR
+2026-05-19 15:31:01 | WARNING | OCR failed on page 473: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:01 | DEBUG | Page 495: quality=0.00, falling back to OCR
+2026-05-19 15:31:02 | WARNING | OCR failed on page 495: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:02 | DEBUG | Page 523: quality=0.00, falling back to OCR
+2026-05-19 15:31:02 | WARNING | OCR failed on page 523: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:02 | DEBUG | Page 583: quality=0.00, falling back to OCR
+2026-05-19 15:31:03 | WARNING | OCR failed on page 583: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:03 | DEBUG | Page 607: quality=0.00, falling back to OCR
+2026-05-19 15:31:04 | WARNING | OCR failed on page 607: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:04 | DEBUG | Page 627: quality=0.00, falling back to OCR
+2026-05-19 15:31:04 | WARNING | OCR failed on page 627: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:04 | DEBUG | Page 639: quality=0.00, falling back to OCR
+2026-05-19 15:31:05 | WARNING | OCR failed on page 639: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:05 | DEBUG | Page 641: quality=0.00, falling back to OCR
+2026-05-19 15:31:06 | WARNING | OCR failed on page 641: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:06 | DEBUG | Page 665: quality=0.00, falling back to OCR
+2026-05-19 15:31:06 | WARNING | OCR failed on page 665: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:07 | DEBUG | Page 705: quality=0.00, falling back to OCR
+2026-05-19 15:31:07 | WARNING | OCR failed on page 705: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:07 | DEBUG | Page 715: quality=0.00, falling back to OCR
+2026-05-19 15:31:08 | WARNING | OCR failed on page 715: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:08 | DEBUG | Page 735: quality=0.00, falling back to OCR
+2026-05-19 15:31:09 | WARNING | OCR failed on page 735: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:09 | DEBUG | Page 737: quality=0.00, falling back to OCR
+2026-05-19 15:31:09 | WARNING | OCR failed on page 737: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:09 | DEBUG | Page 767: quality=0.00, falling back to OCR
+2026-05-19 15:31:10 | WARNING | OCR failed on page 767: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:10 | DEBUG | Page 791: quality=0.00, falling back to OCR
+2026-05-19 15:31:11 | WARNING | OCR failed on page 791: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:11 | DEBUG | Page 793: quality=0.00, falling back to OCR
+2026-05-19 15:31:11 | WARNING | OCR failed on page 793: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:12 | DEBUG | Page 813: quality=0.00, falling back to OCR
+2026-05-19 15:31:12 | WARNING | OCR failed on page 813: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:12 | DEBUG | Page 845: quality=0.00, falling back to OCR
+2026-05-19 15:31:13 | WARNING | OCR failed on page 845: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:13 | DEBUG | Page 846 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 847 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 848 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 849 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 850 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 851 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 852 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 853 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 854 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 855 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 856 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 857 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 858 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 859 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 860 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 861 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 862 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 863 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 864 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 865 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 866 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 867 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 868 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Page 869 appears to be an index page – skipping
+2026-05-19 15:31:13 | DEBUG | Removing 112 repeated header/footer lines
+2026-05-19 15:31:13 | INFO |   Saved: 0-Handbook_of_Venous_and_Lymphatic_Disorders_Guidelines_of_the_American_Venous_F.txt | pages=869 | ocr_pages=0 | words=470,772 | chapters=28
+2026-05-19 15:31:13 | INFO | Extracting: 0-Saphenous-Vein-Sparing-Strategies-in-Chronic-Venous-Disease.pdf
+2026-05-19 15:31:13 | DEBUG | Page 2: quality=1.00, falling back to OCR
+2026-05-19 15:31:14 | WARNING | OCR failed on page 2: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:14 | DEBUG | Page 11: quality=1.00, falling back to OCR
+2026-05-19 15:31:14 | WARNING | OCR failed on page 11: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:14 | DEBUG | Page 126: quality=1.00, falling back to OCR
+2026-05-19 15:31:15 | WARNING | OCR failed on page 126: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:15 | DEBUG | Page 240 appears to be an index page – skipping
+2026-05-19 15:31:15 | DEBUG | Page 255: quality=1.00, falling back to OCR
+2026-05-19 15:31:15 | WARNING | OCR failed on page 255: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:16 | DEBUG | Removing 56 repeated header/footer lines
+2026-05-19 15:31:16 | INFO |   Saved: 0-Saphenous-Vein-Sparing-Strategies-in-Chronic-Venous-Disease.txt | pages=291 | ocr_pages=0 | words=119,780 | chapters=11
+2026-05-19 15:31:16 | INFO | Extracting: 1-Atlas of Endovascular Venous Surgery by José Almeida (z-lib.org).pdf
+2026-05-19 15:31:16 | DEBUG | Page 1: quality=0.00, falling back to OCR
+2026-05-19 15:31:16 | WARNING | OCR failed on page 1: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:16 | DEBUG | Page 4: quality=1.00, falling back to OCR
+2026-05-19 15:31:16 | WARNING | OCR failed on page 4: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:16 | DEBUG | Page 8: quality=1.00, falling back to OCR
+2026-05-19 15:31:17 | WARNING | OCR failed on page 8: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:17 | DEBUG | Page 18: quality=1.00, falling back to OCR
+2026-05-19 15:31:18 | WARNING | OCR failed on page 18: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:18 | DEBUG | Page 70 appears to be an index page – skipping
+2026-05-19 15:31:18 | DEBUG | Page 88: quality=1.00, falling back to OCR
+2026-05-19 15:31:18 | WARNING | OCR failed on page 88: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:18 | DEBUG | Page 106 appears to be an index page – skipping
+2026-05-19 15:31:18 | DEBUG | Page 127: quality=0.97, falling back to OCR
+2026-05-19 15:31:19 | WARNING | OCR failed on page 127: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:19 | DEBUG | Page 186 appears to be an index page – skipping
+2026-05-19 15:31:20 | DEBUG | Page 238: quality=0.00, falling back to OCR
+2026-05-19 15:31:20 | WARNING | OCR failed on page 238: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:20 | DEBUG | Page 350: quality=1.00, falling back to OCR
+2026-05-19 15:31:21 | WARNING | OCR failed on page 350: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:21 | DEBUG | Page 376: quality=1.00, falling back to OCR
+2026-05-19 15:31:22 | WARNING | OCR failed on page 376: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:22 | DEBUG | Page 428: quality=1.00, falling back to OCR
+2026-05-19 15:31:22 | WARNING | OCR failed on page 428: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:22 | DEBUG | Page 460: quality=1.00, falling back to OCR
+2026-05-19 15:31:23 | WARNING | OCR failed on page 460: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:23 | DEBUG | Page 474: quality=1.00, falling back to OCR
+2026-05-19 15:31:24 | WARNING | OCR failed on page 474: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:24 | DEBUG | Page 504: quality=1.00, falling back to OCR
+2026-05-19 15:31:24 | WARNING | OCR failed on page 504: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:24 | DEBUG | Page 505 appears to be an index page – skipping
+2026-05-19 15:31:24 | DEBUG | Page 506 appears to be an index page – skipping
+2026-05-19 15:31:24 | DEBUG | Page 507 appears to be an index page – skipping
+2026-05-19 15:31:24 | DEBUG | Page 508 appears to be an index page – skipping
+2026-05-19 15:31:24 | DEBUG | Page 509 appears to be an index page – skipping
+2026-05-19 15:31:24 | DEBUG | Page 510 appears to be an index page – skipping
+2026-05-19 15:31:24 | DEBUG | Page 511: quality=1.00, falling back to OCR
+2026-05-19 15:31:25 | WARNING | OCR failed on page 511: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:25 | DEBUG | Page 512: quality=1.00, falling back to OCR
+2026-05-19 15:31:26 | WARNING | OCR failed on page 512: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:26 | DEBUG | Page 513: quality=1.00, falling back to OCR
+2026-05-19 15:31:26 | WARNING | OCR failed on page 513: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:26 | DEBUG | Page 514: quality=1.00, falling back to OCR
+2026-05-19 15:31:27 | WARNING | OCR failed on page 514: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:27 | DEBUG | Removing 55 repeated header/footer lines
+2026-05-19 15:31:27 | INFO |   Saved: 1-Atlas_of_Endovascular_Venous_Surgery_by_José_Almeida_z-liborg.txt | pages=514 | ocr_pages=0 | words=102,192 | chapters=6
+2026-05-19 15:31:27 | INFO | Extracting: 2019 book Principles of Venous Hemodynamics Franceschi Zambo.pdf
+2026-05-19 15:31:27 | DEBUG | Page 2: quality=1.00, falling back to OCR
+2026-05-19 15:31:28 | WARNING | OCR failed on page 2: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:28 | DEBUG | Page 3: quality=0.00, falling back to OCR
+2026-05-19 15:31:28 | WARNING | OCR failed on page 3: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:28 | DEBUG | Page 9: quality=0.00, falling back to OCR
+2026-05-19 15:31:29 | WARNING | OCR failed on page 9: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:29 | DEBUG | Page 31: quality=0.00, falling back to OCR
+2026-05-19 15:31:30 | WARNING | OCR failed on page 31: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:30 | DEBUG | Page 99: quality=0.00, falling back to OCR
+2026-05-19 15:31:31 | WARNING | OCR failed on page 99: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:31 | DEBUG | Page 109: quality=0.00, falling back to OCR
+2026-05-19 15:31:31 | WARNING | OCR failed on page 109: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:31 | DEBUG | Page 111: quality=1.00, falling back to OCR
+2026-05-19 15:31:32 | WARNING | OCR failed on page 111: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:32 | DEBUG | Page 113: quality=1.00, falling back to OCR
+2026-05-19 15:31:33 | WARNING | OCR failed on page 113: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:33 | DEBUG | Page 118: quality=1.00, falling back to OCR
+2026-05-19 15:31:34 | WARNING | OCR failed on page 118: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:34 | DEBUG | Page 124: quality=1.00, falling back to OCR
+2026-05-19 15:31:34 | WARNING | OCR failed on page 124: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:34 | DEBUG | Page 128: quality=1.00, falling back to OCR
+2026-05-19 15:31:35 | WARNING | OCR failed on page 128: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:35 | DEBUG | Page 133: quality=0.00, falling back to OCR
+2026-05-19 15:31:36 | WARNING | OCR failed on page 133: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:36 | DEBUG | Page 157: quality=0.00, falling back to OCR
+2026-05-19 15:31:36 | WARNING | OCR failed on page 157: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:37 | DEBUG | Page 170 appears to be an index page – skipping
+2026-05-19 15:31:37 | DEBUG | Removing 20 repeated header/footer lines
+2026-05-19 15:31:37 | INFO |   Saved: 2019_book_Principles_of_Venous_Hemodynamics_Franceschi_Zambo.txt | pages=198 | ocr_pages=0 | words=50,618 | chapters=60
+2026-05-19 15:31:37 | INFO | Extracting: 2025-02-19-Theraclion-investor-presentation-extended-V33.2_compressed-2.pdf
+2026-05-19 15:31:37 | DEBUG | Page 3: quality=1.00, falling back to OCR
+2026-05-19 15:31:37 | WARNING | OCR failed on page 3: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:38 | DEBUG | Page 8: quality=1.00, falling back to OCR
+2026-05-19 15:31:38 | WARNING | OCR failed on page 8: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:38 | DEBUG | Page 19: quality=1.00, falling back to OCR
+2026-05-19 15:31:39 | WARNING | OCR failed on page 19: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:39 | DEBUG | Page 27: quality=1.00, falling back to OCR
+2026-05-19 15:31:40 | WARNING | OCR failed on page 27: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:40 | DEBUG | Page 34: quality=1.00, falling back to OCR
+2026-05-19 15:31:41 | WARNING | OCR failed on page 34: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:41 | DEBUG | Removing 20 repeated header/footer lines
+2026-05-19 15:31:41 | INFO |   Saved: 2025-02-19-Theraclion-investor-presentation-extended-V332_compressed-2.txt | pages=48 | ocr_pages=0 | words=4,895 | chapters=3
+2026-05-19 15:31:41 | INFO | Extracting: adler-et-al-2022-varicose-veins-of-the-lower-extremity-doppler-us-evaluation-protocols-patterns-and-pitfalls.pdf
+2026-05-19 15:31:41 | DEBUG | Removing 2 repeated header/footer lines
+2026-05-19 15:31:41 | INFO |   Saved: adler-et-al-2022-varicose-veins-of-the-lower-extremity-doppler-us-evaluation-pro.txt | pages=17 | ocr_pages=0 | words=8,855 | chapters=0
+2026-05-19 15:31:41 | INFO | Extracting: Atlas of Endovascular Venous Surgery by Almeida, Jose (z-lib.org).pdf
+2026-05-19 15:31:41 | DEBUG | Page 1: quality=1.00, falling back to OCR
+2026-05-19 15:31:42 | WARNING | OCR failed on page 1: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:42 | DEBUG | Page 5: quality=0.00, falling back to OCR
+2026-05-19 15:31:42 | WARNING | OCR failed on page 5: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:42 | DEBUG | Page 9: quality=0.00, falling back to OCR
+2026-05-19 15:31:43 | WARNING | OCR failed on page 9: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:43 | DEBUG | Page 11: quality=0.00, falling back to OCR
+2026-05-19 15:31:44 | WARNING | OCR failed on page 11: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:44 | DEBUG | Page 13: quality=0.00, falling back to OCR
+2026-05-19 15:31:44 | WARNING | OCR failed on page 13: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:44 | DEBUG | Page 53 appears to be an index page – skipping
+2026-05-19 15:31:44 | DEBUG | Page 54 appears to be an index page – skipping
+2026-05-19 15:31:44 | DEBUG | Page 61 appears to be an index page – skipping
+2026-05-19 15:31:44 | DEBUG | Page 95 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 157 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 191 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 270 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 276 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 280 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 329 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 362 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 408 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 421 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 434 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 454 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 466 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 488 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 493 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 494 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 496 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 499 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 500 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 509 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 512 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 513 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 515 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 517 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 524 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 526 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 528 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 529 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 530 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 531 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 532 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 534 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 540 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 569 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 570 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 571 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 572 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 645 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 651 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 657 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 686 appears to be an index page – skipping
+2026-05-19 15:31:45 | DEBUG | Page 702 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 762 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 763 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 764 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 765 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 766 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 767 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 768 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 769 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 770 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 771 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 772 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 773 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 774 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 775 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 776 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Page 777 appears to be an index page – skipping
+2026-05-19 15:31:46 | DEBUG | Removing 91 repeated header/footer lines
+2026-05-19 15:31:46 | INFO |   Saved: Atlas_of_Endovascular_Venous_Surgery_by_Almeida_Jose_z-liborg.txt | pages=777 | ocr_pages=0 | words=154,868 | chapters=8
+2026-05-19 15:31:46 | INFO | Extracting: Carriazo2015.pdf
+2026-05-19 15:31:46 | DEBUG | Removing 48 repeated header/footer lines
+2026-05-19 15:31:46 | INFO |   Saved: Carriazo2015.txt | pages=9 | ocr_pages=0 | words=4,085 | chapters=0
+2026-05-19 15:31:46 | INFO | Extracting: CHIVA STRATEGY Gianesini014.pdf
+2026-05-19 15:31:46 | DEBUG | Removing 5 repeated header/footer lines
+2026-05-19 15:31:46 | INFO |   Saved: CHIVA_STRATEGY_Gianesini014.txt | pages=16 | ocr_pages=0 | words=5,967 | chapters=0
+2026-05-19 15:31:46 | INFO | Extracting: CHIVABook1988-1993_2.pdf
+2026-05-19 15:31:46 | DEBUG | Page 1: quality=0.00, falling back to OCR
+2026-05-19 15:31:47 | WARNING | OCR failed on page 1: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:47 | DEBUG | Page 2: quality=0.00, falling back to OCR
+2026-05-19 15:31:47 | WARNING | OCR failed on page 2: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:47 | DEBUG | Page 3: quality=0.00, falling back to OCR
+2026-05-19 15:31:48 | WARNING | OCR failed on page 3: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:48 | DEBUG | Page 4: quality=0.00, falling back to OCR
+2026-05-19 15:31:49 | WARNING | OCR failed on page 4: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:49 | DEBUG | Page 5: quality=0.00, falling back to OCR
+2026-05-19 15:31:49 | WARNING | OCR failed on page 5: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:49 | DEBUG | Page 6: quality=0.00, falling back to OCR
+2026-05-19 15:31:50 | WARNING | OCR failed on page 6: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:50 | DEBUG | Page 7: quality=0.00, falling back to OCR
+2026-05-19 15:31:51 | WARNING | OCR failed on page 7: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:51 | DEBUG | Page 8: quality=0.00, falling back to OCR
+2026-05-19 15:31:52 | WARNING | OCR failed on page 8: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:52 | DEBUG | Page 9: quality=0.00, falling back to OCR
+2026-05-19 15:31:52 | WARNING | OCR failed on page 9: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:52 | DEBUG | Page 10: quality=0.00, falling back to OCR
+2026-05-19 15:31:53 | WARNING | OCR failed on page 10: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:53 | DEBUG | Page 11: quality=0.00, falling back to OCR
+2026-05-19 15:31:54 | WARNING | OCR failed on page 11: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:54 | DEBUG | Page 12: quality=0.00, falling back to OCR
+2026-05-19 15:31:54 | WARNING | OCR failed on page 12: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:54 | DEBUG | Page 13: quality=0.00, falling back to OCR
+2026-05-19 15:31:55 | WARNING | OCR failed on page 13: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:55 | DEBUG | Page 14: quality=0.00, falling back to OCR
+2026-05-19 15:31:56 | WARNING | OCR failed on page 14: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:56 | DEBUG | Page 15: quality=0.00, falling back to OCR
+2026-05-19 15:31:57 | WARNING | OCR failed on page 15: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:57 | DEBUG | Page 16: quality=0.00, falling back to OCR
+2026-05-19 15:31:57 | WARNING | OCR failed on page 16: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:57 | DEBUG | Page 17: quality=0.00, falling back to OCR
+2026-05-19 15:31:58 | WARNING | OCR failed on page 17: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:58 | DEBUG | Page 18: quality=0.00, falling back to OCR
+2026-05-19 15:31:59 | WARNING | OCR failed on page 18: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:31:59 | DEBUG | Page 19: quality=0.00, falling back to OCR
+2026-05-19 15:32:00 | WARNING | OCR failed on page 19: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:00 | DEBUG | Page 20: quality=0.00, falling back to OCR
+2026-05-19 15:32:00 | WARNING | OCR failed on page 20: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:00 | DEBUG | Page 21: quality=0.00, falling back to OCR
+2026-05-19 15:32:01 | WARNING | OCR failed on page 21: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:01 | DEBUG | Page 22: quality=0.00, falling back to OCR
+2026-05-19 15:32:02 | WARNING | OCR failed on page 22: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:02 | DEBUG | Page 23: quality=0.00, falling back to OCR
+2026-05-19 15:32:02 | WARNING | OCR failed on page 23: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:02 | DEBUG | Page 24: quality=0.00, falling back to OCR
+2026-05-19 15:32:03 | WARNING | OCR failed on page 24: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:03 | DEBUG | Page 25: quality=0.00, falling back to OCR
+2026-05-19 15:32:04 | WARNING | OCR failed on page 25: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:04 | DEBUG | Page 26: quality=0.00, falling back to OCR
+2026-05-19 15:32:04 | WARNING | OCR failed on page 26: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:04 | DEBUG | Page 27: quality=0.00, falling back to OCR
+2026-05-19 15:32:05 | WARNING | OCR failed on page 27: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:05 | DEBUG | Page 28: quality=0.00, falling back to OCR
+2026-05-19 15:32:06 | WARNING | OCR failed on page 28: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:06 | DEBUG | Page 29: quality=0.00, falling back to OCR
+2026-05-19 15:32:07 | WARNING | OCR failed on page 29: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:07 | DEBUG | Page 30: quality=0.00, falling back to OCR
+2026-05-19 15:32:07 | WARNING | OCR failed on page 30: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:07 | DEBUG | Page 31: quality=0.00, falling back to OCR
+2026-05-19 15:32:08 | WARNING | OCR failed on page 31: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:08 | DEBUG | Page 32: quality=0.00, falling back to OCR
+2026-05-19 15:32:09 | WARNING | OCR failed on page 32: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:09 | DEBUG | Page 33: quality=0.00, falling back to OCR
+2026-05-19 15:32:09 | WARNING | OCR failed on page 33: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:09 | DEBUG | Page 34: quality=0.00, falling back to OCR
+2026-05-19 15:32:10 | WARNING | OCR failed on page 34: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:10 | DEBUG | Page 35: quality=0.00, falling back to OCR
+2026-05-19 15:32:11 | WARNING | OCR failed on page 35: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:11 | DEBUG | Page 36: quality=0.00, falling back to OCR
+2026-05-19 15:32:12 | WARNING | OCR failed on page 36: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:12 | DEBUG | Page 37: quality=0.00, falling back to OCR
+2026-05-19 15:32:12 | WARNING | OCR failed on page 37: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:12 | DEBUG | Page 38: quality=0.00, falling back to OCR
+2026-05-19 15:32:13 | WARNING | OCR failed on page 38: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:13 | DEBUG | Page 39: quality=0.00, falling back to OCR
+2026-05-19 15:32:14 | WARNING | OCR failed on page 39: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:14 | DEBUG | Page 40: quality=0.00, falling back to OCR
+2026-05-19 15:32:14 | WARNING | OCR failed on page 40: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:14 | DEBUG | Page 41: quality=0.00, falling back to OCR
+2026-05-19 15:32:15 | WARNING | OCR failed on page 41: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:15 | DEBUG | Page 42: quality=0.00, falling back to OCR
+2026-05-19 15:32:16 | WARNING | OCR failed on page 42: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:16 | DEBUG | Page 43: quality=0.00, falling back to OCR
+2026-05-19 15:32:17 | WARNING | OCR failed on page 43: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:17 | DEBUG | Page 44: quality=0.00, falling back to OCR
+2026-05-19 15:32:17 | WARNING | OCR failed on page 44: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:17 | DEBUG | Page 45: quality=0.00, falling back to OCR
+2026-05-19 15:32:18 | WARNING | OCR failed on page 45: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:18 | DEBUG | Page 46: quality=0.00, falling back to OCR
+2026-05-19 15:32:19 | WARNING | OCR failed on page 46: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:19 | DEBUG | Page 47: quality=0.00, falling back to OCR
+2026-05-19 15:32:19 | WARNING | OCR failed on page 47: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:19 | DEBUG | Page 48: quality=0.00, falling back to OCR
+2026-05-19 15:32:20 | WARNING | OCR failed on page 48: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:20 | DEBUG | Page 49: quality=0.00, falling back to OCR
+2026-05-19 15:32:21 | WARNING | OCR failed on page 49: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:21 | DEBUG | Page 50: quality=0.00, falling back to OCR
+2026-05-19 15:32:21 | WARNING | OCR failed on page 50: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:21 | DEBUG | Page 51: quality=0.00, falling back to OCR
+2026-05-19 15:32:22 | WARNING | OCR failed on page 51: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:22 | DEBUG | Page 52: quality=0.00, falling back to OCR
+2026-05-19 15:32:23 | WARNING | OCR failed on page 52: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:23 | DEBUG | Page 53: quality=0.00, falling back to OCR
+2026-05-19 15:32:24 | WARNING | OCR failed on page 53: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:24 | DEBUG | Page 54: quality=0.00, falling back to OCR
+2026-05-19 15:32:24 | WARNING | OCR failed on page 54: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:24 | DEBUG | Page 55: quality=0.00, falling back to OCR
+2026-05-19 15:32:25 | WARNING | OCR failed on page 55: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:25 | DEBUG | Page 56: quality=0.00, falling back to OCR
+2026-05-19 15:32:26 | WARNING | OCR failed on page 56: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:26 | DEBUG | Page 57: quality=0.00, falling back to OCR
+2026-05-19 15:32:26 | WARNING | OCR failed on page 57: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:26 | DEBUG | Page 58: quality=0.00, falling back to OCR
+2026-05-19 15:32:27 | WARNING | OCR failed on page 58: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:27 | DEBUG | Page 59: quality=0.00, falling back to OCR
+2026-05-19 15:32:28 | WARNING | OCR failed on page 59: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:28 | DEBUG | Page 60: quality=0.00, falling back to OCR
+2026-05-19 15:32:29 | WARNING | OCR failed on page 60: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:29 | DEBUG | Page 61: quality=0.00, falling back to OCR
+2026-05-19 15:32:29 | WARNING | OCR failed on page 61: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:29 | DEBUG | Page 62: quality=0.00, falling back to OCR
+2026-05-19 15:32:30 | WARNING | OCR failed on page 62: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:30 | DEBUG | Page 63: quality=0.00, falling back to OCR
+2026-05-19 15:32:31 | WARNING | OCR failed on page 63: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:31 | DEBUG | Page 64: quality=0.00, falling back to OCR
+2026-05-19 15:32:31 | WARNING | OCR failed on page 64: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:31 | DEBUG | Page 65: quality=0.00, falling back to OCR
+2026-05-19 15:32:32 | WARNING | OCR failed on page 65: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:32 | DEBUG | Page 66: quality=0.00, falling back to OCR
+2026-05-19 15:32:33 | WARNING | OCR failed on page 66: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:33 | DEBUG | Page 67: quality=0.00, falling back to OCR
+2026-05-19 15:32:33 | WARNING | OCR failed on page 67: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:33 | DEBUG | Page 68: quality=0.00, falling back to OCR
+2026-05-19 15:32:34 | WARNING | OCR failed on page 68: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:34 | DEBUG | Page 69: quality=0.00, falling back to OCR
+2026-05-19 15:32:35 | WARNING | OCR failed on page 69: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:35 | DEBUG | Page 70: quality=0.00, falling back to OCR
+2026-05-19 15:32:35 | WARNING | OCR failed on page 70: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:35 | DEBUG | Page 71: quality=0.00, falling back to OCR
+2026-05-19 15:32:36 | WARNING | OCR failed on page 71: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:36 | DEBUG | Page 72: quality=0.00, falling back to OCR
+2026-05-19 15:32:37 | WARNING | OCR failed on page 72: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:37 | DEBUG | Page 73: quality=0.00, falling back to OCR
+2026-05-19 15:32:38 | WARNING | OCR failed on page 73: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:38 | DEBUG | Page 74: quality=0.00, falling back to OCR
+2026-05-19 15:32:38 | WARNING | OCR failed on page 74: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:38 | DEBUG | Page 75: quality=0.00, falling back to OCR
+2026-05-19 15:32:39 | WARNING | OCR failed on page 75: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:39 | DEBUG | Page 76: quality=0.00, falling back to OCR
+2026-05-19 15:32:40 | WARNING | OCR failed on page 76: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:40 | DEBUG | Page 77: quality=0.00, falling back to OCR
+2026-05-19 15:32:41 | WARNING | OCR failed on page 77: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:41 | DEBUG | Page 78: quality=0.00, falling back to OCR
+2026-05-19 15:32:41 | WARNING | OCR failed on page 78: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:41 | DEBUG | Page 79: quality=0.00, falling back to OCR
+2026-05-19 15:32:42 | WARNING | OCR failed on page 79: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:42 | DEBUG | Page 80: quality=0.00, falling back to OCR
+2026-05-19 15:32:43 | WARNING | OCR failed on page 80: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:43 | DEBUG | Page 81: quality=0.00, falling back to OCR
+2026-05-19 15:32:44 | WARNING | OCR failed on page 81: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:44 | DEBUG | Page 82: quality=0.00, falling back to OCR
+2026-05-19 15:32:44 | WARNING | OCR failed on page 82: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:44 | DEBUG | Page 83: quality=0.00, falling back to OCR
+2026-05-19 15:32:45 | WARNING | OCR failed on page 83: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:45 | DEBUG | Page 84: quality=0.00, falling back to OCR
+2026-05-19 15:32:45 | WARNING | OCR failed on page 84: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:45 | DEBUG | Page 85: quality=0.00, falling back to OCR
+2026-05-19 15:32:46 | WARNING | OCR failed on page 85: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:46 | DEBUG | Page 86: quality=0.00, falling back to OCR
+2026-05-19 15:32:47 | WARNING | OCR failed on page 86: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:47 | DEBUG | Page 87: quality=0.00, falling back to OCR
+2026-05-19 15:32:48 | WARNING | OCR failed on page 87: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:48 | DEBUG | Page 88: quality=0.00, falling back to OCR
+2026-05-19 15:32:48 | WARNING | OCR failed on page 88: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:48 | DEBUG | Page 89: quality=0.00, falling back to OCR
+2026-05-19 15:32:49 | WARNING | OCR failed on page 89: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:49 | DEBUG | Page 90: quality=0.00, falling back to OCR
+2026-05-19 15:32:50 | WARNING | OCR failed on page 90: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:50 | DEBUG | Page 91: quality=0.00, falling back to OCR
+2026-05-19 15:32:50 | WARNING | OCR failed on page 91: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:51 | DEBUG | Page 92: quality=0.00, falling back to OCR
+2026-05-19 15:32:51 | WARNING | OCR failed on page 92: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:51 | DEBUG | Page 93: quality=0.00, falling back to OCR
+2026-05-19 15:32:52 | WARNING | OCR failed on page 93: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:52 | DEBUG | Page 94: quality=0.00, falling back to OCR
+2026-05-19 15:32:53 | WARNING | OCR failed on page 94: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:53 | DEBUG | Page 95: quality=0.00, falling back to OCR
+2026-05-19 15:32:53 | WARNING | OCR failed on page 95: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:53 | DEBUG | Page 96: quality=0.00, falling back to OCR
+2026-05-19 15:32:54 | WARNING | OCR failed on page 96: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:54 | DEBUG | Page 97: quality=0.00, falling back to OCR
+2026-05-19 15:32:55 | WARNING | OCR failed on page 97: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:55 | DEBUG | Page 98: quality=0.00, falling back to OCR
+2026-05-19 15:32:56 | WARNING | OCR failed on page 98: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:56 | DEBUG | Page 99: quality=0.00, falling back to OCR
+2026-05-19 15:32:56 | WARNING | OCR failed on page 99: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:56 | DEBUG | Page 100: quality=0.00, falling back to OCR
+2026-05-19 15:32:57 | WARNING | OCR failed on page 100: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:57 | DEBUG | Page 101: quality=0.00, falling back to OCR
+2026-05-19 15:32:58 | WARNING | OCR failed on page 101: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:58 | DEBUG | Page 102: quality=0.00, falling back to OCR
+2026-05-19 15:32:58 | WARNING | OCR failed on page 102: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:58 | DEBUG | Page 103: quality=0.00, falling back to OCR
+2026-05-19 15:32:59 | WARNING | OCR failed on page 103: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:32:59 | DEBUG | Page 104: quality=0.00, falling back to OCR
+2026-05-19 15:33:00 | WARNING | OCR failed on page 104: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:00 | DEBUG | Page 105: quality=0.00, falling back to OCR
+2026-05-19 15:33:01 | WARNING | OCR failed on page 105: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:01 | DEBUG | Page 106: quality=0.00, falling back to OCR
+2026-05-19 15:33:01 | WARNING | OCR failed on page 106: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:01 | DEBUG | Page 107: quality=0.00, falling back to OCR
+2026-05-19 15:33:02 | WARNING | OCR failed on page 107: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:02 | DEBUG | Page 108: quality=0.00, falling back to OCR
+2026-05-19 15:33:03 | WARNING | OCR failed on page 108: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:03 | DEBUG | Page 109: quality=0.00, falling back to OCR
+2026-05-19 15:33:04 | WARNING | OCR failed on page 109: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:04 | DEBUG | Page 110: quality=0.00, falling back to OCR
+2026-05-19 15:33:04 | WARNING | OCR failed on page 110: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:04 | DEBUG | Page 111: quality=0.00, falling back to OCR
+2026-05-19 15:33:05 | WARNING | OCR failed on page 111: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:05 | DEBUG | Page 112: quality=0.00, falling back to OCR
+2026-05-19 15:33:06 | WARNING | OCR failed on page 112: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:06 | DEBUG | Page 113: quality=0.00, falling back to OCR
+2026-05-19 15:33:06 | WARNING | OCR failed on page 113: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:06 | DEBUG | Page 114: quality=0.00, falling back to OCR
+2026-05-19 15:33:07 | WARNING | OCR failed on page 114: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:07 | DEBUG | Page 115: quality=0.00, falling back to OCR
+2026-05-19 15:33:08 | WARNING | OCR failed on page 115: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:08 | DEBUG | Page 116: quality=0.00, falling back to OCR
+2026-05-19 15:33:08 | WARNING | OCR failed on page 116: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:08 | DEBUG | Page 117: quality=0.00, falling back to OCR
+2026-05-19 15:33:09 | WARNING | OCR failed on page 117: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:09 | DEBUG | Page 118: quality=0.00, falling back to OCR
+2026-05-19 15:33:10 | WARNING | OCR failed on page 118: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:10 | DEBUG | Page 119: quality=0.00, falling back to OCR
+2026-05-19 15:33:10 | WARNING | OCR failed on page 119: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:10 | DEBUG | Page 120: quality=0.00, falling back to OCR
+2026-05-19 15:33:11 | WARNING | OCR failed on page 120: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:11 | DEBUG | Page 121: quality=0.00, falling back to OCR
+2026-05-19 15:33:12 | WARNING | OCR failed on page 121: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:12 | DEBUG | Page 122: quality=0.00, falling back to OCR
+2026-05-19 15:33:12 | WARNING | OCR failed on page 122: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:12 | DEBUG | Page 123: quality=0.00, falling back to OCR
+2026-05-19 15:33:13 | WARNING | OCR failed on page 123: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:13 | DEBUG | Page 124: quality=0.00, falling back to OCR
+2026-05-19 15:33:14 | WARNING | OCR failed on page 124: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:14 | DEBUG | Page 125: quality=0.00, falling back to OCR
+2026-05-19 15:33:14 | WARNING | OCR failed on page 125: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:14 | DEBUG | Page 126: quality=0.00, falling back to OCR
+2026-05-19 15:33:15 | WARNING | OCR failed on page 126: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:15 | DEBUG | Page 127: quality=0.00, falling back to OCR
+2026-05-19 15:33:16 | WARNING | OCR failed on page 127: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:16 | DEBUG | Page 128: quality=0.00, falling back to OCR
+2026-05-19 15:33:16 | WARNING | OCR failed on page 128: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:16 | DEBUG | Page 129: quality=0.00, falling back to OCR
+2026-05-19 15:33:17 | WARNING | OCR failed on page 129: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:17 | DEBUG | Page 130: quality=0.00, falling back to OCR
+2026-05-19 15:33:18 | WARNING | OCR failed on page 130: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:18 | DEBUG | Page 131: quality=0.00, falling back to OCR
+2026-05-19 15:33:19 | WARNING | OCR failed on page 131: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:19 | INFO |   Saved: CHIVABook1988-1993_2.txt | pages=131 | ocr_pages=0 | words=0 | chapters=0
+2026-05-19 15:33:19 | INFO | Extracting: DelfrateR CHIVA article.pdf
+2026-05-19 15:33:19 | DEBUG | Removing 2 repeated header/footer lines
+2026-05-19 15:33:19 | INFO |   Saved: DelfrateR_CHIVA_article.txt | pages=16 | ocr_pages=0 | words=9,383 | chapters=1
+2026-05-19 15:33:19 | INFO | Extracting: PrinciplesofVenousHemodynamicsFranceschiZamboni2009.pdf
+2026-05-19 15:33:19 | DEBUG | Page 6: quality=0.00, falling back to OCR
+2026-05-19 15:33:19 | WARNING | OCR failed on page 6: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:19 | DEBUG | Page 28: quality=0.00, falling back to OCR
+2026-05-19 15:33:20 | WARNING | OCR failed on page 28: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:20 | DEBUG | Page 96: quality=0.00, falling back to OCR
+2026-05-19 15:33:21 | WARNING | OCR failed on page 96: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:21 | DEBUG | Page 106: quality=0.00, falling back to OCR
+2026-05-19 15:33:21 | WARNING | OCR failed on page 106: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:21 | DEBUG | Page 108: quality=1.00, falling back to OCR
+2026-05-19 15:33:22 | WARNING | OCR failed on page 108: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:22 | DEBUG | Page 110: quality=1.00, falling back to OCR
+2026-05-19 15:33:23 | WARNING | OCR failed on page 110: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:23 | DEBUG | Page 115: quality=1.00, falling back to OCR
+2026-05-19 15:33:24 | WARNING | OCR failed on page 115: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:24 | DEBUG | Page 121: quality=1.00, falling back to OCR
+2026-05-19 15:33:25 | WARNING | OCR failed on page 121: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:25 | DEBUG | Page 125: quality=1.00, falling back to OCR
+2026-05-19 15:33:25 | WARNING | OCR failed on page 125: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:25 | DEBUG | Page 130: quality=0.00, falling back to OCR
+2026-05-19 15:33:26 | WARNING | OCR failed on page 130: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:26 | DEBUG | Page 154: quality=0.00, falling back to OCR
+2026-05-19 15:33:27 | WARNING | OCR failed on page 154: tesseract is not installed or it's not in your PATH. See README file for more information.. Using raw native text.
+2026-05-19 15:33:27 | DEBUG | Page 167 appears to be an index page – skipping
+2026-05-19 15:33:27 | DEBUG | Removing 20 repeated header/footer lines
+2026-05-19 15:33:27 | INFO |   Saved: PrinciplesofVenousHemodynamicsFranceschiZamboni2009.txt | pages=195 | ocr_pages=0 | words=50,522 | chapters=60
+2026-05-19 15:33:27 | INFO | Extracting: US Lower Extremity Veins_Anatomy and Basic Approach.pdf
+2026-05-19 15:33:27 | DEBUG | Removing 4 repeated header/footer lines
+2026-05-19 15:33:27 | INFO |   Saved: US_Lower_Extremity_Veins_Anatomy_and_Basic_Approach.txt | pages=11 | ocr_pages=0 | words=4,094 | chapters=0
+2026-05-19 15:33:27 | INFO | ============================================================
+2026-05-19 15:33:27 | INFO | EXTRACTION COMPLETE
+2026-05-19 15:33:27 | INFO |   Processed : 14/14 books
+2026-05-19 15:33:27 | INFO |   Failed    : 0 books (see log for details)
+2026-05-19 15:33:27 | INFO |   Total words : 1,108,511
+2026-05-19 15:33:27 | INFO |   Total chapters : 192
+2026-05-19 15:33:27 | INFO |   Output dir : C:\Users\Krish\Downloads\llm_continued_pretraining\data\raw
+2026-05-19 15:33:27 | INFO | ============================================================

@@ -1,0 +1,3914 @@
+Radiología.
+ 2016;58(1):7---15
+www.elsevier.es/rx
+
+[SECTION: UPDATE]
+ IN
+
+[SECTION: RADIOLOGY]
+ study  and  venous  mapping
+in
+ venous  insufficiency
+M.
+ Carriazo a,∗, C.
+ Gómez
+ de
+ las
+ Heras b, P.
+ Mármol
+ Vázquez b, M.F.
+ Ramos
+ Solís b
+a Unidad
+ de
+ Gestión
+ Clínica
+ de
+ Radiodiagnóstico,
+ Hospital
+ Universitario
+ Virgen
+ Macarena,
+ Sevilla,
+ Spain
+b Unidad
+ de
+ Gestión
+ Clínica
+ de
+ Radiodiagnóstico,
+ Hospital
+ de
+ la
+ Merced,
+ Osuna,
+ Sevilla,
+ Spain
+Received
+ July
+ 2015;
+ accepted
+ October
+
+[SECTION: KEYWORDS]
+Varices;
+Venous
+Abstract
+Chronic
+ of
+ the
+ lower
+ limbs
+ is
+ very
+ prevalent.
+In
+ recent
+ decades,
+ has
+ become
+ the
+ of
+ choice
+ to
+ study
+ this
+ condition,
+ and
+ it
+ is
+ considered
+ essential
+ when
+ surgery
+ is
+ indicated.
+This
+ insufficiency;
+ ultrasound;
+CHIVA;
+Vein
+ aims
+ to
+ a
+ for
+ the
+ examination,
+ including
+ and
+preoperative
+ marking.
+ To
+ this
+ end,
+ we
+ review
+ the
+ anatomy
+ of
+ the
+ lower
+ limbs
+ and
+ the
+pathophysiology
+ of
+ and
+ explain
+ the
+ basic
+ concepts
+and
+ mapping;
+Venovenous
+ the
+ terminology
+ required
+ to
+ elaborate
+ a
+ radiological
+ report
+ that
+ will
+ enable
+ appropriate
+ shunt
+ planning
+ and
+ communication
+ with
+ other
+ specialists.
+We
+ briefly
+ explain
+ the
+
+[SECTION: CHIVA]
+ (the
+ acronym
+ for
+ the
+ French
+ term
+ ''cure
+ conservatrice
+ et
+ hémodynamique
+ de
+ l'insuffisance
+ veineuse
+ en
+ ambulatoire''
+ =
+ conservative
+for
+ insufficiency)
+ strategy,
+ a
+ minimally
+ invasive
+ strategy
+ that
+ aims
+ to
+restore
+ correct
+ hemodynamics
+ resecting
+ the
+ vein.
+©
+ SERAM.
+ Published
+ by
+ Elsevier
+ España,
+ S.L.U.
+ All
+ rights
+ reserved.
+
+[SECTION: PALABRAS]
+
+[SECTION: CLAVE]
+Varices;
+Insuficiencia
+Estudio
+ de
+ la
+ mediante
+ ecografía
+ y  realización
+de
+ cartografía
+ venosa;
+Ecografía
+ Doppler;
+CHIVA;
+Cartografía
+Resumen
+La
+ (IVC)
+ de
+ las
+ extremidades
+ inferiores
+ es
+ una
+ enfermedad
+ muy
+ prevalente.
+La
+ ecografía
+ se
+ ha
+ establecido
+ en
+ las
+ últimas
+ décadas
+ como
+ el
+ método
+ de
+ elección
+en
+ venosa;
+Shunt
+ venovenoso
+ el
+ estudio
+ de
+ esta
+ patología,
+ por
+ lo
+ que
+ resulta
+ imprescindible
+ ante
+ una
+ eventual
+ indicación
+quirúrgica.
+ Please
+ cite
+ this
+ as:
+ M,
+ Gómez
+ de
+ las
+ Heras
+ C,
+ Mármol
+ Vázquez
+ P,
+ Ramos
+ Solís
+ MF.
+ Estudio
+ de
+ la
+ mediante
+ ecografía
+ y
+ realización
+ de
+ cartografía
+ venosa.
+ Radiología.
+ 2016;58:7---15.
+∗Corresponding
+ author.
+E-mail
+ address:
+ megarca70@gmail.com
+ (M.
+ Carriazo).
+2173-5107/©
+ SERAM.
+ Published
+ by
+ Elsevier
+ España,
+ S.L.U.
+ All
+ rights
+ reserved.
+M.
+ et
+ al.
+El
+ objetivo
+ de
+ este
+ trabajo
+ es
+ establecer
+ una
+ metodología
+ en
+ la
+ exploración,
+ incluyendo
+ la
+realización
+ de
+ cartografía
+ y  el
+ marcaje
+ prequirúrgico.
+ Para
+ ello
+ revisaremos
+ la
+ anatomía
+de
+ los
+ miembros
+ inferiores
+ y
+ la
+ fisiopatología
+ de
+ la
+ explicando
+ los
+ conceptos
+ hemodinámicos
+básicos y
+ la
+ terminología
+ necesarios
+ para
+ la
+ realización
+ de
+ un
+ informe
+ radiológico
+ que
+ permita
+una
+ adecuada
+ planificación
+ terapéutica
+ y  comunicación
+ con
+ otros
+ especialistas.
+Explicaremos
+ brevemente
+ la
+ estrategia
+
+[SECTION: CHIVA]
+ (cura
+ hemodinámica
+ de
+ la
+ambulatoria),
+ método
+ quirúrgico
+ mínimamente
+ invasivo
+ que
+ tiene
+ como
+ objetivo
+ restaurar
+ la
+hemodinámica
+ sin
+ extirpar
+ la
+ vena
+ safena.
+©
+ SERAM.
+ Publicado
+ por
+ Elsevier
+ España,
+ S.L.U.
+ Todos
+ los
+ derechos
+ reservados.
+
+[SECTION: Introduction]
+Chronic
+ (CVI)
+ is
+ the
+ set
+ of
+ symptoms
+ and
+signs
+ derived
+ from
+ hypertension
+ in
+ the
+ lower
+ extremities
+ due
+ to
+ poor
+ valvular
+ function
+ of
+ the
+ systems.1,2
+ is  the
+ most
+ frequent
+ disease;
+ it
+ affects
+20---30%
+ of
+ the
+ adult
+ population
+ and
+ 50%
+ of
+ people
+ over
+ years
+ of
+ age,
+ with
+ a  prevalence
+ in  Spain
+ of
+ 48.5%
+ of  men
+and
+ 58.5%
+ of
+ women.3
+It
+ is
+ suffered
+ in
+ different
+ degrees
+ of
+ seriousness,
+ and
+ it
+ is
+a
+ problem
+ of
+ public
+ health
+ with
+ significant
+ socio-economic
+and
+ labor
+ implications.
+ It
+ is
+ the
+ cause
+ for
+ 2.5%
+ of
+ medical
+leaves
+ in
+ some
+ of
+ our
+ neighboring
+ countries
+ and
+ overall
+ it
+consumes
+ up
+ 2%
+ of
+ the
+ public
+ health
+ budget.4
+Every
+ is
+ the
+ consequence
+ of
+ avalvulation,
+ which
+
+[SECTION: results]
+ primarily
+ (essential
+ veins)
+from
+ the
+ affectation
+ of
+ the
+ and
+ or
+ secondarily
+ (post-phlebitic
+ or
+ postthrombotic)
+ due
+ to
+ valvular
+ destruction
+ occurring
+ in
+ the
+deep
+ as
+ a  consequence
+ of  post-thrombotic
+recanalization.5
+The
+ clinical
+ manifestations
+ of
+ include
+ a  wide
+ range
+ of
+manifestations
+ from
+ initial
+ symptoms
+ such
+ as
+ heaviness,
+ pain
+or
+ edema;
+ disease,
+ when
+ the
+ veins
+ become
+visible,
+ above
+ all
+ with
+ orthostasim,
+ to
+ late
+ symptoms,
+ with
+changes
+ in
+ skin
+ coloration
+ and
+ trophic
+ disorders
+ that
+ can
+ trigger
+ complications
+ (varicophlebitis,
+ varicorrhage,
+ increase
+ in
+the
+ cicatrization
+ time
+ of
+ leg
+ wounds,
+ dermitis
+ and
+ trophic
+ulcers).6
+ is
+ the
+ only
+ non-invasive
+ procedure
+capable
+ of
+ providing
+ an
+ anatomic
+ and
+ topography
+ for
+ circulation
+ of
+ the
+ lower
+ extremities
+in
+ real
+ time,
+ therefore
+ it
+ is  the
+ diagnostic
+ of
+choice.
+Ever
+ since
+ the
+ appearance
+ of
+ ultrasound,
+ and
+progressively,
+ phlebography
+ has
+ come
+ into
+ disuse,
+ since
+ it
+is
+ an
+ invasive
+ procedure,
+ which
+ uses
+ contrast
+ and
+ ionizing
+radiations,
+ and
+ it
+ has
+ complications
+ associated.
+The
+ systematic
+ use
+ of
+ phlebography
+ with
+ CT
+ and
+ phlebography
+ with
+ MRI
+ is
+ not
+ justified
+ today
+ in
+ the
+ study
+ of
+ CVI,
+and
+ their
+ indications
+ are
+ restricted
+ to
+ a  select
+ group
+ of
+patients,
+ especially:
+ cases
+ of
+ of
+ unusual
+cause
+ that
+ manifest
+ themselves
+ in
+ a  complex
+ manner,
+ one
+that
+ is
+ not
+ cleared
+ up
+ by
+ examination:
+veins
+ of
+ pelvic
+ or
+ abdominal
+ origin,
+ unusual
+ anatomic
+variants
+ or
+ malformations,
+ and
+ recurrent
+veins
+ of
+ unclear
+ etiology.1,7---9 An
+ adequate
+ study,
+including
+ and
+ pre-surgical
+ marking,
+ is  essential
+ for
+the
+ surgeon
+ to
+ plan
+ and
+ it
+ has
+ allowed
+ us
+ to
+ lay
+the
+ foundations
+ of
+ conservative
+ of
+ CVI.10
+The
+
+[SECTION: CHIVA]
+ is
+ a  minimally
+ invasive
+ technique
+ for
+ the
+ of
+ The
+ goal
+ of
+ this
+surgery
+ is
+ to
+ eliminate
+ veno-venous
+ derivations
+ disconnection
+ of
+ the
+ escape
+ points,
+ preserving
+ the
+vein
+ and
+ drainage
+ of
+ the
+ tissues
+of
+ the
+ limb.
+ To  obtain
+ optimal
+ results,
+ it
+ is
+ for
+ the
+valvulo-muscular
+ pump
+ to
+ work
+ properly
+ and
+ to
+ guarantee
+the
+ integrity
+ deep
+Other
+ possibilities
+ in
+ the
+ of
+ veins
+ are
+ stripping
+ (classical
+ with
+ligation
+ of
+ the
+ arch
+ and
+ saphenectomy),
+ sclerotherapy
+ and
+endovascular
+ therapy
+ (radiofrequency
+ or
+ endolaser).
+Regardless
+ technique
+ used,
+ the
+ initial
+ study
+ is
+ to
+ indication,
+ know
+ the
+ origin
+ of
+ the
+ collaterals
+ and
+ what
+the
+ pattern
+ causing
+ them
+ is.  When
+ we
+ use
+the
+
+[SECTION: CHIVA]
+ technique,
+ immediate
+ pre-operative
+ marking
+ is
+essential.
+The
+ goal
+ of
+ this
+ is
+ to
+ a  methodology
+ in
+ study
+ in
+ and
+ and
+pre-surgical
+ marking.
+Anatomy
+There
+ are
+ two
+ fasciae,
+ both
+ hyperecogenic
+ and
+ easily
+ identifiable:
+ the
+ or
+ deep
+ fascia,
+ covering
+ the
+ planes,
+ and
+ the
+ or
+ fascia
+ outlining
+ the
+ subcutaneous
+ cellular
+ tissue.11,12 This
+ allows
+ us  to
+delimit
+ networks
+ (Fig.
+ 1):
+•
+ N1
+ or
+ primary
+ network:
+ deep
+ with
+ respect
+ to
+ the
+ fascia.
+ This
+ is
+ where
+ the
+ deep
+ (DVS)
+ lies
+which
+ runs
+ parallel
+ to
+ the
+ arteries
+ from
+ the
+ foot
+ to
+ the
+thigh.
+ It
+ is
+ made
+ up
+ of
+ plantar
+ the
+ tibial
+the
+ popliteal
+ vein
+ and
+ the
+ vein.
+ The
+ sinusoids
+located
+ within
+ the
+ muscle
+ at
+ calf
+ level
+ are
+ the
+ soleus
+ and
+the
+ gastrocnemius
+ veins
+ are
+ important
+ too.
+•
+ N2
+ or
+ secondary
+ network:
+ both
+ fasciae
+ (sign
+ of
+the
+ eye)
+ (Fig.
+ 2).  The
+ is  located
+here
+ and
+ it
+ is
+ made
+ up
+ of
+ the
+ internal
+ vein
+ (ISV),
+the
+ external
+ vein
+ (ESV),
+ and
+ their
+ anatomical
+ variants
+ (anterior
+ and
+ Giacomini
+ veins)
+(Fig.
+ 3A).
+ study
+ and
+ in
+Axial
+ plane
+ of
+ left
+ lower
+ limb.
+ N1:
+ deep
+ N2:
+ N3:
+ collaterals.
+ DF:
+ deep
+fascia;
+ SF:
+ fascia;
+ SCT:
+ subcutaneous
+ cellular
+ tissue.
+The
+ ISV
+ is
+ the
+ most
+ important
+ trunk
+ of
+ the
+ It  originates
+ in
+ the
+ anterior
+ side
+ of
+ the
+ internal
+ malleolus
+ and
+ it  runs
+ from
+ the
+ leg
+ to
+ the
+ groin
+the
+ inner
+ side
+ of
+ the
+ thigh,
+ to
+ drain
+ its
+ arch
+ into
+ the
+DVS
+ (common
+ vein,
+ CFV).
+The
+ ESV
+ originates
+ behind
+ the
+ external
+ malleolus
+ and
+ runs
+all
+ the
+ way
+ up
+ the
+ line
+ of
+ the
+ calf,
+ draining
+ into
+ the
+A
+B
+A
+ASV
+SFA
+
+[SECTION: ANTERIOR SAPHENOUS VEIN]
+(A)
+ The
+ anterior
+ veins
+ occupies
+ one
+ anterior
+ position
+ with
+ respect
+ to
+ deep
+ (B)
+ Tertiary
+ network
+ in
+ the
+subcutaneous
+ cellular
+ tissue.
+ SFA:
+ artery;
+ ASV:
+ anterior
+ vein;
+ CFV:
+ vein.
+DVS
+ at
+ the
+ level
+ popliteal
+ vein.
+ In
+ approximately
+ one
+third
+ of
+ the
+ cases,
+ it
+ continues
+ up
+ toward
+ the
+ ISV  through
+the
+ Giacomini
+ vein,
+ or
+ else
+ it
+ drains
+ into
+ the
+ DVS
+ a
+ vein.
+•
+ N3
+ or
+ tertiary
+ network:
+ it
+ is
+ made
+ up
+ of
+ veins
+ located
+outside
+ the
+ fascia.
+ They
+ correspond
+ to
+branches
+ of
+ the
+ veins
+ or
+ those
+ originating
+ from
+the
+ veins
+ (Fig.
+ 3B).
+•
+ N4
+ or
+ quaternary
+ network:
+ it  is
+ a  special
+ type
+ of
+ N3
+ connecting
+ two
+ N2.
+ They
+ can
+ be
+ longitudinal
+ (N4L)
+ if
+ they
+communicate
+ with
+ the
+ same
+ N2
+ or
+ transversal
+ (N4T)
+ if
+they
+ communicate
+ two
+ different
+ N2.
+Varicose
+ bundles
+ are
+ mainly
+ made
+ up
+ of
+ dilations
+ or
+ tortuosities
+ of
+ N3
+ and
+ N4.
+N2
+ and
+ N3
+ communicate
+ with
+ N1
+ the
+ arches
+ or
+Physiology,
+ physiopathology
+ and hemodynamic
+concepts
+Physiology
+The
+ acts
+ as
+ a  blood
+ reservoir
+ and
+ it
+ carries
+blood
+ from
+ the
+ capillaries
+ to
+ the
+ heart,
+ against
+ gravity
+ and
+ a  pump
+ of
+ its
+ own;
+ therefore,
+ it
+ is
+ for
+ the
+
+[SECTION: SUPERFICIAL FASCIA]
+ESV
+
+[SECTION: DEEP FASCIA]
+(A---B)
+ Sign
+ of
+ the
+ eye.
+B
+CFV
+M.
+ et
+ al.
+T
+A
+N2-N3
+0.10
+
+[SECTION: 59.4 / 10.0]
+0.10
+cm/s
+−19.8
+−1.5
+−1
+ −0.5
+0.0
+(A)
+ Leakage
+ point.
+ (B)
+ Entry
+ point.
+ (C)
+ Reflux.
+ to
+ be
+ patent,
+ there
+ must
+ also
+ be
+ integrity
+ of
+the
+ valvular
+ and
+ a  preserved
+ heart
+ function.
+Physiopathology11,12
+Venous
+ is
+ defined
+ as
+ the
+ incapacity
+ of
+ a  vein
+to
+ pump
+ blood
+ flow
+ and
+ return
+ it
+ to
+ the
+ heart,
+ adapted
+ to
+the
+ needs
+ of
+ drainage
+ regardless
+ of
+ its
+ location
+ and
+ activity.
+It
+ is
+ due
+ to  the
+ obstruction
+ of
+ drainage
+ or
+ the
+ existence
+ of
+reflux,
+ or
+ a  combination
+ of
+ both.
+Hemodynamic
+ concepts11 (Fig.
+ 4)
+•  Antegrade
+ flow:
+ in  the
+ physiologic
+ direction
+ of
+ the
+ vein.
+•
+ Retrograde
+ flow:
+ contrary
+ to
+ physiological
+ direction.
+•
+ Leakage
+ point:
+ passage
+ from
+ an
+ inner
+ to
+ an  outer
+ compartment.
+•
+ Entry
+ point:
+ passage
+ from
+ an
+ outer
+ to
+ an
+ inner
+ compartment.
+•
+ Reflux:
+ flow
+ that
+ returns
+ in  a  direction
+ contrary
+ to
+ the
+physiological
+ direction;
+ it
+ assumes
+ a  previous
+ flow
+ in
+ the
+ direction
+ (reflux
+ is
+ bidirectional).
+B
+T
+
+[SECTION: PERFORATOR]
+N2-N1
+
+[SECTION: VALSALVA MANOEUVRE]
+
+[SECTION: INTERNAL SAPHENOUS VEIN]
+---  Reflux
+ criteria:
+ flow
+ during
+ relaxation
+ for
+ more
+ than
+ 0.5
+ s  or
+ less
+ if
+ the
+ speed
+ is
+ greater
+than
+ the
+ antegrade
+ speed
+ obtained
+ during
+relaxation.13
+•  Valvular
+ competence/incompetence:
+ it
+ refers
+ to
+ the
+ function
+ valves;
+ it
+ does
+ not
+ necessarily
+ presuppose
+ the
+direction
+ of
+ the
+ flow.
+•
+ The
+ phenomenon
+ of
+ can
+ be
+ defined
+as
+ a  veno-venous
+ shunt
+ or
+ circuit
+ formed
+ by
+ a
+ point
+ (e.g.,
+ the
+ sapheno-femoral
+ junction),
+ a
+ trajectory
+ (varicose
+ veins)
+ and
+ a
+point
+ into
+ the
+ DVS
+ (through
+ veins).
+ They
+ can
+ be
+either
+ open
+ or
+ closed
+ based
+ on
+ whether
+ blood
+ recirculates
+inside
+ or
+ not.
+ Closed
+ shunts
+ will
+ cause
+ overload.
+Veno-venous
+ shunts
+ can
+ be
+ activated
+ during
+relaxation
+ or
+ contraction
+ and
+ they
+ must
+ be
+ differentiated
+from
+ other
+ conditions
+ that
+ can
+ occur
+ in
+ similar
+ ways.
+ A
+clear
+ example
+ is
+ the
+ vicariate
+ shunt
+ or
+ collateral
+ circulation
+shunt10 occurring
+ in
+ with
+ acute
+ thrombosis
+or
+ un-recanalized
+ poorly
+ collateralized
+ post-phlebitic
+ syndrome
+ that
+ can
+ lead
+ to
+ hypertension
+ manifestations
+ study
+ and
+ in
+A
+B
+SHUNT TYPE 1:
+N1-N2-N1
+SHUNT TYPE 2:
+SHUNT TYPE 3:
+N1-N2-N3-N1
+SHUNT TYPE 4:
+
+[SECTION: PELVIC]
+Types
+ of
+ shunts.
+ (A)
+ Type
+ 1.
+ (B)
+ Type
+ 2.
+ (C)
+ Type
+ 3.
+(D)
+ Type
+ 4.
+ reflux.
+ They
+ are
+ created
+ to
+ compensate
+ a  DVS
+ obstacle,
+ and
+ the
+ SVS
+ acts
+ as
+ a  bridge
+ or
+ collateral
+ for
+ blood
+return;
+ it  shows
+ continuous
+ activity
+ in
+ systole
+ (contraction)
+and
+ diastole
+ (muscular
+ relaxation).
+Types
+ of
+ shunts:
+They
+ are
+ classified
+ based
+ on
+ their
+ of
+ and
+re-entry,
+ and
+ the
+ trajectory
+ described
+ one
+ and
+ the
+other
+ (Fig.
+ 5).
+•
+ Type
+ 1  Shunt:
+ N1-N2-N1.
+ The
+ point
+ is
+ established
+ the
+ deep
+ and
+ the
+ vein
+(in
+ the
+ arch
+ or
+ veins).
+ It
+ originates
+ a
+ vein
+ with
+ a  perforating
+ vein
+ located
+ in  the
+ same
+ vein.
+ It
+ is
+ a
+closed
+ shunt.
+ There
+ is
+ no
+ overlapped
+ collateral.
+•
+ Type
+ 2  Shunt:
+ the
+ point
+ originates
+ in
+ the
+ vein
+ itself.
+ They
+ can
+ be
+ open
+ (if
+ the
+ collateral
+ flows
+into
+ a  perforator
+ veins
+ into
+ the
+ deep
+ system,
+ N2-N3-N1)
+or
+ closed
+ (collateral
+ flows
+ into
+ the
+ vein,
+ N2N4-N2).
+•
+ Type
+ Shunt:
+ N1-N2-N3-N1.
+ Like
+ type
+ 1,
+ with
+ a  collateral
+overlapped
+ the
+ maximum
+ energy
+ column
+ and
+ reentry.
+ Closed.
+•
+ Type
+ 4  Shunt.
+ All
+ the
+ shunts
+ not
+ included
+ in
+ the
+ above
+categories.
+ Basically
+ of
+ pelvic
+ origin
+ (N3-N2-N3-N1).
+B
+A
+N2
+N2
+N3
+N1
+N2
+N4
+N1
+N2
+Open (N2-N3-N1)
+Closed (N2-N4-N2)
+N2
+N2
+N2
+N3
+N3
+N3
+N1
+N1
+N1
+(A)
+
+[SECTION: CHIVA]
+ 1  in
+ shunt
+ Type
+ 1.
+ (B)
+
+[SECTION: CHIVA]
+ 1  in
+ shunt
+Type
+ 2.
+ (C)
+
+[SECTION: CHIVA]
+ in
+ Type
+ 3.
+ (D)
+
+[SECTION: CHIVA]
+ 1  +
+ 2.
+The CHIVA strategy
+In
+ the
+ 1980s
+ Francesci14 described
+ a  procedure
+ for
+ treating
+ based
+ on
+ acting
+ on
+ the
+ elements
+ that
+determine
+ the
+ appearance
+ of
+ with
+ preservation
+ of
+ the
+ network.
+This
+ procedure
+ has
+ had
+ a  significant
+ growth
+ in
+ the
+ last
+decade
+ in
+ our
+ country
+ due
+ to
+ its
+ good
+ post-operative
+ recovery
+ and
+ few
+ complications.15
+It
+ is
+ not
+ a  technique,
+ but
+ a  strategy
+ based
+ on12:
+•
+ fragmentation
+ of
+ the
+ pressure
+ column;
+•
+ Interruption
+ of
+ the
+ veno-venous
+ shunts
+ by
+ disconnecting
+the
+ points.
+•
+ Preservation
+ and
+ the
+ perforating
+ preserving
+ drainage
+ of
+ the
+ leg
+ tissues.
+•
+ Suppression
+ of
+ the
+ undrained
+ N3-N4.
+Forms
+ of
+ application
+ (Fig.
+ 6):
+•
+
+[SECTION: CHIVA]
+ 1:  in
+ only
+ one
+ time
+ creating
+affectation
+ and
+ obtaining
+ a  drained
+ Shunt
+ Types
+1,
+ 2  and
+ 4.
+ The
+ suppression
+ of
+ the
+ main
+ point
+ can
+be
+ done
+ at
+ the
+ same
+ time
+ it
+ acts
+ upon
+ the
+ eventual
+ N3.
+•
+
+[SECTION: CHIVA]
+ 2:
+ strategy
+ in
+ two
+ times.
+ Type
+ 3  Shunts.
+ In
+ the
+ first
+ time
+ it
+ acts
+ upon
+ N2-N3
+ point
+ (the
+ vein
+ develops
+ a  new
+ perforating
+vein
+ on
+ N2
+ transforming
+ the
+ Type
+ 3  shunt
+ into
+ a
+ Type
+shunt).
+ In
+ the
+ second
+ time
+ the
+ N1-N2
+ point
+ is
+ closed.
+M.
+ et
+ al.
+It
+ requires
+ periodic
+ controls
+ and
+ it
+ is  counterindicated
+ in
+ cases
+ where
+ the
+ caliber
+ of
+ the
+ vein
+ is
+greater
+ than
+ 1  cm,
+ due
+ to
+ the
+ risk
+ of
+ thrombosis
+ and
+ potential
+ complications
+ when
+ the
+ arch
+ is
+ left
+ open.
+•
+
+[SECTION: CHIVA]
+ +  2:
+ Type
+ shunts.
+ In
+ only
+ one
+ act
+ it  generates
+ conflict
+ by
+ compromising
+ the
+drainage;
+ it
+ suppresses
+ the
+ organizing
+ drainage.
+On
+ some
+ occasion
+ it
+ develops
+ neo-N3.
+The
+ intervention
+ is
+ on
+ one
+ limb
+ only.
+It
+ has
+ a  certain
+ number
+ of
+ advantages
+ compared
+ to
+ other
+more
+ aggressive
+ techniques
+ like
+ stripping
+ (removal
+of
+ veins),
+ such
+ as
+ a  local
+ anesthesia
+ as  opposed
+ to
+ rachideal
+anesthesia,
+ fewer
+ complications,
+ immediate
+ walking
+ after
+the
+ intervention
+ and
+ a  faster
+ come-back
+ to
+ work
+ meaning
+lower
+ socio-economic
+ costs.15,16
+There
+ is
+ no
+ statistically
+ significant
+ difference
+the
+ healing
+ percentages
+ after
+ 5  years
+ of
+ follow-up
+ with
+ both
+techniques.17
+Exploratory
+ technique
+Indications2,18
+The
+main
+indication
+is
+for
+all
+those
+with
+symptomatic
+ veins
+ or
+ trophic
+ disorders
+ (ulcers,
+ dermatitis,
+ atrophy,
+ etc.)
+ eligible
+ for
+ surgery
+ (Fig.
+ 7),  to
+ guide
+ decision,
+ and
+ for
+ with
+ edema
+ or
+ leg
+pains
+ of
+ uncertain
+ origin.
+Patients
+ with
+ spiders
+ or
+ telangiectasis
+ do
+ not
+need
+ to  be
+ assessed
+ ultrasounds.
+Technical
+ requirements
+•  B-mode
+ and
+ color
+ and
+ pulsed
+ wave
+ Doppler.
+•
+ High-frequency
+ linear
+ transducer
+ (7.5---13
+ MHz)
+ to
+ obtain
+good-quality
+ images
+ of
+ the
+ veins
+ and
+ sector
+transducer
+ (3.5---5
+ MHz)
+ useful
+ for
+ the
+ assessment
+ of
+ the
+deep
+ in
+ thick
+ or
+ edematous
+ legs.6
+•  A
+ stool
+ and
+ platform
+ for
+ the
+ study
+ of
+ bidepalism.
+Goals
+The
+ main
+ goal
+ of
+ the
+ is
+ to
+ confirm
+patency,
+ identify
+ the
+ type
+ of
+ insufficiency,
+ determine
+the
+ types
+ of
+ veno-venous
+ shunts,
+ identify
+ the
+ and
+ points,
+ and
+ perform
+ mapping.
+This
+ study
+ will
+ allow
+ us
+ to
+ decide
+ which
+ is
+ the
+ ideal
+ for
+ each
+ patient.12
+Systematic
+First
+ of
+ all,
+ it
+ is
+ important
+ to
+ perform
+ an
+ anamnesis
+ to  know
+the
+ patient's
+ symptoms,
+ and
+ a  physical
+ examination
+ of
+ the
+limb
+ to
+ be
+ examined
+ in
+ a  well-lit
+ room
+ in
+ order
+ to
+the
+ location
+ and
+ distribution
+ of
+ the
+ We
+ will
+be
+ looking
+ for
+ previous
+ surgeries.
+ This
+ is
+ how
+ we
+ will
+ be
+ able
+to
+ optimize
+ the
+ study
+ and
+ predict
+ the
+ origin
+ of
+ the
+ reflux.19
+Varicose
+ veins
+ and
+ trophic
+ changes
+ in
+ preoperative
+exploration.
+Secondly,
+ with
+ the
+ patient
+ lying
+ in
+ the
+ supine
+ position
+ we
+will
+ assess
+ the
+ DVS
+ from
+ the
+ CFV
+ up
+ to
+ the
+ popliteal
+ vein
+and
+ the
+ bifurcation
+ of
+ the
+ tibial-peroneal
+ trunks
+ to
+ ensure
+its
+ patency
+ and
+ competence.19
+It
+ is
+ important
+ to
+ analyze
+ the
+ morphology
+ of
+ the
+ spectral
+wave
+ with
+ pulsed
+ at
+ the
+ level
+ of
+ the
+ CFV,
+ which
+ be
+ phasic
+ and
+ be
+ modified
+ with
+ breathing
+ to
+rule
+ out
+ a  possible
+ proximal
+ obstruction
+ in  the
+ iliac
+ axis.
+ This
+is
+ how
+ we
+ will
+ rule
+ out
+ that
+ in
+ the
+ internal
+vein
+ is  due
+ to
+ a  vicariant
+ flow.2,10
+The
+ existence
+ of  reflux
+ in
+ the
+ and
+ the
+popliteal
+ veins
+ be
+ assessed
+ a  few
+ centimeters
+ above
+the
+ sapheno-femoral
+ or
+ sapheno-popliteal
+ junction.
+Next
+ we
+ will
+ assess
+ the
+ with
+ the
+patient
+ standing
+ on
+ a  platform,
+ with
+ his
+ leg
+ in
+ abduction
+ and
+external
+ rotation,
+ with
+ his
+ weight
+ being
+ supported
+ by
+ the
+opposite
+ leg.
+ It  is
+ an
+ essential
+ that
+ the
+ study
+ is
+with
+ a  stand-up
+ patient.2,10---12,18,19
+To
+ confirm
+ the
+ presence
+ of
+ we
+ will
+ use
+ these
+manoeuvers:
+•
+ Valsalva
+manoeuver:
+increasing
+thoraco-abdominal
+pressure2,10,11,18 (Fig.
+ 8A).
+•
+ Paraná
+ manoeuver:
+ the
+ is
+ pushed
+ and
+ he
+ contract
+his
+ muscles
+ to
+ keep
+ balance
+ and
+ then
+ relaxes
+ the
+ muscles.
+•
+ Distal
+compression/relaxation
+manoeuver2,6,10,12:
+performing
+ distal
+ compression
+ until
+ the
+ flow
+ disappears;
+ the
+is
+considered
+positive
+when
+upon
+stopping
+ study
+ and
+ in
+A
+
+[SECTION: CONTRALATERAL]
+
+[SECTION: VALSALVA MANOEUVRE]
+(A)
+ Reflux
+ with
+ color
+ (Valsalva
+ maneuver).
+ (B)
+ Mickey
+ Mouse
+ sign.
+ CFA:
+ artery;
+ CFV:
+ vein;
+ ISV:
+ internal
+ vein.
+the
+ compression
+ the
+ inverted
+ flow
+ is
+ detected
+ by
+ showing
+a
+ change
+ of
+ color
+ and
+ inversion
+ of
+ the
+ spectral
+ curve19,20
+in
+ transversal
+ slices
+ and
+ with
+ color
+ Doppler.
+ is
+ and
+ it
+ occurs
+ with
+valvular
+Transient
+ closure.
+We
+ will
+ begin
+ the
+ study
+ at
+ the
+ level
+ of
+ the
+ saphenofemoral
+ junction
+ in
+ B-mode
+ (Mickey
+ Mouse
+ sign)
+ (Fig.
+ 8B).
+At
+ this
+ point
+ we
+ look
+ for
+ the
+ cause
+ of
+reflux,
+ which
+ in  most
+ cases
+ is
+ caused
+ by
+ incompetence
+ at
+the
+ level
+ of
+ the
+ sapheno-femoral
+ junction.21
+The
+ most
+ cause
+ of
+ immediately
+ distal
+ to
+this
+ point
+ is
+ incompetence
+ of
+ the
+ tributary
+ vein
+ of
+ the
+ lower
+abdomen
+ or
+ pelvis
+ (superficial
+ epigastric
+ vein
+ and
+ external
+pudendal
+ vein),19,21 especially
+ in
+ multiparous
+ women10,19,21
+(type
+ 4  shunt).
+ Vulvo-perineal
+ varicosities
+ are
+ significantly
+associated
+ with
+ pelvic
+ congestion
+ syndrome.21
+Approximately
+ from
+ the
+ junction,
+ the
+ calibers
+ of
+both
+ veins
+ be
+ measured,
+ which
+ in
+conditions
+ be
+ less
+ than
+ mm.18,19 This
+ measurement
+ will
+ influence
+ the
+ decision
+ and
+ can
+ be
+ used
+as
+ a  reference
+ for
+ further
+ examinations.
+ Although
+ it
+ is  not
+ an
+absolute
+ counterindication
+ one
+ diameter
+ >  10
+means
+ the
+
+[SECTION: CHIVA]
+ procedure
+ not
+ be
+ used
+ because
+ of
+a
+ postoperative
+ symptomatic
+ thrombosis.15
+The
+ presence
+ of
+ is
+ associated
+ with
+ an
+increase
+ in
+ the
+ diameter
+ of
+ the
+ structure.
+Next
+ we
+ will
+ assess
+ caliber
+ changes
+ looking
+ for
+ and
+ the
+ location
+ and
+ distribution
+ of
+ as
+ well
+ as
+ (through
+veins
+ into
+ the
+ DVS
+ or
+ the
+ secondary
+ network
+ (N4)).
+We
+ will
+ use
+ the
+ same
+ systematics
+ to
+ study
+ the
+ great
+ vein
+ and
+ the
+ small
+ vein.
+Mapping
+Lastly
+ all
+ these
+ data
+ must
+ be
+ recorded
+ in
+ a  detailed
+ manner
+ and
+ in
+ an
+ adequate
+ nomenclature
+ in
+ the
+ radiologic
+report
+ and
+ in
+ one
+ diagram,10 or
+ mapping,
+ which
+ is
+ the
+ schematic
+ description
+ of
+ the
+ hemodynamics
+ of
+ the
+ limb,
+which
+ in
+ turn
+ allows
+ us
+ to
+ rationalize
+ treatment11 (Fig.
+ 9).
+B
+ISV
+CFV
+CFA
+The
+ needs
+ to
+ show
+ the
+ diameters
+ of
+ the
+ the
+ and
+ and
+the
+ distribution
+ of
+ the
+ bundles
+ marked
+ with
+ arrows
+in
+ the
+ direction
+ of
+ flow10 and
+ identify
+ the
+ type
+ of
+ shunt.
+Presurgical
+ marking (Fig. 10)
+Right
+ before
+ the
+ intervention,
+ the
+ and
+ reentry
+ and
+ the
+ palpable
+ segments
+ (N3-N4)
+that
+ need
+ to
+ be
+ phlebotomized
+ are
+ marked
+ on
+ the
+ skin
+ in
+accordance
+ with
+ the
+ guidelines
+ established
+ in
+ the
+ previous
+section.
+R
+8 mm
+N3
+3 mm
+Venous mapping
+Example
+ of
+ shunt
+ type
+ 3  paper
+ mapping.
+M.
+ et
+ al.
+Presurgical
+ marking.
+Marking
+ will
+ be
+ with
+ the
+ stand-up
+ patient
+except
+ in
+ the
+ case
+ of
+ veins
+ on
+ the
+ great
+ vein;
+ in  this
+ case
+ the
+ marking
+ of
+ the
+ arch
+ will
+ be
+ with
+ the
+ patient
+ lying
+ in
+ the
+ prone
+ position
+ given
+the
+ anatomic
+ variation
+ in
+ the
+ origin
+ thereof.
+ We
+ will
+ not
+need
+ to  mark
+ the
+ arch
+ of
+ the
+ small
+ vein.
+Marking
+ is
+ in
+ indelible
+ ink
+ and
+ on
+ a  shaved
+limb.
+ It
+ needs
+ to
+ be
+ extremely
+ accurate
+ so
+ that
+ the
+ surgeon
+ can
+ perform
+ all
+ the
+ incisions
+ of
+ the
+ smallest
+ size.
+The  patient
+ shall
+ not
+ wash
+ his
+ body
+ in  the
+ hours
+ elapsing
+ the
+ marking
+ and
+ the
+ procedure.12
+The
+ needs
+ to
+ be
+ available
+ for
+ the
+ surgeon
+ during
+the
+ initial
+ study.
+
+[SECTION: Conclusion]
+ allows
+ an
+ adequate
+ topographic
+ and
+ assessment
+ of
+ the
+ SVS
+ and
+ the
+ DVS
+ in
+ turn
+ for
+ the
+ diagnostic
+ and
+ guidance
+ of
+and
+ also
+ allows
+ us
+ to
+ differential
+ diagnoses
+ with
+other
+ pathologic
+ entities
+ capable
+ of
+ causing
+ similar
+symptoms.22
+To
+ perform
+ the
+ examination
+ correctly,
+ it
+ is
+ to
+have
+ an
+ adequate
+ knowledge
+ of
+ anatomy
+ and
+ patterns.
+Venous
+ is
+ essential
+ for
+ planning
+ which
+must
+ be
+ individualized
+ for
+ every
+ patient.12,20
+The
+
+[SECTION: CHIVA]
+ strategy
+ is
+ a  safe
+ allowing
+ a  quick
+ and
+active
+ recovery
+ of
+ the
+ patients'
+ activity,
+ including
+coming
+ back
+ to
+ work
+ with
+ a  low
+ incidence
+ of
+ complications
+that
+ are
+ local
+ and
+ benign15,23 and
+ an
+ acceptable
+relapse
+ rate.
+Ethical responsibilities
+Protection
+ of
+ people
+ and
+ animals.
+ The
+ authors
+ declare
+ that
+no
+ experiments
+ with
+ human
+ beings
+ or
+ animals
+ have
+ been
+ while
+ conducting
+ this
+ investigation.
+ confidentiality.
+ The
+ authors
+ confirm
+ that
+ they
+ have
+followed
+Data
+ the
+ protocols
+ from
+ their
+ institutions
+ on
+ publishing
+data
+ from
+ patients.
+ to
+ privacy
+ and
+ informed
+ consent.
+ The
+ authors
+declare
+Right
+ that
+ in
+ this
+ there
+ are
+ no
+ data
+ from
+ patients.
+Authors
+1.  Manager
+ of
+ the
+ integrity
+ of
+ the
+ study:
+ MGC
+ and
+ PMV.
+2.
+ Study
+ Idea:
+ CGH
+ and
+ MFRS.
+3.  Study
+ Design:
+ CGH
+ and
+ MFRS.
+4.
+ Data
+ Mining:
+ MGC
+ and
+ PMV.
+5.
+ Data
+ Analysis
+ and
+ Interpretation:
+ MGC
+ and
+ PMV.
+6.
+ Statistical
+ Analysis:
+ N/A.
+7. Reference
+ Search:
+ CGH,
+ MFRS,
+ MGC
+ and
+ PMV.
+8.
+ Writing:
+ CGH,
+ MFRS,
+ MGC
+ and
+ PMV.
+9.
+ Critical
+ review
+ of
+ the
+ manuscript
+ with
+ intellectually
+ relevant
+ remarks:
+ CGH,
+ MFRS,
+ MGC
+ and
+ PMV.
+10.
+ Approval
+ of
+ final
+ version:
+ CGH,
+ MFRS,
+ MGC
+ and
+ PMV.
+Conflict of interests
+The
+ authors
+ declare
+ no
+ conflict
+ of
+ interests
+ associated
+ with
+this
+ whatsoever.
+
+[SECTION: References]
+1.
+ Permanyer
+ J.
+ Historia
+ clínica
+ en
+ patología
+ venosa.
+ In:
+ Toquero
+F,
+ Zarco
+ J,
+ editors.
+ Guía
+ de
+ buena
+ práctica
+ clínica
+ en
+ patología
+venosa.
+ 1.a ed.
+ Madrid:
+ IM&C;
+ 2004.
+ p.
+ 24.
+2.
+ Khilnani
+ NM.
+ Duplex
+ evaluation
+ of
+ with
+ disease
+ of
+ the
+ lower
+ extremities.
+ AJR
+ Am
+ J
+Roentgenol.
+ 2014;202:663---742.
+3.
+ Escudero
+ Rodríguez
+ JR,
+ Fernández
+ Quesada
+ F,
+ Bellmunt
+ Montoya
+ S.
+ Prevalencia
+ y
+ características
+ clínicas
+ de
+ la
+ enfermedad
+ en
+ pacientes
+ atendidos
+ en
+ Atención
+ Primaria
+ en
+Espa˜na:
+ resultados
+ del
+ estudio
+ internacional
+ Vein
+ Consult
+ Program.
+ Cir
+ Esp.
+ 2014;92:539---46.
+4.
+ Olalla
+ E.
+ Insuficiencia
+ crónica.
+ Introducción.
+ 1.
+a ed.
+Sevilla:
+ Consejería
+ de
+ Salud;
+ 2003.
+ p.
+ 12.
+5.
+ Pintos
+ G,
+ Martínez
+ M,
+ Ramos
+ E,
+ Lojo
+ I. Insuficiencia
+crónica.
+ Varices.
+ In:
+ Viver
+ E,
+ Ros
+ E,
+ editors.
+ Patología
+ vascular.
+1.a ed.
+ Barcelona:
+ EDIKA-MED;
+ 1993.
+ p.
+ 327---50.
+ study
+ and
+ in
+6.
+ Zabala
+ R.
+ Diagnóstico
+ no
+ invasivo
+ de
+ la
+ patología
+ de
+ las
+extremidades
+ inferiores.
+ In:
+ Del
+ Cura
+ JL,
+ Pedraza
+ S,
+ Gayete
+A,
+ directores.
+ Radiología
+ Esencial.
+ Tomo
+ II.
+ Edición
+ revisada.
+Madrid:
+ Editorial
+ Médica
+ Panamericana;
+ 2011.
+ p.
+ 1529---39.
+7.
+ Lee
+ W,
+ Chung
+ JW,  Yin
+ YH,
+ Jae
+ HJ,
+ Kim
+ SJ,
+ Ha
+ J,
+ et
+ al.
+ Threedimensional
+ CT
+ venography
+ of
+ veins
+ of
+ the
+ lower
+extremity:
+ image
+ quality
+ and
+ comparison
+ with
+ sonography.
+ AJR
+ Am
+ J
+ Roentgenol.
+ 2008;191:1186---91.
+8.
+ Müller
+MA,
+Mayer
+D,
+Seifert
+B,
+Marincek
+B,
+Willmann
+JK.
+ Recurrent
+ lower-limb
+ veins:
+ effect
+ of
+ direct
+contrast-enhanced
+ three-dimensional
+ MR
+ venographic
+ findings
+on
+ diagnostic
+ thinking
+ and
+ decisions.
+ Radiology.
+2008;247:887---95.
+9.
+ Min
+ SK,
+ Kim
+ SY,
+ Park
+ YJ,
+ Lee
+ W,
+ Jung
+ IM,
+ Lee
+ T,
+ et
+ al.
+ Role
+of
+ the
+ three-dimensional
+ computed
+ tomography
+ venography
+ as
+a
+ powerful
+ navigator
+ for
+ vein
+ surgery.
+ J
+ Vasc
+ Surg.
+2010;51:893---9.
+10.
+ Paolinelli
+ P.
+ Ultrasonido
+ de
+ extremidades
+ inferiores
+para
+ el
+ estudio
+ de
+ la
+ venosa.
+ Rev
+ Chil
+ Radiol.
+2009;1:181---9.
+11.
+ Fontcuberta
+ J,
+ Samsó
+ JJ,
+ Senin
+ Fernández
+ ME,
+ Vila
+Coll
+ R,
+ Escribano
+ Ferrer
+ JM.
+ Actualización
+ de
+ la
+ Guía
+ para
+ el
+diagnóstico
+ no
+ invasivo
+ de
+ la
+ (I).
+ Documento
+ de
+ consenso
+ del
+ capítulo
+ de
+ diagnóstico
+ de
+ la
+Sociedad
+ Espa˜nola
+ de
+ Angiología
+ y
+ Cirugía
+ Vascular.
+2015;67:125---32.
+12.
+ Juan-Samsó
+J,
+Escribano-Ferrer
+JM,
+Rodríguez-Mori
+A,
+Bofill-Brossa
+R,
+Matas-Docampo
+M.
+Cirugía
+hemodinámica
+ en
+ el
+ tratamiento
+ del
+ síndrome
+ varicoso.
+2003;55:460---75.
+13.
+ Konoeda
+ H,
+ Yamaki
+ T,
+ Hamahata
+ A,
+ Ochi
+ M,
+ Sakurai
+ H.
+ Quantification
+ of
+ by
+ duplex
+ ultrasound-role
+ of
+ velocity
+ in
+ the
+ assessment
+ the
+ clinical
+ stage
+ of
+ insufficiency.
+ Ann
+ Vasc
+ Dis.
+ 2014;7:376---82.
+14.
+ Franceschi
+C.
+La
+cure
+hémodynamique
+de
+l'insuffisance
+veineuse
+ en
+ ambulatoire
+ (CHIVA).
+ J
+ Mal
+ Vasc.
+ 1992;17:291---300.
+15.
+ Maldonado-Fernández
+ N,
+ López
+ Espada
+ C,
+ Martínez
+ Gámez
+FJ,
+ Mata
+ Campos
+ JE,
+ Galán
+ Zafra
+ M,
+ Sánchez
+ Maestre
+ M.
+Complicaciones
+ postoperatorias
+ de
+ la
+ estrategia
+
+[SECTION: CHIVA]
+ para
+el
+ tratamiento
+ de
+ la
+ crónica.
+2010;62:91---6.
+16.
+ Bellmunt-Montoya
+ S,
+ Escribano
+ JM,
+ Dilme
+ J,
+ Martinez-Zapata
+M.
+
+[SECTION: CHIVA]
+ for
+ the
+ of
+ [Access
+ the
+ March
+ 25,
+ 2015].
+ Cochrane
+ Database
+Syst
+ Rev
+ website.
+ Available
+ in:
+ http://onlinelibrary.wiley.com/
+doi/10.1002/14651858.CD009648.pub2/pdf.
+17.
+ Marinel-lo
+ Roura
+ J.
+ A
+ pesar
+ del
+ empuje
+ inicial
+ del
+ CHIVA,
+ el
+stripping
+ sigue
+ siendo
+ la
+ técnica
+ de
+ elección
+ en
+ el
+ tratamiento
+de
+ la
+ incompetencia
+ de
+ la
+ vena
+ safena
+ interna.
+2012;64:82---5
+ (Esp
+ Cong).
+18.
+ ACR-AIUM-SRU
+ Practice
+ parameter
+ for
+ the
+ performance
+ of
+peripheral
+ examinations
+ [Access
+ the
+ May
+29,
+ 2015].
+ American
+ College
+ of
+ Radiology
+ website.
+ Available
+ in:
+ http://www.acr.org/∼/media/ACR/Documents/PGTS/
+guidelines/US
+ Peripheral
+ Venous.pdf.
+19.
+ Hamper
+ UM,
+ DeJong
+ MR,
+ Scoutt
+ LM.
+ Ultrasound
+ evaluation
+ of
+ the
+lower
+ extremity
+ Radiol
+ Clin
+ North
+ Am.
+ 2007;45:525---48.
+20.
+ Selfa
+ S,
+ Diago
+ T,
+ Ricart
+ M,
+ Chulia
+ R,
+ Martín
+ F.
+ Insuficiencia
+ primaria
+ de
+ los
+ miembros
+ inferiores.
+ Valoración
+prequirúrgica
+ con
+ ecografía
+ Dúplex
+ color.
+ Radiología.
+2000;42:343---8.
+21.
+ Jung
+ SC,
+ Lee
+ W,
+ Chung
+ JW,
+ Hae
+ HJ,
+ Park
+ EA,
+ Jin
+ KN,
+et
+ al.
+ Unusual
+ causes
+ of
+ veins
+ in
+ the
+ lower
+ extremities:
+ CT
+ venographic
+ and
+ US
+ findings.
+ Radiographics.
+2009;29:525---36.
+22.
+ Bellmunt
+ S,
+ Miquel
+ C,
+ Reina
+ L,
+ Lozano
+ F.
+ La
+ en
+ el
+ Sistema
+ Nacional
+ de
+ Salud.
+ Diagnóstico,
+ indicaciones
+ quirúrgicas
+ y
+ priorización
+ de
+ listas
+ de
+ espera.
+ Documento
+de
+ la
+ Sociedad
+ Espa˜nola
+ de
+ Angiología
+ y Cirugía
+ Vascular
+ (SEACV)
+y
+ del
+ Capítulo
+ de
+ Flebología
+ y
+ Linfología
+ de
+ la
+ SEACV.
+2013;65:61---71.
+23.
+ Iborra-Ortega
+ E,
+ Barjau-Urrea
+ E,
+ Vila-Coll
+ R,
+ Ballón-Carazas
+H,
+ Cairols-Castellote
+ MA.
+ Estudio
+ comparativo
+ de
+ dos
+ técnicas
+quirúrgicas
+ en
+ el
+ tratamiento
+ de
+ las
+ varices
+ de
+ las
+ extremidades
+ inferiores:
+ resultados
+ tras
+ cinco
+ a˜nos
+ de
+ seguimiento.
+ 2006;58:459---68.

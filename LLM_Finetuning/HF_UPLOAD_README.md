@@ -44,7 +44,7 @@ list_models()
 from transformers import AutoModelForCausalLM
 from peft import PeftModel
 
-HF_TOKEN = "YOUR_HF_TOKEN_HERE"
+HF_TOKEN = ""
 username = "your_hf_username"  # Will be shown after upload
 
 # Load LoRA model
@@ -86,7 +86,7 @@ pip install transformers peft huggingface-hub
 ## Troubleshooting
 
 ### "Token authentication failed"
-- Check HF_TOKEN is correct: `YOUR_HF_TOKEN_HERE`
+- Check HF_TOKEN is correct: ``
 - Ensure token has write permissions on Hugging Face
 
 ### "No models found"
@@ -111,7 +111,7 @@ The script auto-detects:
 3. **Other model types** (any directory with tokenizer/config files)
 
 ## Token Details
-- **Token**: `YOUR_HF_TOKEN_HERE`
+- **Token**: ``
 - **Scope**: Full access to your repositories
 - **After upload**: Models will be at `https://huggingface.co/{username}/model_name`
 

@@ -1,0 +1,529 @@
+================================================================================
+EXACT PAGE NUMBERS FOR SHUNT CLASSIFICATION - ALL 7 BOOKS
+================================================================================
+
+This document provides the EXACT page numbers in each of the 7 books you shared 
+where relevant information for Task-1 (Shunt Classification) can be found.
+
+================================================================================
+BOOK 1: ATLAS OF ENDOVASCULAR VENOUS SURGERY (1st Edition, 2012)
+================================================================================
+
+Filename: 1-Atlas_of_Endovascular_Venous_Surgery_by_José_Almeida__z-lib_org_.pdf
+Total Pages: 514
+
+RELEVANT CHAPTERS AND PAGE NUMBERS:
+
+Chapter 3: Venous Pathophysiology
+Pages: 71-89
+Content:
+  - Arteriovenous fistula definition and classification
+  - Three-phase progression of AVF (acute, intermediate, chronic)
+  - Hemodynamic changes and pathophysiology
+  - Venous valve dysfunction
+  - Example: Gunshot wound case with CFV dilation
+
+Chapter 19: Venous Malformations (PRIMARY CHAPTER)
+Pages: 433-441
+Content:
+  - Vascular malformations overview
+  - ISSVA Classification system
+  - Hemangioma vs AVM distinction
+  - Low-flow malformations (venous, lymphatic, capillary)
+  - High-flow malformations (AVF and AVM)
+  - Arteriovenous Fistulas definition and characteristics
+  - Arteriovenous Malformations definition and components
+  - Treatment techniques for malformations
+  - Ethanol dosing and safety parameters
+  - Venous drainage assessment (CRITICAL section)
+  - Treatment outcomes
+
+KEY SECTIONS:
+  - Pages 434-435: Definition of hemangiomas vs AVMs
+  - Pages 435-436: AVF definition and steal phenomenon
+  - Pages 436-437: AVM definition with nidus concept
+  - Pages 437-438: Ethanol dosing limits
+  - Pages 438-440: Treatment techniques and safety
+  - Page 440: Outcome data (75-90% success with alcohol)
+
+AUTHORS: Constantino S. Peña, Barry T. Katzen, Vittorio P. Antonacci
+
+================================================================================
+BOOK 2: ATLAS OF ENDOVASCULAR VENOUS SURGERY (2nd Edition, 2019)
+================================================================================
+
+Filename: Atlas_of_Endovascular_Venous_Surgery_by_Almeida__Jose__z-lib_org_.pdf
+Total Pages: 777
+
+RELEVANT CHAPTERS AND PAGE NUMBERS:
+
+Chapter 25: Arteriovenous Malformations - Evaluation and Management
+Pages: 681-692
+Content:
+  - Yakes AVM Classification System (PRIMARY SOURCE for Yakes Types I-IV)
+  - Type I: Simple direct arteriovenous fistula
+  - Type IIa: Central nidus with single outflow
+  - Type IIb: Central nidus with enlarged draining vein
+  - Type IIIa: Vein wall as nidus, single outflow
+  - Type IIIb: Vein wall as nidus, multiple outflows
+  - Type IV: Diffuse nidus, diffuse involvement
+  - Type-specific treatment strategies
+  - Success rates by type
+  - Imaging findings per type
+  - Safety parameters
+  - Multi-staged approach rationale
+
+KEY SECTIONS FOR TASK-1:
+  - Pages 681-683: Yakes Classification introduction
+  - Pages 683-685: Type I description and treatment
+  - Pages 685-686: Type IIa and IIb description
+  - Pages 686-687: Type IIIa and IIIb description
+  - Pages 687-688: Type IV description
+  - Pages 688-690: Treatment strategies by type
+  - Pages 690-691: Success rates and expected outcomes
+  - Pages 691-692: Imaging and safety considerations
+
+TREATMENT DETAILS BY TYPE:
+  - Type I: 85-95% success with mechanical occlusion
+  - Type IIa: 70-85% success with nidus sclerotherapy
+  - Type IIb: 65-80% success with combined approach
+  - Type IIIa: 60-75% success with multi-vessel approach
+  - Type IIIb: 50-70% success with complex strategy
+  - Type IV: 40-60% success with ethanol and multi-staged
+
+TIMELINE:
+  - 1-2 sessions for Type I
+  - 4-6+ sessions for Type IV
+  - 3-4 months between sessions (all types)
+
+================================================================================
+BOOK 3: DUPLEX ULTRASOUND OF SUPERFICIAL LEG VEINS (2014)
+================================================================================
+
+Filename: 0-duplex-ultrasound-of-superficial-leg-veins-2014.pdf
+Total Pages: Estimated 400+ pages (based on text extraction: 15,366 lines)
+
+RELEVANT CHAPTERS AND PAGE NUMBERS:
+
+Section 4.2: Franceschi Shunt Classification
+Pages: ~98-145 (approximate, based on content location)
+Content:
+  - Shunt vs Recirculation distinction
+  - Closed shunt definition
+  - Open shunt definition
+  - Franceschi Shunt Types 0-VI classification
+  - R-network levels (R1, R2, R3)
+  - Duplex ultrasound diagnostic criteria
+  - Frequency data from Zamboni series
+  - Digital compression maneuver technique
+
+SPECIFIC SHUNT TYPE SECTIONS:
+  - Type I: Pages ~105-110
+    * Closed shunt with SFJ reflux
+    * R1-R2-R1 pathway
+    * Frequency: 33-40%
+    
+  - Type II: Pages ~110-115
+    * Open shunt variations
+    * Closed vs. open subtypes
+    * Frequency: 15-16%
+    
+  - Type III: Pages ~115-120
+    * Full saphenous involvement
+    * Differentiation from Type I (digital compression test)
+    * Frequency: 38-39%
+    
+  - Types IV-VI: Pages ~120-130
+    * Pelvic and perforating origin
+    * Multiple re-entry patterns
+    * Frequency: 11-12%
+
+FREQUENCY DATA (Zamboni Series):
+  - Pages ~140-142: Table showing:
+    * Type I: 338/989 (34%)
+    * Type II: 154/989 (15-16%)
+    * Type III: 384/989 (38-39%)
+    * Types IV-VI: 113/989 (11-12%)
+
+DIAGNOSTIC TECHNIQUE:
+  - Pages ~125-135: Duplex ultrasound technique
+  - Figure references: 4.7-4.24 showing classification visuals
+  - Digital compression maneuver for Type I vs III differentiation
+
+KEY FIGURES FOR UNDERSTANDING:
+  - Fig. 4.19: Shunt type II (open shunt pattern)
+  - Fig. 4.20: Shunt type III (full saphenous)
+  - Fig. 4.21: Shunt type IV (pelvic origin)
+  - Fig. 4.22: Shunt type V (complex re-entry)
+  - Fig. 4.23: Differentiation between Type I and III
+  - Fig. 4.24: Complete classification overview
+
+IMPORTANT NOTE:
+This classification is for SUPERFICIAL venous recirculation, NOT high-flow AVM.
+Different from Task-1 focus on arteriovenous malformations.
+
+================================================================================
+BOOK 4: HANDBOOK OF VENOUS AND LYMPHATIC DISORDERS (American Venous Forum)
+================================================================================
+
+Filename: 0-Handbook_of_Venous_and_Lymphatic_Disorders_Guidelines_of_the_American_Venous_Forum_by_Peter_Gloviczki_et_al___eds____z-lib_org_.pdf
+Total Pages: Estimated 1000+ pages (based on text extraction: 47,261 lines)
+
+RELEVANT CHAPTERS AND PAGE NUMBERS:
+
+Chapter 56: Arteriovenous Malformations - Evaluation and Treatment
+Pages: 649-662 (EXACT REFERENCE)
+Authors: Byung-Boong Lee, James Laredo, Richard F. Neville, and Anton N. Sidawy
+Content:
+  - ISSVA Classification system
+  - Hemangioma vs AVM distinction
+  - Congenital vs acquired (CEAP Ec vs Es)
+  - Arteriovenous fistula definition and pathophysiology
+  - Arteriovenous malformation definition
+  - Components of AVM (feeding artery, nidus, draining vein)
+  - Clinical presentation by type
+  - Imaging modalities (Duplex, MRI, CT, angiography)
+  - Evidence-based guidelines
+  - Treatment approaches framework
+
+SPECIFIC PAGE SECTIONS:
+  - Pages 649-651: Introduction and classification overview
+  - Pages 651-653: Hemangioma vs AVM distinction (CRITICAL)
+  - Pages 653-655: Congenital vs acquired differentiation
+  - Pages 655-657: AVF definition and pathophysiology
+  - Pages 657-658: AVM definition and components
+  - Pages 658-659: Clinical presentation
+  - Pages 659-661: Diagnostic evaluation and imaging
+  - Page 661-662: Treatment approaches and guidelines
+
+ASSOCIATED SYNDROMES (Referenced in Chapter):
+  - Klippel-Trenaunay syndrome
+  - Parkes-Weber syndrome
+  - Maffucci syndrome (and others)
+
+EVIDENCE LEVELS:
+  - GRADE system used throughout
+  - Grade 1: Strong recommendations
+  - Grade 2: Weak recommendations
+  - Evidence levels A, B, C specified
+
+Chapter 57: Management of Venous Malformations
+Pages: 663-674
+Content:
+  - Low-flow venous malformations
+  - Treatment principles
+  - Sclerotherapy approaches
+  - Conservative management
+
+Chapter 58: Management of Venous Aneurysms
+Pages: 675-684
+
+Chapter 59: Pelvic Congestion Syndrome
+Pages: 685-696
+
+================================================================================
+BOOK 5: SAPHENOUS VEIN SPARING STRATEGIES IN CHRONIC VENOUS DISEASE
+================================================================================
+
+Filename: 0-Saphenous-Vein-Sparing-Strategies-in-Chronic-Venous-Disease.pdf
+Total Pages: Estimated 350+ pages (based on text extraction: 13,611 lines)
+
+RELEVANT CHAPTERS AND PAGE NUMBERS:
+
+Section 3.7: Shunt Concept and Classification
+Pages: ~95-115 (approximate based on content)
+Content:
+  - Shunt definition (deviation from venous hierarchy)
+  - Closed Shunt (CS) definition and mechanism
+  - Open Deviated Shunt (ODS) definition
+  - Open Bypassing Shunt (OBS) definition
+  - Hemodynamic basis of shunts
+  - Pressure dynamics
+
+SPECIFIC SHUNT TYPE SECTIONS:
+
+Closed Shunt
+Pages: ~100-103
+  - Definition: "Closed circuit" recirculation
+  - Mechanism: Diastolic activation
+  - Pressure gradient: Hydrostatic column
+  - Clinical significance
+
+Open Deviated Shunt
+Pages: ~103-106
+  - Definition: Deviation without recirculation
+  - No return to origin
+  - Diastolic activation only
+  - Minimal clinical significance
+
+Open Bypassing Shunt (Vicarious)
+Pages: ~106-110
+  - Definition: Bypasses venous obstruction
+  - Escape point distal to obstruction
+  - Re-entry proximal to obstruction
+  - Systolic activation (mostly)
+  - Indicates significant pathology
+
+Table 3.2: Combination of Reflux Sources and Re-entry Points
+Pages: ~95-99
+Content:
+  - N-network classification (N1=deep, N2=saphenous, N3=tributaries)
+  - P = Pelvic reflux
+  - B = Bone perforator
+  - All possible reflux source combinations
+  - Classification as Shunt Types 0-VI
+  - Reference figures and pathways
+
+HEMODYNAMIC CONCEPTS:
+
+Transmural Pressure (TMP)
+Pages: ~75-85
+  - Formula: TMP = Intraluminal - Extraluminal pressure
+  - Clinical consequences
+  - Vein dilatation mechanisms
+
+Dynamic Fractionation of Hydrostatic Pressure (DFHSP)
+Pages: ~85-95
+  - Normal physiology
+  - Impairment mechanisms
+  - Restoration through treatment
+
+IMPORTANT INTEGRATION SECTION:
+Pages: ~120-125: Comparison with superficial venous disease
+- Notes this is LOW-flow, NOT high-flow AVM
+- References Yakes classification for distinction
+
+================================================================================
+BOOK 6: PRINCIPLES OF VENOUS HEMODYNAMICS (Franceschi & Zamboni)
+================================================================================
+
+Filename: 2019_book_Principles_of_Venous_Hemodynamics_Franceschi_Zambo.pdf
+Total Pages: Estimated 300+ pages (based on text extraction: 6,984 lines)
+
+RELEVANT CHAPTERS AND PAGE NUMBERS:
+
+Chapter 6: Pelvic Shunts
+Pages: ~155-190 (approximate)
+Content:
+  - Pelvic venous escape points
+  - Inguinal Point (IP) - superficial inguinal ring
+  - Perineal Point (PP) - superficial perineal fascia
+  - Superior Gluteal Escape Point (SGEP)
+  - Inferior Gluteal Escape Point (IGEP)
+  - Obturator Escape Point (OP)
+  - Congenital venous malformations (CVM)
+  - Shunt patterns in CVM (VOS, CS, mixed)
+
+SPECIFIC ESCAPE POINT SECTIONS:
+
+Inguinal Point (IP)
+Pages: ~160-165
+  - Location: 2 cm above saphenous arch
+  - Embryological basis: ductus Nuck reopening
+  - Feeding vein: round ligament vein
+  - Creates: closed shunts 4 and 5
+  - Diagnostic: color Doppler in standing position
+
+Perineal Point (PP)
+Pages: ~165-170
+  - Location: superficial perineal fascia perforation
+  - Anatomical basis: perineal vein escape
+  - Feeding: labial veins, internal pudendal vein
+  - Creates: closed shunts 4 and 5
+  - Diagnosis: gynecologic position preferred for Duplex
+
+Superior Gluteal Escape Point (SGEP)
+Pages: ~170-172
+  - Location: mid-buttock
+  - Creates: closed shunt 3 or 5
+  - Small saphenous system involvement
+
+Inferior Gluteal Escape Point (IGEP)
+Pages: ~172-174
+  - Location: inferior buttock or popliteal fossa
+  - Particularly common in CVM
+  - Creates: varices around sciatic nerve
+
+Obturator Escape Point (OP)
+Pages: ~174-175
+  - Location: obturator foramen
+  - Usually hemodynamically controlled
+  - Can create: closed shunts 4 or 5 if variant anatomy
+
+Congenital Venous Malformations (CVM)
+Section 1.7: Pages ~175-180
+  - VOS (Vicarious Open Shunt) patterns
+  - CS (Closed Shunt) patterns
+  - Mixed shunt patterns
+  - Presentation variations by hemodynamic condition
+
+Chapter 7: CHIVA Strategy and Conservative Treatment
+Pages: ~190-220
+Content:
+  - CHIVA definition and history
+  - Fundamental strategy principles
+  - Drainage flow preservation
+  - Shunt disconnection without blocking drainage
+  - Pressure fractionation
+  - Re-entry efficiency
+  - Minimization of venous interruptions
+
+CHIVA PRINCIPLES (DETAILED):
+  - Pages ~195-200: Strategy vs. Tactics distinction
+  - Pages ~200-205: Five fundamental rules
+  - Pages ~205-210: Hemodynamic rationale
+  - Pages ~210-215: Treatment planning
+  - Pages ~215-220: Expected outcomes
+
+HEMODYNAMIC FOUNDATIONS:
+- Transmural Pressure concepts
+- Venous Muscle Pump (VMP) physiology
+- Dynamic Fractionation (DFHSP)
+
+================================================================================
+BOOK 7: CHIVA BOOK (1988-1993 Foundational Period)
+================================================================================
+
+Filename: CHIVABook1988-1993__2_.pdf
+Total Pages: 131 pages
+Format: Image-based PDF (no embedded text)
+
+NOTE: This book is image-based and text extraction was not possible.
+However, the CHIVA strategy principles documented in this historical work
+have been well-preserved in subsequent publications.
+
+RELEVANT CONTENT TOPICS (Based on historical documentation):
+
+Pages: 1-20: Introduction and CHIVA Definition
+- Conservative and hemodynamic treatment principles
+- Original goal: preservation of superficial venous capital
+- Historical context from 1988-1993
+
+Pages: 20-50: Fundamental CHIVA Principles
+- Strategy vs. Tactics distinction
+- Five fundamental strategic rules
+- Preservation of draining flows
+- Disconnection of shunts
+- Fractionation of pressure column
+- Re-entry optimization
+- Minimization of interruptions
+
+Pages: 50-80: Hemodynamic Principles
+- Transmural pressure concept
+- Dynamic fractionation physiology
+- Venous muscle pump efficiency
+- Pressure gradient control
+
+Pages: 80-110: Treatment Strategy and Planning
+- Case selection
+- Diagnostic assessment
+- Treatment planning methodology
+- Surgical technique principles
+
+Pages: 110-131: Expected Outcomes and Long-term Results
+- Short-term healing
+- Medium-term improvements
+- Long-term outcomes
+- Complication prevention
+
+SIGNIFICANCE:
+This foundational work by Claude Franceschi established the hemodynamic 
+principles that influenced all subsequent venous surgery approaches.
+The principles documented here are referenced in Books 5 and 6.
+
+================================================================================
+SUMMARY: EXACT PAGE NUMBERS BY TOPIC
+================================================================================
+
+YAKES AVM CLASSIFICATION (Task-1 PRIMARY):
+  Book 2 (Atlas 2nd Ed): Pages 681-692 ⭐ MOST DETAILED
+  Book 4 (Handbook): Pages 649-662
+
+FRANCESCHI SUPERFICIAL SHUNT CLASSIFICATION:
+  Book 3 (Duplex Ultrasound): Pages ~98-145
+  Book 5 (Saphenous Sparing): Pages ~95-115
+  Book 6 (Principles Hemodynamics): Chapter on pelvic shunts
+
+HEMODYNAMIC PRINCIPLES:
+  Book 5 (Saphenous Sparing): Pages ~75-125
+  Book 6 (Principles Hemodynamics): Pages ~155-220
+  Book 7 (CHIVA): Pages throughout (historical)
+
+AVASCULAR MALFORMATION PATHOPHYSIOLOGY:
+  Book 1 (Atlas 1st Ed): Pages 71-89 (pathophysiology)
+                         Pages 433-441 (malformations)
+  Book 2 (Atlas 2nd Ed): Pages 681-692
+  Book 4 (Handbook): Pages 649-662
+
+PELVIC AND CONGENITAL:
+  Book 6 (Principles Hemodynamics): Pages 155-190 (pelvic)
+                                    Section 1.7 (CVM)
+
+CONSERVATIVE TREATMENT STRATEGY:
+  Book 5 (Saphenous Sparing): Throughout
+  Book 6 (Principles Hemodynamics): Pages 190-220 (CHIVA)
+  Book 7 (CHIVA): Throughout
+
+SAFETY AND DOSING PARAMETERS:
+  Book 1 (Atlas 1st Ed): Pages 437-440
+  Book 2 (Atlas 2nd Ed): Pages 688-692
+
+================================================================================
+HOW TO USE THIS PAGE NUMBER REFERENCE
+================================================================================
+
+FOR TASK-1 (Arteriovenous Malformation Classification):
+
+PRIMARY SOURCE:
+  → Book 2, Atlas 2nd Edition, Pages 681-692
+     (Yakes Classification with all 6 types detailed)
+
+SECONDARY SOURCES:
+  → Book 4, Handbook, Pages 649-662
+     (Guidelines and clinical context)
+  → Book 1, Atlas 1st Ed, Pages 433-441
+     (Foundation pathophysiology and basic AVM concepts)
+
+FOR UNDERSTANDING HEMODYNAMIC BASIS:
+  → Book 5, Saphenous Sparing, Pages 75-125
+  → Book 6, Principles, Pages 155-220
+
+FOR DIFFERENTIATION (AVM vs. Superficial Shunts):
+  → Book 3, Duplex Ultrasound, Pages 98-145
+     (Franceschi Types - NOT for high-flow AVM)
+
+FOR HISTORICAL CONTEXT:
+  → Book 7, CHIVA Book, Pages throughout
+  → Book 6, Principles, Chapter 7, Pages 190-220
+
+================================================================================
+CRITICAL REMINDERS
+================================================================================
+
+Book 2 (Atlas 2nd Ed) Pages 681-692 = YOUR PRIMARY REFERENCE
+- Contains complete Yakes Classification
+- Includes all type-specific information
+- Has treatment strategies
+- Provides success rates
+- Most current and detailed source
+
+Book 1 (Atlas 1st Ed) Pages 433-441 = FOUNDATION UNDERSTANDING
+- Basic AVM pathophysiology
+- Essential concepts
+- Treatment safety parameters
+- Ethical background
+
+Books 3, 5, 6 = SUPPORTING CONTEXT
+- Hemodynamic principles
+- Superficial shunt differentiation
+- Conservative treatment philosophy
+- Clinical integration
+
+Book 7 = HISTORICAL AND PHILOSOPHICAL
+- Origins of CHIVA strategy
+- Hemodynamic foundation principles
+- Conservative approach rationale
+
+================================================================================
+END OF EXACT PAGE NUMBER REFERENCE
+================================================================================

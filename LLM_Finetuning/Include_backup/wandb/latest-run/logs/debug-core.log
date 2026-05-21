@@ -1,0 +1,18 @@
+{"time":"2026-05-04T14:00:50.258940981+08:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmp91lhmd8i/port-6882.txt","pid":6882,"detached":false,"idle-timeout":600000000000,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false,"enable-dcgm-profiling":false}
+{"time":"2026-05-04T14:00:50.260997113+08:00","level":"INFO","msg":"server: accepting connections","addr":{"Name":"/tmp/wandb-6882-7043-2931743548/socket","Net":"unix"}}
+{"time":"2026-05-04T14:00:50.261428563+08:00","level":"INFO","msg":"server: will exit if parent process dies","ppid":6882}
+{"time":"2026-05-04T14:00:50.400973078+08:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"1(@)"}
+{"time":"2026-05-04T14:00:50.407280531+08:00","level":"INFO","msg":"handleInformInit: received","streamId":"qnijhwkq","id":"1(@)"}
+{"time":"2026-05-04T14:00:50.829529939+08:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"qnijhwkq","id":"1(@)"}
+{"time":"2026-05-04T14:00:54.721552545+08:00","level":"INFO","msg":"connection: cancelling request","id":"1(@)","requestId":"6rs03lov1mq4"}
+{"time":"2026-05-04T14:06:56.98786978+08:00","level":"INFO","msg":"connection: cancelling request","id":"1(@)","requestId":"6rs03lov1mq4"}
+{"time":"2026-05-04T14:06:58.628622928+08:00","level":"INFO","msg":"connection: cancelling request","id":"1(@)","requestId":"6rs03lov1mq4"}
+{"time":"2026-05-04T14:06:58.631339148+08:00","level":"INFO","msg":"handleInformFinish: finish message received","streamId":"qnijhwkq","id":"1(@)"}
+{"time":"2026-05-04T14:06:58.634479001+08:00","level":"INFO","msg":"handleInformFinish: stream closed","streamId":"qnijhwkq","id":"1(@)"}
+{"time":"2026-05-04T14:06:58.634493873+08:00","level":"INFO","msg":"handleInformInit: received","streamId":"59aa2wre","id":"1(@)"}
+{"time":"2026-05-04T14:06:59.049519904+08:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"59aa2wre","id":"1(@)"}
+{"time":"2026-05-04T14:07:04.695743519+08:00","level":"INFO","msg":"connection: cancelling request","id":"1(@)","requestId":"3cmij5yose3b"}
+{"time":"2026-05-04T15:49:04.93488387+08:00","level":"INFO","msg":"connection: cancelling request","id":"1(@)","requestId":"3cmij5yose3b"}
+{"time":"2026-05-04T15:49:06.756600978+08:00","level":"INFO","msg":"connection: cancelling request","id":"1(@)","requestId":"3cmij5yose3b"}
+{"time":"2026-05-04T15:49:06.772579458+08:00","level":"INFO","msg":"handleInformFinish: finish message received","streamId":"59aa2wre","id":"1(@)"}
+{"time":"2026-05-04T15:49:06.774605419+08:00","level":"INFO","msg":"handleInformFinish: stream closed","streamId":"59aa2wre","id":"1(@)"}

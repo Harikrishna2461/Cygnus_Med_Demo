@@ -11,7 +11,7 @@ import subprocess
 from pathlib import Path
 from typing import List, Dict
 
-HF_TOKEN = "YOUR_HF_TOKEN_HERE"
+HF_TOKEN = ""
 HF_USERNAME = "HariKrishna1824"  # Your HuggingFace username
 
 def run_cmd(cmd, check=True):

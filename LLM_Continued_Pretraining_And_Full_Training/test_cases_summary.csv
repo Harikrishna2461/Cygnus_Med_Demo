@@ -1,0 +1,35 @@
+id,shunt_type,ground_truth,clips
+No_Shunt_Type_no_shunt_detected_1,No_Shunt_Type,Unknown,EP at N1->N2
+No_Shunt_Type_no_shunt_detected_2,No_Shunt_Type,Unknown,EP at N2->N2
+No_Shunt_Type_no_shunt_detected_3,No_Shunt_Type,Unknown,EP at N1->N2
+No_Shunt_Type_no_shunt_detected_4,No_Shunt_Type,Unknown,"EP at N1->N2,EP at N2->N3"
+Shunt_Type_1_clipdata,Shunt_Type_1,1,"EP at N1->N2,RP at N2->N1"
+Shunt_Type_1_clipdata2,Shunt_Type_1,1,"EP at N1->N2,RP at N2->N1"
+Shunt_Type_1_clipdata3,Shunt_Type_1,1,"EP at N1->N2,RP at N2->N1"
+Shunt_Type_1_clipdata4,Shunt_Type_1,1,"EP at N1->N2,RP at N2->N1"
+Shunt_Type_1_clipdata5,Shunt_Type_1,1,"EP at N1->N2,RP at N2->N1"
+Shunt_Type_1+2_clipdata,Shunt_Type_1+2,1+2,"EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+Shunt_Type_1+2_clipdata2,Shunt_Type_1+2,1+2,"EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+Shunt_Type_1+2_clipdata3,Shunt_Type_1+2,1+2,"EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+Shunt_Type_1+2_clipdata4,Shunt_Type_1+2,1+2,"EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+Shunt_Type_1+2_clipdata5,Shunt_Type_1+2,1+2,"EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+Shunt_Type_2A_clipdata,Shunt_Type_2A,2A,EP at N2->N3
+Shunt_Type_2A_clipdata2,Shunt_Type_2A,2A,EP at N2->N3
+Shunt_Type_2A_clipdata3,Shunt_Type_2A,2A,EP at N2->N3
+Shunt_Type_2A_clipdata4,Shunt_Type_2A,2A,EP at N2->N3
+Shunt_Type_2A_clipdata5,Shunt_Type_2A,2A,EP at N2->N3
+Shunt_Type_2B_clipdata,Shunt_Type_2B,2B,"EP at N2->N2,RP at N3->N1"
+Shunt_Type_2B_clipdata2,Shunt_Type_2B,2B,"EP at N2->N2,RP at N3->N1"
+Shunt_Type_2B_clipdata3,Shunt_Type_2B,2B,"EP at N2->N2,RP at N3->N1"
+Shunt_Type_2B_clipdata4,Shunt_Type_2B,2B,"EP at N2->N2,RP at N3->N1"
+Shunt_Type_2B_clipdata5,Shunt_Type_2B,2B,"EP at N2->N2,RP at N3->N1"
+Shunt_Type_2C_clipdata,Shunt_Type_2C,2C,"EP at N2->N2,RP at N3->N2,RP at N2->N1"
+Shunt_Type_2C_clipdata2,Shunt_Type_2C,2C,"EP at N2->N2,RP at N3->N2,RP at N2->N1"
+Shunt_Type_2C_clipdata3,Shunt_Type_2C,2C,"EP at N2->N2,RP at N3->N2,RP at N2->N1"
+Shunt_Type_2C_clipdata4,Shunt_Type_2C,2C,"EP at N2->N2,RP at N3->N2,RP at N2->N1"
+Shunt_Type_2C_clipdata5,Shunt_Type_2C,2C,"EP at N2->N2,RP at N3->N2,RP at N2->N1"
+Shunt_Type_3_clipdata,Shunt_Type_3,3,"EP at N1->N2,EP at N2->N3,RP at N3->N1"
+Shunt_Type_3_clipdata2,Shunt_Type_3,3,"EP at N1->N2,EP at N2->N3,RP at N3->N1"
+Shunt_Type_3_clipdata3,Shunt_Type_3,3,"EP at N1->N2,EP at N2->N3,RP at N3->N1"
+Shunt_Type_3_clipdata4,Shunt_Type_3,3,"EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+Shunt_Type_3_clipdata5,Shunt_Type_3,3,"EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"

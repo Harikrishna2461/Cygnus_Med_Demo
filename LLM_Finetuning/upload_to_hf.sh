@@ -3,7 +3,7 @@
 
 set -e
 
-HF_TOKEN="${HF_TOKEN:-YOUR_HF_TOKEN_HERE}"
+HF_TOKEN=""
 
 echo "================================================================================"
 echo "UPLOADING MODELS TO HUGGINGFACE"
@@ -30,7 +30,7 @@ import json
 from pathlib import Path
 from huggingface_hub import HfApi, login, get_user_info, create_repo
 
-HF_TOKEN = os.getenv("HF_TOKEN", "YOUR_HF_TOKEN_HERE")
+HF_TOKEN = os.getenv("HF_TOKEN", "")
 
 # Login
 print("  Authenticating...", end=" ")

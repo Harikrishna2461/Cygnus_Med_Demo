@@ -1,0 +1,18 @@
+2026-05-20 13:14:09,597 - INFO - ============================================================
+2026-05-20 13:14:09,597 - INFO - Starting extractive restatement pipeline
+2026-05-20 13:14:09,597 - INFO - ============================================================
+2026-05-20 13:14:09,597 - INFO - Loading tokenizer: Qwen/Qwen2.5-7B
+2026-05-20 13:14:10,946 - INFO - Loading chunks from data\final\train.jsonl
+2026-05-20 13:14:10,969 - INFO - Loaded 2637 chunks
+2026-05-20 13:14:10,969 - INFO - Extracting key points...
+2026-05-20 13:14:13,292 - INFO - Saving 2555 key point chunks to data\augmented\key_points.jsonl
+2026-05-20 13:14:13,314 - INFO - ============================================================
+2026-05-20 13:14:13,314 - INFO - EXTRACTIVE RESTATEMENT PIPELINE SUMMARY
+2026-05-20 13:14:13,314 - INFO - ============================================================
+2026-05-20 13:14:13,314 - INFO - Total chunks processed:         2637
+2026-05-20 13:14:13,314 - INFO - Key point chunks created:       2555
+2026-05-20 13:14:13,314 - INFO - Extraction ratio:               96.9%
+2026-05-20 13:14:13,314 - INFO - Average sentences selected:     5.6
+2026-05-20 13:14:13,314 - INFO - Total output tokens:            942,488
+2026-05-20 13:14:13,314 - INFO - Average tokens per chunk:       368
+2026-05-20 13:14:13,314 - INFO - ============================================================

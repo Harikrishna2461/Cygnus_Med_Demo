@@ -1,0 +1,23 @@
+2026-05-19 15:37:06 | INFO | Loaded 3,103 chunks from C:\Users\Krish\Downloads\llm_continued_pretraining\data\chunks\all_chunks.jsonl
+2026-05-19 15:37:06 | INFO | Saving pre-filter analysis plots…
+2026-05-19 15:37:09 | INFO | Saved 4 analysis plots to C:\Users\Krish\Downloads\llm_continued_pretraining\data\analysis
+2026-05-19 15:37:09 | INFO | Entropy range: [6.284, 8.368]
+2026-05-19 15:37:09 | INFO | Keeping chunks with entropy in [7.278, 8.161]
+2026-05-19 15:37:09 | INFO | Removed 126 entropy-outlier chunks (4.1%)
+2026-05-19 15:37:09 | INFO | Building MinHash LSH with threshold=0.85, num_perm=128…
+2026-05-19 15:37:20 | INFO | Removed 324 near-duplicate chunks (10.9%)
+2026-05-19 15:37:20 | INFO | Train books (12): ['0-Handbook_of_Venous_and_Lymphatic_Disorders_Guidelines_of_the_American_Venous_F', '0-Saphenous-Vein-Sparing-Strategies-in-Chronic-Venous-Disease', '0-duplex-ultrasound-of-superficial-leg-veins-2014', '1-Atlas_of_Endovascular_Venous_Surgery_by_José_Almeida_z-liborg', '2019_book_Principles_of_Venous_Hemodynamics_Franceschi_Zambo', '2025-02-19-Theraclion-investor-presentation-extended-V332_compressed-2', 'Atlas_of_Endovascular_Venous_Surgery_by_Almeida_Jose_z-liborg', 'CHIVA_STRATEGY_Gianesini014', 'Carriazo2015', 'DelfrateR_CHIVA_article', 'PrinciplesofVenousHemodynamicsFranceschiZamboni2009', 'US_Lower_Extremity_Veins_Anatomy_and_Basic_Approach']
+2026-05-19 15:37:20 | INFO | Eval books  (1):  ['adler-et-al-2022-varicose-veins-of-the-lower-extremity-doppler-us-evaluation-pro']
+2026-05-19 15:37:20 | INFO | Wrote 2,637 chunks to C:\Users\Krish\Downloads\llm_continued_pretraining\data\final\train.jsonl
+2026-05-19 15:37:20 | INFO | Wrote 16 chunks to C:\Users\Krish\Downloads\llm_continued_pretraining\data\final\eval.jsonl
+2026-05-19 15:37:20 | INFO | =================================================================
+2026-05-19 15:37:20 | INFO | ANALYSIS & FILTERING COMPLETE
+2026-05-19 15:37:20 | INFO |   Original chunks    : 3,103
+2026-05-19 15:37:20 | INFO |   Entropy outliers   : -126
+2026-05-19 15:37:20 | INFO |   Numeric/code chunks: -0
+2026-05-19 15:37:20 | INFO |   Near-duplicates    : -324
+2026-05-19 15:37:20 | INFO |   Final chunks       : 2,653
+2026-05-19 15:37:20 | INFO |   Train chunks       : 2,637
+2026-05-19 15:37:20 | INFO |   Eval  chunks       : 16
+2026-05-19 15:37:20 | INFO |   Eval fraction      : 0.6%
+2026-05-19 15:37:20 | INFO | =================================================================

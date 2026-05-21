@@ -1,0 +1,752 @@
+[
+  {
+    "id": "No_Shunt_Type_no_shunt_detected_1",
+    "shunt_type_label": "No_Shunt_Type",
+    "ground_truth_shunt": "Unknown",
+    "ground_truth_ligation": "",
+    "ground_truth_reasoning": "",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      }
+    ],
+    "clips_str": "EP at N1->N2"
+  },
+  {
+    "id": "No_Shunt_Type_no_shunt_detected_2",
+    "shunt_type_label": "No_Shunt_Type",
+    "ground_truth_shunt": "Unknown",
+    "ground_truth_ligation": "",
+    "ground_truth_reasoning": "",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      }
+    ],
+    "clips_str": "EP at N2->N2"
+  },
+  {
+    "id": "No_Shunt_Type_no_shunt_detected_3",
+    "shunt_type_label": "No_Shunt_Type",
+    "ground_truth_shunt": "Unknown",
+    "ground_truth_ligation": "",
+    "ground_truth_reasoning": "",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      }
+    ],
+    "clips_str": "EP at N1->N2"
+  },
+  {
+    "id": "No_Shunt_Type_no_shunt_detected_4",
+    "shunt_type_label": "No_Shunt_Type",
+    "ground_truth_shunt": "Unknown",
+    "ground_truth_ligation": "",
+    "ground_truth_reasoning": "",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3"
+  },
+  {
+    "id": "Shunt_Type_1_clipdata",
+    "shunt_type_label": "Shunt_Type_1",
+    "ground_truth_shunt": "1",
+    "ground_truth_ligation": "- Ligation at the SFJ",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n-- RP exists along N2, but no RP exists along N3",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_1_clipdata2",
+    "shunt_type_label": "Shunt_Type_1",
+    "ground_truth_shunt": "1",
+    "ground_truth_ligation": "- Ligation at the SFJ",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n-- RP exists along N2, but no RP exists along N3",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_1_clipdata3",
+    "shunt_type_label": "Shunt_Type_1",
+    "ground_truth_shunt": "1",
+    "ground_truth_ligation": "- Ligation at the Hunterian Perforator closer to N2",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at Hunterian perforator \n-- RP exists along N2, but no RP exists along N3",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_1_clipdata4",
+    "shunt_type_label": "Shunt_Type_1",
+    "ground_truth_shunt": "1",
+    "ground_truth_ligation": "- Ligation at the SFJ",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n-- RP exists along N2, but no RP exists along N3",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_1_clipdata5",
+    "shunt_type_label": "Shunt_Type_1",
+    "ground_truth_shunt": "1",
+    "ground_truth_ligation": "- Ligation at the Hunterian Perforator closer to N2",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at Hunterian perforator \n-- RP exists along N2, but no RP exists along N3",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_1+2_clipdata",
+    "shunt_type_label": "Shunt_Type_1+2",
+    "ground_truth_shunt": "1+2",
+    "ground_truth_ligation": "- Shunt Type 1+2 detected, requires more data to classify ligation",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux persists in elimination test",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_1+2_clipdata2",
+    "shunt_type_label": "Shunt_Type_1+2",
+    "ground_truth_shunt": "1+2",
+    "ground_truth_ligation": "- Shunt Type 1+2 detected, requires more data to classify ligation",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux persists in elimination test",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_1+2_clipdata3",
+    "shunt_type_label": "Shunt_Type_1+2",
+    "ground_truth_shunt": "1+2",
+    "ground_truth_ligation": "- Shunt Type 1+2 detected, requires more data to classify ligation",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux persists in elimination test",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_1+2_clipdata4",
+    "shunt_type_label": "Shunt_Type_1+2",
+    "ground_truth_shunt": "1+2",
+    "ground_truth_ligation": "- Shunt Type 1+2 detected, requires more data to classify ligation",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux persists in elimination test",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_1+2_clipdata5",
+    "shunt_type_label": "Shunt_Type_1+2",
+    "ground_truth_shunt": "1+2",
+    "ground_truth_ligation": "- Shunt Type 1+2 detected, requires more data to classify ligation",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux persists in elimination test",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_2A_clipdata",
+    "shunt_type_label": "Shunt_Type_2A",
+    "ground_truth_shunt": "2A",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP exists from N2 to N3, but no EP exists from N1 to N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      }
+    ],
+    "clips_str": "EP at N2->N3"
+  },
+  {
+    "id": "Shunt_Type_2A_clipdata2",
+    "shunt_type_label": "Shunt_Type_2A",
+    "ground_truth_shunt": "2A",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP exists from N2 to N3, but no EP exists from N1 to N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      }
+    ],
+    "clips_str": "EP at N2->N3"
+  },
+  {
+    "id": "Shunt_Type_2A_clipdata3",
+    "shunt_type_label": "Shunt_Type_2A",
+    "ground_truth_shunt": "2A",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP exists from N2 to N3, but no EP exists from N1 to N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      }
+    ],
+    "clips_str": "EP at N2->N3"
+  },
+  {
+    "id": "Shunt_Type_2A_clipdata4",
+    "shunt_type_label": "Shunt_Type_2A",
+    "ground_truth_shunt": "2A",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP exists from N2 to N3, but no EP exists from N1 to N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      }
+    ],
+    "clips_str": "EP at N2->N3"
+  },
+  {
+    "id": "Shunt_Type_2A_clipdata5",
+    "shunt_type_label": "Shunt_Type_2A",
+    "ground_truth_shunt": "2A",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP exists from N2 to N3, but no EP exists from N1 to N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      }
+    ],
+    "clips_str": "EP at N2->N3"
+  },
+  {
+    "id": "Shunt_Type_2B_clipdata",
+    "shunt_type_label": "Shunt_Type_2B",
+    "ground_truth_shunt": "2B",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along N3, but no RP exists along N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N2->N2,RP at N3->N1"
+  },
+  {
+    "id": "Shunt_Type_2B_clipdata2",
+    "shunt_type_label": "Shunt_Type_2B",
+    "ground_truth_shunt": "2B",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along N3, but no RP exists along N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N2->N2,RP at N3->N1"
+  },
+  {
+    "id": "Shunt_Type_2B_clipdata3",
+    "shunt_type_label": "Shunt_Type_2B",
+    "ground_truth_shunt": "2B",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along N3, but no RP exists along N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N2->N2,RP at N3->N1"
+  },
+  {
+    "id": "Shunt_Type_2B_clipdata4",
+    "shunt_type_label": "Shunt_Type_2B",
+    "ground_truth_shunt": "2B",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along N3, but no RP exists along N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N2->N2,RP at N3->N1"
+  },
+  {
+    "id": "Shunt_Type_2B_clipdata5",
+    "shunt_type_label": "Shunt_Type_2B",
+    "ground_truth_shunt": "2B",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along N3, but no RP exists along N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N2->N2,RP at N3->N1"
+  },
+  {
+    "id": "Shunt_Type_2C_clipdata",
+    "shunt_type_label": "Shunt_Type_2C",
+    "ground_truth_shunt": "2C",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N2->N2,RP at N3->N2,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_2C_clipdata2",
+    "shunt_type_label": "Shunt_Type_2C",
+    "ground_truth_shunt": "2C",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N2->N2,RP at N3->N2,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_2C_clipdata3",
+    "shunt_type_label": "Shunt_Type_2C",
+    "ground_truth_shunt": "2C",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N2->N2,RP at N3->N2,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_2C_clipdata4",
+    "shunt_type_label": "Shunt_Type_2C",
+    "ground_truth_shunt": "2C",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N2->N2,RP at N3->N2,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_2C_clipdata5",
+    "shunt_type_label": "Shunt_Type_2C",
+    "ground_truth_shunt": "2C",
+    "ground_truth_ligation": "- Ligate highest EP at N2->N3",
+    "ground_truth_reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N2"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N2->N2,RP at N3->N2,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_3_clipdata",
+    "shunt_type_label": "Shunt_Type_3",
+    "ground_truth_shunt": "3",
+    "ground_truth_ligation": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along N3, but no RP exists along N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3,RP at N3->N1"
+  },
+  {
+    "id": "Shunt_Type_3_clipdata2",
+    "shunt_type_label": "Shunt_Type_3",
+    "ground_truth_shunt": "3",
+    "ground_truth_ligation": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along N3, but no RP exists along N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3,RP at N3->N1"
+  },
+  {
+    "id": "Shunt_Type_3_clipdata3",
+    "shunt_type_label": "Shunt_Type_3",
+    "ground_truth_shunt": "3",
+    "ground_truth_ligation": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along N3, but no RP exists along N2",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3,RP at N3->N1"
+  },
+  {
+    "id": "Shunt_Type_3_clipdata4",
+    "shunt_type_label": "Shunt_Type_3",
+    "ground_truth_shunt": "3",
+    "ground_truth_ligation": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux does not persist in elimination test",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+  },
+  {
+    "id": "Shunt_Type_3_clipdata5",
+    "shunt_type_label": "Shunt_Type_3",
+    "ground_truth_shunt": "3",
+    "ground_truth_ligation": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated",
+    "ground_truth_reasoning": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux does not persist in elimination test",
+    "clips": [
+      {
+        "flow": "EP",
+        "from": "N1",
+        "to": "N2"
+      },
+      {
+        "flow": "EP",
+        "from": "N2",
+        "to": "N3"
+      },
+      {
+        "flow": "RP",
+        "from": "N3",
+        "to": "N1"
+      },
+      {
+        "flow": "RP",
+        "from": "N2",
+        "to": "N1"
+      }
+    ],
+    "clips_str": "EP at N1->N2,EP at N2->N3,RP at N3->N1,RP at N2->N1"
+  }
+]

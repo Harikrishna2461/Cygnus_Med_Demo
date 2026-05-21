@@ -1,0 +1,478 @@
+Ultrasonography of the lower extremity
+veins: anatomy and basic approach
+Dong-Kyu Lee, Kyung-Sik Ahn, Chang Ho Kang, Sung Bum Cho
+Department of Radiology, Korea University Anam Hospital, Korea University College of
+Medicine, Seoul, Korea
+https://doi.org/10.14366/usg.17001
+pISSN: 2288-5919 • eISSN: 2288-5943
+Ultrasonography 2017;36:120-130
+Ultrasonography is an imaging modality widely used to evaluate venous diseases of the lower
+extremities. It is important to understand the normal venous anatomy of the lower extremities,
+which has deep, superficial, and perforating venous components, in order to determine the
+pathophysiology of venous disease. This review provides a basic description of the anatomy of
+the lower extremity veins and useful techniques for approaching each vein via ultrasonography.
+Keywords: Anatomy; Lower extremity; Ultrasonography; Vein
+
+[SECTION: Introduction]
+Ultrasonography (US) is the most useful and widely used modality for evaluating venous diseases
+of the lower extremities [1-3]. The examiner should be familiar with the normal venous anatomy
+of the lower extremities, which is somewhat different from the corresponding arterial anatomy. An
+understanding of the lower extremity venous system is important for diagnosing and determining the
+pathophysiology of venous disease.
+The venous system of the lower extremities is classified into three groups according to the
+relationship to the muscular fascia that surrounds the calf and leg muscles [4-6]. The veins that lie
+beneath the muscular fascia and drain the lower extremity muscles are the deep veins, those that
+are above the muscular fascia and drain the cutaneous microcirculation are the superficial veins,
+and those that penetrate the muscular fascia and connect the superficial and deep veins are the
+perforating veins (Fig. 1). These groups are closely related to one another. This article reviews the
+anatomy of the deep, superficial, and perforating veins in the lower extremities for US and provides
+practical tips for approaching each vein to evaluate venous disease of the lower extremities.
+General Considerations for the US Examination of Veins
+In contrast to arteries, veins have a weaker muscular layer with less elastic walls, and therefore
+completely collapse when the vein is compressed by the transducer (Fig. 2A). The compressibility of
+veins and pulsation of the arteries can be a way to discriminate them in US. In addition, veins have
+valves that play an important role in preventing reflux of the venous flow (Fig. 2B). The normal flow
+is directed from distal to proximal and from superficial to deep. Usually, vascular flow is not seen on
+grayscale US, and the venous lumen presents as anechoic. However, venous flow sometimes presents
+as echogenic, which can reflect red blood cell aggregation [7,8] and should not be confused with
+
+[SECTION: REVIEW ARTICLE]
+Received: January 5, 2017
+Revised: January 29, 2017
+Accepted: January 30, 2017
+Correspondence to:
+Kyung-Sik Ahn, MD, Department of
+Radiology, Korea University Anam
+Hospital, Korea University College of
+Medicine, 73 Inchon-ro, Seongbuk-gu,
+Seoul 02841, Korea
+Tel. +82-2-920-6540
+Fax. +82-2-929-3796
+E-mail: glassesik@gmail.com
+This is an Open Access article distributed under the
+terms of the Creative Commons Attribution NonCommercial License (http://creativecommons.org/
+licenses/by-nc/3.0/) which permits unrestricted noncommercial use, distribution, and reproduction in
+any medium, provided the original work is properly
+cited.
+Copyright © 2017 Korean Society of
+Ultrasound in Medicine (KSUM)
+How to cite this article:
+Lee DK, Ahn KS, Kang CH, Cho SB. Ultrasonography
+of the lower extremity veins: anatomy and
+basic approach. Ultrasonography. 2017
+Apr;36(2):120-130.
+Fig. 1. Normal computed tomography venography of the lower extremities. The venous system of the lower extremities is classified into
+three groups: deep veins, which lie beneath the muscular fascia (dotted lines); superficial veins, which are situated above the muscular fascia;
+and perforating veins, which penetrate the muscular fascia and connect the superficial and deep veins. Note the deep vein (femoral vein,
+arrows), superficial vein (great saphenous vein, open arrows), and perforating vein (femoral canal perforator, arrowheads) of the thigh.
+A
+B
+Fig. 2. Ultrasonographic findings of normal veins.
+A. In contrast to arteries (open arrows), veins (arrows) have a weaker muscular layer with less elastic walls, and therefore completely collapse
+when compressed by the transducer. B. Veins contain valves that play an important role in preventing venous reflux.
+Deep Veins
+thrombosis. This phenomenon is found especially frequently in
+conditions of slow venous flow. Continuous observation without
+transducer movement or identifying the compressibility of the lumen
+can be helpful to differentiate this condition from true thrombosis.
+The selection of a transducer for evaluating the lower extremity
+veins is a trade-off between resolution and beam penetration.
+Generally, a frequency of 5 MHz or greater is recommended, but
+sometimes a lower-frequency transducer is required for deeppenetration views in obese, edematous, or muscular patients [1].
+Anatomy
+The major deep veins of the lower extremities follow the course
+of the corresponding arteries. The deep venous system of the calf
+includes the anterior tibial, posterior tibial, and peroneal veins.
+In the calf, these deep veins present as pairs on both sides of the
+artery. The posterior tibial vein receives blood from the medial and
+lateral plantar vein and drains the posterior compartment of the leg
+and plantar surface of the foot. This vein lies behind the tibia and
+joins the popliteal vein at the posterior knee. The anterior tibial vein
+is the upward continuation of the dorsal pedal vein. It runs along
+the anterior compartment of the leg just above the interosseous
+membrane between the tibia and the fibula, and joins the posterior
+tibial vein to form the tibioperoneal trunk and popliteal vein. The
+peroneal vein runs along the posteromedial aspect of the fibula and
+joins the posterior tibial vein.
+The popliteal vein is formed by the junction of the anterior and
+posterior tibial veins at the lower aspect of the posterior knee. It
+ascends along the posterior aspect of the knee and the distal aspect
+of the anteromedial thigh. The popliteal vein is located medial to
+the artery in the lower knee, superficial to the artery at the posterior
+knee, and to the lateral side above the knee.
+After the popliteal vein goes into the adductor hiatus, it is referred
+to as the femoral vein. The term superficial femoral vein is no longer
+recommended, because this vein is not a superficial vein, but rather
+a deep vein [9-11]. In the lower part, it lies lateral to the artery; in
+the mid-part, behind the artery; and in the upper part, medial to the
+artery. The deep femoral vein from the inner thigh, running along the
+deep femoral artery, joins the femoral vein and forms the common
+femoral vein, which is located medial to the common femoral artery.
+The inguinal ligament is the landmark that divides the common
+femoral vein from the external iliac vein (Fig. 3).
+Approach
+It is convenient for the US examination to begin with the patient in
+a supine or semi-Fowler position. The reverse Trendelenburg position,
+if possible, is also recommended, as it facilitates venous filling in
+the lower extremities and makes the veins dilate. External rotation
+of the hip and slight flexion of the knee helps to decrease muscle
+tension and is good both for exposing the deep veins in the medial
+thigh, posterior knee, and calf, and for the compression maneuver
+(Fig. 4A).
+Veins drain blood in the distal-to-proximal direction to the right
+side of the heart. However, it is convenient to examine the deep
+veins from a proximal to distal direction because the proximal
+veins are larger in diameter and easy to detect. At the level of the
+inguinal ligament, in the transverse view, the examiner can see the
+common femoral vein on the medial side of the artery (Fig. 4B).
+Information about the flow pattern of the vein can be assessed in
+the longitudinal view with Doppler US [12]. Following the common
+femoral vein, it bifurcates into the deep femoral vein and the
+femoral vein (Fig. 4C). In the more distal part of the medial thigh,
+only the femoral vein is visible (Fig. 4D).
+When the transducer approaches the popliteal fossa of the
+posterior knee, the popliteal vein is visible. The popliteal vein is
+superficial to the popliteal artery at the posterior knee (Fig. 4E).
+EIV
+CFV
+DFV
+FV
+PV
+PTV
+ATV
+Pev
+Fig. 3. Schematic image of lower extremity deep veins. Although
+lower extremity veins form a continuous structure, they are named
+individually according to their closest anatomic landmark. The
+inguinal ligament (upper dotted line) is the anatomic landmark
+between the external iliac and common femoral veins, and the
+adductor hiatus (lower dotted line) is the anatomic landmark
+between the femoral and popliteal veins. EIV, external iliac vein; CFV,
+common femoral vein; FV, femoral vein; DFV, deep femoral vein; PV,
+popliteal vein; ATV, anterior tibial vein; PTV, posterior tibial vein; PeV,
+peroneal vein.
+Duplicated femoral veins or popliteal veins can be seen [13].
+Because a duplicated venous segment may result in false-negative
+results, both lumens should be carefully examined (Supplementary
+Fig. 1). Manual vein compression is recommended every 3-4 cm [3].
+When tracing the popliteal vein downward, two posteriorly
+branching veins are found in the calf from the posteromedial
+approach. The vein along the tibia is the posterior tibial vein, and
+the vein along the posteromedial aspect of the fibula is the peroneal
+vein. In a US approach, the cortical shadow of the tibia and fibula
+can be used as a bony landmark. The paired veins are present on
+both sides of the artery (Fig. 4F). After stretching the patient's leg,
+the anterior tibial vein can be visualized from an anterolateral
+approach (Fig. 5). Just above the echogenic interosseous membrane
+between the tibia and the fibula, the anterior tibial artery and vein
+can be found. If the posterior tibial vein cannot be traced in the
+proximal to distal direction, it is helpful to trace the vein upward
+from the posterior to the medial malleolus, where this vein is located
+more superficially. If the popliteal and calf veins are not visualized
+well in the supine-based position, the prone or decubitus position
+B
+E
+Fig. 4. Demonstration of side-by-side transverse ultrasonography (noncompression and
+compression views) and the corresponding sonic window in computed tomography
+venography based on transducer placement.
+A. Patient position and schematic representation of the transducer locations are shown here
+(B, C, D, E, and F). B. The common femoral vein is seen at the level of the inguinal ligament on
+the medial side of the common femoral artery, which is round and pulsatile. The vein collapses
+upon compression (arrows). C. Upon following the common femoral vein downward, it
+bifurcates into the deep femoral vein (open arrows) and the femoral vein (arrows).
+A
+F
+B
+Femoral condyle
+E
+T
+T
+F
+F
+F
+D. Only the femoral vein (arrows) is visible in the more distal part of the medial thigh. E. When the transducer approaches the popliteal fossa
+in the posterior knee, the popliteal vein (arrows) becomes visible. F. Tracing the popliteal vein downward from the posteromedial approach
+shows two posteriorly branching veins in the calf. The vein along the tibia (T) is the posterior tibial vein (arrows) and the vein along the fibula
+(F) is the peroneal vein (open arrows). The veins are present on both sides of the artery.
+Fig. 5. Ultrasonographic findings of the anterior tibial vein.
+A. Stretching of the patient's leg permits approach to the anterior tibial vein from the
+anterior side. B. Above the interosseous membrane (arrowheads) between the tibia (T)
+and the fibula (F), the anterior tibial vein (arrows) and artery (open arrows) are visible. The
+sonic window is demonstrated through computed tomography venography.
+A
+F
+B
+can also be helpful. The distal femoral vein at the level of the
+adductor hiatus can be difficult to evaluate because of its depth and
+the transducer location.
+T
+T
+F
+Superficial Veins
+Anatomy
+The two major superficial veins of the lower extremities are the
+great saphenous vein (GSV) and small saphenous vein (SSV). The
+terms "greater saphenous vein," "long saphenous vein," "lesser
+ACV of thigh
+PCV of thigh
+
+[SECTION: AAGSV]
+
+[SECTION: PAGSV]
+ACV of calf
+PCV of calf
+GSV
+A
+B
+saphenous vein," and "short saphenous vein" are no longer
+recommended for the purpose of standardizing terminology [10,11].
+The GSV begins in the medial marginal vein of the dorsum of
+the foot, ascends anteriorly to the medial malleolus, and passes
+posteromedially to the knee. The vein then ascends medially in the
+thigh to perforate the muscular fascia and join the common femoral
+vein at the saphenofemoral junction, a few centimeters distal to
+the inguinal ligament. Tributaries of the GSV are variable between
+individuals, but there are general rules for naming them [10]. If the
+course of the tributary is parallel to the GSV, it is called an accessory
+GSV (an anterior accessory GSV or a posterior accessory GSV). When
+the tributary courses obliquely, it is called the circumflex vein (the
+posterior thigh circumflex vein or the anterior calf circumflex vein)
+(Fig. 6A). However, despite attempts to standardize the terminology,
+various terms have been used and many of the tributaries are
+difficult to name.
+The SSV arises from the dorsal pedal arch and ascends
+posterolaterally from behind the lateral malleolus. It ascends along
+the middle of the calf and ends in the popliteal vein in the posterior
+knee. However, there are many variations in the termination of
+the SSV, including without connection to the popliteal vein [5,14].
+Before it penetrates the muscular fascia, it may branch out a cranial
+extension that goes upward to join the GSV through the posterior
+thigh circumflex vein (the vein of Giacomini) (Fig. 6B).
+Fig. 6. Schematic images of the superficial veins of the
+lower extremities.
+A. The great saphenous vein (GSV) arises from the
+medial aspect of the dorsal pedal venous arch,
+ascends anteriorly to the medial malleolus, passes
+posteromedially to the knee, and ascends medially in
+the thigh to join the common femoral vein through the
+saphenofemoral junction. Tributaries of the GSV are
+named according to their course. A tributary parallel
+to the GSV is called an accessory GSV. A tributary
+that courses obliquely is called a circumflex vein. ACV,
+anterior circumflex vein; PCV, posterior circumflex vein;
+AAGSV, anterior accessory great saphenous vein; PAGSV,
+posterior accessory great saphenous vein. B. The small
+saphenous vein (SSV) arises from the dorsal pedal arch
+and ascends along the middle of the calf and ends in
+the popliteal vein through the saphenopopliteal junction
+(SPJ). Before it penetrates the muscular fascia, the SSV
+may branch out a cranial extension, known as the vein
+of Giacomini, which goes upward to join the GSV.
+Vein of
+Giacomini
+SPJ
+SSV
+Approach
+Insufficiency of the superficial veins should be evaluated with
+the subject in the erect position, as the supine position may
+underestimate or miss the reflux of the venous flow (Fig. 7A). The
+reverse Trendelenburg position can be used if an erect position
+is impossible. The examined leg should be in a non-weightbearing position [1]. The saphenofemoral junction is visible on the
+anteromedial surface of the common femoral vein in the transverse
+view. A longitudinal view of the saphenofemoral junction (Fig. 7B)
+is useful for assessing reflux of the terminal valve with the help of
+Doppler US (Supplementary Fig. 2). Normally, the terminal valve at
+the saphenofemoral junction prevents backward flow into the GSV.
+After a provocation test, such as the Valsalva maneuver, retrograde
+flow in the proximal GSV persisting for more than 0.5 seconds is
+defined as pathologic reflux [4,15].
+There is an echogenic fascia surrounding the GSV that is bordered
+deeply by the muscular fascia and superficially by the saphenous
+fascia. This saphenous compartment is readily visualized on US
+and is described as having an "Egyptian eye" appearance (Fig.
+7C). The saphenous compartment is also visible at the knee level,
+above the tibia and medial gastrocnemius (Fig. 7D). Unfortunately,
+however, there are many variations in the relationship of the fascial
+compartment to the GSV. Sometimes there is a large tributary
+outside of the saphenous compartment, while the distal GSV is
+hypoplastic or even absent [14,16].
+The SSV is visible at the middle of the gastrocnemius belly in
+Fig. 7. Ultrasonographic findings of the great saphenous vein (GSV).
+A. Patient position (standing) and schematic representation of the transducer locations are
+shown here. B. Longitudinal view of the saphenofemoral junction and the corresponding sonic
+window in computed tomography venography based on transducer location are demonstrated.
+In most cases, a terminal valve (arrows) near the saphenofemoral junction prevents backward
+flow into the great saphenous vein. CFV, common femoral vein. C. Examination of the GSV
+shows the echogenic fascia surrounding the GSV, which is bordered deeply by the muscular
+fascia (arrows) and superficially by the saphenous fascia (arrowheads). This saphenous
+compartment is readily visualized on ultrasonography and is described as having an "Egyptian
+eye" appearance. D. Transverse ultrasonography examination at the level of the knee shows the
+saphenous compartment (arrowheads) overlying the tibia (T) and the muscle fascia of the medial
+gastrocnemius (G).
+B
+CFV
+B
+A
+the fascial trunk (Fig. 8). In tracing the SSV upward, it enters into
+the popliteal vein. The longitudinal view of the saphenopopliteal
+junction, like the saphenofemoral junction of the GSV, is useful
+for assessing insufficiency of the SSV. In the saphenopopliteal
+junction, calf squeezing augments the venous flow at first, followed
+CFV
+GSV
+GSV
+T
+G
+by retrograde flow. As described above, however, there are many
+anatomical variations in this region, and the saphenopopliteal
+junction may be absent or rudimentary [5,14].
+Perforating Veins
+Anatomy
+The perforating veins connect the deep veins with the superficial
+veins and direct the flow from the superficial to the deep system.
+There are numerous perforators in the leg. According to a consensus
+B
+A
+B
+SSV
+Pop V
+Fig. 8. Ultrasonographic findings of the small saphenous vein (SSV).
+A. Patient position and schematic representation of the transducer locations are shown here. B. In the transverse view of the posterior
+calf, the SSV is seen in the middle of the gastrocnemius (G) belly in the fascial trunk (arrowheads). C. Longitudinal ultrasound view and
+the corresponding sonic window in computed tomography venography based on transducer location are demonstrated. The SSV joins the
+popliteal vein (Pop V) through the saphenopopliteal junction. However, many variations are noted in this region, and the saphenopopliteal
+junction can be absent or hypoplastic.
+statement [10], perforators are named after their locations. Major
+groups classify perforators according to their longitudinal location
+as ankle, leg, knee, and thigh perforators. Subgroups indicate side
+(i.e., anterior, posterior, medial, and lateral perforators). Thus, the
+complete name of the perforator is a combination of the level and
+side (i.e., the medial leg perforator or the anterior thigh perforator).
+G
+G
+SSV
+Pop V
+More detailed subgroups are present for medial thigh and medial leg
+perforators. The medial thigh perforators are further classified as the
+perforating vein of the femoral canal and inguinal perforating vein,
+and the medial leg perforators are subdivided into the paratibial and
+posterior tibial perforating veins (Fig. 9). This is convenient becausez
+it eliminates eponyms such as Hunterian, Dodd, Boyd or Cockett, all
+PV of the
+femoral canal
+Paratibial
+PV
+Posterior
+tibial PV
+Fig. 9. Schematic images of the perforating veins (PVs) along the
+medial aspect of the lower extremity. The PV of the medial leg
+includes the paratibial PV and the posterior tibial PV. The medial
+thigh perforator includes the PV of the femoral canal and the
+inguinal PV.
+A
+B
+Fig. 10. Ultrasonographic findings of perforating veins (PVs).
+A. A dilated paratibial perforating vein in the calf is shown here, which penetrates the muscular fascia (dotted lines). B. A dilated PV of the
+femoral canal is shown here, which connects the great saphenous vein (GSV) and the femoral vein (FV). Venous reflux from the deep to the
+superficial vein is seen on transverse and longitudinal views of Doppler ultrasonography.
+of which have been used commonly, but are confusing.
+Approach
+Normally, the perforating veins are not clearly visible on US.
+However, when there is a flow disturbance in the deep or superficial
+veins or in the case of perforator insufficiency, the perforating veins
+can be dilated and are readily visible as a penetrating structure
+through the muscular fascia (Fig. 10A). In the case of varicose veins
+caused by perforating vein insufficiency, it is important to localize
+the refluxing point in order to correct it.
+This review describes several clinically relevant perforators around
+the GSV and their connections. The medial thigh and leg perforators
+are clinically the most important. The medial leg perforator
+includes the posterior tibial perforator and the paratibial perforator.
+The posterior tibial perforator, previously known as the Cockett
+perforator, connects the posterior accessory GSV with the posterior
+tibial vein in the distal calf. The paratibial perforator connects the
+GSV or its tributaries with the posterior tibial vein. The proximal
+paratibial perforator was previously called the Boyd perforator. In
+the thigh, the perforating vein of the femoral canal, previously called
+the Hunterian (proximal thigh) or Dodd (distal thigh) perforator,
+connects the GSV with the femoral vein or the proximal popliteal
+vein. Insufficiency of these perforators may cause medial thigh and
+calf varicosities, even in the absence of saphenofemoral reflux (Fig.
+10B).
+Inguinal PV
+
+[SECTION: Conclusion]
+The venous system of the lower extremities is divided into three
+groups: deep, superficial, and perforating veins. In US examination
+GSV
+PV
+FV
+practical guide to therapy. 3rd ed. New York: Springer, 2012.
+	 4.	 Meissner MH. Lower extremity venous anatomy. Semin Intervent
+Radiol 2005;22:147-156.
+	 5.	 Oguzkurt L. Ultrasonographic anatomy of the lower extremity
+superficial veins. Diagn Interv Radiol 2012;18:423-430.
+	 6.	 Cina A, Pedicelli A, Di Stasi C, Porcelli A, Fiorentino A, Cina G, et al.
+Color-Doppler sonography in chronic venous insufficiency: what the
+radiologist should know. Curr Probl Diagn Radiol 2005;34:51-62.
+	 7.	 Sigel B, Machi J, Beitler JC, Justin JR, Coelho JC. Variable ultrasound
+echogenicity in flowing blood. Science 1982;218:1321-1323.
+	 8.	 Rastegar R, Harnick DJ, Weidemann P, Fuster V, Coller B, Badimon
+JJ, et al. Spontaneous echo contrast videodensity is flow-related
+and is dependent on the relative concentrations of fibrinogen and
+red blood cells. J Am Coll Cardiol 2003;41:603-610.
+	 9.	 Bundens WP, Bergan JJ, Halasz NA, Murray J, Drehobl M. The
+superficial femoral vein: a potentially lethal misnomer. JAMA
+1995;274:1296-1298.
+10.	 Caggiati A, Bergan JJ, Gloviczki P, Jantet G, Wendell-Smith CP,
+Partsch H, et al. Nomenclature of the veins of the lower limbs: an
+international interdisciplinary consensus statement. J Vasc Surg
+2002;36:416-422.
+11.	 Caggiati A, Bergan JJ, Gloviczki P, Eklof B, Allegra C, Partsch H,
+et al. Nomenclature of the veins of the lower limb: extensions,
+refinements, and clinical application. J Vasc Surg 2005;41:719-724.
+12.	 Lin EP, Bhatt S, Rubens D, Dogra VS. The importance of monophasic
+Doppler waveforms in the common femoral vein: a retrospective
+study. J Ultrasound Med 2007;26:885-891.
+13.	 Quinlan DJ, Alikhan R, Gishen P, Sidhu PS. Variations in lower
+limb venous anatomy: implications for US diagnosis of deep vein
+thrombosis. Radiology 2003;228:443-448.
+14.	 Cavezzi A, Labropoulos N, Partsch H, Ricci S, Caggiati A, Myers
+K, et al. Duplex ultrasound investigation of the veins in chronic
+venous disease of the lower limbs: UIP consensus document. Part
+II. Anatomy. Eur J Vasc Endovasc Surg 2006;31:288-299.
+15.	 Min RJ, Khilnani NM, Golia P. Duplex ultrasound evaluation of lower
+extremity venous insufficiency. J Vasc Interv Radiol 2003;14:12331241.
+16.	 Khilnani NM, Min RJ. Imaging of venous insufficiency. Semin
+Intervent Radiol 2005;22:178-184.
+of the lower extremity veins, knowledge of the venous anatomy as
+well as appropriate patient positioning and transducer placement
+are important for optimal imaging and accurate diagnosis.
+ORCID: Kyung-Sik Ahn: http://orcid.org/0000-0001-9354-5699
+Conflict of Interest
+No potential conflict of interest relevant to this article was reported.
+Supplementary Material
+Supplementary Fig. 1. Transverse ultrasonography of an 88-yearold man with a pulmonary embolism. The patient shows duplication
+of the popliteal vein and thrombosis (arrowheads) in one of the
+popliteal lumens. On the compression view, the nonthrombosed
+lumen shows complete obliteration (arrows), while the thrombosed
+lumen is not fully compressed (open arrows) (https://doi.
+org/10.14366/usg.17001).
+Supplementary Fig. 2. Competent (A) and incompetent (B)
+saphenofemoral junction. A. After initiation of the Valsalva maneuver,
+there was no retrograde flow in the proximal great saphenous vein.
+B. In contrast, retrograde flow that persisted over 3 seconds was
+observed during the Valsalva maneuver, which suggests abnormal
+function of the terminal valve (https://doi.org/10.14366/usg.17001).
+
+[SECTION: References]
+	 1.	 Guideline developed in collaboration with the American College of
+Radiology; Society of Pediatric Radiology; Society of Radiologists
+in Ultrasound. AIUM practice guideline for the performance of
+peripheral venous ultrasound examinations. J Ultrasound Med
+2015;34:1-9.
+	 2.	 Coleridge-Smith P, Labropoulos N, Partsch H, Myers K, Nicolaides A,
+Cavezzi A. Duplex ultrasound investigation of the veins in chronic
+venous disease of the lower limbs: UIP consensus document. Part I.
+Basic principles. Eur J Vasc Endovasc Surg 2006;31:83-92.
+	 3.	 AbuRahma AF, Bandyk D. Noninvasive vascular diagnosis: a

@@ -17,7 +17,7 @@ print("MERGE LORA + BASE MODEL (GPU OPTIMIZED)")
 print("="*80)
 
 # Configuration
-HF_TOKEN = "YOUR_HF_TOKEN_HERE"
+HF_TOKEN = ""
 HF_USERNAME = "HariKrishna1824"
 BASE_MODEL = "Qwen/Qwen2.5-7B"
 LORA_REPO = "HariKrishna1824/qwen25_chiva_v2"

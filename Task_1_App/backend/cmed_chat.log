@@ -1,0 +1,914 @@
+2026-04-29 12:02:04,736 __main__ INFO Database initialised.
+2026-04-29 12:02:04,810 __main__ ERROR Qdrant collection 'ligation_knowledgebase_db_v2' not found in C:\Users\Krish\Downloads\Cygnus_Med_Demo\backend\qdrant_storage. Ensure the parent backend/qdrant_storage is intact.
+2026-04-29 12:02:04,810 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-04-29 12:02:04,817 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-04-29 12:02:04,817 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-04-29 12:02:10,773 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:02:10] "GET / HTTP/1.1" 200 -
+2026-04-29 12:02:10,816 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:02:10] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-29 12:02:13,012 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:02:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:02:13,016 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:02:13] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:02:13,018 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:02:13] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:02:46,000 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:02:46] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:03:15,984 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:03:15] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:03:45,277 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:03:45] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:03:47,415 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:03:47] "POST /api/session HTTP/1.1" 200 -
+2026-04-29 12:03:47,418 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:03:47] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:03:47,515 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:03:47] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:03:47,518 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:03:47] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:04:15,979 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:04:15] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:04:45,983 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:04:45] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:05:15,973 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:05:15] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:05:45,972 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:05:45] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:06:46,959 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:06:46] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:07:18,623 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:07:18] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:07:45,960 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:07:45] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:08:15,977 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:08:15] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:08:59,953 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:08:59] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:09:39,077 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:09:39] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:09:42,679 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:09:42] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-29 12:09:44,926 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:09:44] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:09:44,930 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:09:44] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:09:44,932 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:09:44] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:09:44,934 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:09:44] "GET /api/session/51ecad29-d2f6-4b2c-9aa1-1c92769b521b/messages HTTP/1.1" 200 -
+2026-04-29 12:09:44,937 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:09:44] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:09:48,772 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:09:48] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:09:48,774 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:09:48] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:10:04,021 __main__ INFO Database initialised.
+2026-04-29 12:10:04,055 rag_engine INFO BM25 index built (10 chunks).
+2026-04-29 12:10:04,055 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-04-29 12:10:04,056 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-04-29 12:10:04,062 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-04-29 12:10:04,062 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-04-29 12:10:06,841 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:06] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-29 12:10:08,867 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:08] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-29 12:10:08,912 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:08] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:10:10,919 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:10] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:10:10,922 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:10] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:10:10,925 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:10] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:10:10,927 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:10] "GET /api/session/51ecad29-d2f6-4b2c-9aa1-1c92769b521b/messages HTTP/1.1" 200 -
+2026-04-29 12:10:10,930 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:10] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:10:18,254 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:10:18,263 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11548 chars
+2026-04-29 12:10:19,133 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:10:19,134 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 1",\n    "confidence": 0.90,\n    "reasoning": [\n        "Found EP N1→N2 with SFJ-ENTRY label, indicating SFJ incompetence",\n        "No EP N2→N3 present",\n        "RP N2→N1 present with no RP at N3",\n        "Matches Type 1 pattern: EP N1→N2 present, RP N2→N1, no EP '
+2026-04-29 12:10:19,134 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4273, completion=159
+2026-04-29 12:10:22,190 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-04-29 12:10:22,190 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 1966 chars
+2026-04-29 12:10:23,530 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:10:23,531 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 1",\n    "ligation_steps": [\n        "Ligate the incompetent SFJ (saphenofemoral junction) to prevent reflux",\n        "Ligate the refluxing segment of the GSV (great saphenous vein) trunk at the mid-thigh level (N2→N1)"\n    ],\n    "clinical_rationale": "The ligation plan is'
+2026-04-29 12:10:23,531 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=548, completion=311
+2026-04-29 12:10:23,542 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:23] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:10:23,545 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:23] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:10:43,012 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:10:53,652 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:10:53] "GET /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:11:01,147 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:11:01] "GET /api/session/51ecad29-d2f6-4b2c-9aa1-1c92769b521b/messages HTTP/1.1" 200 -
+2026-04-29 12:11:01,151 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:11:01] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:11:04,925 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:11:04] "GET /api/session/51ecad29-d2f6-4b2c-9aa1-1c92769b521b/messages HTTP/1.1" 200 -
+2026-04-29 12:11:04,928 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:11:04] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:11:12,974 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:11:12] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:11:43,817 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:11:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:12:13,864 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:12:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:12:43,850 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:12:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:13:13,820 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:13:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:13:42,997 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:13:42] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:13:47,237 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:13:47] "GET / HTTP/1.1" 200 -
+2026-04-29 12:13:49,294 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:13:49] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:13:49,298 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:13:49] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:13:49,306 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:13:49] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:13:49,309 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:13:49] "GET /api/session/51ecad29-d2f6-4b2c-9aa1-1c92769b521b/messages HTTP/1.1" 200 -
+2026-04-29 12:13:49,323 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:13:49] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:14:21,847 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:14:21] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:14:51,410 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:14:51] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:15:21,386 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:15:21] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:15:51,424 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:15:51] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:16:21,381 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:16:21] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:16:47,103 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:16:47,104 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11548 chars
+2026-04-29 12:16:47,915 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:16:47,916 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 1",\n    "confidence": 0.90,\n    "reasoning": [\n        "Found EP N1→N2 with y=0.060, indicating SFJ incompetence",\n        "No EP N2→N3 present",\n        "RP N2→N1 present with y=0.250, indicating GSV reflux",\n        "Pattern matches Type 1 criteria: EP N1→N2 with '
+2026-04-29 12:16:47,916 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4272, completion=159
+2026-04-29 12:16:50,808 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-04-29 12:16:50,809 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 1966 chars
+2026-04-29 12:16:51,372 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:16:51] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:16:52,091 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:16:52,092 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 1",\n    "ligation_steps": [\n        "Ligation of the incompetent SFJ (saphenofemoral junction) to prevent reflux",\n        "Ligation of the GSV (great saphenous vein) trunk at the level of N2 to address the N2→N1 reflux"\n    ],\n    "clinical_rationale": "The clinical findin'
+2026-04-29 12:16:52,092 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=547, completion=332
+2026-04-29 12:16:52,102 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:16:52] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:16:52,105 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:16:52] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:17:21,408 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:17:21] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:17:34,276 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:17:34] "GET /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:17:51,839 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:17:51] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:18:21,843 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:18:21] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:18:59,850 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:18:59] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:19:59,810 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:19:59] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:20:59,818 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:20:59] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:21:59,845 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:21:59] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:22:59,809 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:22:59] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:23:59,831 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:23:59] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:24:53,586 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:24:53] "GET / HTTP/1.1" 200 -
+2026-04-29 12:24:54,509 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:24:54] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:24:55,656 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:24:55] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:24:55,659 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:24:55] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:24:55,662 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:24:55] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:24:55,664 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:24:55] "GET /api/session/51ecad29-d2f6-4b2c-9aa1-1c92769b521b/messages HTTP/1.1" 200 -
+2026-04-29 12:24:55,674 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:24:55] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:25:27,770 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:25:27] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:25:51,653 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:25:51] "[31m[1mPOST /api/feedback HTTP/1.1[0m" 405 -
+2026-04-29 12:26:17,136 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:26:17] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:26:27,753 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:26:27] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:26:57,765 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:26:57] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:27:27,746 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:27:27] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:27:57,735 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:27:57] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:28:27,772 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:28:27] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:28:57,761 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:28:57] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:29:27,744 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:29:27] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:29:57,781 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:29:57] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:30:19,143 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:30:19,145 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11587 chars
+2026-04-29 12:30:19,913 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:30:19,913 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 2A",\n    "confidence": 0.90,\n    "reasoning": [\n        "No EP N1→N2 found, indicating SFJ competence.",\n        "Found EP N2→N3, indicating Type 2A shunt.",\n        "RP N3→N1 present, consistent with Type 2A pattern."\n    ],\n    "ask_branching": false,\n    "summary'
+2026-04-29 12:30:19,914 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4285, completion=128
+2026-04-29 12:30:22,796 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-04-29 12:30:22,796 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 2008 chars
+2026-04-29 12:30:23,942 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:30:23,942 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 2A",\n    "ligation_steps": [\n        "Ligate the tributary vein between N2 and N3 to prevent reflux from the GSV",\n        "Ligate the tributary vein between N3 and N1 to prevent reflux into the femoral system"\n    ],\n    "clinical_rationale": "The ligation plan is based on'
+2026-04-29 12:30:23,943 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=563, completion=320
+2026-04-29 12:30:23,950 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:30:23] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:30:23,953 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:30:23] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:30:27,770 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:30:27] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:30:54,775 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:30:54] "[31m[1mPOST /api/feedback HTTP/1.1[0m" 405 -
+2026-04-29 12:30:57,818 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:30:57] "GET / HTTP/1.1" 200 -
+2026-04-29 12:30:58,365 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:30:58] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:30:59,739 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:30:59] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-29 12:30:59,875 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:30:59] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:31:01,810 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:01] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:31:01,813 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:01] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:31:01,816 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:01] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:31:01,818 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:01] "GET /api/session/51ecad29-d2f6-4b2c-9aa1-1c92769b521b/messages HTTP/1.1" 200 -
+2026-04-29 12:31:01,823 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:01] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:31:33,928 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:33] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:31:48,636 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:48] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-29 12:31:50,702 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:50] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:31:50,705 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:50] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:31:50,707 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:50] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:31:50,710 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:50] "GET /api/session/51ecad29-d2f6-4b2c-9aa1-1c92769b521b/messages HTTP/1.1" 200 -
+2026-04-29 12:31:50,715 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:50] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:31:50,937 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:50] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-29 12:31:53,005 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:53] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:31:53,008 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:53] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:31:53,010 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:53] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:31:53,013 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:53] "GET /api/session/51ecad29-d2f6-4b2c-9aa1-1c92769b521b/messages HTTP/1.1" 200 -
+2026-04-29 12:31:53,017 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:31:53] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:32:25,110 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:32:25] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:33:07,945 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:33:07] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:33:17,897 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:33:17,898 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11643 chars
+2026-04-29 12:33:19,864 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:33:19,865 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 3",\n    "confidence": 0.88,\n    "reasoning": [\n        "Found EP N1→N2 at y=0.060, indicating SFJ incompetence",\n        "Found EP N2→N3 at y=0.150, indicating antegrade flow to tributary",\n        "Found RP N3→N1 at y=0.150, indicating tributary reflux",\n        "N'
+2026-04-29 12:33:19,865 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4318, completion=167
+2026-04-29 12:33:21,982 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-04-29 12:33:21,982 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 2061 chars
+2026-04-29 12:33:23,583 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:33:23,584 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 3",\n    "ligation_steps": [\n        "Ligate the tributary vein at the GSV-to-TRIBUTARY-ENTRY point (N2→N3)",\n        "Ligate the tributary vein at the TRIBUTARY-REFLUX point (N3→N1)",\n        "Assess and potentially ligate the SFJ-ENTRY point if incompetence persists after '
+2026-04-29 12:33:23,584 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=593, completion=448
+2026-04-29 12:33:23,590 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:33:23] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:33:23,594 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:33:23] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:33:25,120 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:33:25] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:33:55,084 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:33:55] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:34:04,630 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:34:04,631 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11650 chars
+2026-04-29 12:34:05,518 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:34:05,519 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 3",\n    "confidence": 0.88,\n    "reasoning": [\n        "Found EP N1→N2, indicating SFJ INCOMPETENT",\n        "EP N2→N3 exists, indicating antegrade flow to tributary",\n        "RP N3→N1 present, indicating tributary reflux",\n        "No RP N2→N1, which aligns with T'
+2026-04-29 12:34:05,519 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4319, completion=155
+2026-04-29 12:34:07,614 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-04-29 12:34:07,614 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 2068 chars
+2026-04-29 12:34:08,899 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:34:08,900 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 3",\n    "ligation_steps": [\n        "Ligate the tributary vein at the junction with the great saphenous vein (GSV) to prevent reflux from N2 to N3",\n        "Ligate the incompetent saphenofemoral junction (SFJ) to prevent reflux from the femoral vein into the GSV",\n        '
+2026-04-29 12:34:08,900 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=594, completion=382
+2026-04-29 12:34:08,906 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:34:08] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:34:08,910 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:34:08] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:34:25,121 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:34:25] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:34:45,110 __main__ INFO Database initialised.
+2026-04-29 12:34:45,129 rag_engine INFO BM25 index built (10 chunks).
+2026-04-29 12:34:45,129 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-04-29 12:34:45,129 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-04-29 12:34:45,136 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-04-29 12:34:45,136 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-04-29 12:34:47,216 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:34:47] "GET / HTTP/1.1" 200 -
+2026-04-29 12:34:49,298 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:34:49] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:34:49,301 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:34:49] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:34:49,303 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:34:49] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:34:49,305 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:34:49] "GET /api/session/51ecad29-d2f6-4b2c-9aa1-1c92769b521b/messages HTTP/1.1" 200 -
+2026-04-29 12:34:49,311 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:34:49] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:35:21,395 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:35:21] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:35:48,633 __main__ INFO Feedback received: session=51ecad29-d2f6-4b2c-9, question=At saphenofemoral junction, there is reflux that f, response=Type 1 (90%)
+2026-04-29 12:35:48,640 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:35:48] "POST /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:35:51,347 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:35:51] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:36:07,011 __main__ INFO Feedback received: session=51ecad29-d2f6-4b2c-9, question=The GSV feeds into a tributary at the upper thigh , response=Type 2A (90%)
+2026-04-29 12:36:07,018 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:36:07] "POST /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:36:21,386 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:36:21] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:36:51,381 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:36:51] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:36:53,797 __main__ INFO Feedback received: session=51ecad29-d2f6-4b2c-9, question=SFJ is incompetent with EP from femoral to GSV. Th, response=Type 3 (88%)
+2026-04-29 12:36:53,804 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:36:53] "POST /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:37:12,321 __main__ INFO Feedback received: session=51ecad29-d2f6-4b2c-9, question=The GSV feeds into a tributary at the upper thigh , response=Type 3 (88%)
+2026-04-29 12:37:12,324 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:37:12] "POST /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:37:13,974 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:37:13] "GET /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:37:21,406 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:37:21] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:37:51,832 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:37:51] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:38:21,843 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:38:21] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:38:59,816 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:38:59] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:39:10,275 __main__ INFO Database initialised.
+2026-04-29 12:39:10,290 __main__ ERROR Qdrant collection 'ligation_knowledgebase_db_v2' not found in C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\qdrant_storage. Ensure the parent backend/qdrant_storage is intact.
+2026-04-29 12:39:10,291 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-04-29 12:39:10,295 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-04-29 12:39:10,296 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-04-29 12:40:24,104 __main__ INFO Database initialised.
+2026-04-29 12:40:24,122 rag_engine INFO BM25 index built (10 chunks).
+2026-04-29 12:40:24,123 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-04-29 12:40:24,123 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-04-29 12:40:24,129 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-04-29 12:40:24,129 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-04-29 12:40:51,852 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:40:51] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:41:07,319 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:07] "GET / HTTP/1.1" 200 -
+2026-04-29 12:41:09,269 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:09] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-29 12:41:09,403 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:09] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:41:11,336 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:41:11,339 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:11] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:41:11,342 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:11] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:41:13,328 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:13] "POST /api/session HTTP/1.1" 200 -
+2026-04-29 12:41:13,330 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:13] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:41:40,164 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:41:40,170 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11548 chars
+2026-04-29 12:41:41,347 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:41:41,348 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 1",\n    "confidence": 0.90,\n    "reasoning": [\n        "Found EP N1→N2 with y=0.060, indicating SFJ incompetence",\n        "Presence of RP N2→N1 with y=0.250 and no EP N2→N3 or RP at N3",\n        "Matches pattern for Type 1: EP N1→N2 present, RP N2→N1, no EP N2→N3, '
+2026-04-29 12:41:41,348 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4273, completion=163
+2026-04-29 12:41:43,409 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:41:44,325 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-04-29 12:41:44,325 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 1966 chars
+2026-04-29 12:41:45,777 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:41:45,778 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 1",\n    "ligation_steps": [\n        "Ligation of the incompetent SFJ (saphenofemoral junction) to prevent reflux from the femoral vein into the saphenous vein",\n        "Ligation of the refluxing segment of the GSV (great saphenous vein) trunk at the level of the mid-thigh '
+2026-04-29 12:41:45,779 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=548, completion=374
+2026-04-29 12:41:45,787 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:45] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:41:45,790 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:41:45] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:42:00,608 __main__ INFO Feedback received: session=155f6b9f-49cf-4c0a-b, question=There is reflux at the saphenofemoral junction. Bl, response=Type 1 (90%)
+2026-04-29 12:42:00,611 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:42:00] "POST /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:42:01,959 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:42:01] "GET /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:42:05,744 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:42:05] "GET /api/session/155f6b9f-49cf-4c0a-be4d-bf327bc7140a/messages HTTP/1.1" 200 -
+2026-04-29 12:42:05,747 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:42:05] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:42:06,626 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:42:06] "GET /api/session/155f6b9f-49cf-4c0a-be4d-bf327bc7140a/messages HTTP/1.1" 200 -
+2026-04-29 12:42:06,629 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:42:06] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:42:13,424 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:42:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:42:41,509 __main__ INFO Feedback received: session=155f6b9f-49cf-4c0a-b, question=There is reflux at the saphenofemoral junction. Bl, response=Type 1 (90%)
+2026-04-29 12:42:41,513 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:42:41] "POST /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:42:43,431 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:42:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:43:13,417 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:43:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:43:43,391 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:43:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:44:06,808 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:44:06,810 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11498 chars
+2026-04-29 12:44:07,812 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:44:07,813 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "No shunt detected",\n    "confidence": 0.95,\n    "reasoning": [\n        "No EP N1→N2 clip found, indicating SFJ competence.",\n        "No EP N2→N3 or EP N2→N2 clips, which are necessary for Type 2A, 2B, or 2C classification.",\n        "Only RP clips are present, but no EP'
+2026-04-29 12:44:07,813 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4248, completion=142
+2026-04-29 12:44:09,918 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-04-29 12:44:09,918 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 1949 chars
+2026-04-29 12:44:11,506 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:44:11,508 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "No shunt detected",\n    "ligation_steps": [],\n    "clinical_rationale": "Given the absence of a detected shunt, the primary focus should be on addressing the reflux identified in the tributary from N3 to N1. However, without a shunt, the approach leans more towards managing refl'
+2026-04-29 12:44:11,508 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=526, completion=368
+2026-04-29 12:44:11,513 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:44:11] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:44:11,516 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:44:11] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:44:13,442 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:44:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:44:43,400 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:44:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:45:01,925 __main__ INFO Feedback received: session=155f6b9f-49cf-4c0a-b, question=First blood reflux flows from the GSV into a tribu, response=No shunt detected (95%)
+2026-04-29 12:45:01,929 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:45:01] "POST /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:45:13,425 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:45:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:45:43,418 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:45:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:45:50,337 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:45:50,337 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11597 chars
+2026-04-29 12:45:51,050 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:45:51,050 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 3",\n    "confidence": 0.88,\n    "reasoning": [\n        "Found EP N1→N2, indicating SFJ incompetence",\n        "Presence of EP N2→N3 and RP N3→N1, but no RP N2→N1",\n        "Matches pattern for Type 3"\n    ],\n    "ask_branching": false,\n    "summary": "The left leg h'
+2026-04-29 12:45:51,051 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4293, completion=123
+2026-04-29 12:45:53,143 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-04-29 12:45:53,143 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 2015 chars
+2026-04-29 12:45:54,545 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:45:54,546 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 3",\n    "ligation_steps": [\n        "Ligate the refluxing tributary between N3→N1 at the upper thigh",\n        "Consider ligation of the incompetent SFJ if necessary, based on further assessment of reflux and clinical symptoms"\n    ],\n    "clinical_rationale": "The identifi'
+2026-04-29 12:45:54,546 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=568, completion=326
+2026-04-29 12:45:54,554 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:45:54] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:45:54,558 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:45:54] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:46:13,397 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:46:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:46:43,431 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:46:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:47:13,445 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:47:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:47:43,406 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:47:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:48:06,806 __main__ INFO Feedback received: session=155f6b9f-49cf-4c0a-b, question=First blood reflux flows from the GSV into a tribu, response=Type 3 (88%)
+2026-04-29 12:48:06,810 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:48:06] "POST /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:48:07,690 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:48:07] "GET /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:48:13,406 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:48:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:48:23,452 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:48:23] "GET /api/session/155f6b9f-49cf-4c0a-be4d-bf327bc7140a/messages HTTP/1.1" 200 -
+2026-04-29 12:48:23,456 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:48:23] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:48:43,436 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:48:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:48:44,038 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:48:44,039 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11621 chars
+2026-04-29 12:48:45,075 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:48:45,076 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 1",\n    "confidence": 0.90,\n    "reasoning": [\n        "Found EP N1→N2 with y=0.060, indicating SFJ incompetence.",\n        "Presence of RP N2→N1 with no EP N2→N3 or RP at N3 indicates Type 1 shunt.",\n        "No elimination test needed as the pattern clearly matche'
+2026-04-29 12:48:45,077 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4313, completion=142
+2026-04-29 12:48:47,160 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-04-29 12:48:47,160 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 2039 chars
+2026-04-29 12:48:48,595 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 12:48:48,596 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 1",\n    "ligation_steps": [\n        "Ligate the refluxing tributary at Boyd\'s perforator (N3→N1) to prevent backflow",\n        "Ligate the Great Saphenous Vein (GSV) trunk at the saphenofemoral junction (SFJ) to address incompetence",\n        "Assess and potentially ligate '
+2026-04-29 12:48:48,596 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=588, completion=398
+2026-04-29 12:48:48,603 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:48:48] "POST /api/chat HTTP/1.1" 200 -
+2026-04-29 12:48:48,606 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:48:48] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 12:49:11,730 __main__ INFO Feedback received: session=155f6b9f-49cf-4c0a-b, question=SFJ + Below-Knee Perforators "Varicose veins from , response=Type 1 (90%)
+2026-04-29 12:49:11,736 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:49:11] "POST /api/feedback HTTP/1.1" 200 -
+2026-04-29 12:49:13,452 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:49:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:49:43,393 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:49:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:50:13,422 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:50:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:50:43,407 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:50:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:51:13,401 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:51:13] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 12:51:43,395 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 12:51:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:25:48,932 __main__ INFO Database initialised.
+2026-04-29 17:25:48,951 rag_engine INFO BM25 index built (10 chunks).
+2026-04-29 17:25:48,951 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-04-29 17:25:48,951 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-04-29 17:25:48,958 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-04-29 17:25:48,958 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-04-29 17:26:12,081 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:26:12] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:26:42,092 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:26:42] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:27:12,092 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:27:12] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:27:58,107 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:27:58] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:28:58,113 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:28:58] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:29:58,112 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:29:58] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:30:58,122 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:30:58] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:31:19,693 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:31:19] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:31:41,715 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:31:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:32:11,683 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:32:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:32:41,699 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:32:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:33:11,693 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:33:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:33:41,691 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:33:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:34:11,691 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:34:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:34:41,696 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:34:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:35:11,692 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:35:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:35:41,683 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:35:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:36:11,694 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:36:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:36:41,689 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:36:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:37:11,714 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:37:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:37:41,687 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:37:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:38:11,686 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:38:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:38:41,700 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:38:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:39:11,653 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:39:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:39:41,663 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:39:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:40:11,709 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:40:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:40:41,686 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:40:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:41:11,684 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:41:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:41:41,713 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:41:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:42:11,699 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:42:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:42:41,714 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:42:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:43:11,705 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:43:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:43:41,710 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:43:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:44:11,697 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:44:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:44:41,700 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:44:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:45:11,686 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:45:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:45:41,700 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:45:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:46:11,695 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:46:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:46:41,698 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:46:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:47:11,679 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:47:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:47:41,710 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:47:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:48:11,709 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:48:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:48:41,689 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:48:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:49:11,708 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:49:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:49:41,672 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:49:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:50:11,682 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:50:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:50:41,683 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:50:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:51:11,703 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:51:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:51:41,701 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:51:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:52:11,696 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:52:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:52:41,693 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:52:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:53:11,695 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:53:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:53:41,673 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:53:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:54:12,114 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:54:12] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:54:28,931 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 17:54:28,938 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11643 chars
+2026-04-29 17:54:28,939 shunt_classification_and_ligation_llm ERROR Shunt classification LLM call failed for Left: call_llm() got an unexpected keyword argument 'stream'
+2026-04-29 17:54:28,939 shunt_classification_and_ligation_llm ERROR Shunt classification failed for Left
+2026-04-29 17:54:28,939 __main__ ERROR Classification pipeline failed: Shunt classification failed for Left
+Traceback (most recent call last):
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\app.py", line 247, in api_chat
+    result = classify_and_plan_ligation_with_llm(
+        clip_list=clips,
+        call_llm_fn=call_llm,
+        retrieve_ligation_context_fn=retrieve_ligation_context,
+    )
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\shunt_classification_and_ligation_llm.py", line 567, in classify_and_plan_ligation_with_llm
+    classification = _call_llm_for_shunt_classification(group, leg_label, call_llm_fn)
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\shunt_classification_and_ligation_llm.py", line 479, in _call_llm_for_shunt_classification
+    raise RuntimeError(f"Shunt classification failed for {leg_label}")
+RuntimeError: Shunt classification failed for Left
+2026-04-29 17:54:28,946 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:54:28] "[35m[1mPOST /api/chat HTTP/1.1[0m" 500 -
+2026-04-29 17:54:28,949 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:54:28] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 17:54:41,182 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-29 17:54:41,183 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11643 chars
+2026-04-29 17:54:41,183 shunt_classification_and_ligation_llm ERROR Shunt classification LLM call failed for Left: call_llm() got an unexpected keyword argument 'stream'
+2026-04-29 17:54:41,183 shunt_classification_and_ligation_llm ERROR Shunt classification failed for Left
+2026-04-29 17:54:41,183 __main__ ERROR Classification pipeline failed: Shunt classification failed for Left
+Traceback (most recent call last):
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\app.py", line 247, in api_chat
+    result = classify_and_plan_ligation_with_llm(
+        clip_list=clips,
+        call_llm_fn=call_llm,
+        retrieve_ligation_context_fn=retrieve_ligation_context,
+    )
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\shunt_classification_and_ligation_llm.py", line 567, in classify_and_plan_ligation_with_llm
+    classification = _call_llm_for_shunt_classification(group, leg_label, call_llm_fn)
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\shunt_classification_and_ligation_llm.py", line 479, in _call_llm_for_shunt_classification
+    raise RuntimeError(f"Shunt classification failed for {leg_label}")
+RuntimeError: Shunt classification failed for Left
+2026-04-29 17:54:41,190 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:54:41] "[35m[1mPOST /api/chat HTTP/1.1[0m" 500 -
+2026-04-29 17:54:41,193 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:54:41] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 17:54:41,678 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:54:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:55:11,699 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:55:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:55:42,095 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:55:42] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:56:11,688 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:56:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:56:41,708 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:56:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:57:11,704 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:57:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:57:41,680 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:57:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:58:11,667 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:58:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:58:41,691 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:58:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:59:11,713 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:59:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 17:59:41,680 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 17:59:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:00:08,134 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:00:08] "GET /api/feedback HTTP/1.1" 200 -
+2026-04-29 18:00:11,701 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:00:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:00:41,685 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:00:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:00:52,572 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:00:52] "POST /api/session HTTP/1.1" 200 -
+2026-04-29 18:00:52,575 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:00:52] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 18:01:02,507 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:01:02] "GET /api/session/155f6b9f-49cf-4c0a-be4d-bf327bc7140a/messages HTTP/1.1" 200 -
+2026-04-29 18:01:02,513 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:01:02] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 18:01:11,711 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:01:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:01:41,686 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:01:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:02:11,704 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:02:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:02:41,702 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:02:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:02:49,782 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:02:49] "GET /api/feedback HTTP/1.1" 200 -
+2026-04-29 18:02:53,378 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:02:53] "GET /api/session/155f6b9f-49cf-4c0a-be4d-bf327bc7140a/messages HTTP/1.1" 200 -
+2026-04-29 18:02:53,382 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:02:53] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-29 18:03:11,683 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:03:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:03:41,666 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:03:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:04:11,673 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:04:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:04:41,686 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:04:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:05:11,692 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:05:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:05:41,687 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:05:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:06:11,682 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:06:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:06:41,685 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:06:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:07:11,714 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:07:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:07:41,684 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:07:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:08:11,694 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:08:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:08:41,688 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:08:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:09:11,678 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:09:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:09:41,692 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:09:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:10:11,709 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:10:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:10:41,676 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:10:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:11:11,694 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:11:11] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:11:41,701 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:11:41] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:12:12,105 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:12:12] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:12:42,126 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:12:42] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:13:43,081 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:13:43] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:14:44,105 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:14:44] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:15:45,111 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:15:45] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:16:46,131 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:16:46] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:17:47,100 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:17:47] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:18:48,110 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:18:48] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:19:49,109 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:19:49] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:20:50,138 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:20:50] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:21:51,119 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:21:51] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:22:52,096 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:22:52] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:23:53,115 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:23:53] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:24:54,096 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:24:54] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:25:55,112 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:25:55] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:26:56,115 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:26:56] "GET /api/status HTTP/1.1" 200 -
+2026-04-29 18:27:57,079 werkzeug INFO 127.0.0.1 - - [29/Apr/2026 18:27:57] "GET /api/status HTTP/1.1" 200 -
+2026-04-30 09:56:50,892 __main__ INFO Database initialised.
+2026-04-30 09:56:50,917 rag_engine INFO BM25 index built (10 chunks).
+2026-04-30 09:56:50,917 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-04-30 09:56:50,917 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-04-30 09:56:50,925 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-04-30 09:56:50,925 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-04-30 09:56:56,625 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:56:56] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-30 09:56:56,700 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:56:56] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-30 09:56:58,696 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:56:58] "GET /api/status HTTP/1.1" 200 -
+2026-04-30 09:56:58,699 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:56:58] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:56:58,707 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:56:58] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:56:58,710 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:56:58] "GET /api/session/8c8cffae-dd58-44a1-82b4-d1fe2d85c779/messages HTTP/1.1" 200 -
+2026-04-30 09:56:58,712 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:56:58] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:57:02,517 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:57:02] "GET /api/session/8c8cffae-dd58-44a1-82b4-d1fe2d85c779/messages HTTP/1.1" 200 -
+2026-04-30 09:57:02,519 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:57:02] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:57:03,084 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:57:03] "GET /api/session/155f6b9f-49cf-4c0a-be4d-bf327bc7140a/messages HTTP/1.1" 200 -
+2026-04-30 09:57:03,107 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:57:03] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:57:11,670 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-30 09:57:11,676 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11643 chars
+2026-04-30 09:57:11,676 shunt_classification_and_ligation_llm ERROR Shunt classification LLM call failed for Left: call_llm() got an unexpected keyword argument 'stream'
+2026-04-30 09:57:11,676 shunt_classification_and_ligation_llm ERROR Shunt classification failed for Left
+2026-04-30 09:57:11,676 __main__ ERROR Classification pipeline failed: Shunt classification failed for Left
+Traceback (most recent call last):
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\app.py", line 247, in api_chat
+    result = classify_and_plan_ligation_with_llm(
+        clip_list=clips,
+        call_llm_fn=call_llm,
+        retrieve_ligation_context_fn=retrieve_ligation_context,
+    )
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\shunt_classification_and_ligation_llm.py", line 567, in classify_and_plan_ligation_with_llm
+    classification = _call_llm_for_shunt_classification(group, leg_label, call_llm_fn)
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\shunt_classification_and_ligation_llm.py", line 479, in _call_llm_for_shunt_classification
+    raise RuntimeError(f"Shunt classification failed for {leg_label}")
+RuntimeError: Shunt classification failed for Left
+2026-04-30 09:57:11,680 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:57:11] "[35m[1mPOST /api/chat HTTP/1.1[0m" 500 -
+2026-04-30 09:57:11,683 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:57:11] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:57:30,846 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:57:30] "GET /api/status HTTP/1.1" 200 -
+2026-04-30 09:58:00,828 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:58:00] "GET /api/status HTTP/1.1" 200 -
+2026-04-30 09:58:30,850 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:58:30] "GET /api/status HTTP/1.1" 200 -
+2026-04-30 09:58:55,619 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-30 09:58:56,437 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-30 09:58:56,442 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:58:56] "POST /api/chat HTTP/1.1" 200 -
+2026-04-30 09:58:56,445 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:58:56] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:00,769 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:00] "GET /api/status HTTP/1.1" 200 -
+2026-04-30 09:59:11,365 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-30 09:59:11,366 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11643 chars
+2026-04-30 09:59:11,366 shunt_classification_and_ligation_llm ERROR Shunt classification LLM call failed for Left: call_llm() got an unexpected keyword argument 'stream'
+2026-04-30 09:59:11,366 shunt_classification_and_ligation_llm ERROR Shunt classification failed for Left
+2026-04-30 09:59:11,366 __main__ ERROR Classification pipeline failed: Shunt classification failed for Left
+Traceback (most recent call last):
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\app.py", line 247, in api_chat
+    result = classify_and_plan_ligation_with_llm(
+        clip_list=clips,
+        call_llm_fn=call_llm,
+        retrieve_ligation_context_fn=retrieve_ligation_context,
+    )
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\shunt_classification_and_ligation_llm.py", line 567, in classify_and_plan_ligation_with_llm
+    classification = _call_llm_for_shunt_classification(group, leg_label, call_llm_fn)
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\shunt_classification_and_ligation_llm.py", line 479, in _call_llm_for_shunt_classification
+    raise RuntimeError(f"Shunt classification failed for {leg_label}")
+RuntimeError: Shunt classification failed for Left
+2026-04-30 09:59:11,374 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:11] "[35m[1mPOST /api/chat HTTP/1.1[0m" 500 -
+2026-04-30 09:59:11,377 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:11] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:14,614 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:14] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-30 09:59:15,894 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:15] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-30 09:59:16,699 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:16] "GET /api/status HTTP/1.1" 200 -
+2026-04-30 09:59:17,977 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:17] "GET /api/status HTTP/1.1" 200 -
+2026-04-30 09:59:17,979 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:17] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:17,982 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:17] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:17,984 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:17] "GET /api/session/155f6b9f-49cf-4c0a-be4d-bf327bc7140a/messages HTTP/1.1" 200 -
+2026-04-30 09:59:17,989 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:17] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:20,166 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-30 09:59:20,167 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11643 chars
+2026-04-30 09:59:20,167 shunt_classification_and_ligation_llm ERROR Shunt classification LLM call failed for Left: call_llm() got an unexpected keyword argument 'stream'
+2026-04-30 09:59:20,167 shunt_classification_and_ligation_llm ERROR Shunt classification failed for Left
+2026-04-30 09:59:20,167 __main__ ERROR Classification pipeline failed: Shunt classification failed for Left
+Traceback (most recent call last):
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\app.py", line 247, in api_chat
+    result = classify_and_plan_ligation_with_llm(
+        clip_list=clips,
+        call_llm_fn=call_llm,
+        retrieve_ligation_context_fn=retrieve_ligation_context,
+    )
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\shunt_classification_and_ligation_llm.py", line 567, in classify_and_plan_ligation_with_llm
+    classification = _call_llm_for_shunt_classification(group, leg_label, call_llm_fn)
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\shunt_classification_and_ligation_llm.py", line 479, in _call_llm_for_shunt_classification
+    raise RuntimeError(f"Shunt classification failed for {leg_label}")
+RuntimeError: Shunt classification failed for Left
+2026-04-30 09:59:20,176 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:20] "[35m[1mPOST /api/chat HTTP/1.1[0m" 500 -
+2026-04-30 09:59:20,179 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:20] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:27,926 __main__ INFO Database initialised.
+2026-04-30 09:59:27,945 rag_engine INFO BM25 index built (10 chunks).
+2026-04-30 09:59:27,945 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-04-30 09:59:27,946 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-04-30 09:59:27,952 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-04-30 09:59:27,952 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-04-30 09:59:30,948 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:30] "[36mGET / HTTP/1.1[0m" 304 -
+2026-04-30 09:59:33,019 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:33] "GET /api/status HTTP/1.1" 200 -
+2026-04-30 09:59:33,023 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:33] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:33,026 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:33] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:33,029 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:33] "GET /api/session/155f6b9f-49cf-4c0a-be4d-bf327bc7140a/messages HTTP/1.1" 200 -
+2026-04-30 09:59:33,034 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:33] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:33,952 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:33] "GET /api/session/8c8cffae-dd58-44a1-82b4-d1fe2d85c779/messages HTTP/1.1" 200 -
+2026-04-30 09:59:33,955 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:33] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:41,047 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-30 09:59:41,056 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11643 chars
+2026-04-30 09:59:41,920 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-30 09:59:41,921 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 3",\n    "confidence": 0.88,\n    "reasoning": [\n        "Found EP N1→N2, indicating SFJ incompetence",\n        "Presence of EP N2→N3 and RP N3→N1 without RP N2→N1",\n        "Matches Type 3 pattern: EP N1→N2, EP N2→N3, and RP N3→N1 without RP N2→N1"\n    ],\n    "ask_br'
+2026-04-30 09:59:41,924 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4318, completion=177
+2026-04-30 09:59:45,190 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-04-30 09:59:45,190 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 2061 chars
+2026-04-30 09:59:46,386 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-30 09:59:46,388 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 3",\n    "ligation_steps": [\n        "Ligate the tributary vein at the junction of N2→N3 to prevent reflux",\n        "Ligate the incompetent SFJ to prevent backflow into the saphenous vein",\n        "Consider ligation of the tributary vein at the junction of N3→N1 if reflux '
+2026-04-30 09:59:46,389 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=593, completion=345
+2026-04-30 09:59:46,400 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:46] "POST /api/chat HTTP/1.1" 200 -
+2026-04-30 09:59:46,403 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:46] "GET /api/sessions HTTP/1.1" 200 -
+2026-04-30 09:59:56,875 __main__ INFO Feedback received: session=8c8cffae-dd58-44a1-8, question=SFJ is incompetent with EP from femoral to GSV. Th, response=Type 3 (88%)
+2026-04-30 09:59:56,881 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 09:59:56] "POST /api/feedback HTTP/1.1" 200 -
+2026-04-30 10:00:05,112 werkzeug INFO 127.0.0.1 - - [30/Apr/2026 10:00:05] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:13:29,856 __main__ INFO Database initialised.
+2026-05-18 11:13:29,906 rag_engine INFO BM25 index built (10 chunks).
+2026-05-18 11:13:29,906 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-05-18 11:13:29,906 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-05-18 11:13:29,911 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-05-18 11:13:29,911 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-05-18 11:13:37,626 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:37] "GET / HTTP/1.1" 200 -
+2026-05-18 11:13:37,697 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:37] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-18 11:13:39,712 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:39] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:13:39,715 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:39] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 11:13:39,724 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:39] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 11:13:39,727 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:39] "GET /api/session/8c8cffae-dd58-44a1-82b4-d1fe2d85c779/messages HTTP/1.1" 200 -
+2026-05-18 11:13:39,753 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:39] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 11:13:56,223 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:56] "GET / HTTP/1.1" 200 -
+2026-05-18 11:13:56,297 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:56] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-18 11:13:58,317 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:58] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:13:58,321 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:58] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 11:13:58,330 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:58] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 11:13:58,333 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:58] "GET /api/session/8c8cffae-dd58-44a1-82b4-d1fe2d85c779/messages HTTP/1.1" 200 -
+2026-05-18 11:13:58,348 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:13:58] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 11:14:05,135 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:14:05] "POST /api/session HTTP/1.1" 200 -
+2026-05-18 11:14:05,138 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:14:05] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 11:14:11,837 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:14:11] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:14:30,451 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:14:30] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:14:41,830 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:14:41] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:14:52,601 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-18 11:14:52,612 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11596 chars
+2026-05-18 11:14:53,534 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-18 11:14:53,536 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 1",\n    "confidence": 0.90,\n    "reasoning": [\n        "Found EP N1→N2 with SFJ-ENTRY label, indicating SFJ incompetence",\n        "No EP N2→N3 present",\n        "RP N3→N1 present, but this is not a decisive factor in the presence of EP N1→N2 and the absence of EP N'
+2026-05-18 11:14:53,543 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4287, completion=180
+2026-05-18 11:14:56,485 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-05-18 11:14:56,485 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 2014 chars
+2026-05-18 11:14:57,869 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-18 11:14:57,870 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 1",\n    "ligation_steps": [\n        "Ligate the incompetent SFJ (saphenofemoral junction) to prevent reflux from the femoral vein into the great saphenous vein",\n        "Ligate the tributary vein between N3 and N1 to eliminate the reflux pathway",\n        "Consider ligatio'
+2026-05-18 11:14:57,870 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=562, completion=370
+2026-05-18 11:14:57,878 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:14:57] "POST /api/chat HTTP/1.1" 200 -
+2026-05-18 11:14:57,882 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:14:57] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 11:15:00,440 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:15:00] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:15:11,814 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:15:11] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:15:30,424 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:15:30] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:15:41,836 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:15:41] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:16:01,330 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:16:01] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:16:31,338 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:16:31] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:17:01,331 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:17:01] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:17:31,327 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:17:31] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:18:10,332 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:18:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:19:10,345 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:19:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:19:33,513 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:19:33] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:20:01,315 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:20:01] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:20:31,320 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:20:31] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:21:10,339 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:21:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:22:10,331 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:22:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:23:04,381 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:23:04] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:23:31,330 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:23:31] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:24:01,303 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:24:01] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:25:02,308 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:25:02] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:26:03,318 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:26:03] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:26:30,721 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:26:30] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:27:01,320 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:27:01] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:28:02,310 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:28:02] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:29:03,335 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:29:03] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:30:04,304 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:30:04] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:31:05,325 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:31:05] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:32:06,339 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:32:06] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:33:07,303 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:33:07] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:34:08,313 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:34:08] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:35:09,318 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:35:09] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:36:10,323 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:36:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:37:10,352 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:37:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:38:10,328 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:38:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:39:10,292 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:39:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:40:10,321 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:40:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:41:10,316 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:41:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:42:10,325 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:42:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:43:10,294 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:43:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:44:10,333 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:44:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:45:10,316 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:45:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:46:10,335 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:46:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:47:10,331 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:47:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:48:10,340 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:48:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:49:10,348 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:49:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:50:10,322 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:50:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:51:10,304 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:51:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:52:10,346 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:52:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:53:10,305 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:53:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:54:10,314 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:54:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:55:10,323 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:55:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:56:10,335 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:56:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:57:10,319 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:57:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:58:10,337 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:58:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 11:59:10,328 werkzeug INFO 127.0.0.1 - - [18/May/2026 11:59:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:00:10,313 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:00:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:01:10,318 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:01:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:02:10,349 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:02:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:03:10,344 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:03:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:04:10,341 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:04:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:05:10,335 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:05:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:06:10,339 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:06:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:07:10,342 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:07:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:08:10,346 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:08:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:09:10,334 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:09:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:10:10,311 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:10:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:11:10,335 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:11:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:12:10,305 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:12:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:13:10,311 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:13:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:14:10,305 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:14:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:15:10,344 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:15:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:16:10,341 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:16:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:17:10,347 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:17:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:18:10,331 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:18:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:19:10,315 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:19:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:20:10,306 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:20:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:21:10,323 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:21:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 12:22:10,340 werkzeug INFO 127.0.0.1 - - [18/May/2026 12:22:10] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:03:09,200 __main__ INFO Database initialised.
+2026-05-18 17:03:09,226 rag_engine INFO BM25 index built (10 chunks).
+2026-05-18 17:03:09,226 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-05-18 17:03:09,226 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-05-18 17:03:09,231 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-05-18 17:03:09,231 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-05-18 17:03:11,304 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:11] "GET / HTTP/1.1" 200 -
+2026-05-18 17:03:11,348 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:11] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-18 17:03:13,355 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:13] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:03:13,359 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:13] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 17:03:13,367 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:13] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 17:03:13,370 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:13] "GET /api/session/b4103da4-81fd-467d-972d-669cfebe3928/messages HTTP/1.1" 200 -
+2026-05-18 17:03:13,387 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:13] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 17:03:23,857 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:23] "[36mGET / HTTP/1.1[0m" 304 -
+2026-05-18 17:03:25,900 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:25] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:03:25,904 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:25] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 17:03:25,906 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:25] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 17:03:25,908 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:25] "GET /api/session/b4103da4-81fd-467d-972d-669cfebe3928/messages HTTP/1.1" 200 -
+2026-05-18 17:03:25,911 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:25] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 17:03:26,522 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:26] "POST /api/session HTTP/1.1" 200 -
+2026-05-18 17:03:26,524 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:26] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 17:03:58,316 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:03:58] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:04:28,327 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:04:28] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:04:58,329 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:04:58] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:05:28,359 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:05:28] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:05:58,321 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:05:58] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:06:28,348 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:06:28] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:06:58,345 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:06:58] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:07:48,318 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:07:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:08:48,342 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:08:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:09:48,337 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:09:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:10:48,358 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:10:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:11:48,340 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:11:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:12:48,336 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:12:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:13:48,295 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:13:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:14:48,351 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:14:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:15:48,331 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:15:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:16:48,334 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:16:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:17:48,333 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:17:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:18:48,335 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:18:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:19:48,313 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:19:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:20:48,339 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:20:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:21:48,322 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:21:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:22:48,321 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:22:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:23:48,345 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:23:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:24:48,338 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:24:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:25:48,366 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:25:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:26:23,994 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:26:23] "GET /api/session/b4103da4-81fd-467d-972d-669cfebe3928/messages HTTP/1.1" 200 -
+2026-05-18 17:26:24,003 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:26:24] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-18 17:26:24,525 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:26:24] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:26:28,001 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:26:28] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:26:57,947 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:26:57] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:27:27,983 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:27:27] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:27:58,342 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:27:58] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:28:28,352 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:28:28] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:29:29,300 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:29:29] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:30:30,336 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:30:30] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:31:31,311 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:31:31] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:32:32,337 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:32:32] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:33:33,312 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:33:33] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:34:34,316 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:34:34] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:35:35,364 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:35:35] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:36:36,344 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:36:36] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:36:58,324 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:36:58] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:37:28,348 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:37:28] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:38:29,341 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:38:29] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:39:30,351 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:39:30] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:40:31,351 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:40:31] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:41:32,334 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:41:32] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:42:33,358 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:42:33] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:43:34,364 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:43:34] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:44:35,325 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:44:35] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:45:36,349 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:45:36] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:46:37,350 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:46:37] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:47:02,840 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:47:02] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:47:28,324 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:47:28] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:47:58,354 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:47:58] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:48:48,349 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:48:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:49:48,359 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:49:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:50:48,354 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:50:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:51:48,342 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:51:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:52:48,337 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:52:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:53:48,338 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:53:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:54:48,346 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:54:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:55:48,358 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:55:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:56:48,358 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:56:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:57:48,348 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:57:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:58:48,327 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:58:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 17:59:48,305 werkzeug INFO 127.0.0.1 - - [18/May/2026 17:59:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:00:48,298 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:00:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:01:48,327 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:01:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:02:48,362 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:02:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:03:48,344 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:03:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:04:48,328 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:04:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:05:48,350 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:05:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:06:48,320 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:06:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:07:48,352 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:07:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:08:48,330 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:08:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:09:48,301 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:09:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:10:48,334 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:10:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:11:48,363 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:11:48] "GET /api/status HTTP/1.1" 200 -
+2026-05-18 18:12:29,217 werkzeug INFO 127.0.0.1 - - [18/May/2026 18:12:29] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:55:11,098 __main__ INFO Database initialised.
+2026-05-21 16:55:11,133 rag_engine INFO BM25 index built (10 chunks).
+2026-05-21 16:55:11,133 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-05-21 16:55:11,133 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-05-21 16:55:11,139 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-05-21 16:55:11,139 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-05-21 16:55:13,205 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:55:13] "GET / HTTP/1.1" 200 -
+2026-05-21 16:55:13,255 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:55:13] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-21 16:55:15,286 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:55:15] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:55:15,289 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:55:15] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:55:15,296 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:55:15] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:55:15,299 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:55:15] "GET /api/session/8ba1e1c1-6455-4bba-8163-29bc34145747/messages HTTP/1.1" 200 -
+2026-05-21 16:55:15,302 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:55:15] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:55:19,490 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:55:19] "GET /api/session/b4103da4-81fd-467d-972d-669cfebe3928/messages HTTP/1.1" 200 -
+2026-05-21 16:55:19,508 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:55:19] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:55:47,382 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:55:47] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:56:02,552 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:02] "GET /api/session/8ba1e1c1-6455-4bba-8163-29bc34145747/messages HTTP/1.1" 200 -
+2026-05-21 16:56:02,555 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:02] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:56:07,465 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-21 16:56:07,471 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Left: 11549 chars
+2026-05-21 16:56:08,609 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-21 16:56:08,611 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Left): '```json\n{\n    "shunt_type": "Type 1",\n    "confidence": 0.90,\n    "reasoning": [\n        "Found EP N1→N2 with y=0.060, indicating SFJ incompetence",\n        "No EP N2→N3 present",\n        "RP N2→N1 present with y=0.300, indicating GSV reflux",\n        "Matched pattern to Type 1: SFJ incompetent with'
+2026-05-21 16:56:08,611 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Left): prompt=4273, completion=148
+2026-05-21 16:56:10,649 rag_engine ERROR Embedding error: 404 Client Error: Not Found for url: http://localhost:11434/api/embed
+2026-05-21 16:56:10,649 rag_engine ERROR Vector search failed: 'QdrantClient' object has no attribute 'search'
+2026-05-21 16:56:10,649 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Left: 1967 chars
+2026-05-21 16:56:12,125 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-21 16:56:12,126 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Left): '{\n    "shunt_type": "Type 1",\n    "ligation_steps": [\n        "Ligate the incompetent SFJ (saphenofemoral junction) to prevent reflux from the femoral vein into the saphenous vein",\n        "Ligate the refluxing segment of the GSV (great saphenous vein) between N2 and N1 to prevent retrograde flow"\n'
+2026-05-21 16:56:12,126 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Left): prompt=548, completion=323
+2026-05-21 16:56:12,136 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:12] "POST /api/chat HTTP/1.1" 200 -
+2026-05-21 16:56:12,141 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:12] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:56:17,342 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:17] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:56:34,108 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:34] "GET /api/feedback HTTP/1.1" 200 -
+2026-05-21 16:56:35,954 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:35] "GET /api/session/8ba1e1c1-6455-4bba-8163-29bc34145747/messages HTTP/1.1" 200 -
+2026-05-21 16:56:35,957 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:35] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:56:37,984 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:37] "GET /api/session/b4103da4-81fd-467d-972d-669cfebe3928/messages HTTP/1.1" 200 -
+2026-05-21 16:56:37,987 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:37] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:56:39,160 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:39] "GET /api/session/8ba1e1c1-6455-4bba-8163-29bc34145747/messages HTTP/1.1" 200 -
+2026-05-21 16:56:39,163 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:39] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:56:39,315 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:39] "GET /api/session/8ba1e1c1-6455-4bba-8163-29bc34145747/messages HTTP/1.1" 200 -
+2026-05-21 16:56:39,319 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:39] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:56:39,450 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:39] "GET /api/session/8ba1e1c1-6455-4bba-8163-29bc34145747/messages HTTP/1.1" 200 -
+2026-05-21 16:56:39,453 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:39] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:56:40,090 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:40] "GET /api/session/8ba1e1c1-6455-4bba-8163-29bc34145747/messages HTTP/1.1" 200 -
+2026-05-21 16:56:40,093 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:40] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:56:47,385 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:56:47] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:57:17,397 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:17] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:57:33,172 __main__ INFO Database initialised.
+2026-05-21 16:57:33,190 rag_engine INFO BM25 index built (10 chunks).
+2026-05-21 16:57:33,190 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-05-21 16:57:33,191 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-05-21 16:57:33,196 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-05-21 16:57:33,196 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-05-21 16:57:35,260 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:35] "[36mGET / HTTP/1.1[0m" 304 -
+2026-05-21 16:57:37,336 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:37] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:57:37,339 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:37] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:57:37,348 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:37] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:57:37,350 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:37] "GET /api/session/8ba1e1c1-6455-4bba-8163-29bc34145747/messages HTTP/1.1" 200 -
+2026-05-21 16:57:37,372 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:37] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:57:44,975 __main__ INFO Database initialised.
+2026-05-21 16:57:44,991 __main__ ERROR Qdrant collection 'ligation_knowledgebase_db_v2' not found in C:\Users\Krish\Downloads\Cygnus_Med_Demo\cmed_demo\backend\qdrant_storage. Ensure the parent backend/qdrant_storage is intact.
+2026-05-21 16:57:44,991 __main__ INFO CHIVA Clinical Assistant ready at http://127.0.0.1:7860
+2026-05-21 16:57:44,996 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-05-21 16:57:44,996 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-05-21 16:57:47,038 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:47] "[36mGET / HTTP/1.1[0m" 304 -
+2026-05-21 16:57:49,103 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:49] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:57:49,106 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:49] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:57:49,114 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:49] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:57:49,116 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:49] "GET /api/session/8ba1e1c1-6455-4bba-8163-29bc34145747/messages HTTP/1.1" 200 -
+2026-05-21 16:57:49,136 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:57:49] "GET /api/sessions HTTP/1.1" 200 -
+2026-05-21 16:58:21,196 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:58:21] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:58:51,334 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:58:51] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:59:21,320 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:59:21] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 16:59:51,305 werkzeug INFO 127.0.0.1 - - [21/May/2026 16:59:51] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 17:00:21,337 werkzeug INFO 127.0.0.1 - - [21/May/2026 17:00:21] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 17:00:51,332 werkzeug INFO 127.0.0.1 - - [21/May/2026 17:00:51] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 17:01:21,346 werkzeug INFO 127.0.0.1 - - [21/May/2026 17:01:21] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 17:02:22,310 werkzeug INFO 127.0.0.1 - - [21/May/2026 17:02:22] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 17:03:23,339 werkzeug INFO 127.0.0.1 - - [21/May/2026 17:03:23] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 17:04:24,343 werkzeug INFO 127.0.0.1 - - [21/May/2026 17:04:24] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 17:05:25,316 werkzeug INFO 127.0.0.1 - - [21/May/2026 17:05:25] "GET /api/status HTTP/1.1" 200 -
+2026-05-21 17:06:26,348 werkzeug INFO 127.0.0.1 - - [21/May/2026 17:06:26] "GET /api/status HTTP/1.1" 200 -

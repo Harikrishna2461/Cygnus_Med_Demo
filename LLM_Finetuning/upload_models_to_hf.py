@@ -12,7 +12,7 @@ import json
 import subprocess
 
 # HF Token
-HF_TOKEN = "YOUR_HF_TOKEN_HERE"
+HF_TOKEN = ""
 HF_ORG = "your_huggingface_username"  # Will be auto-detected
 
 print("="*80)

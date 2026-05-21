@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Krish\\\\Downloads\\\\llm_continued_pretraining\\\\src\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Krish\\\\Downloads\\\\llm_continued_pretraining\\\\data\\\\raw\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Krish\\\\Downloads\\\\llm_continued_pretraining\\\\data\\\\chunks\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Krish\\\\Downloads\\\\llm_continued_pretraining\\\\data\\\\final\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Krish\\\\Downloads\\\\llm_continued_pretraining\\\\data\\\\analysis\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Krish\\\\Downloads\\\\llm_continued_pretraining\\\\logs\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Krish\\\\Downloads\\\\llm_continued_pretraining\\\\models\")",
+      "Bash(python -c ' *)",
+      "Bash(python src/extract_books.py)",
+      "Bash(pip install *)",
+      "PowerShell(pip install -q loguru tqdm chardet ftfy pymupdf pymupdf-fonts pdf2image pytesseract pillow opencv-python ebooklib beautifulsoup4 lxml python-docx nltk datasketch scipy scikit-learn matplotlib seaborn numpy pandas pathlib2 psutil regex 2>&1)",
+      "PowerShell(tail -20)",
+      "PowerShell(python -m pip install -q loguru tqdm chardet ftfy pymupdf pymupdf-fonts pdf2image pytesseract pillow opencv-python ebooklib beautifulsoup4 lxml python-docx nltk datasketch scipy scikit-learn matplotlib seaborn numpy pandas psutil regex 2>&1)",
+      "PowerShell(tail -30)",
+      "PowerShell(python -m pip install -q loguru tqdm chardet ftfy pymupdf pymupdf-fonts pdf2image pytesseract pillow opencv-python ebooklib beautifulsoup4 lxml python-docx nltk datasketch scipy scikit-learn matplotlib seaborn numpy pandas psutil regex)",
+      "Bash(Get-ChildItem -Recurse data/final -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name, Length)",
+      "PowerShell(cd \"c:\\\\Users\\\\Krish\\\\Downloads\\\\llm_continued_pretraining\"; @\\(\"data/final/train.jsonl\", \"data/final/eval.jsonl\"\\) | ForEach-Object { if \\(Test-Path $_\\) { $lines = \\(Get-Content $_ | Measure-Object -Line\\).Lines; Write-Host \"$_`: $lines chunks\" } else { Write-Host \"$_`: NOT FOUND\" } })",
+      "Bash(python3)",
+      "Bash(python)",
+      "Bash(python3 -m json.tool)",
+      "Bash(python3 -m pip install -q deep-translator nltk tqdm scikit-learn langdetect)",
+      "Bash(python3 src/augment/back_translate.py)",
+      "Bash(python3 src/augment/extractive_restatement.py)",
+      "Bash(python3 src/augment/back_translate_fast.py)",
+      "Bash(python3 src/augment/merge_dataset.py)",
+      "Bash(python3 src/augment/validate_dataset.py)",
+      "Bash(python3 dedup_final.py)",
+      "Bash(grep -E \"\\\\.\\(ipynb|py|md|txt|jsonl\\)$\")",
+      "Bash(awk '{print $NF}')",
+      "Bash(nvidia-smi)",
+      "Bash(Get-PSDrive)",
+      "Bash(Select-Object Name, Used, Free)",
+      "Bash(Format-Table)"
+    ]
+  }
+}

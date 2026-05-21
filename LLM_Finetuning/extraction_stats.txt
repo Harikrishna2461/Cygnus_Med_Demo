@@ -1,0 +1,35 @@
+PDF EXTRACTION STATISTICS
+Generated: 2026-05-13T17:07:27.587037
+
+================================================================================
+Total PDFs: 17
+Successful: 14
+Failed: 3
+
+Extraction Methods:
+  pdfplumber: 14
+  OCR: 0
+
+Output Statistics:
+  Total words: 899,042
+  Total characters: 5,923,718
+  File size: 5.76 MB
+
+================================================================================
+Per-file status:
+  0-Handbook of Venous and Lymphatic Disorders Guidelines of the American Venous Forum by Peter Gloviczki et al. (eds.) (z-lib.org).pdf: success (pdfplumber)
+  0-Saphenous-Vein-Sparing-Strategies-in-Chronic-Venous-Disease.pdf: success (pdfplumber)
+  2019 book Principles of Venous Hemodynamics Franceschi Zambo.pdf: success (pdfplumber)
+  2025-02-19-Theraclion-investor-presentation-extended-V33.2_compressed-2.pdf: success (pdfplumber)
+  CHIVA STRATEGY Gianesini014.pdf: success (pdfplumber)
+  CHIVABook1988-1993_2.pdf: failed
+  Carriazo2015.pdf: success (pdfplumber)
+  DelfrateR CHIVA article.pdf: success (pdfplumber)
+  Ligation_Knowledgebase_1.pdf: success (pdfplumber)
+  Ligation_Knowledgebase_2.pdf: failed
+  PrinciplesofVenousHemodynamicsFranceschiZamboni2009.pdf: success (pdfplumber)
+  Shunt_Book_8.pdf: success (pdfplumber)
+  Shunt_Classification_Cheetsheat.pdf: success (pdfplumber)
+  Task_1_Shunt_Classification_Knowledgebase.pdf: failed
+  US Lower Extremity Veins_Anatomy and Basic Approach.pdf: success (pdfplumber)
+  adler-et-al-2022-varicose-veins-of-the-lower-extremity-doppler-us-evaluation-protocols-patterns-and-pitfalls.pdf: success (pdfplumber)

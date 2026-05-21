@@ -1,0 +1,300 @@
+{"input": "EP N1→N2 at y=0.05, RP N2→N1 at y=0.13", "output": "ST1", "category": "classification", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.03, RP N2→N1 at y=0.13", "output": "ST1", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.05, RP N2→N1 at y=0.13", "output": "ST1", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.08, RP N2→N1 at y=0.13", "output": "ST1", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "For ST1 shunt, what is the ligation strategy?", "output": "- Ligation at the SFJ", "category": "ligation_strategy", "real_case": "clipdata.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, RP N2→N1 at y=0.13\nWhat should be the ligation strategy?", "output": "- Ligation at the SFJ", "category": "ligation_with_context", "real_case": "clipdata.json"}
+{"input": "Why is EP N1→N2 at y=0.05, RP N2→N1 at y=0.13 classified as ST1?", "output": "- EP exists from N1 to N2 at SFJ \n-- RP exists along N2, but no RP exists along N3", "category": "reasoning", "real_case": "clipdata.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, RP N2→N1 at y=0.13", "output": "ST1 (SFJ incompetent)", "category": "classification_short", "real_case": "clipdata.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, RP N2→N1 at y=0.13\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with isolated GSV reflux (Type 1)", "category": "key_finding", "real_case": "clipdata.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, RP N2→N1 at y=0.13. Next step?", "output": "Classification: ST1. Ligation strategy: - Ligation at the SFJ", "category": "clinical_decision", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.08, RP N2→N1 at y=0.17", "output": "ST1", "category": "classification", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.03, RP N2→N1 at y=0.17", "output": "ST1", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.05, RP N2→N1 at y=0.17", "output": "ST1", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.08, RP N2→N1 at y=0.17", "output": "ST1", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "For ST1 shunt, what is the ligation strategy?", "output": "- Ligation at the SFJ", "category": "ligation_strategy", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N1→N2 at y=0.08, RP N2→N1 at y=0.17\nWhat should be the ligation strategy?", "output": "- Ligation at the SFJ", "category": "ligation_with_context", "real_case": "clipdata2.json"}
+{"input": "Why is EP N1→N2 at y=0.08, RP N2→N1 at y=0.17 classified as ST1?", "output": "- EP exists from N1 to N2 at SFJ \n-- RP exists along N2, but no RP exists along N3", "category": "reasoning", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N1→N2 at y=0.08, RP N2→N1 at y=0.17", "output": "ST1 (SFJ incompetent)", "category": "classification_short", "real_case": "clipdata2.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.08, RP N2→N1 at y=0.17\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with isolated GSV reflux (Type 1)", "category": "key_finding", "real_case": "clipdata2.json"}
+{"input": "Patient with EP N1→N2 at y=0.08, RP N2→N1 at y=0.17. Next step?", "output": "Classification: ST1. Ligation strategy: - Ligation at the SFJ", "category": "clinical_decision", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.10, RP N2→N1 at y=0.21", "output": "ST1", "category": "classification", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.03, RP N2→N1 at y=0.21", "output": "ST1", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.05, RP N2→N1 at y=0.21", "output": "ST1", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.08, RP N2→N1 at y=0.21", "output": "ST1", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "For ST1 shunt, what is the ligation strategy?", "output": "- Ligation at the Hunterian Perforator closer to N2", "category": "ligation_strategy", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N1→N2 at y=0.10, RP N2→N1 at y=0.21\nWhat should be the ligation strategy?", "output": "- Ligation at the Hunterian Perforator closer to N2", "category": "ligation_with_context", "real_case": "clipdata3.json"}
+{"input": "Why is EP N1→N2 at y=0.10, RP N2→N1 at y=0.21 classified as ST1?", "output": "- EP exists from N1 to N2 at Hunterian perforator \n-- RP exists along N2, but no RP exists along N3", "category": "reasoning", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N1→N2 at y=0.10, RP N2→N1 at y=0.21", "output": "ST1 (SFJ incompetent)", "category": "classification_short", "real_case": "clipdata3.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.10, RP N2→N1 at y=0.21\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with isolated GSV reflux (Type 1)", "category": "key_finding", "real_case": "clipdata3.json"}
+{"input": "Patient with EP N1→N2 at y=0.10, RP N2→N1 at y=0.21. Next step?", "output": "Classification: ST1. Ligation strategy: - Ligation at the Hunterian Perforator closer to N2", "category": "clinical_decision", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.04, RP N2→N1 at y=0.20", "output": "ST1", "category": "classification", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.03, RP N2→N1 at y=0.20", "output": "ST1", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.05, RP N2→N1 at y=0.20", "output": "ST1", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.08, RP N2→N1 at y=0.20", "output": "ST1", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "For ST1 shunt, what is the ligation strategy?", "output": "- Ligation at the SFJ", "category": "ligation_strategy", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N1→N2 at y=0.04, RP N2→N1 at y=0.20\nWhat should be the ligation strategy?", "output": "- Ligation at the SFJ", "category": "ligation_with_context", "real_case": "clipdata4.json"}
+{"input": "Why is EP N1→N2 at y=0.04, RP N2→N1 at y=0.20 classified as ST1?", "output": "- EP exists from N1 to N2 at SFJ \n-- RP exists along N2, but no RP exists along N3", "category": "reasoning", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N1→N2 at y=0.04, RP N2→N1 at y=0.20", "output": "ST1 (SFJ incompetent)", "category": "classification_short", "real_case": "clipdata4.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.04, RP N2→N1 at y=0.20\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with isolated GSV reflux (Type 1)", "category": "key_finding", "real_case": "clipdata4.json"}
+{"input": "Patient with EP N1→N2 at y=0.04, RP N2→N1 at y=0.20. Next step?", "output": "Classification: ST1. Ligation strategy: - Ligation at the SFJ", "category": "clinical_decision", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.13, RP N2→N1 at y=0.27", "output": "ST1", "category": "classification", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.03, RP N2→N1 at y=0.27", "output": "ST1", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.05, RP N2→N1 at y=0.27", "output": "ST1", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.08, RP N2→N1 at y=0.27", "output": "ST1", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "For ST1 shunt, what is the ligation strategy?", "output": "- Ligation at the Hunterian Perforator closer to N2", "category": "ligation_strategy", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N1→N2 at y=0.13, RP N2→N1 at y=0.27\nWhat should be the ligation strategy?", "output": "- Ligation at the Hunterian Perforator closer to N2", "category": "ligation_with_context", "real_case": "clipdata5.json"}
+{"input": "Why is EP N1→N2 at y=0.13, RP N2→N1 at y=0.27 classified as ST1?", "output": "- EP exists from N1 to N2 at Hunterian perforator \n-- RP exists along N2, but no RP exists along N3", "category": "reasoning", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N1→N2 at y=0.13, RP N2→N1 at y=0.27", "output": "ST1 (SFJ incompetent)", "category": "classification_short", "real_case": "clipdata5.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.13, RP N2→N1 at y=0.27\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with isolated GSV reflux (Type 1)", "category": "key_finding", "real_case": "clipdata5.json"}
+{"input": "Patient with EP N1→N2 at y=0.13, RP N2→N1 at y=0.27. Next step?", "output": "Classification: ST1. Ligation strategy: - Ligation at the Hunterian Perforator closer to N2", "category": "clinical_decision", "real_case": "clipdata5.json"}
+{"input": "EP N2→N3 at y=0.05", "output": "ST2A", "category": "classification", "real_case": "clipdata.json"}
+{"input": "EP N2→N3 at y=0.03", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N2→N3 at y=0.05", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N2→N3 at y=0.08", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "For ST2A shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata.json"}
+{"input": "Classify: EP N2→N3 at y=0.05\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata.json"}
+{"input": "Why is EP N2→N3 at y=0.05 classified as ST2A?", "output": "- EP exists from N2 to N3, but no EP exists from N1 to N2", "category": "reasoning", "real_case": "clipdata.json"}
+{"input": "Classify: EP N2→N3 at y=0.05", "output": "ST2A (SFJ competent)", "category": "classification_short", "real_case": "clipdata.json"}
+{"input": "Examine this pattern: EP N2→N3 at y=0.05\nWhat is the key diagnostic finding?", "output": "Key finding: GSV feed to tributaries with competent SFJ (Type 2A)", "category": "key_finding", "real_case": "clipdata.json"}
+{"input": "Patient with EP N2→N3 at y=0.05. Next step?", "output": "Classification: ST2A. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata.json"}
+{"input": "EP N2→N3 at y=0.09", "output": "ST2A", "category": "classification", "real_case": "clipdata2.json"}
+{"input": "EP N2→N3 at y=0.03", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N2→N3 at y=0.05", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N2→N3 at y=0.08", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "For ST2A shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N2→N3 at y=0.09\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata2.json"}
+{"input": "Why is EP N2→N3 at y=0.09 classified as ST2A?", "output": "- EP exists from N2 to N3, but no EP exists from N1 to N2", "category": "reasoning", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N2→N3 at y=0.09", "output": "ST2A (SFJ competent)", "category": "classification_short", "real_case": "clipdata2.json"}
+{"input": "Examine this pattern: EP N2→N3 at y=0.09\nWhat is the key diagnostic finding?", "output": "Key finding: GSV feed to tributaries with competent SFJ (Type 2A)", "category": "key_finding", "real_case": "clipdata2.json"}
+{"input": "Patient with EP N2→N3 at y=0.09. Next step?", "output": "Classification: ST2A. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata2.json"}
+{"input": "EP N2→N3 at y=0.12", "output": "ST2A", "category": "classification", "real_case": "clipdata3.json"}
+{"input": "EP N2→N3 at y=0.03", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N2→N3 at y=0.05", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N2→N3 at y=0.08", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "For ST2A shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N2→N3 at y=0.12\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata3.json"}
+{"input": "Why is EP N2→N3 at y=0.12 classified as ST2A?", "output": "- EP exists from N2 to N3, but no EP exists from N1 to N2", "category": "reasoning", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N2→N3 at y=0.12", "output": "ST2A (SFJ competent)", "category": "classification_short", "real_case": "clipdata3.json"}
+{"input": "Examine this pattern: EP N2→N3 at y=0.12\nWhat is the key diagnostic finding?", "output": "Key finding: GSV feed to tributaries with competent SFJ (Type 2A)", "category": "key_finding", "real_case": "clipdata3.json"}
+{"input": "Patient with EP N2→N3 at y=0.12. Next step?", "output": "Classification: ST2A. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata3.json"}
+{"input": "EP N2→N3 at y=0.08", "output": "ST2A", "category": "classification", "real_case": "clipdata4.json"}
+{"input": "EP N2→N3 at y=0.03", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N2→N3 at y=0.05", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N2→N3 at y=0.08", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "For ST2A shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N2→N3 at y=0.08\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata4.json"}
+{"input": "Why is EP N2→N3 at y=0.08 classified as ST2A?", "output": "- EP exists from N2 to N3, but no EP exists from N1 to N2", "category": "reasoning", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N2→N3 at y=0.08", "output": "ST2A (SFJ competent)", "category": "classification_short", "real_case": "clipdata4.json"}
+{"input": "Examine this pattern: EP N2→N3 at y=0.08\nWhat is the key diagnostic finding?", "output": "Key finding: GSV feed to tributaries with competent SFJ (Type 2A)", "category": "key_finding", "real_case": "clipdata4.json"}
+{"input": "Patient with EP N2→N3 at y=0.08. Next step?", "output": "Classification: ST2A. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata4.json"}
+{"input": "EP N2→N3 at y=0.17", "output": "ST2A", "category": "classification", "real_case": "clipdata5.json"}
+{"input": "EP N2→N3 at y=0.03", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N2→N3 at y=0.05", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N2→N3 at y=0.08", "output": "ST2A", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "For ST2A shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N2→N3 at y=0.17\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata5.json"}
+{"input": "Why is EP N2→N3 at y=0.17 classified as ST2A?", "output": "- EP exists from N2 to N3, but no EP exists from N1 to N2", "category": "reasoning", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N2→N3 at y=0.17", "output": "ST2A (SFJ competent)", "category": "classification_short", "real_case": "clipdata5.json"}
+{"input": "Examine this pattern: EP N2→N3 at y=0.17\nWhat is the key diagnostic finding?", "output": "Key finding: GSV feed to tributaries with competent SFJ (Type 2A)", "category": "key_finding", "real_case": "clipdata5.json"}
+{"input": "Patient with EP N2→N3 at y=0.17. Next step?", "output": "Classification: ST2A. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata5.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N1 at y=0.13", "output": "ST2B", "category": "classification", "real_case": "clipdata.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N1 at y=0.13", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N1 at y=0.13", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N1 at y=0.13", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "For ST2B shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata.json"}
+{"input": "Classify: EP N2→N2 at y=0.05, RP N3→N1 at y=0.13\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata.json"}
+{"input": "Why is EP N2→N2 at y=0.05, RP N3→N1 at y=0.13 classified as ST2B?", "output": "- EP starts at mid GSV from N2 to N2 \n- RP exists along N3, but no RP exists along N2", "category": "reasoning", "real_case": "clipdata.json"}
+{"input": "Classify: EP N2→N2 at y=0.05, RP N3→N1 at y=0.13", "output": "ST2B (SFJ competent)", "category": "classification_short", "real_case": "clipdata.json"}
+{"input": "Examine this pattern: EP N2→N2 at y=0.05, RP N3→N1 at y=0.13\nWhat is the key diagnostic finding?", "output": "Key finding: Perforator entry point (Type 2B or 2C)", "category": "key_finding", "real_case": "clipdata.json"}
+{"input": "Patient with EP N2→N2 at y=0.05, RP N3→N1 at y=0.13. Next step?", "output": "Classification: ST2B. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N1 at y=0.13", "output": "ST2B", "category": "classification", "real_case": "clipdata2.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N1 at y=0.13", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N1 at y=0.13", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N1 at y=0.13", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "For ST2B shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N2→N2 at y=0.05, RP N3→N1 at y=0.13\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata2.json"}
+{"input": "Why is EP N2→N2 at y=0.05, RP N3→N1 at y=0.13 classified as ST2B?", "output": "- EP starts at mid GSV from N2 to N2 \n- RP exists along N3, but no RP exists along N2", "category": "reasoning", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N2→N2 at y=0.05, RP N3→N1 at y=0.13", "output": "ST2B (SFJ competent)", "category": "classification_short", "real_case": "clipdata2.json"}
+{"input": "Examine this pattern: EP N2→N2 at y=0.05, RP N3→N1 at y=0.13\nWhat is the key diagnostic finding?", "output": "Key finding: Perforator entry point (Type 2B or 2C)", "category": "key_finding", "real_case": "clipdata2.json"}
+{"input": "Patient with EP N2→N2 at y=0.05, RP N3→N1 at y=0.13. Next step?", "output": "Classification: ST2B. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata2.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N1 at y=0.18", "output": "ST2B", "category": "classification", "real_case": "clipdata3.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N1 at y=0.18", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N1 at y=0.18", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N1 at y=0.18", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "For ST2B shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N2→N2 at y=0.05, RP N3→N1 at y=0.18\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata3.json"}
+{"input": "Why is EP N2→N2 at y=0.05, RP N3→N1 at y=0.18 classified as ST2B?", "output": "- EP starts at mid GSV from N2 to N2 \n- RP exists along N3, but no RP exists along N2", "category": "reasoning", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N2→N2 at y=0.05, RP N3→N1 at y=0.18", "output": "ST2B (SFJ competent)", "category": "classification_short", "real_case": "clipdata3.json"}
+{"input": "Examine this pattern: EP N2→N2 at y=0.05, RP N3→N1 at y=0.18\nWhat is the key diagnostic finding?", "output": "Key finding: Perforator entry point (Type 2B or 2C)", "category": "key_finding", "real_case": "clipdata3.json"}
+{"input": "Patient with EP N2→N2 at y=0.05, RP N3→N1 at y=0.18. Next step?", "output": "Classification: ST2B. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata3.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N1 at y=0.21", "output": "ST2B", "category": "classification", "real_case": "clipdata4.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N1 at y=0.21", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N1 at y=0.21", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N1 at y=0.21", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "For ST2B shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N2→N2 at y=0.08, RP N3→N1 at y=0.21\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata4.json"}
+{"input": "Why is EP N2→N2 at y=0.08, RP N3→N1 at y=0.21 classified as ST2B?", "output": "- EP starts at mid GSV from N2 to N2 \n- RP exists along N3, but no RP exists along N2", "category": "reasoning", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N2→N2 at y=0.08, RP N3→N1 at y=0.21", "output": "ST2B (SFJ competent)", "category": "classification_short", "real_case": "clipdata4.json"}
+{"input": "Examine this pattern: EP N2→N2 at y=0.08, RP N3→N1 at y=0.21\nWhat is the key diagnostic finding?", "output": "Key finding: Perforator entry point (Type 2B or 2C)", "category": "key_finding", "real_case": "clipdata4.json"}
+{"input": "Patient with EP N2→N2 at y=0.08, RP N3→N1 at y=0.21. Next step?", "output": "Classification: ST2B. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata4.json"}
+{"input": "EP N2→N2 at y=0.09, RP N3→N1 at y=0.26", "output": "ST2B", "category": "classification", "real_case": "clipdata5.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N1 at y=0.26", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N1 at y=0.26", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N1 at y=0.26", "output": "ST2B", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "For ST2B shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N2→N2 at y=0.09, RP N3→N1 at y=0.26\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata5.json"}
+{"input": "Why is EP N2→N2 at y=0.09, RP N3→N1 at y=0.26 classified as ST2B?", "output": "- EP starts at mid GSV from N2 to N2 \n- RP exists along N3, but no RP exists along N2", "category": "reasoning", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N2→N2 at y=0.09, RP N3→N1 at y=0.26", "output": "ST2B (SFJ competent)", "category": "classification_short", "real_case": "clipdata5.json"}
+{"input": "Examine this pattern: EP N2→N2 at y=0.09, RP N3→N1 at y=0.26\nWhat is the key diagnostic finding?", "output": "Key finding: Perforator entry point (Type 2B or 2C)", "category": "key_finding", "real_case": "clipdata5.json"}
+{"input": "Patient with EP N2→N2 at y=0.09, RP N3→N1 at y=0.26. Next step?", "output": "Classification: ST2B. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata5.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N2 at y=0.17, RP N2→N1 at y=0.31", "output": "ST2C", "category": "classification", "real_case": "clipdata.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N2 at y=0.17, RP N2→N1 at y=0.31", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N2 at y=0.17, RP N2→N1 at y=0.31", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N2 at y=0.17, RP N2→N1 at y=0.31", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "For ST2C shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata.json"}
+{"input": "Classify: EP N2→N2 at y=0.03, RP N3→N2 at y=0.17, RP N2→N1 at y=0.31\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata.json"}
+{"input": "Why is EP N2→N2 at y=0.03, RP N3→N2 at y=0.17, RP N2→N1 at y=0.31 classified as ST2C?", "output": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3", "category": "reasoning", "real_case": "clipdata.json"}
+{"input": "Classify: EP N2→N2 at y=0.03, RP N3→N2 at y=0.17, RP N2→N1 at y=0.31", "output": "ST2C (SFJ competent)", "category": "classification_short", "real_case": "clipdata.json"}
+{"input": "Examine this pattern: EP N2→N2 at y=0.03, RP N3→N2 at y=0.17, RP N2→N1 at y=0.31\nWhat is the key diagnostic finding?", "output": "Key finding: Perforator entry point (Type 2B or 2C)", "category": "key_finding", "real_case": "clipdata.json"}
+{"input": "Patient with EP N2→N2 at y=0.03, RP N3→N2 at y=0.17, RP N2→N1 at y=0.31. Next step?", "output": "Classification: ST2C. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata.json"}
+{"input": "EP N2→N2 at y=0.04, RP N3→N2 at y=0.12, RP N2→N1 at y=0.25", "output": "ST2C", "category": "classification", "real_case": "clipdata2.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N2 at y=0.12, RP N2→N1 at y=0.25", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N2 at y=0.12, RP N2→N1 at y=0.25", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N2 at y=0.12, RP N2→N1 at y=0.25", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "For ST2C shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N2→N2 at y=0.04, RP N3→N2 at y=0.12, RP N2→N1 at y=0.25\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata2.json"}
+{"input": "Why is EP N2→N2 at y=0.04, RP N3→N2 at y=0.12, RP N2→N1 at y=0.25 classified as ST2C?", "output": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3", "category": "reasoning", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N2→N2 at y=0.04, RP N3→N2 at y=0.12, RP N2→N1 at y=0.25", "output": "ST2C (SFJ competent)", "category": "classification_short", "real_case": "clipdata2.json"}
+{"input": "Examine this pattern: EP N2→N2 at y=0.04, RP N3→N2 at y=0.12, RP N2→N1 at y=0.25\nWhat is the key diagnostic finding?", "output": "Key finding: Perforator entry point (Type 2B or 2C)", "category": "key_finding", "real_case": "clipdata2.json"}
+{"input": "Patient with EP N2→N2 at y=0.04, RP N3→N2 at y=0.12, RP N2→N1 at y=0.25. Next step?", "output": "Classification: ST2C. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata2.json"}
+{"input": "EP N2→N2 at y=0.04, RP N3→N2 at y=0.16, RP N2→N1 at y=0.29", "output": "ST2C", "category": "classification", "real_case": "clipdata3.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N2 at y=0.16, RP N2→N1 at y=0.29", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N2 at y=0.16, RP N2→N1 at y=0.29", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N2 at y=0.16, RP N2→N1 at y=0.29", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "For ST2C shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N2→N2 at y=0.04, RP N3→N2 at y=0.16, RP N2→N1 at y=0.29\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata3.json"}
+{"input": "Why is EP N2→N2 at y=0.04, RP N3→N2 at y=0.16, RP N2→N1 at y=0.29 classified as ST2C?", "output": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3", "category": "reasoning", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N2→N2 at y=0.04, RP N3→N2 at y=0.16, RP N2→N1 at y=0.29", "output": "ST2C (SFJ competent)", "category": "classification_short", "real_case": "clipdata3.json"}
+{"input": "Examine this pattern: EP N2→N2 at y=0.04, RP N3→N2 at y=0.16, RP N2→N1 at y=0.29\nWhat is the key diagnostic finding?", "output": "Key finding: Perforator entry point (Type 2B or 2C)", "category": "key_finding", "real_case": "clipdata3.json"}
+{"input": "Patient with EP N2→N2 at y=0.04, RP N3→N2 at y=0.16, RP N2→N1 at y=0.29. Next step?", "output": "Classification: ST2C. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata3.json"}
+{"input": "EP N2→N2 at y=0.04, RP N3→N2 at y=0.21, RP N2→N1 at y=0.38", "output": "ST2C", "category": "classification", "real_case": "clipdata4.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N2 at y=0.21, RP N2→N1 at y=0.38", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N2 at y=0.21, RP N2→N1 at y=0.38", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N2 at y=0.21, RP N2→N1 at y=0.38", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "For ST2C shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N2→N2 at y=0.04, RP N3→N2 at y=0.21, RP N2→N1 at y=0.38\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata4.json"}
+{"input": "Why is EP N2→N2 at y=0.04, RP N3→N2 at y=0.21, RP N2→N1 at y=0.38 classified as ST2C?", "output": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3", "category": "reasoning", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N2→N2 at y=0.04, RP N3→N2 at y=0.21, RP N2→N1 at y=0.38", "output": "ST2C (SFJ competent)", "category": "classification_short", "real_case": "clipdata4.json"}
+{"input": "Examine this pattern: EP N2→N2 at y=0.04, RP N3→N2 at y=0.21, RP N2→N1 at y=0.38\nWhat is the key diagnostic finding?", "output": "Key finding: Perforator entry point (Type 2B or 2C)", "category": "key_finding", "real_case": "clipdata4.json"}
+{"input": "Patient with EP N2→N2 at y=0.04, RP N3→N2 at y=0.21, RP N2→N1 at y=0.38. Next step?", "output": "Classification: ST2C. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata4.json"}
+{"input": "EP N2→N2 at y=0.04, RP N3→N2 at y=0.25, RP N2→N1 at y=0.42", "output": "ST2C", "category": "classification", "real_case": "clipdata5.json"}
+{"input": "EP N2→N2 at y=0.03, RP N3→N2 at y=0.25, RP N2→N1 at y=0.42", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N2→N2 at y=0.05, RP N3→N2 at y=0.25, RP N2→N1 at y=0.42", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N2→N2 at y=0.08, RP N3→N2 at y=0.25, RP N2→N1 at y=0.42", "output": "ST2C", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "For ST2C shunt, what is the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_strategy", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N2→N2 at y=0.04, RP N3→N2 at y=0.25, RP N2→N1 at y=0.42\nWhat should be the ligation strategy?", "output": "- Ligate highest EP at N2->N3", "category": "ligation_with_context", "real_case": "clipdata5.json"}
+{"input": "Why is EP N2→N2 at y=0.04, RP N3→N2 at y=0.25, RP N2→N1 at y=0.42 classified as ST2C?", "output": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3", "category": "reasoning", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N2→N2 at y=0.04, RP N3→N2 at y=0.25, RP N2→N1 at y=0.42", "output": "ST2C (SFJ competent)", "category": "classification_short", "real_case": "clipdata5.json"}
+{"input": "Examine this pattern: EP N2→N2 at y=0.04, RP N3→N2 at y=0.25, RP N2→N1 at y=0.42\nWhat is the key diagnostic finding?", "output": "Key finding: Perforator entry point (Type 2B or 2C)", "category": "key_finding", "real_case": "clipdata5.json"}
+{"input": "Patient with EP N2→N2 at y=0.04, RP N3→N2 at y=0.25, RP N2→N1 at y=0.42. Next step?", "output": "Classification: ST2C. Ligation strategy: - Ligate highest EP at N2->N3", "category": "clinical_decision", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29", "output": "ST1+2", "category": "classification", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.03, EP N2→N3 at y=0.03, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.05, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.08, EP N2→N3 at y=0.08, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "For ST1+2 shunt, what is the ligation strategy?", "output": "- Shunt Type 1+2 detected, requires more data to classify ligation", "category": "ligation_strategy", "real_case": "clipdata.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29\nWhat should be the ligation strategy?", "output": "- Shunt Type 1+2 detected, requires more data to classify ligation", "category": "ligation_with_context", "real_case": "clipdata.json"}
+{"input": "Why is EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29 classified as ST1+2?", "output": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux persists in elimination test", "category": "reasoning", "real_case": "clipdata.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29", "output": "ST1+2 (SFJ competent)", "category": "classification_short", "real_case": "clipdata.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with secondary tributaries (Type 3 or 1+2)", "category": "key_finding", "real_case": "clipdata.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29. Next step?", "output": "Classification: ST1+2. Ligation strategy: - Shunt Type 1+2 detected, requires more data to classify ligation", "category": "clinical_decision", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.27, RP N2→N1 at y=0.37", "output": "ST1+2", "category": "classification", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.03, EP N2→N3 at y=0.03, RP N3→N1 at y=0.27, RP N2→N1 at y=0.37", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.05, RP N3→N1 at y=0.27, RP N2→N1 at y=0.37", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.08, EP N2→N3 at y=0.08, RP N3→N1 at y=0.27, RP N2→N1 at y=0.37", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "For ST1+2 shunt, what is the ligation strategy?", "output": "- Shunt Type 1+2 detected, requires more data to classify ligation", "category": "ligation_strategy", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.27, RP N2→N1 at y=0.37\nWhat should be the ligation strategy?", "output": "- Shunt Type 1+2 detected, requires more data to classify ligation", "category": "ligation_with_context", "real_case": "clipdata2.json"}
+{"input": "Why is EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.27, RP N2→N1 at y=0.37 classified as ST1+2?", "output": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux persists in elimination test", "category": "reasoning", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.27, RP N2→N1 at y=0.37", "output": "ST1+2 (SFJ competent)", "category": "classification_short", "real_case": "clipdata2.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.27, RP N2→N1 at y=0.37\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with secondary tributaries (Type 3 or 1+2)", "category": "key_finding", "real_case": "clipdata2.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.27, RP N2→N1 at y=0.37. Next step?", "output": "Classification: ST1+2. Ligation strategy: - Shunt Type 1+2 detected, requires more data to classify ligation", "category": "clinical_decision", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.18, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44", "output": "ST1+2", "category": "classification", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.03, EP N2→N3 at y=0.03, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.05, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.08, EP N2→N3 at y=0.08, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "For ST1+2 shunt, what is the ligation strategy?", "output": "- Shunt Type 1+2 detected, requires more data to classify ligation", "category": "ligation_strategy", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.18, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44\nWhat should be the ligation strategy?", "output": "- Shunt Type 1+2 detected, requires more data to classify ligation", "category": "ligation_with_context", "real_case": "clipdata3.json"}
+{"input": "Why is EP N1→N2 at y=0.05, EP N2→N3 at y=0.18, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44 classified as ST1+2?", "output": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux persists in elimination test", "category": "reasoning", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.18, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44", "output": "ST1+2 (SFJ competent)", "category": "classification_short", "real_case": "clipdata3.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, EP N2→N3 at y=0.18, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with secondary tributaries (Type 3 or 1+2)", "category": "key_finding", "real_case": "clipdata3.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, EP N2→N3 at y=0.18, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44. Next step?", "output": "Classification: ST1+2. Ligation strategy: - Shunt Type 1+2 detected, requires more data to classify ligation", "category": "clinical_decision", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.15, RP N3→N1 at y=0.28, RP N2→N1 at y=0.38", "output": "ST1+2", "category": "classification", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.03, EP N2→N3 at y=0.03, RP N3→N1 at y=0.28, RP N2→N1 at y=0.38", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.05, RP N3→N1 at y=0.28, RP N2→N1 at y=0.38", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.08, EP N2→N3 at y=0.08, RP N3→N1 at y=0.28, RP N2→N1 at y=0.38", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "For ST1+2 shunt, what is the ligation strategy?", "output": "- Shunt Type 1+2 detected, requires more data to classify ligation", "category": "ligation_strategy", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.15, RP N3→N1 at y=0.28, RP N2→N1 at y=0.38\nWhat should be the ligation strategy?", "output": "- Shunt Type 1+2 detected, requires more data to classify ligation", "category": "ligation_with_context", "real_case": "clipdata4.json"}
+{"input": "Why is EP N1→N2 at y=0.05, EP N2→N3 at y=0.15, RP N3→N1 at y=0.28, RP N2→N1 at y=0.38 classified as ST1+2?", "output": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux persists in elimination test", "category": "reasoning", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.15, RP N3→N1 at y=0.28, RP N2→N1 at y=0.38", "output": "ST1+2 (SFJ competent)", "category": "classification_short", "real_case": "clipdata4.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, EP N2→N3 at y=0.15, RP N3→N1 at y=0.28, RP N2→N1 at y=0.38\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with secondary tributaries (Type 3 or 1+2)", "category": "key_finding", "real_case": "clipdata4.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, EP N2→N3 at y=0.15, RP N3→N1 at y=0.28, RP N2→N1 at y=0.38. Next step?", "output": "Classification: ST1+2. Ligation strategy: - Shunt Type 1+2 detected, requires more data to classify ligation", "category": "clinical_decision", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.20, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44", "output": "ST1+2", "category": "classification", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.03, EP N2→N3 at y=0.03, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.05, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.08, EP N2→N3 at y=0.08, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44", "output": "ST1+2", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "For ST1+2 shunt, what is the ligation strategy?", "output": "- Shunt Type 1+2 detected, requires more data to classify ligation", "category": "ligation_strategy", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.20, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44\nWhat should be the ligation strategy?", "output": "- Shunt Type 1+2 detected, requires more data to classify ligation", "category": "ligation_with_context", "real_case": "clipdata5.json"}
+{"input": "Why is EP N1→N2 at y=0.05, EP N2→N3 at y=0.20, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44 classified as ST1+2?", "output": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux persists in elimination test", "category": "reasoning", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.20, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44", "output": "ST1+2 (SFJ competent)", "category": "classification_short", "real_case": "clipdata5.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, EP N2→N3 at y=0.20, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with secondary tributaries (Type 3 or 1+2)", "category": "key_finding", "real_case": "clipdata5.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, EP N2→N3 at y=0.20, RP N3→N1 at y=0.33, RP N2→N1 at y=0.44. Next step?", "output": "Classification: ST1+2. Ligation strategy: - Shunt Type 1+2 detected, requires more data to classify ligation", "category": "clinical_decision", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21", "output": "ST3", "category": "classification", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.03, EP N2→N3 at y=0.03, RP N3→N1 at y=0.21", "output": "ST3", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.05, RP N3→N1 at y=0.21", "output": "ST3", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.08, EP N2→N3 at y=0.08, RP N3→N1 at y=0.21", "output": "ST3", "category": "classification_variant", "real_case": "clipdata.json"}
+{"input": "For ST3 shunt, what is the ligation strategy?", "output": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "ligation_strategy", "real_case": "clipdata.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21\nWhat should be the ligation strategy?", "output": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "ligation_with_context", "real_case": "clipdata.json"}
+{"input": "Why is EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21 classified as ST3?", "output": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along N3, but no RP exists along N2", "category": "reasoning", "real_case": "clipdata.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21", "output": "ST3 (SFJ incompetent)", "category": "classification_short", "real_case": "clipdata.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with secondary tributaries (Type 3 or 1+2)", "category": "key_finding", "real_case": "clipdata.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21. Next step?", "output": "Classification: ST3. Ligation strategy: - Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "clinical_decision", "real_case": "clipdata.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21", "output": "ST3", "category": "classification", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.03, EP N2→N3 at y=0.03, RP N3→N1 at y=0.21", "output": "ST3", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.05, RP N3→N1 at y=0.21", "output": "ST3", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.08, EP N2→N3 at y=0.08, RP N3→N1 at y=0.21", "output": "ST3", "category": "classification_variant", "real_case": "clipdata2.json"}
+{"input": "For ST3 shunt, what is the ligation strategy?", "output": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "ligation_strategy", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21\nWhat should be the ligation strategy?", "output": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "ligation_with_context", "real_case": "clipdata2.json"}
+{"input": "Why is EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21 classified as ST3?", "output": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along N3, but no RP exists along N2", "category": "reasoning", "real_case": "clipdata2.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21", "output": "ST3 (SFJ incompetent)", "category": "classification_short", "real_case": "clipdata2.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with secondary tributaries (Type 3 or 1+2)", "category": "key_finding", "real_case": "clipdata2.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21. Next step?", "output": "Classification: ST3. Ligation strategy: - Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "clinical_decision", "real_case": "clipdata2.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.32", "output": "ST3", "category": "classification", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.03, EP N2→N3 at y=0.03, RP N3→N1 at y=0.32", "output": "ST3", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.05, RP N3→N1 at y=0.32", "output": "ST3", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.08, EP N2→N3 at y=0.08, RP N3→N1 at y=0.32", "output": "ST3", "category": "classification_variant", "real_case": "clipdata3.json"}
+{"input": "For ST3 shunt, what is the ligation strategy?", "output": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "ligation_strategy", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.32\nWhat should be the ligation strategy?", "output": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "ligation_with_context", "real_case": "clipdata3.json"}
+{"input": "Why is EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.32 classified as ST3?", "output": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along N3, but no RP exists along N2", "category": "reasoning", "real_case": "clipdata3.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.32", "output": "ST3 (SFJ incompetent)", "category": "classification_short", "real_case": "clipdata3.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.32\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with secondary tributaries (Type 3 or 1+2)", "category": "key_finding", "real_case": "clipdata3.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, EP N2→N3 at y=0.17, RP N3→N1 at y=0.32. Next step?", "output": "Classification: ST3. Ligation strategy: - Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "clinical_decision", "real_case": "clipdata3.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.14, RP N3→N1 at y=0.27, RP N2→N1 at y=0.42", "output": "ST3", "category": "classification", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.03, EP N2→N3 at y=0.03, RP N3→N1 at y=0.27, RP N2→N1 at y=0.42", "output": "ST3", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.05, RP N3→N1 at y=0.27, RP N2→N1 at y=0.42", "output": "ST3", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.08, EP N2→N3 at y=0.08, RP N3→N1 at y=0.27, RP N2→N1 at y=0.42", "output": "ST3", "category": "classification_variant", "real_case": "clipdata4.json"}
+{"input": "For ST3 shunt, what is the ligation strategy?", "output": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "ligation_strategy", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.14, RP N3→N1 at y=0.27, RP N2→N1 at y=0.42\nWhat should be the ligation strategy?", "output": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "ligation_with_context", "real_case": "clipdata4.json"}
+{"input": "Why is EP N1→N2 at y=0.05, EP N2→N3 at y=0.14, RP N3→N1 at y=0.27, RP N2→N1 at y=0.42 classified as ST3?", "output": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux does not persist in elimination test", "category": "reasoning", "real_case": "clipdata4.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.14, RP N3→N1 at y=0.27, RP N2→N1 at y=0.42", "output": "ST3 (SFJ incompetent)", "category": "classification_short", "real_case": "clipdata4.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, EP N2→N3 at y=0.14, RP N3→N1 at y=0.27, RP N2→N1 at y=0.42\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with secondary tributaries (Type 3 or 1+2)", "category": "key_finding", "real_case": "clipdata4.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, EP N2→N3 at y=0.14, RP N3→N1 at y=0.27, RP N2→N1 at y=0.42. Next step?", "output": "Classification: ST3. Ligation strategy: - Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "clinical_decision", "real_case": "clipdata4.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29", "output": "ST3", "category": "classification", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.03, EP N2→N3 at y=0.03, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29", "output": "ST3", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.05, EP N2→N3 at y=0.05, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29", "output": "ST3", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "EP N1→N2 at y=0.08, EP N2→N3 at y=0.08, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29", "output": "ST3", "category": "classification_variant", "real_case": "clipdata5.json"}
+{"input": "For ST3 shunt, what is the ligation strategy?", "output": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "ligation_strategy", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29\nWhat should be the ligation strategy?", "output": "- Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "ligation_with_context", "real_case": "clipdata5.json"}
+{"input": "Why is EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29 classified as ST3?", "output": "- EP exists from N1 to N2 at SFJ \n- EP exists from N2 to N3 \n- RP exists along both N2 and N3, and towards N1 \n- Reflux does not persist in elimination test", "category": "reasoning", "real_case": "clipdata5.json"}
+{"input": "Classify: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29", "output": "ST3 (SFJ incompetent)", "category": "classification_short", "real_case": "clipdata5.json"}
+{"input": "Examine this pattern: EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29\nWhat is the key diagnostic finding?", "output": "Key finding: SFJ incompetence with secondary tributaries (Type 3 or 1+2)", "category": "key_finding", "real_case": "clipdata5.json"}
+{"input": "Patient with EP N1→N2 at y=0.05, EP N2→N3 at y=0.13, RP N3→N1 at y=0.21, RP N2→N1 at y=0.29. Next step?", "output": "Classification: ST3. Ligation strategy: - Ligate the EP at N2->N3\n- Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2\n- If there is reflux, the SFJ must be treated/ligated", "category": "clinical_decision", "real_case": "clipdata5.json"}

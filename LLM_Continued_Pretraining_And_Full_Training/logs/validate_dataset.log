@@ -1,0 +1,42 @@
+2026-05-20 14:45:09,175 - INFO - ======================================================================
+2026-05-20 14:45:09,176 - INFO - FINAL DATASET VALIDATION
+2026-05-20 14:45:09,176 - INFO - ======================================================================
+2026-05-20 14:45:09,176 - INFO - Loading dataset from data\final_augmented\train.jsonl
+2026-05-20 14:45:09,270 - INFO - Loaded 7,812 chunks
+2026-05-20 14:45:09,270 - INFO - Loading tokenizer: Qwen/Qwen2.5-7B
+2026-05-20 14:45:10,682 - INFO - 
+Running validation checks...
+2026-05-20 14:45:10,682 - INFO - ----------------------------------------------------------------------
+2026-05-20 14:45:10,683 - INFO - Check 1 - Token range: PASS
+2026-05-20 14:45:10,685 - INFO - Check 2 - Metadata fields: PASS
+2026-05-20 14:45:15,571 - INFO - Check 3 - Token count accuracy: PASS
+2026-05-20 14:45:15,594 - WARNING - Found 272 duplicate chunks
+2026-05-20 14:45:15,595 - INFO - Check 4 - Exact duplicates: FAIL
+2026-05-20 14:45:15,595 - INFO -   Found: 272 duplicates
+2026-05-20 14:45:15,596 - INFO - Translation degradation rate: 0.0%
+2026-05-20 14:45:15,596 - INFO - Check 5 - Translation quality: PASS
+2026-05-20 14:45:15,598 - INFO - Max source dominance: 53.5%
+2026-05-20 14:45:15,598 - INFO - Check 6 - Source distribution: PASS
+2026-05-20 14:45:15,598 - INFO -   0-Handbook_of_Venous_and_Lymphatic_Disorders_Guidelines_of_the_American_Venous_F: 53.5%
+2026-05-20 14:45:15,598 - INFO -   Atlas_of_Endovascular_Venous_Surgery_by_Almeida_Jose_z-liborg: 11.9%
+2026-05-20 14:45:15,598 - INFO -   0-Saphenous-Vein-Sparing-Strategies-in-Chronic-Venous-Disease: 10.1%
+2026-05-20 14:45:15,821 - INFO - Check 7 - Language: PASS
+2026-05-20 14:45:15,821 - INFO - 
+======================================================================
+2026-05-20 14:45:15,821 - INFO - VALIDATION SUMMARY
+2026-05-20 14:45:15,821 - INFO - ======================================================================
+2026-05-20 14:45:15,824 - INFO - 
+----------------------------------------------------------------------
+2026-05-20 14:45:15,824 - INFO - DATASET STATISTICS
+2026-05-20 14:45:15,824 - INFO - ----------------------------------------------------------------------
+2026-05-20 14:45:15,826 - INFO - Total chunks:                   7,812
+2026-05-20 14:45:15,826 - INFO - Total tokens:               4,642,350
+2026-05-20 14:45:15,826 - INFO - Avg tokens/chunk:                 594
+2026-05-20 14:45:15,826 - INFO - Min tokens/chunk:                 100
+2026-05-20 14:45:15,826 - INFO - Max tokens/chunk:                1785
+2026-05-20 14:45:15,826 - INFO - 
+Augmentation breakdown:
+2026-05-20 14:45:15,826 - INFO -   back_translation..............      2,620 ( 33.5%)
+2026-05-20 14:45:15,826 - INFO -   key_points....................      2,555 ( 32.7%)
+2026-05-20 14:45:15,826 - INFO -   original......................      2,637 ( 33.8%)
+2026-05-20 14:45:15,826 - INFO - ======================================================================

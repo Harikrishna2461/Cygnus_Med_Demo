@@ -1,0 +1,34 @@
+2026-05-20 13:26:10,882 - INFO - ============================================================
+2026-05-20 13:26:10,882 - INFO - Starting dataset merge and deduplication
+2026-05-20 13:26:10,882 - INFO - ============================================================
+2026-05-20 13:26:10,882 - INFO - Loading datasets...
+2026-05-20 13:26:10,953 - INFO -   Original train:   2637 chunks
+2026-05-20 13:26:10,953 - INFO -   Original eval:    16 chunks
+2026-05-20 13:26:10,953 - INFO -   Back-translated:  2637 chunks
+2026-05-20 13:26:10,953 - INFO -   Key points:       2555 chunks
+2026-05-20 13:26:10,953 - INFO - Saving eval dataset to data\final_augmented\eval.jsonl
+2026-05-20 13:26:10,957 - INFO - Combined train size: 7829 chunks
+2026-05-20 13:26:10,957 - INFO - Filtering chunks under 100 tokens...
+2026-05-20 13:26:10,958 - INFO -   Removed 17 short chunks
+2026-05-20 13:26:10,958 - INFO - Running MinHash deduplication (threshold=0.85)...
+2026-05-20 13:26:10,958 - INFO - Computing MinHash signatures for 7812 chunks...
+2026-05-20 13:29:20,607 - INFO - Identifying duplicates...
+2026-05-20 14:45:02,620 - INFO -   Removed 0 duplicate chunks
+2026-05-20 14:45:02,621 - INFO - Shuffling with seed 42...
+2026-05-20 14:45:02,627 - INFO - Saving final training dataset to data\final_augmented\train.jsonl
+2026-05-20 14:45:02,766 - INFO - ============================================================
+2026-05-20 14:45:02,766 - INFO - DATASET MERGE SUMMARY
+2026-05-20 14:45:02,766 - INFO - ============================================================
+2026-05-20 14:45:02,766 - INFO - Original train chunks:       2,637
+2026-05-20 14:45:02,766 - INFO - After back-translation:      7,829
+2026-05-20 14:45:02,766 - INFO - After key points:            7,829
+2026-05-20 14:45:02,766 - INFO - After filtering (<100 tok):  7,812
+2026-05-20 14:45:02,766 - INFO - After deduplication:         7,812
+2026-05-20 14:45:02,766 - INFO - 
+2026-05-20 14:45:02,766 - INFO - Final train chunks:          7,812
+2026-05-20 14:45:02,766 - INFO - Final eval chunks:           16
+2026-05-20 14:45:02,766 - INFO - 
+2026-05-20 14:45:02,766 - INFO - Original train tokens:       1,849,658
+2026-05-20 14:45:02,766 - INFO - Final train tokens:          4,642,350
+2026-05-20 14:45:02,766 - INFO - Dataset size increase:       +151.0%
+2026-05-20 14:45:02,766 - INFO - ============================================================

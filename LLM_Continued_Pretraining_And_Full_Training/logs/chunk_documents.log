@@ -1,0 +1,52 @@
+2026-05-19 15:36:17 | INFO | Found 14 raw text file(s)
+2026-05-19 15:36:17 | INFO | Loading tokenizer (this may take a moment on first run)…
+2026-05-19 15:36:33 | INFO | Loading tokenizer: Qwen/Qwen2.5-7B-Instruct
+2026-05-19 15:36:37 | INFO | Processing: 0-duplex-ultrasound-of-superficial-leg-veins-2014.txt
+2026-05-19 15:36:37 | INFO | Downloading NLTK punkt tokeniser…
+2026-05-19 15:36:40 | INFO |   0-duplex-ultrasound-of-superficial-leg-veins-2014: duplicating 10 high-value chunks
+2026-05-19 15:36:40 | INFO |   0-duplex-ultrasound-of-superficial-leg-veins-2014: 253 chunks | avg_tokens=883.1
+2026-05-19 15:36:40 | INFO | Processing: 0-Handbook_of_Venous_and_Lymphatic_Disorders_Guidelines_of_the_American_Venous_F.txt
+2026-05-19 15:36:43 | INFO |   0-Handbook_of_Venous_and_Lymphatic_Disorders_Guidelines_of_the_American_Venous_F: duplicating 101 high-value chunks
+2026-05-19 15:36:43 | INFO |   0-Handbook_of_Venous_and_Lymphatic_Disorders_Guidelines_of_the_American_Venous_F: 1564 chunks | avg_tokens=620.5
+2026-05-19 15:36:43 | INFO | Processing: 0-Saphenous-Vein-Sparing-Strategies-in-Chronic-Venous-Disease.txt
+2026-05-19 15:36:44 | INFO |   0-Saphenous-Vein-Sparing-Strategies-in-Chronic-Venous-Disease: duplicating 16 high-value chunks
+2026-05-19 15:36:44 | INFO |   0-Saphenous-Vein-Sparing-Strategies-in-Chronic-Venous-Disease: 291 chunks | avg_tokens=803.6
+2026-05-19 15:36:44 | INFO | Processing: 1-Atlas_of_Endovascular_Venous_Surgery_by_José_Almeida_z-liborg.txt
+2026-05-19 15:36:45 | INFO |   1-Atlas_of_Endovascular_Venous_Surgery_by_José_Almeida_z-liborg: duplicating 18 high-value chunks
+2026-05-19 15:36:45 | INFO |   1-Atlas_of_Endovascular_Venous_Surgery_by_José_Almeida_z-liborg: 244 chunks | avg_tokens=854.4
+2026-05-19 15:36:45 | INFO | Processing: 2019_book_Principles_of_Venous_Hemodynamics_Franceschi_Zambo.txt
+2026-05-19 15:36:45 | INFO |   2019_book_Principles_of_Venous_Hemodynamics_Franceschi_Zambo: duplicating 5 high-value chunks
+2026-05-19 15:36:45 | INFO |   2019_book_Principles_of_Venous_Hemodynamics_Franceschi_Zambo: 130 chunks | avg_tokens=733.3
+2026-05-19 15:36:45 | INFO | Processing: 2025-02-19-Theraclion-investor-presentation-extended-V332_compressed-2.txt
+2026-05-19 15:36:45 | INFO |   2025-02-19-Theraclion-investor-presentation-extended-V332_compressed-2: duplicating 1 high-value chunks
+2026-05-19 15:36:45 | INFO |   2025-02-19-Theraclion-investor-presentation-extended-V332_compressed-2: 29 chunks | avg_tokens=258.9
+2026-05-19 15:36:45 | INFO | Processing: adler-et-al-2022-varicose-veins-of-the-lower-extremity-doppler-us-evaluation-pro.txt
+2026-05-19 15:36:45 | INFO |   adler-et-al-2022-varicose-veins-of-the-lower-extremity-doppler-us-evaluation-pro: duplicating 2 high-value chunks
+2026-05-19 15:36:45 | INFO |   adler-et-al-2022-varicose-veins-of-the-lower-extremity-doppler-us-evaluation-pro: 21 chunks | avg_tokens=828
+2026-05-19 15:36:45 | INFO | Processing: Atlas_of_Endovascular_Venous_Surgery_by_Almeida_Jose_z-liborg.txt
+2026-05-19 15:36:46 | INFO |   Atlas_of_Endovascular_Venous_Surgery_by_Almeida_Jose_z-liborg: duplicating 30 high-value chunks
+2026-05-19 15:36:46 | INFO |   Atlas_of_Endovascular_Venous_Surgery_by_Almeida_Jose_z-liborg: 376 chunks | avg_tokens=818.8
+2026-05-19 15:36:46 | INFO | Processing: Carriazo2015.txt
+2026-05-19 15:36:46 | INFO |   Carriazo2015: 17 chunks | avg_tokens=409.6
+2026-05-19 15:36:46 | INFO | Processing: CHIVA_STRATEGY_Gianesini014.txt
+2026-05-19 15:36:46 | INFO |   CHIVA_STRATEGY_Gianesini014: duplicating 1 high-value chunks
+2026-05-19 15:36:46 | INFO |   CHIVA_STRATEGY_Gianesini014: 14 chunks | avg_tokens=799.6
+2026-05-19 15:36:46 | INFO | Processing: CHIVABook1988-1993_2.txt
+2026-05-19 15:36:46 | INFO |   CHIVABook1988-1993_2: 0 chunks | avg_tokens=0
+2026-05-19 15:36:46 | INFO | Processing: DelfrateR_CHIVA_article.txt
+2026-05-19 15:36:46 | INFO |   DelfrateR_CHIVA_article: duplicating 1 high-value chunks
+2026-05-19 15:36:46 | INFO |   DelfrateR_CHIVA_article: 23 chunks | avg_tokens=895.5
+2026-05-19 15:36:46 | INFO | Processing: PrinciplesofVenousHemodynamicsFranceschiZamboni2009.txt
+2026-05-19 15:36:47 | INFO |   PrinciplesofVenousHemodynamicsFranceschiZamboni2009: duplicating 5 high-value chunks
+2026-05-19 15:36:47 | INFO |   PrinciplesofVenousHemodynamicsFranceschiZamboni2009: 130 chunks | avg_tokens=734.3
+2026-05-19 15:36:47 | INFO | Processing: US_Lower_Extremity_Veins_Anatomy_and_Basic_Approach.txt
+2026-05-19 15:36:47 | INFO |   US_Lower_Extremity_Veins_Anatomy_and_Basic_Approach: 11 chunks | avg_tokens=674.4
+2026-05-19 15:36:47 | INFO | =================================================================
+2026-05-19 15:36:47 | INFO | CHUNKING COMPLETE
+2026-05-19 15:36:47 | INFO |   Total chunks   : 3,103
+2026-05-19 15:36:47 | INFO |   Avg token count: 710.9
+2026-05-19 15:36:47 | INFO |   Median tokens  : 767.0
+2026-05-19 15:36:47 | INFO |   Min / Max      : 138 / 1784
+2026-05-19 15:36:47 | INFO |   High-value dup : 380
+2026-05-19 15:36:47 | INFO |   Output         : C:\Users\Krish\Downloads\llm_continued_pretraining\data\chunks\all_chunks.jsonl
+2026-05-19 15:36:47 | INFO | =================================================================

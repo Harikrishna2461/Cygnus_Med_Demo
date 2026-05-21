@@ -22,7 +22,7 @@ print("="*80)
 # CONFIG
 # ============================================================
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "YOUR_GROQ_API_KEY_HERE")
+GROQ_API_KEY = ""
 QWEN_MODEL_PATH = "Qwen/Qwen2.5-7B"
 QWEN_LORA_PATH = r'.\lora_finetuned_model'
 

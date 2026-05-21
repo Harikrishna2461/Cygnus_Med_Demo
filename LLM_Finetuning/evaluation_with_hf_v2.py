@@ -19,7 +19,7 @@ print("EVALUATION WITH V2 MODEL FROM HUGGINGFACE")
 print("="*80)
 
 # Configuration
-HF_TOKEN = "YOUR_HF_TOKEN_HERE"
+HF_TOKEN = ""
 HF_MODEL_REPO = "HariKrishna1824/qwen25_chiva_v2"
 TEST_CASES_DIR = Path("json samples")
 

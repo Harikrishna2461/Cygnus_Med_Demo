@@ -21,8 +21,8 @@ print("FULL EVALUATION: API-BASED")
 print("="*80)
 
 # Configuration
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "YOUR_GROQ_API_KEY_HERE")
-HF_TOKEN = os.getenv("HF_TOKEN", "YOUR_HF_TOKEN_HERE")
+GROQ_API_KEY = ""
+HF_TOKEN = ""
 HF_MODEL_REPO = "HariKrishna1824/qwen25_chiva_v2"
 TEST_CASES_DIR = Path("json samples")
 

@@ -1,0 +1,37 @@
+2026-05-20 13:14:05,209 - INFO - ============================================================
+2026-05-20 13:14:05,209 - INFO - Starting back-translation augmentation pipeline
+2026-05-20 13:14:05,210 - INFO - ============================================================
+2026-05-20 13:14:05,210 - INFO - Loading tokenizer: Qwen/Qwen2.5-7B
+2026-05-20 13:14:06,592 - INFO - Loading chunks from data\final\train.jsonl
+2026-05-20 13:14:06,615 - INFO - Loaded 2637 chunks
+2026-05-20 13:14:06,615 - INFO - Starting back-translation process...
+2026-05-20 13:26:02,230 - INFO - ============================================================
+2026-05-20 13:26:02,231 - INFO - Starting fast back-translation augmentation (local only)
+2026-05-20 13:26:02,231 - INFO - ============================================================
+2026-05-20 13:26:02,231 - INFO - Loading tokenizer: Qwen/Qwen2.5-7B
+2026-05-20 13:26:03,647 - INFO - Loading chunks from data\final\train.jsonl
+2026-05-20 13:26:03,671 - INFO - Loaded 2637 chunks
+2026-05-20 13:26:03,671 - INFO - Augmenting chunks...
+2026-05-20 13:26:05,589 - INFO - Saving 2637 chunks to data\augmented\back_translated.jsonl
+2026-05-20 13:26:05,616 - INFO - ============================================================
+2026-05-20 13:26:05,616 - INFO - AUGMENTATION SUMMARY
+2026-05-20 13:26:05,616 - INFO - ============================================================
+2026-05-20 13:26:05,616 - INFO - Total chunks attempted:    2637
+2026-05-20 13:26:05,616 - INFO - Successfully augmented:    2637
+2026-05-20 13:26:05,616 - INFO - Failed chunks:             0
+2026-05-20 13:26:05,616 - INFO - Total output tokens:       1,851,148
+2026-05-20 13:26:05,616 - INFO - Average tokens per chunk:  701
+2026-05-20 13:26:05,616 - INFO - ============================================================
+2026-05-20 13:29:54,171 - ERROR - Chunk 936: Translation error: HTTPSConnectionPool(host='translate.google.com', port=443): Read timed out. (read timeout=None)
+2026-05-20 15:16:26,050 - INFO - Saving 2636 chunks to data\augmented\back_translated.jsonl
+2026-05-20 15:16:26,087 - INFO - ============================================================
+2026-05-20 15:16:26,087 - INFO - BACK-TRANSLATION PIPELINE SUMMARY
+2026-05-20 15:16:26,087 - INFO - ============================================================
+2026-05-20 15:16:26,087 - INFO - Total chunks attempted:    2637
+2026-05-20 15:16:26,087 - INFO - Successfully translated:   2636
+2026-05-20 15:16:26,087 - INFO - Failed chunks:             1
+2026-05-20 15:16:26,087 - INFO - Chunks with degradation:   0
+2026-05-20 15:16:26,087 - INFO - Total output tokens:       1,847,613
+2026-05-20 15:16:26,087 - INFO - Average tokens per chunk:  700
+2026-05-20 15:16:26,087 - INFO - ============================================================
+2026-05-20 15:16:26,087 - INFO - Failed chunk indices: [936]
