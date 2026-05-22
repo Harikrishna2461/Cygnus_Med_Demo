@@ -10,12 +10,54 @@ from datetime import datetime
 from config import DB_PATH
 
 
+def _migrate_sessions_table():
+    """Migrate sessions table to add missing columns (mode, hidden)."""
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.execute("PRAGMA table_info(sessions)")
+            columns = {row[1] for row in cursor.fetchall()}
+
+            if "mode" not in columns:
+                conn.executescript("""
+                    BEGIN TRANSACTION;
+
+                    CREATE TABLE sessions_new (
+                        session_id   TEXT PRIMARY KEY,
+                        title        TEXT NOT NULL DEFAULT 'New Consultation',
+                        mode         TEXT NOT NULL DEFAULT 'clinical' CHECK(mode IN ('clinical','general')),
+                        created_at   TEXT NOT NULL,
+                        updated_at   TEXT NOT NULL
+                    );
+
+                    INSERT INTO sessions_new (session_id, title, mode, created_at, updated_at)
+                    SELECT session_id, title, 'clinical', created_at, updated_at FROM sessions;
+
+                    DROP TABLE sessions;
+
+                    ALTER TABLE sessions_new RENAME TO sessions;
+
+                    COMMIT;
+                """)
+                cursor = conn.execute("PRAGMA table_info(sessions)")
+                columns = {row[1] for row in cursor.fetchall()}
+
+            if "hidden" not in columns:
+                conn.execute(
+                    "ALTER TABLE sessions ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0"
+                )
+                conn.commit()
+    except Exception as e:
+        print(f"Migration warning: {e}")
+
+
 def init_db():
     with sqlite3.connect(DB_PATH) as conn:
         conn.executescript("""
             CREATE TABLE IF NOT EXISTS sessions (
                 session_id   TEXT PRIMARY KEY,
                 title        TEXT NOT NULL DEFAULT 'New Consultation',
+                mode         TEXT NOT NULL DEFAULT 'clinical' CHECK(mode IN ('clinical','general')),
+                hidden       INTEGER NOT NULL DEFAULT 0,
                 created_at   TEXT NOT NULL,
                 updated_at   TEXT NOT NULL
             );
@@ -43,6 +85,9 @@ def init_db():
         """)
         conn.commit()
 
+    # Migrate existing database if mode column doesn't exist
+    _migrate_sessions_table()
+
 
 def _now() -> str:
     return datetime.now().isoformat()
@@ -50,13 +95,13 @@ def _now() -> str:
 
 # ── Sessions ─────────────────────────────────────────────────────────────────
 
-def create_session(title: str = "New Consultation") -> str:
+def create_session(title: str = "New Consultation", mode: str = "clinical") -> str:
     sid = str(uuid.uuid4())
     now = _now()
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute(
-            "INSERT INTO sessions VALUES (?, ?, ?, ?)",
-            (sid, title, now, now),
+            "INSERT INTO sessions (session_id, title, mode, hidden, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?)",
+            (sid, title, mode, now, now),
         )
         conn.commit()
     return sid
@@ -71,13 +116,30 @@ def update_session_title(session_id: str, title: str):
         conn.commit()
 
 
-def get_sessions() -> list[dict]:
+def get_sessions(mode: str | None = None) -> list[dict]:
+    """Get non-hidden sessions, optionally filtered by mode (clinical or general)."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
-        rows = conn.execute(
-            "SELECT * FROM sessions ORDER BY updated_at DESC LIMIT 50"
-        ).fetchall()
+        if mode:
+            rows = conn.execute(
+                "SELECT * FROM sessions WHERE mode=? AND hidden=0 ORDER BY updated_at DESC LIMIT 50",
+                (mode,)
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM sessions WHERE hidden=0 ORDER BY updated_at DESC LIMIT 50"
+            ).fetchall()
     return [dict(r) for r in rows]
+
+
+def hide_session(session_id: str):
+    """Mark a session as hidden (UI-only delete — data is preserved)."""
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            "UPDATE sessions SET hidden=1 WHERE session_id=?",
+            (session_id,),
+        )
+        conn.commit()
 
 
 # ── Messages ─────────────────────────────────────────────────────────────────

@@ -69,9 +69,11 @@
     .session-item {
       padding: 9px 10px; border-radius: 7px; cursor: pointer;
       margin-bottom: 2px; transition: background .15s;
+      display: flex; align-items: center; gap: 4px;
     }
     .session-item:hover { background: rgba(255,255,255,.07); }
     .session-item.active { background: rgba(255,255,255,.14); }
+    .s-item-info { flex: 1; min-width: 0; }
     .session-item .s-title {
       font-size: 12.5px; font-weight: 500;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -80,6 +82,14 @@
     .session-item .s-date {
       font-size: 11px; color: var(--slate-400); margin-top: 2px;
     }
+    .s-delete-btn {
+      flex-shrink: 0; background: none; border: none;
+      color: var(--slate-500); font-size: 15px; line-height: 1;
+      cursor: pointer; padding: 2px 6px; border-radius: 4px;
+      opacity: 0; transition: opacity .15s, background .15s, color .15s;
+    }
+    .session-item:hover .s-delete-btn { opacity: 1; }
+    .s-delete-btn:hover { color: var(--white); background: rgba(220,38,38,.5); }
 
     #sidebar-footer { padding: 10px; border-top: 1px solid rgba(255,255,255,.1); flex-shrink: 0; }
     #feedback-btn {
@@ -392,7 +402,7 @@
     </div>
     <div id="sidebar-footer">
       <button id="feedback-btn" onclick="showFeedback()">
-        📋 View Feedback Log
+        View Feedback Log
         <span id="status-dot"></span>
       </button>
     </div>
@@ -405,11 +415,10 @@
     <div id="view-chat">
       <div id="chat-header">
         <span id="session-title">Select a session or start a new one</span>
-        <span id="status-badge">⬤ Checking status…</span>
+        <span id="status-badge">Checking status…</span>
       </div>
       <div id="messages-wrap">
         <div class="empty-state">
-          <div class="icon">🩺</div>
           <div>Describe the patient's venous condition in plain language.<br>
           The assistant will classify the shunt type and plan ligation.</div>
         </div>
@@ -428,12 +437,11 @@
     <!-- Feedback view -->
     <div id="view-feedback">
       <div id="feedback-header">
-        <h2>📋 Feedback &amp; Clinical Log</h2>
+        <h2>Feedback &amp; Clinical Log</h2>
         <button id="back-btn" onclick="showChat()">← Back to Chat</button>
       </div>
       <div id="feedback-body">
         <div class="empty-state">
-          <div class="icon">📂</div>
           <div>No feedback records yet.</div>
         </div>
       </div>
@@ -446,16 +454,29 @@
 // ── State ──────────────────────────────────────────────────────────────────
 let currentSessionId = null;
 let isLoading = false;
+let chatMode = 'clinical'; // 'clinical' or 'general'
 
 // ── Init ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  // Detect mode from URL
+  const path = window.location.pathname;
+  if (path.includes('/general')) {
+    chatMode = 'general';
+    document.getElementById('sidebar-header').innerHTML += '<div style="font-size:10px;color:#64748b;margin-top:4px">General Chat</div>';
+  } else if (path.includes('/clinical')) {
+    chatMode = 'clinical';
+    document.getElementById('sidebar-header').innerHTML += '<div style="font-size:10px;color:#64748b;margin-top:4px">Clinical Mode</div>';
+  }
+
   setupInputHandlers();
   await checkStatus();
   await loadSessions();
-  // If sessions exist, load the most recent one
-  const sessions = await api('/api/sessions');
-  if (sessions && sessions.length > 0) {
-    await loadSession(sessions[0].session_id, sessions[0].title);
+  // If sessions exist, load the most recent visible one
+  const sessions = await api(`/api/sessions?mode=${chatMode}`);
+  const deleted = getDeletedSessions();
+  const visible = (sessions || []).filter(s => !deleted.has(s.session_id));
+  if (visible.length > 0) {
+    await loadSession(visible[0].session_id, visible[0].title);
   }
   setInterval(checkStatus, 30000);
 });
@@ -483,65 +504,117 @@ async function checkStatus() {
   const dot = document.getElementById('status-dot');
   const badge = document.getElementById('status-badge');
   if (!s) {
-    dot.className = 'err'; badge.textContent = '⬤ Server offline'; return;
+    dot.className = 'err'; badge.textContent = 'Server offline'; return;
   }
   const qdrantOk = s.qdrant?.collection_ready;
   const ollamaOk = s.ollama?.running;
   if (qdrantOk && ollamaOk) {
     dot.className = 'ok';
-    badge.textContent = `⬤ Ready · ${s.qdrant.document_count} docs`;
+    badge.textContent = `Ready · ${s.qdrant.document_count} docs`;
   } else if (!ollamaOk) {
     dot.className = 'warn';
-    badge.textContent = '⬤ Ollama not running';
+    badge.textContent = 'Ollama not running';
   } else {
     dot.className = 'warn';
-    badge.textContent = '⬤ Knowledge base not indexed';
+    badge.textContent = 'Knowledge base not indexed';
   }
 }
 
 // ── Sessions ───────────────────────────────────────────────────────────────
+function getDeletedSessions() {
+  try { return new Set(JSON.parse(localStorage.getItem('cmed_deleted_sessions') || '[]')); }
+  catch { return new Set(); }
+}
+
+async function hideSession(sid) {
+  // Instant UI feedback via localStorage
+  const deleted = getDeletedSessions();
+  deleted.add(sid);
+  localStorage.setItem('cmed_deleted_sessions', JSON.stringify([...deleted]));
+  if (currentSessionId === sid) {
+    currentSessionId = null;
+    document.getElementById('session-title').textContent = 'Select a session or start a new one';
+    const emptyText = chatMode === 'general'
+      ? 'Ask any medical or surgical questions from the knowledge base.<br>Includes anatomy, pathology, procedures, and clinical guidelines.'
+      : 'Describe the patient\'s venous condition in plain language.<br>The assistant will classify the shunt type and plan ligation.';
+    document.getElementById('messages-wrap').innerHTML = `<div class="empty-state"><div>${emptyText}</div></div>`;
+  }
+  loadSessions();
+  // Persist on backend (data is kept, only marked hidden)
+  await api(`/api/session/${sid}/hide`, 'PATCH');
+}
+
 async function loadSessions() {
-  const sessions = await api('/api/sessions');
+  const sessions = await api(`/api/sessions?mode=${chatMode}`);
+  const deleted = getDeletedSessions();
+  const visible = (sessions || []).filter(s => !deleted.has(s.session_id));
   const list = document.getElementById('session-list');
   list.innerHTML = '';
-  if (!sessions || sessions.length === 0) {
+  if (visible.length === 0) {
     list.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:#64748b">No sessions yet</div>';
     return;
   }
-  sessions.forEach(s => {
+  visible.forEach(s => {
     const el = document.createElement('div');
     el.className = 'session-item' + (s.session_id === currentSessionId ? ' active' : '');
     el.dataset.id = s.session_id;
     el.innerHTML = `
-      <div class="s-title">${escHtml(s.title)}</div>
-      <div class="s-date">${formatDate(s.updated_at)}</div>`;
+      <div class="s-item-info">
+        <div class="s-title">${escHtml(s.title)}</div>
+        <div class="s-date">${formatDate(s.updated_at)}</div>
+      </div>
+      <button class="s-delete-btn" title="Remove from list">&#x2715;</button>`;
     el.onclick = () => loadSession(s.session_id, s.title);
+    el.querySelector('.s-delete-btn').onclick = (e) => { e.stopPropagation(); hideSession(s.session_id); };
     list.appendChild(el);
   });
 }
 
 async function newSession() {
-  const s = await api('/api/session', 'POST', { title: 'New Consultation' });
+  const title = chatMode === 'general' ? 'Medical Q&A' : 'New Consultation';
+  const s = await api('/api/session', 'POST', { title, mode: chatMode });
   if (!s) return;
   currentSessionId = s.session_id;
   document.getElementById('session-title').textContent = s.title;
+
+  let emptyStateText = '';
+
+  if (chatMode === 'general') {
+    emptyStateText = 'Ask any medical or surgical questions from the knowledge base.<br>Includes anatomy, pathology, procedures, and clinical guidelines.';
+  } else {
+    emptyStateText = 'Describe the patient\'s venous condition in plain language.<br>The assistant will classify the shunt type and plan ligation.';
+  }
+
   document.getElementById('messages-wrap').innerHTML = `
     <div class="empty-state">
-      <div class="icon">🩺</div>
-      <div>Describe the patient's venous condition in plain language.<br>
-      The assistant will classify the shunt type and plan ligation.</div>
+      <div>${emptyStateText}</div>
     </div>`;
   await loadSessions();
 }
 
 async function loadSession(sid, title) {
   currentSessionId = sid;
-  document.getElementById('session-title').textContent = title || 'Consultation';
+  const titleEl = document.getElementById('session-title');
+  titleEl.textContent = title || 'Consultation';
+
+  // Add back button to header
+  const header = document.getElementById('chat-header');
+  if (!header.querySelector('.back-to-home')) {
+    const backBtn = document.createElement('a');
+    backBtn.className = 'back-to-home';
+    backBtn.href = '/';
+    backBtn.style.cssText = 'margin-right:auto;padding:6px 12px;border-radius:6px;background:var(--slate-100);color:var(--slate-600);text-decoration:none;font-size:12px;cursor:pointer;transition:all .15s;';
+    backBtn.textContent = '← Back to Home';
+    backBtn.onmouseover = (e) => e.target.style.background = 'var(--slate-200)';
+    backBtn.onmouseout = (e) => e.target.style.background = 'var(--slate-100)';
+    header.appendChild(backBtn);
+  }
+
   const msgs = await api(`/api/session/${sid}/messages`);
   const wrap = document.getElementById('messages-wrap');
   wrap.innerHTML = '';
   if (!msgs || msgs.length === 0) {
-    wrap.innerHTML = `<div class="empty-state"><div class="icon">🩺</div><div>Start describing the patient's condition.</div></div>`;
+    wrap.innerHTML = `<div class="empty-state"><div>Start describing the patient's condition.</div></div>`;
   } else {
     // Track last user message for feedback forms
     let lastUserMsg = '';
@@ -608,9 +681,13 @@ async function sendMessage() {
   wrap.scrollTop = wrap.scrollHeight;
 
   setLoading(true);
-  const data = await api('/api/chat', 'POST', {
+
+  // Call appropriate endpoint based on mode
+  const endpoint = chatMode === 'general' ? '/api/general-chat' : '/api/chat';
+  const data = await api(endpoint, 'POST', {
     session_id: currentSessionId,
     message: text,
+    mode: chatMode,
   });
   setLoading(false);
 
@@ -624,8 +701,10 @@ async function sendMessage() {
 
   if (data.type === 'clinical') {
     appendClinicalResult(data);
-  } else if (data.type === 'conversational') {
+  } else if (data.type === 'conversational' || data.type === 'general') {
     appendBubble('bot', data.conversational_response, null);
+  } else if (data.type === 'guardrail') {
+    appendBubble('bot', data.conversational_response, null, 'warning');
   } else if (data.type === 'error') {
     appendBubble('bot', data.conversational_response || 'An error occurred.', null, 'error');
   }
@@ -711,15 +790,15 @@ function buildClinicalHTML(data, doctorQuestion = '') {
   // Interpretation card
   if (interp) {
     html += `<div class="interp-card">
-      <div class="card-label">🔷 CHIVA Interpretation</div>
+      <div class="card-label">CHIVA Interpretation</div>
       <p>${escHtml(interp)}</p>
     </div>`;
   }
 
   // Special flags at top level
   const flags = [];
-  if (data.needs_elim_test) flags.push('<span class="flag-pill flag-warn">⚠ Elimination Test Required</span>');
-  if (data.ask_branching)   flags.push('<span class="flag-pill flag-info">ℹ Branching Info Needed</span>');
+  if (data.needs_elim_test) flags.push('<span class="flag-pill flag-warn">Elimination Test Required</span>');
+  if (data.ask_branching)   flags.push('<span class="flag-pill flag-info">Branching Info Needed</span>');
   if (flags.length) html += `<div class="flag-row">${flags.join('')}</div>`;
 
   // Each finding
@@ -729,7 +808,7 @@ function buildClinicalHTML(data, doctorQuestion = '') {
 
   // Feedback form
   html += `<div class="feedback-form" id="${fbId}">
-    <label class="fb-label">📝 Provide Feedback</label>
+    <label class="fb-label">Provide Feedback</label>
     <textarea placeholder="Enter any feedback, concerns, or suggestions about this classification…" class="fb-textarea" data-fb-id="${fbId}"></textarea>
     <div style="margin-bottom: 10px;">
       <div style="font-size: 11px; color: var(--slate-600); margin-bottom: 6px; font-weight: 600;">Rate this response (1-5):</div>
@@ -776,7 +855,7 @@ function buildFindingHTML(f, showLegLabel) {
   html += `
   <div class="class-card">
     <div class="class-card-header">
-      <span class="card-title">🔵 Shunt Classification</span>
+      <span class="card-title">Shunt Classification</span>
       <span class="confidence-badge ${confClass}">${confPct} confidence</span>
     </div>
     <div class="class-body">
@@ -784,8 +863,8 @@ function buildFindingHTML(f, showLegLabel) {
       ${f.summary ? `<div class="shunt-summary">${escHtml(f.summary)}</div>` : ''}`;
 
   const flags = [];
-  if (f.needs_elim_test) flags.push('<span class="flag-pill flag-warn">⚠ Elimination Test Required</span>');
-  if (f.ask_branching)   flags.push('<span class="flag-pill flag-info">ℹ Branching Info Needed</span>');
+  if (f.needs_elim_test) flags.push('<span class="flag-pill flag-warn">Elimination Test Required</span>');
+  if (f.ask_branching)   flags.push('<span class="flag-pill flag-info">Branching Info Needed</span>');
   if (flags.length) html += `<div class="flag-row">${flags.join('')}</div>`;
 
   html += `</div>`;
@@ -808,7 +887,7 @@ function buildFindingHTML(f, showLegLabel) {
   html += `
   <div class="lig-card">
     <div class="lig-card-header">
-      <span class="card-title">🔴 Ligation Strategy</span>
+      <span class="card-title">Ligation Strategy</span>
     </div>
     <div class="lig-body">
       ${ligPoint ? `<div class="lig-point-label">Ligation Point</div>
@@ -883,12 +962,12 @@ async function loadFeedback() {
   const body = document.getElementById('feedback-body');
 
   if (!records || records.length === 0) {
-    body.innerHTML = `<div class="empty-state"><div class="icon">📂</div><div>No feedback records yet. Submit feedback from clinical responses.</div></div>`;
+    body.innerHTML = `<div class="empty-state"><div>No feedback records yet. Submit feedback from clinical responses.</div></div>`;
     return;
   }
 
   body.innerHTML = records.map(r => {
-    const ratingStars = r.doctor_rating ? '⭐'.repeat(r.doctor_rating) : '—';
+    const ratingStars = r.doctor_rating ? '[' + '*'.repeat(r.doctor_rating) + ']' : '—';
     const hasQuestion = r.doctor_question && r.doctor_question.trim();
     const hasResponse = r.ai_response && r.ai_response.trim();
     const hasFeedback = r.doctor_feedback && r.doctor_feedback.trim();
@@ -897,7 +976,7 @@ async function loadFeedback() {
     return `
     <div class="fb-card">
       <div class="fb-card-header">
-        <span class="fb-type-badge">📋 Feedback</span>
+        <span class="fb-type-badge">Feedback</span>
         <span class="fb-date">${formatDate(r.created_at)}</span>
       </div>
       <div class="fb-body">

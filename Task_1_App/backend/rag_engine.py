@@ -35,6 +35,12 @@ _bm25_corpus: list[str] = []
 
 # ── Qdrant client ─────────────────────────────────────────────────────────────
 
+def set_qdrant_client(client: QdrantClient):
+    """Accept a shared QdrantClient from app.py to avoid lock conflicts."""
+    global _qdrant_client
+    _qdrant_client = client
+
+
 def _get_qdrant() -> QdrantClient:
     global _qdrant_client
     if _qdrant_client is None:
@@ -43,7 +49,6 @@ def _get_qdrant() -> QdrantClient:
                 host=QDRANT_HOST, port=QDRANT_PORT, api_key=QDRANT_API_KEY
             )
         else:
-            # Read-only open of existing qdrant_storage — do NOT makedirs
             _qdrant_client = QdrantClient(path=QDRANT_PATH)
     return _qdrant_client
 
@@ -168,13 +173,13 @@ def retrieve_context(query: str, k: int = RERANK_TOP_N) -> list[str]:
     # Stage 1a: Vector search
     q_vec = get_embedding(query)
     try:
-        vector_hits = client.search(
+        vector_hits = client.query_points(
             collection_name=QDRANT_COLLECTION,
-            query_vector=q_vec.tolist(),
+            query=q_vec.tolist(),
             limit=VECTOR_TOP_K,
             with_payload=True,
         )
-        candidates: list[str] = [h.payload.get("text", "") for h in vector_hits]
+        candidates: list[str] = [h.payload.get("text", "") for h in vector_hits.points]
     except Exception as e:
         logger.error(f"Vector search failed: {e}")
         return []

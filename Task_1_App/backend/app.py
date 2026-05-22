@@ -35,6 +35,7 @@ from config import (
     PORT, HOST, DEBUG,
     LOG_FILE, LOG_LEVEL,
     QDRANT_PATH, QDRANT_COLLECTION,
+    RERANK_TOP_N,
 )
 _QDRANT_STORAGE_PATH = QDRANT_PATH
 _QDRANT_COLLECTION_NAME = QDRANT_COLLECTION
@@ -43,10 +44,18 @@ from chat_db import (
     create_session, update_session_title, get_sessions,
     save_message, get_messages,
     save_feedback, get_all_feedback,
+    hide_session,
 )
 from rag_engine import (
     retrieve_context, collection_exists, get_collection_size,
-    load_bm25_from_qdrant,
+    load_bm25_from_qdrant, set_qdrant_client as set_rag_qdrant_client,
+)
+from general_chat_engine import (
+    retrieve_general_context, collection_exists as general_collection_exists,
+    get_collection_size as get_general_collection_size,
+    load_bm25_from_collection as load_general_bm25,
+    set_qdrant_client as set_general_qdrant_client,
+    is_domain_relevant,
 )
 from nl_interpreter import parse_nl_to_clips, build_conversational_response
 
@@ -91,6 +100,10 @@ CORS(app, origins=["http://localhost:7860", "http://127.0.0.1:7860"])
 
 # ── Groq client ───────────────────────────────────────────────────────────────
 _groq = GroqClient(api_key=GROQ_API_KEY)
+
+# ── Shared Qdrant client ───────────────────────────────────────────────────────
+from qdrant_client import QdrantClient
+_qdrant_shared = QdrantClient(path=_QDRANT_STORAGE_PATH)
 
 # Per-session analysis context cache (in-memory, for conversational follow-ups)
 _analysis_cache: dict[str, str] = {}
@@ -159,8 +172,198 @@ def _format_analysis_for_context(result: dict) -> str:
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/")
-def serve_frontend():
+def serve_landing():
+    """Landing page with mode selection (Clinical vs General)."""
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Medical Assistant</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: #0f172a;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .container {
+                max-width: 900px;
+                width: 100%;
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 60px;
+            }
+            .header h1 {
+                font-size: 2.5em;
+                margin-bottom: 12px;
+                font-weight: 700;
+                color: #ffffff;
+                letter-spacing: -0.5px;
+            }
+            .header p {
+                font-size: 0.95em;
+                color: #94a3b8;
+            }
+            .modes {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+                margin-bottom: 40px;
+            }
+            @media (max-width: 768px) {
+                .modes {
+                    grid-template-columns: 1fr;
+                }
+                .header h1 {
+                    font-size: 2em;
+                }
+            }
+            .mode-card {
+                background: #1e293b;
+                border-radius: 12px;
+                padding: 32px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: 1px solid #334155;
+                text-decoration: none;
+                color: inherit;
+                display: flex;
+                flex-direction: column;
+            }
+            .mode-card:hover {
+                transform: translateY(-4px);
+                border-color: #475569;
+                background: #0f172a;
+            }
+            .mode-icon {
+                font-size: 2.5em;
+                margin-bottom: 16px;
+            }
+            .mode-card h2 {
+                font-size: 1.5em;
+                margin-bottom: 12px;
+                color: #ffffff;
+                font-weight: 600;
+            }
+            .mode-card p {
+                font-size: 0.9em;
+                color: #cbd5e1;
+                line-height: 1.6;
+                margin-bottom: 20px;
+                flex: 1;
+            }
+            .features {
+                list-style: none;
+                margin-bottom: 20px;
+            }
+            .features li {
+                padding: 6px 0;
+                color: #94a3b8;
+                font-size: 0.85em;
+            }
+            .features li:before {
+                content: "• ";
+                color: #64748b;
+                margin-right: 8px;
+            }
+            .btn {
+                padding: 11px 20px;
+                border-radius: 8px;
+                font-size: 0.95em;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                border: none;
+                cursor: pointer;
+                align-self: flex-start;
+            }
+            .btn-clinical {
+                background: #2563eb;
+                color: white;
+            }
+            .btn-clinical:hover {
+                background: #1d4ed8;
+            }
+            .btn-general {
+                background: #2563eb;
+                color: white;
+            }
+            .btn-general:hover {
+                background: #1d4ed8;
+            }
+            .footer {
+                text-align: center;
+                color: #64748b;
+                font-size: 0.85em;
+                margin-top: 50px;
+                padding-top: 30px;
+                border-top: 1px solid #334155;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Medical Assistant</h1>
+                <p>Select a mode to begin</p>
+            </div>
+
+            <div class="modes">
+                <a href="/clinical" class="mode-card">
+                    <div class="mode-icon">C</div>
+                    <h2>Clinical Support</h2>
+                    <p>Specialized analysis for venous shunt classification and ligation planning with clinical decision support.</p>
+                    <ul class="features">
+                        <li>Shunt classification</li>
+                        <li>Ligation guidance</li>
+                        <li>Clinical reasoning</li>
+                    </ul>
+                    <button class="btn btn-clinical">Enter →</button>
+                </a>
+
+                <a href="/general" class="mode-card">
+                    <div class="mode-icon">+</div>
+                    <h2>General Chat</h2>
+                    <p>Ask any medical or surgical questions from the comprehensive knowledge base with intelligent search.</p>
+                    <ul class="features">
+                        <li>Medical research</li>
+                        <li>General knowledge</li>
+                        <li>Evidence-based answers</li>
+                    </ul>
+                    <button class="btn btn-general">Enter →</button>
+                </a>
+            </div>
+
+            <div class="footer">
+                <p>Always consult clinical guidelines and specialists for critical decisions</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+
+@app.route("/clinical")
+def serve_clinical_frontend():
+    """Serve the clinical decision support interface."""
     return send_file(str(_FRONTEND_DIR / "index.html"))
+
+
+@app.route("/general")
+def serve_general_frontend():
+    """Serve the general medical chat interface."""
+    return send_file(str(_FRONTEND_DIR / "general.html"))
 
 
 @app.route("/api/status")
@@ -192,15 +395,25 @@ def api_status():
 
 @app.route("/api/sessions", methods=["GET"])
 def api_list_sessions():
-    return jsonify(get_sessions())
+    mode = request.args.get("mode", None)  # clinical, general, or None for all
+    return jsonify(get_sessions(mode=mode))
 
 
 @app.route("/api/session", methods=["POST"])
 def api_new_session():
-    data = request.get_json(force=True) or {}
+    try:
+        data = request.get_json(force=True, silent=False)
+    except Exception as e:
+        logger.error(f"JSON parse error in /api/session: {e}")
+        data = None
+
+    if not data or not isinstance(data, dict):
+        data = {}
+
     title = data.get("title", "New Consultation")
-    sid = create_session(title)
-    return jsonify({"session_id": sid, "title": title})
+    mode = data.get("mode", "clinical")  # clinical or general
+    sid = create_session(title, mode=mode)
+    return jsonify({"session_id": sid, "title": title, "mode": mode})
 
 
 @app.route("/api/session/<session_id>/messages", methods=["GET"])
@@ -208,11 +421,27 @@ def api_get_messages(session_id: str):
     return jsonify(get_messages(session_id))
 
 
+@app.route("/api/session/<session_id>/hide", methods=["PATCH"])
+def api_hide_session(session_id: str):
+    hide_session(session_id)
+    return jsonify({"status": "hidden"})
+
+
 @app.route("/api/chat", methods=["POST"])
 def api_chat():
-    data = request.get_json(force=True) or {}
-    session_id: str = data.get("session_id", "").strip()
-    user_message: str = data.get("message", "").strip()
+    try:
+        data = request.get_json(force=True, silent=False)
+    except Exception as e:
+        logger.error(f"JSON parse error in /api/chat: {e}")
+        logger.error(f"Request content-type: {request.content_type}")
+        logger.error(f"Request data: {request.data}")
+        return jsonify({"error": f"Invalid JSON: {str(e)}"}), 400
+
+    if not data or not isinstance(data, dict):
+        return jsonify({"error": "Invalid JSON in request body"}), 400
+
+    session_id: str = (data.get("session_id") or "").strip()
+    user_message: str = (data.get("message") or "").strip()
 
     if not session_id or not user_message:
         return jsonify({"error": "session_id and message are required"}), 400
@@ -306,6 +535,163 @@ def api_chat():
         })
 
 
+@app.route("/api/general-chat", methods=["POST"])
+def api_general_chat():
+    """General medical chat with RAG and domain guardrails."""
+    try:
+        data = request.get_json(force=True, silent=False)
+    except Exception as e:
+        logger.error(f"JSON parse error in /api/general-chat: {e}")
+        logger.error(f"Request content-type: {request.content_type}")
+        logger.error(f"Request data: {request.data}")
+        return jsonify({"error": f"Invalid JSON: {str(e)}"}), 400
+
+    if not data or not isinstance(data, dict):
+        return jsonify({"error": "Invalid JSON in request body"}), 400
+
+    session_id: str = (data.get("session_id") or "").strip()
+    user_message: str = (data.get("message") or "").strip()
+    mode: str = (data.get("mode") or "general").strip()
+
+    if not session_id or not user_message:
+        return jsonify({"error": "session_id and message are required"}), 400
+
+    user_msg_id = save_message(session_id, "user", user_message)
+
+    # Guardrail: reject off-topic queries before hitting the LLM
+    if not is_domain_relevant(user_message):
+        guardrail_msg = (
+            "I'm a medical assistant specialised in venous disease, surgical procedures, "
+            "and clinical guidelines. I'm not able to help with that topic. "
+            "Please ask a medical or clinical question."
+        )
+        save_message(session_id, "assistant", guardrail_msg)
+        return jsonify({
+            "type": "guardrail",
+            "conversational_response": guardrail_msg,
+            "message_id": user_msg_id,
+        })
+
+    # Check collection exists
+    if not general_collection_exists():
+        msg = (
+            f"General knowledge collection not found. "
+            "Ensure the final_structured_rag collection has been created."
+        )
+        save_message(session_id, "assistant", msg)
+        return jsonify({"type": "error", "conversational_response": msg, "message_id": user_msg_id})
+
+    # Retrieve relevant context from final_structured_rag
+    try:
+        context_chunks = retrieve_general_context(user_message, k=RERANK_TOP_N)
+    except Exception as e:
+        logger.error(f"Context retrieval failed: {e}")
+        context_chunks = []
+
+    # Clean context chunks - normalize Unicode and special characters
+    def clean_text(text):
+        """Remove problematic Unicode characters and normalize."""
+        if not text:
+            return text
+        replacements = {
+            '–': '-', '—': '-',        # dashes
+            ''': "'", ''': "'",        # quotes
+            '"': '"', '"': '"',        # smart quotes
+            ' ': ' ',                   # non-breaking space
+            '​': '',              # zero-width space
+            '‌': '',              # zero-width non-joiner
+            '‍': '',              # zero-width joiner
+        }
+        for char, replacement in replacements.items():
+            text = text.replace(char, replacement)
+        return text
+
+    cleaned_chunks = [clean_text(chunk) for chunk in context_chunks]
+    context_str = "\n\n".join(cleaned_chunks) if cleaned_chunks else "No relevant context found."
+
+    system_prompt = """You are a clinical medical assistant specializing in venous disease and CHIVA methodology.
+Plain text only. No markdown. No special characters. ASCII only.
+
+EXAMPLE - simple question gets a short paragraph:
+
+Question: What is CHIVA?
+Answer: CHIVA stands for Cure Conservatrice et Hemodynamique de l'Insuffisance Veineuse en Ambulatoire. It is a minimally invasive technique for treating venous insufficiency that targets the hemodynamic source of reflux rather than removing veins. Developed to preserve the saphenous vein while eliminating pathological recirculation circuits.
+Sources: Zamboni et al. 1998
+
+---
+
+EXAMPLE - complex multi-part question gets structured sections:
+
+Question: Blood refluxes N2 to N3 to N1. What shunt type is this and what is the ligation strategy?
+Answer:
+
+CLASSIFICATION
+Shunt Type II. Recirculation occurs entirely in the superficial veins. Reflux originates from the saphenous vein (N2), fills a tributary (N3), and re-enters either the saphenous vein or deep system (N1).
+
+SUBTYPES
+Type 2A: Tributary (N3) drains back into saphenous vein (N2). Saphenous vein competent above the refluxive junction.
+Type 2B: Saphenous vein becomes incompetent just above the refluxive tributary junction.
+Type 2C: Tributary (N3) re-enters the deep vein directly via perforator. Saphenous vein incompetent above junction.
+
+LIGATION STRATEGY
+Target the point where the tributary (N3) connects to the saphenous vein. Interrupting this eliminates the recirculation while preserving the saphenous vein. For Type 2C, target the perforating vein re-entry point.
+
+SOURCES
+Zamboni et al. 1998, Cappelli et al. 2000
+
+---
+
+Use the appropriate format based on question complexity. Do not copy chunks. Reason and answer."""
+
+    user_prompt = f"""KNOWLEDGE BASE:
+{context_str}
+
+QUESTION:
+{user_message}
+
+Answer based on the knowledge base. Simple question = short paragraph. Complex question = structured sections. End with SOURCES."""
+
+    history = [m for m in get_messages(session_id) if m["message_id"] != user_msg_id]
+
+    # Convert history to conversation format for context
+    system_with_history = system_prompt
+    if history and len(history) > 0:
+        system_with_history += "\n\nPrevious conversation context:"
+        for msg in history[-4:]:  # Keep last 4 messages for context
+            role = "Doctor" if msg["role"] == "user" else "Assistant"
+            system_with_history += f"\n{role}: {msg['content'][:300]}"
+
+    # Call LLM
+    try:
+        resp = _groq.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": system_with_history},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=0.5,
+            max_tokens=1536,
+        )
+        response_text = resp.choices[0].message.content or ""
+    except Exception as e:
+        logger.error(f"LLM call failed: {e}")
+        response_text = f"Error generating response: {e}"
+
+    # Auto-title session
+    if not any(m["role"] == "assistant" for m in history):
+        short_input = user_message[:45].rstrip() + ("…" if len(user_message) > 45 else "")
+        update_session_title(session_id, f"Medical Q&A — {short_input}")
+
+    save_message(session_id, "assistant", response_text)
+
+    return jsonify({
+        "type": "general",
+        "conversational_response": response_text,
+        "context_count": len(context_chunks),
+        "message_id": user_msg_id,
+    })
+
+
 @app.route("/api/feedback", methods=["GET"])
 def api_feedback():
     return jsonify(get_all_feedback())
@@ -313,11 +699,19 @@ def api_feedback():
 
 @app.route("/api/feedback", methods=["POST"])
 def api_submit_feedback():
-    data = request.get_json(force=True) or {}
-    session_id = data.get("session_id", "").strip()
-    doctor_question = data.get("doctor_question", "").strip()
-    ai_response = data.get("ai_response", "").strip()
-    doctor_feedback = data.get("doctor_feedback", "").strip()
+    try:
+        data = request.get_json(force=True, silent=False)
+    except Exception as e:
+        logger.error(f"JSON parse error in /api/feedback: {e}")
+        return jsonify({"error": f"Invalid JSON: {str(e)}"}), 400
+
+    if not data or not isinstance(data, dict):
+        data = {}
+
+    session_id = (data.get("session_id") or "").strip()
+    doctor_question = (data.get("doctor_question") or "").strip()
+    ai_response = (data.get("ai_response") or "").strip()
+    doctor_feedback = (data.get("doctor_feedback") or "").strip()
     doctor_rating = data.get("doctor_rating")
 
     logger.info(f"Feedback received: session={session_id[:20] if session_id else 'EMPTY'}, "
@@ -357,6 +751,10 @@ def _startup():
     init_db()
     logger.info("Database initialised.")
 
+    # Set shared Qdrant client for all engines (single client avoids lock conflicts)
+    set_rag_qdrant_client(_qdrant_shared)
+    set_general_qdrant_client(_qdrant_shared)
+
     if not collection_exists():
         logger.error(
             f"Qdrant collection '{_QDRANT_COLLECTION_NAME}' not found in "
@@ -367,7 +765,17 @@ def _startup():
         # Build BM25 index from the pre-existing collection (no ingestion needed)
         load_bm25_from_qdrant()
 
-    logger.info(f"CHIVA Clinical Assistant ready at http://{HOST}:{PORT}")
+    # Load general chat collection and BM25 index
+    if not general_collection_exists():
+        logger.warning(
+            f"General collection 'final_structured_rag' not found. "
+            "General chat mode will not be available."
+        )
+    else:
+        logger.info(f"General collection ready ({get_general_collection_size()} points)")
+        load_general_bm25()
+
+    logger.info(f"Medical Assistant ready at http://{HOST}:{PORT}")
 
 
 if __name__ == "__main__":

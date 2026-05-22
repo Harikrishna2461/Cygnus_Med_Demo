@@ -32,7 +32,7 @@ CHUNK_OVERLAP = 50
 
 # Improved RAG retrieval (cross-encoder reranking pipeline)
 VECTOR_TOP_K = 50        # Pull top-50 by vector similarity
-RERANK_TOP_N = 5         # Return top-5 after cross-encoder reranking
+RERANK_TOP_N = 15        # Return top-15 after cross-encoder reranking (more context for subtypes)
 CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 CROSS_ENCODER_ENABLED = True
 
