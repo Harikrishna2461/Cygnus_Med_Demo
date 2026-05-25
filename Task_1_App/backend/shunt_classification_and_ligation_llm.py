@@ -226,19 +226,35 @@ def build_shunt_classification_prompt(clips: list[dict], leg_label: str) -> str:
 STEP-BY-STEP DECISION GUIDE (Follow in order)
 ═══════════════════════════════════════════════════════════════
 
-STEP 1: CHECK FOR EP N1→N2 (SFJ or Hunterian ENTRY)
+STEP 1: CHECK FOR EP N1→N3 FIRST (Type 4 / Type 5 path)
+    Look for any clip with flow=EP, fromType=N1, toType=N3.
+    If YES → this is a direct deep-to-tributary shunt. Go to Type 4/5 branch below.
+    If NO  → continue to STEP 2.
+
+    ┌─ EP N1→N3 PATH (direct deep-to-tributary escape):
+    │
+    ├─ Has RP N2→N1 (return through saphenous trunk)?
+    │  └─ YES → TYPE 4 (confidence 0.88)
+    │           Key: the return loop goes THROUGH the N2 trunk (RP N2→N1)
+    │
+    └─ Has RP N3→N1 or RP N3→N2 (return stays in tributaries)?
+       └─ YES → TYPE 5 (confidence 0.88)
+               Key: the return loop stays within N3 tributaries (RP N3→N1 or N3→N2)
+               *** EP N1→N3 + RP N3→N1 = TYPE 5, NOT TYPE 4 ***
+
+STEP 2: CHECK FOR EP N1→N2 (SFJ or Hunterian ENTRY)
     Look for: "EP N1→N2" with y≤0.098 (SFJ) or y≤0.353 (Hunterian)
     If YES with SFJ-ENTRY/Hunterian-ENTRY label → SFJ INCOMPETENT
     If NO  → SFJ COMPETENT (go to Case C)
     ✓ Found EP N1→N2? YES/NO
 
-    STEP 2: IF YES to EP N1→N2, CHECK FOR REFLUX PATTERNS
-    2a) ANY RP N3→N2 or RP N3→N1? (tributary reflux)
-    2b) ANY RP N2→N1? (GSV reflux)
-    2c) ANY RP anywhere else?
-    2d) ANY EP N2→N3? (extra antegrade to tributary)
+    STEP 3: IF YES to EP N1→N2, CHECK FOR REFLUX PATTERNS
+    3a) ANY RP N3→N2 or RP N3→N1? (tributary reflux)
+    3b) ANY RP N2→N1? (GSV reflux)
+    3c) ANY RP anywhere else?
+    3d) ANY EP N2→N3? (extra antegrade to tributary)
 
-STEP 3: MATCH PATTERN TO TYPE
+STEP 4: MATCH PATTERN TO TYPE
 
     ┌─ SFJ INCOMPETENT PATH (has EP N1→N2):
     │
@@ -249,10 +265,10 @@ STEP 3: MATCH PATTERN TO TYPE
         ├─ Has RP N3 (at N2 or N1), NO RP N2→N1 → TYPE 3 (confidence 0.88)
         ├─ Has RP N3 AND RP N2→N1:
         │  ├─ eliminationTest absent → UNDETERMINED (confidence 0.55) [needs_elim_test=true]
-        │  ├─ eliminationTest="Reflux" → TYPE 1+2 (confidence 0.80) 
+        │  ├─ eliminationTest="Reflux" → TYPE 1+2 (confidence 0.80)
         │  └─ eliminationTest="No Reflux" → TYPE 3 (confidence 0.75)
 
-    ┌─ SFJ COMPETENT PATH (NO EP N1→N2):
+    ┌─ SFJ COMPETENT PATH (NO EP N1→N2, NO EP N1→N3):
     │
     ├─ EP N2→N3 EXISTS:
     │  └─ TYPE 2A (confidence 0.85-0.92)
@@ -273,16 +289,25 @@ STEP 4: ASSIGN CONFIDENCE
 
 ═══════════════════════════════════════════════════════════════
 CRITICAL REMINDERS:
-    • EP N1→N2 is THE KEY decision point — check this FIRST
+    • Check EP N1→N3 FIRST — if present, it is Type 4 or Type 5, not Type 1/2/3
+    • TYPE 4 vs TYPE 5 — the ONLY difference is the return path:
+        Type 4: EP N1→N3 + RP N2→N1  (return via saphenous TRUNK)
+        Type 5: EP N1→N3 + RP N3→N1 or RP N3→N2  (return via TRIBUTARIES)
+        EP N1→N3 + RP N3→N1 = TYPE 5 — NEVER classify this as Type 4
+    • EP N1→N2 is THE KEY decision point for Types 1/2/3 — check after ruling out N1→N3
     • EP N2→N2 means perforator (SFJ COMPETENT), never confuse with N1→N2
     • Type 2A has EP N2→N3; Type 2B/2C have EP N2→N2 (NOT N2→N3)
     • Type 2C differs from Type 1+2: 2C has EP N2→N2, Type 1+2 has EP N1→N2
-    • Type 4/5 are N1→N3 path shunts and should be classified explicitly when present
     • RP only at N3 (not N2→N1) + EP N1→N2 = TYPE 3 (not 1+2)
 ═══════════════════════════════════════════════════════════════
 
 === TASK ===
-Follow the Step-by-Step Decision Guide above. Classify the {leg_label} leg.
+Follow the Step-by-Step Decision Guide above. Classify the venous shunt for: {leg_label}.
+
+STRICT OUTPUT RULES:
+- summary: 1 sentence clinical summary. Do NOT mention "left leg" or "right leg" unless {leg_label} is explicitly Left or Right (i.e. not "Unspecified").
+- reasoning: describe each decision step in plain clinical language (e.g. "EP N1→N2 present, indicating SFJ incompetence"). Do NOT reference internal clip indices ("Clip 00", "Clip 01", etc.), y-coordinates, or posYRatio values in any reasoning step.
+
 Output ONLY the JSON below — no other text, no markdown.
 
 {{
@@ -355,10 +380,12 @@ Based on the shunt type "{shunt_type}", the clinical findings above, and the med
 
 Important formatting rules:
 1. ligation_steps must be a JSON array with one clear action per item.
-2. Each ligation step must name the ligation point or vessel segment explicitly.
-3. clinical_rationale must explain why that plan fits the shunt anatomy.
+2. Each ligation step must name the ligation point or vessel segment using anatomical terms only (e.g. "saphenofemoral junction", "mid-thigh", "knee level", "tributary junction"). Do NOT use y-coordinates, posYRatio values, or clip indices (e.g. never write "y=0.15", "Clip 00", "posY").
+3. clinical_rationale must explain why that plan fits the shunt anatomy in plain surgical language — no y-coordinates.
 4. additional_info_needed must be [] when there is no meaningful extra information to request.
 5. chiva_approach must describe the hemodynamic CHIVA reasoning, even if brief.
+6. Do NOT mention "left leg" or "right leg" in any field if {leg_label} is "Unspecified".
+7. NEVER include raw clip data, y-values, posYRatio, or coordinate numbers in any output field.
 
 Output ONLY the JSON below — no other text, no markdown:
 

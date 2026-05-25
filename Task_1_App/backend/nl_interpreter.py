@@ -73,7 +73,7 @@ IMPORTANT DISTINCTIONS:
 3. Generate one virtual clip per flow event.
 4. Use the mappings above to assign EP/RP and N1/N2/N3 notation.
 5. Estimate posYRatio from anatomical location clues.
-6. If left/right leg is mentioned, assign legSide accordingly (default: "Left").
+6. If left/right leg is explicitly mentioned, assign legSide accordingly. If NOT mentioned, use "Unspecified" — never assume or default to Left or Right.
 7. If the description is NOT about patient venous anatomy (e.g., it is a question,
    a greeting, or asks about a concept without describing a patient), set is_clinical=false.
 
@@ -88,7 +88,7 @@ Output ONLY valid JSON — no markdown, no explanation:
             "toType": "N2",
             "posYRatio": 0.06,
             "step": "SFJ",
-            "legSide": "Left"
+            "legSide": "Unspecified"
         }}
     ]
 }}
@@ -104,10 +104,15 @@ _NL_TO_CHIVA_PROMPT = """You are an expert CHIVA vascular surgeon. A colleague i
 
 === CHIVA NOTATION GUIDE ===
 
-COMPARTMENTS:
-  N1 = Deep venous system (femoral vein, popliteal vein, deep veins)
-  N2 = Saphenous trunk (GSV = Great Saphenous Vein, SSV = Small Saphenous Vein)
-  N3 = Tributaries, perforators branching off the saphenous trunk, varicosities, superficial branches
+COMPARTMENTS — READ CAREFULLY:
+  N1 = Deep venous system ONLY (femoral vein, popliteal vein, deep veins)
+  N2 = Saphenous TRUNK ONLY — i.e. the GSV (Great Saphenous Vein) or SSV (Small Saphenous Vein) named explicitly.
+       N2 applies ONLY when the clinician specifically names the GSV, SSV, or saphenous trunk.
+  N3 = Everything else superficial: tributaries, branches, varicosities, perforators,
+       AND generic "superficial veins" / "superficial system" when the specific trunk is NOT named.
+
+  *** CRITICAL: "superficial veins" without naming GSV/SSV = N3, NOT N2. ***
+  *** N2 is reserved for the named saphenous trunk (GSV or SSV) only. ***
 
 FLOW DIRECTIONS:
   EP = Antegrade (forward, physiological, normal direction toward heart)
@@ -123,7 +128,7 @@ POSITION RATIOS (posYRatio — 0 = groin, 1 = ankle):
 
 KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION FROM EXAMPLE CLINICAL LANGUAGE IN BOOK:
   "SFJ incompetent" / "reflux at SFJ" / "deep blood enters GSV at groin"
-      → EP  N1→N2  
+      → EP  N1→N2
 
   "GSV reflux" / "blood flows backward in GSV" / "GSV carries reflux downward"
       → RP  N2→N1  (at the level described, e.g. mid-thigh ≈ 0.30)
@@ -138,6 +143,12 @@ KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION FROM EXAMPLE CLINICAL LANGUAGE I
       → EP  N2→N2  (perforator entry — note: fromType=N2, toType=N2, NOT N1→N2)
       This means SFJ is COMPETENT even if posYRatio is small.
 
+  "deep vein to superficial veins" / "deep to superficial" / "N1 to superficial system" (GSV NOT named)
+      → EP  N1→N3
+
+  "superficial veins reflux back to deep" / "superficial back to deep vein" (GSV NOT named)
+      → RP  N3→N1
+
   "deep vein directly feeds a tributary" / "N1 to N3 direct connection"
       → EP  N1→N3
 
@@ -145,11 +156,12 @@ KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION FROM EXAMPLE CLINICAL LANGUAGE I
       → EP  N1→N2 (SFJ INCOMPETENT via Hunterian)
 
 IMPORTANT DISTINCTIONS:
-  - EP N1→N2 means deep system → saphenous trunk (SFJ or Hunterian INCOMPETENT)
+  - EP N1→N2 means deep system → named saphenous trunk GSV/SSV (SFJ or Hunterian INCOMPETENT)
+  - EP N1→N3 means deep system → generic superficial veins/tributaries (when GSV/SSV NOT named)
   - EP N2→N2 means perforator → saphenous trunk (SFJ COMPETENT)
   - RP N2→N1 means saphenous trunk reflux (backward in GSV)
   - RP N3→N2 means tributary reflux back into GSV
-  - RP N3→N1 means tributary reflux all the way back to deep system
+  - RP N3→N1 means tributary/superficial reflux all the way back to deep system
 
 === CLINICAL DESCRIPTION TO INTERPRET ===
 {description}
@@ -160,7 +172,7 @@ IMPORTANT DISTINCTIONS:
 3. Generate one virtual clip per flow event.
 4. Use the mappings above to assign EP/RP and N1/N2/N3 notation.
 5. Estimate posYRatio from anatomical location clues.
-6. If left/right leg is mentioned, assign legSide accordingly (default: "Left").
+6. If left/right leg is explicitly mentioned, assign legSide accordingly. If NOT mentioned, use "Unspecified" — never assume or default to Left or Right.
 7. If the description is NOT about patient venous anatomy (e.g., it is a question,
    a greeting, or asks about a concept without describing a patient), set is_clinical=false.
 
@@ -175,7 +187,7 @@ Output ONLY valid JSON — no markdown, no explanation:
             "toType": "N2",
             "posYRatio": 0.06,
             "step": "SFJ",
-            "legSide": "Left"
+            "legSide": "Unspecified"
         }}
     ]
 }}
