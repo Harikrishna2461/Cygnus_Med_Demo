@@ -182,13 +182,6 @@
       display: flex; align-items: center; gap: 8px;
     }
     .class-card-header .card-title { font-size: 11px; font-weight: 700; letter-spacing: .8px; color: var(--slate-400); text-transform: uppercase; }
-    .confidence-badge {
-      margin-left: auto; font-size: 11.5px; font-weight: 700;
-      padding: 2px 9px; border-radius: 20px;
-    }
-    .conf-high  { background: var(--green-100); color: var(--green-600); }
-    .conf-med   { background: var(--amber-100); color: var(--amber-600); }
-    .conf-low   { background: var(--red-100);   color: var(--red-600); }
 
     .class-body { padding: 12px 14px; }
     .shunt-type { font-size: 22px; font-weight: 800; color: var(--slate-900); margin-bottom: 4px; }
@@ -242,8 +235,6 @@
     .lig-card-header .card-title { font-size: 11px; font-weight: 700; letter-spacing: .8px; color: rgba(255,255,255,.8); text-transform: uppercase; }
 
     .lig-body { padding: 12px 14px; }
-    .lig-point-label { font-size: 11px; font-weight: 700; letter-spacing: .6px; color: var(--teal-600); text-transform: uppercase; margin-bottom: 4px; }
-    .lig-point-value { font-size: 16px; font-weight: 700; color: var(--slate-900); margin-bottom: 12px; }
 
     .lig-steps { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; counter-reset: step; }
     .lig-steps li {
@@ -259,7 +250,7 @@
     }
 
     .text-block { font-size: 12.5px; color: var(--slate-600); line-height: 1.5; }
-    .complications-list { display: flex; flex-direction: column; gap: 4px; }
+    .complications-list { display: flex; flex-direction: column; gap: 4px; list-style: none; padding-left: 0; margin: 0; }
     .complications-list li {
       font-size: 12.5px; color: var(--slate-600); padding-left: 12px;
       position: relative;
@@ -795,12 +786,6 @@ function buildClinicalHTML(data, doctorQuestion = '') {
     </div>`;
   }
 
-  // Special flags at top level
-  const flags = [];
-  if (data.needs_elim_test) flags.push('<span class="flag-pill flag-warn">Elimination Test Required</span>');
-  if (data.ask_branching)   flags.push('<span class="flag-pill flag-info">Branching Info Needed</span>');
-  if (flags.length) html += `<div class="flag-row">${flags.join('')}</div>`;
-
   // Each finding
   findings.forEach(f => {
     html += buildFindingHTML(f, findings.length > 1);
@@ -834,15 +819,12 @@ function buildSummaryText(data) {
   const findings = data.findings || [];
   const parts = [];
   findings.forEach(f => {
-    parts.push(`${f.shunt_type || 'Unknown'} (${Math.round((f.confidence || 0) * 100)}%)`);
+    parts.push(f.shunt_type || 'Unknown');
   });
   return parts.join(' | ') || 'Clinical assessment complete';
 }
 
 function buildFindingHTML(f, showLegLabel) {
-  const conf = f.confidence || 0;
-  const confClass = conf >= 0.8 ? 'conf-high' : conf >= 0.6 ? 'conf-med' : 'conf-low';
-  const confPct = Math.round(conf * 100) + '%';
   const reasoning = f.reasoning || [];
   const steps = f.ligation_steps || [];
   const complications = f.complications_contraindications || [];
@@ -856,7 +838,6 @@ function buildFindingHTML(f, showLegLabel) {
   <div class="class-card">
     <div class="class-card-header">
       <span class="card-title">Shunt Classification</span>
-      <span class="confidence-badge ${confClass}">${confPct} confidence</span>
     </div>
     <div class="class-body">
       <div class="shunt-type">${escHtml(f.shunt_type || 'Unknown')}</div>
@@ -883,15 +864,12 @@ function buildFindingHTML(f, showLegLabel) {
   html += '</div>'; // close class-card
 
   // Ligation card
-  const ligPoint = f.point_of_ligation || (steps[0] || '');
   html += `
   <div class="lig-card">
     <div class="lig-card-header">
       <span class="card-title">Ligation Strategy</span>
     </div>
     <div class="lig-body">
-      ${ligPoint ? `<div class="lig-point-label">Ligation Point</div>
-      <div class="lig-point-value">${escHtml(ligPoint)}</div>` : ''}
       ${steps.length ? `<ul class="lig-steps">${steps.map(s => `<li>${escHtml(s)}</li>`).join('')}</ul>` : ''}
     </div>`;
 

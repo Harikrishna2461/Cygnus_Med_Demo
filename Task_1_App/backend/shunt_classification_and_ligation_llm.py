@@ -112,13 +112,15 @@ QUICK DECISION TABLE (commit this to memory):
     Has EP N1→N2? YES + EP N2→N3 + RP N3 + RP N2→N1 + eliminationTest absent → UNDETERMINED
     Has EP N1→N2? YES + EP N2→N3 + RP N3 + RP N2→N1 + elim="Reflux"          → TYPE 1+2
     Has EP N1→N2? YES + EP N2→N3 + RP N3 + RP N2→N1 + elim="No Reflux"       → TYPE 3
+    Has EP N1→N2? YES + EP N2→N3 + ZERO RP clips          → NO SHUNT (not Type 3 — Type 3 requires RP)
+    Has EP N1→N2? YES + no EP N2→N3 + ZERO RP clips       → NO SHUNT
     No EP N1→N2  + EP N2→N3                                → TYPE 2A
     No EP N1→N2  + EP N2→N2 + RP N3 + NO RP N2→N1         → TYPE 2B
     No EP N1→N2  + EP N2→N2 + RP N3 + RP N2→N1            → TYPE 2C
     No EP N1→N2  + EP N2→N2 + NO RP                        → NO SHUNT
     EP N1→N3 + RP N2→N1                                    → TYPE 4
     EP N1→N3 + RP N3→N2 or RP N3→N1                         → TYPE 5
-    No RP at all                                            → NO SHUNT
+    No RP at all (except Type 2A)                          → NO SHUNT
 
 CONCRETE EXAMPLES (match these patterns exactly):
     Type 1:  [EP N1→N2 y=0.06 SFJ-ENTRY, RP N2→N1 y=0.25]
@@ -139,6 +141,7 @@ CONCRETE EXAMPLES (match these patterns exactly):
             [EP N1→N2, EP N2→N3, RP N3→N1, RP N2→N1, no eliminationTest] → UNDETERMINED
     Type 1+2:[EP N1→N2, EP N2→N3 eliminationTest="Reflux", RP N3→N1, RP N2→N1] → TYPE 1+2
     No shunt:[EP N1→N2 only, no RP]  OR  [EP N2→N2 only, no RP] → NO SHUNT
+    No shunt:[EP N1→N2 + EP N2→N3, ZERO RP clips] → NO SHUNT (cannot be Type 3 without RP clips)
 
 TYPE 2 BRANCHING — ask_branching flag:
     Set ask_branching=true when there are MULTIPLE RP at N3 tributaries in a Type 2A, 2B, or 2C case.
@@ -178,6 +181,112 @@ _CLIP_LABELS: dict[tuple, str] = {
     ("EP", "N2", "N3"): " [GSV-to-TRIBUTARY-ENTRY: N2→N3]",
     ("RP", "N2", "N1"): " [GSV-TRUNK-REFLUX: N2→N1]",
 }
+
+
+def _posY_to_location(posY: float) -> str:
+    """Translate a posYRatio value to a named anatomical location."""
+    if posY <= 0.09:
+        return "groin / SFJ level"
+    elif posY <= 0.20:
+        return "upper thigh"
+    elif posY <= 0.35:
+        return "mid-thigh (Hunterian area)"
+    elif posY <= 0.55:
+        return "knee / popliteal area"
+    elif posY <= 0.80:
+        return "calf"
+    else:
+        return "ankle"
+
+
+def _compute_ligation_hints(shunt_type: str, clips: list[dict]) -> str:
+    """
+    Pre-compute the anatomical ligation location from clip posYRatios so the LLM
+    outputs location-specific ligation steps instead of generic CHIVA notation.
+    """
+    hints = []
+
+    if "Type 1" in shunt_type and "1+2" not in shunt_type:
+        for c in clips:
+            if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N2":
+                y = c.get("posYRatio") or 0.0
+                if y <= 0.098:
+                    hints.append(
+                        "EP N1→N2 entry is at the SFJ level "
+                        "→ LIGATION POINT: Saphenofemoral Junction (SFJ), at the groin"
+                    )
+                else:
+                    loc = _posY_to_location(y)
+                    hints.append(
+                        f"EP N1→N2 entry is at the {loc} "
+                        f"→ LIGATION POINT: Hunterian Perforator at the {loc} (NOT at the SFJ)"
+                    )
+
+    elif shunt_type in ("Type 2A", "Type 2B", "Type 2C"):
+        ep_clips = sorted(
+            [c for c in clips if c.get("flow") == "EP"],
+            key=lambda c: c.get("posYRatio") or 0.0,
+        )
+        if ep_clips:
+            top = ep_clips[0]
+            y = top.get("posYRatio") or 0.0
+            ft, tt = top.get("fromType", "?"), top.get("toType", "?")
+            loc = _posY_to_location(y)
+            if ft == "N2" and tt == "N2":
+                hints.append(
+                    f"EP N2→N2 perforator entry is at the {loc} "
+                    f"→ PRIMARY LIGATION POINT: perforator entry into the GSV at the {loc}"
+                )
+            elif ft == "N2" and tt == "N3":
+                hints.append(
+                    f"EP N2→N3 branch point is at the {loc} "
+                    f"→ PRIMARY LIGATION POINT: GSV-to-tributary junction at the {loc}"
+                )
+        if shunt_type == "Type 2C":
+            rp_n2 = sorted(
+                [c for c in clips if c.get("flow") == "RP" and c.get("fromType") == "N2" and c.get("toType") == "N1"],
+                key=lambda c: c.get("posYRatio") or 0.0,
+            )
+            for c in rp_n2:
+                y = c.get("posYRatio") or 0.0
+                loc = _posY_to_location(y)
+                hints.append(f"RP N2→N1 GSV reflux segment at the {loc} → also ligate this GSV segment")
+
+    elif shunt_type == "Type 3":
+        for c in clips:
+            if c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3":
+                y = c.get("posYRatio") or 0.0
+                loc = _posY_to_location(y)
+                hints.append(
+                    f"EP N2→N3 branch point is at the {loc} "
+                    f"→ PRIMARY LIGATION POINT: GSV-to-tributary junction at the {loc}. "
+                    f"Follow up 6–12 months; if GSV reflux develops, ligate the SFJ."
+                )
+                break
+
+    elif shunt_type == "Type 1+2":
+        for c in clips:
+            if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N2":
+                y = c.get("posYRatio") or 0.0
+                if y <= 0.098:
+                    hints.append("SFJ entry point at the groin → SFJ ligation is part of the plan")
+                else:
+                    loc = _posY_to_location(y)
+                    hints.append(f"Hunterian entry point at the {loc} → Hunterian ligation is part of the plan")
+        for c in clips:
+            if c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3":
+                y = c.get("posYRatio") or 0.0
+                loc = _posY_to_location(y)
+                hints.append(f"EP N2→N3 tributary branch at the {loc} → tributary junction also requires ligation")
+                break
+
+    if not hints:
+        return ""
+    return (
+        "\n=== PRE-COMPUTED LIGATION LOCATIONS (use these anatomical names in your ligation_steps) ===\n"
+        + "\n".join(f"  • {h}" for h in hints)
+        + "\n"
+    )
 
 
 def _clip_label(flow: str, ft: str, tt: str, y: float) -> str:
@@ -262,6 +371,10 @@ STEP 4: MATCH PATTERN TO TYPE
     │  └─ Has RP N2→N1, no RP at N3 → TYPE 1 (confidence 0.90)
     │
     └─ YES EP N2→N3 EXISTS:
+        ├─ FIRST: Are there ANY RP clips in the assessment at all?
+        │  └─ ZERO RP clips → NO SHUNT DETECTED (confidence 0.90)
+        │       *** Type 3, 1+2, and Undetermined ALL require at least one RP clip. ***
+        │       *** If no RP clip is listed above, do not classify as Type 3. ***
         ├─ Has RP N3 (at N2 or N1), NO RP N2→N1 → TYPE 3 (confidence 0.88)
         ├─ Has RP N3 AND RP N2→N1:
         │  ├─ eliminationTest absent → UNDETERMINED (confidence 0.55) [needs_elim_test=true]
@@ -299,6 +412,8 @@ CRITICAL REMINDERS:
     • Type 2A has EP N2→N3; Type 2B/2C have EP N2→N2 (NOT N2→N3)
     • Type 2C differs from Type 1+2: 2C has EP N2→N2, Type 1+2 has EP N1→N2
     • RP only at N3 (not N2→N1) + EP N1→N2 = TYPE 3 (not 1+2)
+    • EP N1→N2 + EP N2→N3 with ZERO RP clips = NO SHUNT — never classify as Type 3 without RP
+    • NEVER infer, hypothesize, or assume RP clips that are not listed in the assessment above
 ═══════════════════════════════════════════════════════════════
 
 === TASK ===
@@ -307,6 +422,7 @@ Follow the Step-by-Step Decision Guide above. Classify the venous shunt for: {le
 STRICT OUTPUT RULES:
 - summary: 1 sentence clinical summary. Do NOT mention "left leg" or "right leg" unless {leg_label} is explicitly Left or Right (i.e. not "Unspecified").
 - reasoning: describe each decision step in plain clinical language (e.g. "EP N1→N2 present, indicating SFJ incompetence"). Do NOT reference internal clip indices ("Clip 00", "Clip 01", etc.), y-coordinates, or posYRatio values in any reasoning step.
+- STRICT NO-INFERENCE RULE: classify ONLY based on clips listed in the assessment above. Do NOT write "RP might be present", "could have reflux", or any similar inference. If no RP clip is listed, no RP exists.
 
 Output ONLY the JSON below — no other text, no markdown.
 
@@ -353,6 +469,7 @@ LIGATION_QUERIES = {
 def build_ligation_prompt(shunt_type: str, clips: list[dict], rag_context: str, leg_label: str) -> str:
     """Build prompt for ligation planning — WITH RAG context from ligation database."""
     clips_str = _summarise_clips(clips)
+    location_hints = _compute_ligation_hints(shunt_type, clips)
 
     return f"""=== LIGATION PLANNING FOR VENOUS SHUNT CLASSIFICATION ===
 
@@ -368,19 +485,20 @@ Type: {shunt_type}
 === CLINICAL ASSESSMENT: {leg_label} ===
 Number of clips: {len(clips)}
 {clips_str}
-
+{location_hints}
 === TASK ===
 Based on the shunt type "{shunt_type}", the clinical findings above, and the medical knowledge base provided:
 
-1. Generate a detailed ligation plan with specific steps
-2. Identify any additional clinical information needed
-3. Consider complications and contraindications
-4. Provide follow-up and monitoring recommendations
-5. Consider CHIVA principles (hemodynamic, saphenous-vein-sparing when appropriate)
+1. Generate a detailed ligation plan with specific anatomical steps — the pre-computed ligation locations section above gives you the EXACT anatomical site name(s) to use. Copy those location names verbatim into your ligation_steps (e.g. "Ligate at the Hunterian Perforator at the upper thigh", "Ligate the GSV-to-tributary junction at the mid-thigh", "Ligate the perforator entry into the GSV at the groin level").
+2. Identify any additional clinical information needed.
+3. Consider complications and contraindications.
+4. Provide follow-up and monitoring recommendations.
+5. Consider CHIVA principles (hemodynamic, saphenous-vein-sparing when appropriate).
 
 Important formatting rules:
 1. ligation_steps must be a JSON array with one clear action per item.
-2. Each ligation step must name the ligation point or vessel segment using anatomical terms only (e.g. "saphenofemoral junction", "mid-thigh", "knee level", "tributary junction"). Do NOT use y-coordinates, posYRatio values, or clip indices (e.g. never write "y=0.15", "Clip 00", "posY").
+2. The FIRST ligation step MUST name the specific anatomical location exactly as given in the pre-computed ligation locations above. If the pre-computed section says "Hunterian Perforator at the upper thigh", your step must say "Hunterian Perforator at the upper thigh" — not just "Hunterian Perforator" and not "SFJ". Do NOT use y-coordinates, posYRatio values, or clip indices.
+3. Every ligation step that names a vessel or junction must include the anatomical level (e.g. "at the groin", "at the upper thigh", "at the mid-thigh", "at the knee level", "in the calf"). Never say just "ligate the perforator" without specifying where.
 3. clinical_rationale must explain why that plan fits the shunt anatomy in plain surgical language — no y-coordinates.
 4. additional_info_needed must be [] when there is no meaningful extra information to request.
 5. chiva_approach must describe the hemodynamic CHIVA reasoning, even if brief.

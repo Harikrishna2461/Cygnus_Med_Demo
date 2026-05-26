@@ -105,7 +105,7 @@ _NL_TO_CHIVA_PROMPT = """You are an expert CHIVA vascular surgeon. A colleague i
 === CHIVA NOTATION GUIDE ===
 
 COMPARTMENTS — READ CAREFULLY:
-  N1 = Deep venous system ONLY (femoral vein, popliteal vein, deep veins)
+  N1 = Deep venous system ONLY (femoral vein, popliteal vein, deep veins — the actual named deep vessel)
   N2 = Saphenous TRUNK ONLY — i.e. the GSV (Great Saphenous Vein) or SSV (Small Saphenous Vein) named explicitly.
        N2 applies ONLY when the clinician specifically names the GSV, SSV, or saphenous trunk.
   N3 = Everything else superficial: tributaries, branches, varicosities, perforators,
@@ -126,7 +126,70 @@ POSITION RATIOS (posYRatio — 0 = groin, 1 = ankle):
   Calf:                       0.60 – 0.80
   Ankle:                      0.85 – 1.00
 
-KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION FROM EXAMPLE CLINICAL LANGUAGE IN BOOK:
+═══════════════════════════════════════════════════════════
+CRITICAL RULE 1 — EP N2→N2 vs EP N1→N2 (most common error):
+═══════════════════════════════════════════════════════════
+
+  EP N1→N2  (fromType=N1, toType=N2) — SFJ INCOMPETENT:
+    Use ONLY when the FEMORAL VEIN, POPLITEAL VEIN, or the deep venous system ITSELF directly
+    sends blood into the GSV. This requires an explicit statement of deep system incompetence.
+    Trigger phrases: "SFJ incompetent", "reflux at SFJ", "femoral vein feeds GSV",
+    "deep venous blood enters the GSV", "blood from deep system enters GSV at groin",
+    "Hunterian perforator incompetent" (only when stated as incompetent / allowing deep blood in).
+
+  EP N2→N2  (fromType=N2, toType=N2) — SFJ COMPETENT:
+    Use when a PERFORATING VESSEL or COMMUNICATING VEIN inserts into or feeds the GSV trunk.
+    The SFJ is competent. The perforator acts as an accessory entry into the saphenous trunk.
+    *** THE WORD "PERFORATOR" OR "PERFORATING VESSEL" ENTERING THE GSV = ALWAYS EP N2→N2. ***
+    *** NEVER map a perforator entering the GSV to EP N1→N2. ***
+    The descriptor "deep" (as in "deep perforating vessel") describes the vessel's anatomical
+    depth — it does NOT mean the vessel originates from the N1 deep venous system.
+    Trigger phrases: "perforator enters the GSV", "perforating vessel connects to the saphenous trunk",
+    "perforator feeds mid-GSV", "communicating vein inserts into the GSV",
+    "perforator inserts into saphenous trunk", "perforating vessel at [location] enters the GSV",
+    "SFJ is competent but a perforator connects to the GSV".
+
+  DECISION RULE — when you see a perforator / perforating vessel entering the GSV:
+    → ALWAYS EP N2→N2 (SFJ competent)
+    → NEVER EP N1→N2 (even if the word "deep" appears)
+
+═══════════════════════════════════════════════════════════
+CRITICAL RULE 2 — DO NOT HALLUCINATE RP CLIPS:
+═══════════════════════════════════════════════════════════
+
+  Generate RP clips ONLY when the description EXPLICITLY contains words such as:
+    "reflux", "refluxes", "retrograde", "backward", "backwards", "back toward the deep",
+    "drains back", "flows back", "carries blood back", or direct equivalent phrasing.
+
+  If the description mentions ONLY forward / antegrade flow — words like "feeds", "enters",
+  "passes into", "escapes to", "discharges into", "flows forward", "antegrade" — and contains
+  NO mention of backward or retrograde flow anywhere, then generate EP clips ONLY.
+
+  NEGATIVE STATEMENTS CONFIRM NO RP — treat these as zero RP:
+    "no retrograde flow detected", "no reflux anywhere", "no backward flow seen",
+    "no reflux is present", "no reflux identified", "not refluxing" — when these phrases
+    appear, generate ZERO RP clips regardless of what EP pattern is described.
+
+  SFJ INCOMPETENCE ALONE DOES NOT IMPLY RP:
+    The presence of SFJ incompetence (EP N1→N2) does NOT automatically mean GSV reflux
+    (RP N2→N1) exists. They are separate findings. Only add RP N2→N1 if the description
+    explicitly states the GSV is refluxing or carrying blood backward.
+
+  CONCRETE NO-SHUNT EXAMPLES — generate EP clips only, zero RP:
+    "SFJ incompetent, blood enters GSV at groin, no retrograde flow detected anywhere"
+        → [EP N1→N2]  — zero RP clips
+    "A perforating vessel enters the GSV, SFJ competent, no reflux present"
+        → [EP N2→N2]  — zero RP clips
+    "Blood enters GSV at SFJ and feeds a tributary, no backward flow identified"
+        → [EP N1→N2, EP N2→N3]  — zero RP clips
+
+  *** DO NOT infer or add RP clips that are not explicitly stated in the description. ***
+  *** Negative reflux statements = zero RP. SFJ entry alone ≠ GSV reflux. ***
+  *** Never fabricate reflux to make the pattern fit a known shunt type. ***
+
+═══════════════════════════════════════════════════════════
+
+KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION:
   "SFJ incompetent" / "reflux at SFJ" / "deep blood enters GSV at groin"
       → EP  N1→N2
 
@@ -139,11 +202,10 @@ KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION FROM EXAMPLE CLINICAL LANGUAGE I
   "blood refluxes back in the tributary" / "tributary drains backward"
       → RP  N3→N2 or RP N3→N1  (depending on where it drains to)
 
-  "perforator feeds GSV" / "there is a perforator entry into the trunk"
-      → EP  N2→N2  (perforator entry — note: fromType=N2, toType=N2, NOT N1→N2)
-      This means SFJ is COMPETENT even if posYRatio is small.
+  "perforator feeds GSV" / "perforating vessel enters the GSV" / "perforator inserts into the trunk"
+      → EP  N2→N2  (perforator entry — fromType=N2, toType=N2, SFJ COMPETENT)
 
-  "deep vein to superficial veins" / "deep to superficial" / "N1 to superficial system" (GSV NOT named)
+  "deep vein to superficial veins" / "deep to superficial" (GSV NOT named)
       → EP  N1→N3
 
   "superficial veins reflux back to deep" / "superficial back to deep vein" (GSV NOT named)
@@ -152,13 +214,13 @@ KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION FROM EXAMPLE CLINICAL LANGUAGE I
   "deep vein directly feeds a tributary" / "N1 to N3 direct connection"
       → EP  N1→N3
 
-  "Hunterian perforator incompetent" / "mid-thigh perforator entry from deep system"
-      → EP  N1→N2 (SFJ INCOMPETENT via Hunterian)
+  "Hunterian perforator incompetent" / "mid-thigh perforator entry from deep system allows deep blood into GSV"
+      → EP  N1→N2 (SFJ INCOMPETENT via Hunterian — only when explicitly stated as incompetent)
 
 IMPORTANT DISTINCTIONS:
   - EP N1→N2 means deep system → named saphenous trunk GSV/SSV (SFJ or Hunterian INCOMPETENT)
   - EP N1→N3 means deep system → generic superficial veins/tributaries (when GSV/SSV NOT named)
-  - EP N2→N2 means perforator → saphenous trunk (SFJ COMPETENT)
+  - EP N2→N2 means perforator/communicating vein → saphenous trunk (SFJ COMPETENT)
   - RP N2→N1 means saphenous trunk reflux (backward in GSV)
   - RP N3→N2 means tributary reflux back into GSV
   - RP N3→N1 means tributary/superficial reflux all the way back to deep system
@@ -168,13 +230,15 @@ IMPORTANT DISTINCTIONS:
 
 === INSTRUCTIONS ===
 1. Read the description carefully.
-2. Identify each distinct blood flow event mentioned.
+2. Identify each distinct blood flow event EXPLICITLY mentioned.
 3. Generate one virtual clip per flow event.
 4. Use the mappings above to assign EP/RP and N1/N2/N3 notation.
 5. Estimate posYRatio from anatomical location clues.
 6. If left/right leg is explicitly mentioned, assign legSide accordingly. If NOT mentioned, use "Unspecified" — never assume or default to Left or Right.
 7. If the description is NOT about patient venous anatomy (e.g., it is a question,
    a greeting, or asks about a concept without describing a patient), set is_clinical=false.
+8. Apply Critical Rule 1: any perforator/perforating vessel entering the GSV = EP N2→N2, never N1→N2.
+9. Apply Critical Rule 2: generate RP clips ONLY when backward/retrograde/reflux is explicitly stated.
 
 Output ONLY valid JSON — no markdown, no explanation:
 {{
