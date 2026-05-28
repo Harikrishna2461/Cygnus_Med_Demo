@@ -306,7 +306,8 @@ def _summarise_clips(clips: list[dict]) -> str:
         ft   = c.get("fromType", "?")
         tt   = c.get("toType", "?")
         y    = c.get("posYRatio") or 0.0
-        elim = (c.get("eliminationTest") or "").strip()
+        elim_raw = c.get("eliminationTest")
+        elim = elim_raw.strip() if isinstance(elim_raw, str) else ""
         step = c.get("step", "")
         has_rect = c.get("ep_ligation_rect2") or c.get("ep_ligation_rect")
 
@@ -367,14 +368,17 @@ STEP 4: MATCH PATTERN TO TYPE
 
     ┌─ SFJ INCOMPETENT PATH (has EP N1→N2):
     │
+    │  *** FIRST CHECK FOR ALL BRANCHES: Count RP clips. ZERO RP → NO SHUNT immediately. ***
+    │
     ├─ NO EP N2→N3:
+    │  ├─ ZERO RP clips anywhere → NO SHUNT DETECTED (confidence 0.95)
+    │  │   *** EP N1→N2 alone with no reflux = entry without shunt. Do NOT classify as Type 1. ***
     │  └─ Has RP N2→N1, no RP at N3 → TYPE 1 (confidence 0.90)
     │
     └─ YES EP N2→N3 EXISTS:
-        ├─ FIRST: Are there ANY RP clips in the assessment at all?
-        │  └─ ZERO RP clips → NO SHUNT DETECTED (confidence 0.90)
-        │       *** Type 3, 1+2, and Undetermined ALL require at least one RP clip. ***
-        │       *** If no RP clip is listed above, do not classify as Type 3. ***
+        ├─ ZERO RP clips → NO SHUNT DETECTED (confidence 0.90)
+        │   *** Type 3, 1+2, and Undetermined ALL require at least one RP clip. ***
+        │   *** EP N1→N2 + EP N2→N3 with ZERO RP = no reflux = no shunt. ***
         ├─ Has RP N3 (at N2 or N1), NO RP N2→N1 → TYPE 3 (confidence 0.88)
         ├─ Has RP N3 AND RP N2→N1:
         │  ├─ eliminationTest absent → UNDETERMINED (confidence 0.55) [needs_elim_test=true]
@@ -422,7 +426,8 @@ Follow the Step-by-Step Decision Guide above. Classify the venous shunt for: {le
 STRICT OUTPUT RULES:
 - summary: 1 sentence clinical summary. Do NOT mention "left leg" or "right leg" unless {leg_label} is explicitly Left or Right (i.e. not "Unspecified").
 - reasoning: describe each decision step in plain clinical language (e.g. "EP N1→N2 present, indicating SFJ incompetence"). Do NOT reference internal clip indices ("Clip 00", "Clip 01", etc.), y-coordinates, or posYRatio values in any reasoning step.
-- STRICT NO-INFERENCE RULE: classify ONLY based on clips listed in the assessment above. Do NOT write "RP might be present", "could have reflux", or any similar inference. If no RP clip is listed, no RP exists.
+- STRICT NO-INFERENCE RULE: classify ONLY based on flow findings listed in the assessment above. Do NOT write "RP might be present", "could have reflux", or any similar inference. If no RP finding is listed, no RP exists.
+- NEVER use the word "clip" or "clips" anywhere in summary or reasoning. Say "finding", "flow finding", "entry point", "reflux finding", or "EP/RP finding" instead.
 
 Output ONLY the JSON below — no other text, no markdown.
 
@@ -504,6 +509,7 @@ Important formatting rules:
 5. chiva_approach must describe the hemodynamic CHIVA reasoning, even if brief.
 6. Do NOT mention "left leg" or "right leg" in any field if {leg_label} is "Unspecified".
 7. NEVER include raw clip data, y-values, posYRatio, or coordinate numbers in any output field.
+8. NEVER use the word "clip" or "clips" in any output field. Use "finding", "flow finding", "entry", "reflux finding", or "EP/RP finding" instead.
 
 Output ONLY the JSON below — no other text, no markdown:
 
@@ -606,8 +612,87 @@ _LIGATION_ERROR_RESULT: dict = {
 _LEG_ORDER = {"Left": 0, "Right": 1}
 
 
+def _deterministic_no_shunt_check(group: list[dict]) -> dict | None:
+    """
+    Return a No Shunt result immediately — without calling the LLM — when the
+    clip pattern is unambiguously shunt-free.
+
+    Rules (all require zero RP clips):
+      • EP N1→N2 present (with or without EP N2→N3): SFJ incompetent entry but no
+        reflux anywhere → No Shunt.
+      • EP N2→N2 present with no EP N2→N3: perforator entry, SFJ competent, no
+        reflux → No Shunt.
+
+    EP N2→N3 alone with zero RP is left to the LLM because it may be an early
+    Type 2A developing case.
+    """
+    rp_clips = [c for c in group if c.get("flow") == "RP"]
+    if rp_clips:
+        return None  # RP present — let LLM classify
+
+    ep_n1_n2 = any(
+        c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N2"
+        for c in group
+    )
+    ep_n2_n2 = any(
+        c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N2"
+        for c in group
+    )
+    ep_n2_n3 = any(
+        c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3"
+        for c in group
+    )
+
+    if ep_n1_n2:
+        # SFJ/Hunterian entry with zero RP → definitively No Shunt
+        reason = (
+            "EP N1→N2 present (SFJ/Hunterian incompetent entry) but no retrograde flow "
+            "detected anywhere — no shunt by CHIVA definition."
+        )
+        if ep_n2_n3:
+            reason = (
+                "EP N1→N2 (SFJ entry) and EP N2→N3 (tributary branch) present, "
+                "but no retrograde flow found — no shunt. "
+                "Type 3 requires at least one RP (reflux) finding."
+            )
+        logger.info(f"Deterministic No Shunt: {reason}")
+        return {
+            "shunt_type": "No shunt detected",
+            "confidence": 0.95,
+            "reasoning": [reason],
+            "needs_elim_test": False,
+            "ask_branching": False,
+            "summary": "No venous shunt detected. Antegrade entry present but no retrograde flow identified.",
+            "_llm_usage": {},
+        }
+
+    if ep_n2_n2 and not ep_n2_n3:
+        reason = (
+            "EP N2→N2 present (perforator entry, SFJ competent) but no retrograde flow "
+            "detected anywhere — no shunt by CHIVA definition."
+        )
+        logger.info(f"Deterministic No Shunt: {reason}")
+        return {
+            "shunt_type": "No shunt detected",
+            "confidence": 0.95,
+            "reasoning": [reason],
+            "needs_elim_test": False,
+            "ask_branching": False,
+            "summary": "No venous shunt detected. Perforator entry present but no retrograde flow identified.",
+            "_llm_usage": {},
+        }
+
+    return None  # fall through to LLM
+
+
 def _call_llm_for_shunt_classification(group: list[dict], leg_label: str, call_llm_fn: Callable) -> dict:
     """Task 1: Classify shunt type — NO RAG."""
+    # Deterministic shortcut: zero-RP patterns are unambiguously No Shunt
+    deterministic = _deterministic_no_shunt_check(group)
+    if deterministic is not None:
+        logger.info(f"Shunt classification for {leg_label}: deterministic No Shunt (skipping LLM)")
+        return deterministic
+
     prompt = build_shunt_classification_prompt(group, leg_label)
     logger.info(f"Shunt classification LLM prompt for {leg_label}: {len(prompt)} chars")
     try:
@@ -704,6 +789,29 @@ def classify_and_plan_ligation_with_llm(
         side = (c.get("legSide") or c.get("leg_side") or "Assessment").strip().capitalize()
         groups.setdefault(side, []).append(c)
 
+    _NO_LIGATION_RESULT = {
+        "No shunt detected": {
+            "ligation_steps": [],
+            "clinical_rationale": "No pathological venous shunt identified. No surgical intervention is required.",
+            "additional_info_needed": [],
+            "complications_contraindications": [],
+            "followup_schedule": "Routine clinical follow-up. Conservative management with compression therapy if symptomatic.",
+            "chiva_approach": "No hemodynamic shunt present — CHIVA intervention is not indicated.",
+            "confidence": 0.95,
+            "_llm_usage": {},
+        },
+        "Undetermined": {
+            "ligation_steps": [],
+            "clinical_rationale": "Shunt classification is undetermined — ligation planning cannot proceed until the elimination test result is available.",
+            "additional_info_needed": ["Elimination test result required to confirm shunt type before ligation planning."],
+            "complications_contraindications": [],
+            "followup_schedule": "Perform elimination test. Return for reassessment once shunt type is confirmed.",
+            "chiva_approach": "Defer ligation planning until hemodynamic classification is confirmed via elimination test.",
+            "confidence": 0.0,
+            "_llm_usage": {},
+        },
+    }
+
     findings = []
     total_prompt_tokens = 0
     total_completion_tokens = 0
@@ -713,13 +821,17 @@ def classify_and_plan_ligation_with_llm(
         classification_usage = classification.pop("_llm_usage", {})
         shunt_type = classification.get("shunt_type", "Unknown")
 
-        # Step 2: Ligation Planning (WITH RAG from ligation database)
-        rag_context = (
-            _retrieve_rag_context_for_ligation(shunt_type, retrieve_ligation_context_fn)
-            if retrieve_ligation_context_fn else "No RAG context available."
-        )
-        ligation = _call_llm_for_ligation(shunt_type, group, rag_context, leg_label, call_llm_fn)
-        ligation_usage = ligation.pop("_llm_usage", {})
+        # Step 2: Ligation Planning — skip entirely for types that require no ligation
+        if shunt_type in _NO_LIGATION_RESULT:
+            ligation = dict(_NO_LIGATION_RESULT[shunt_type])
+            ligation_usage = ligation.pop("_llm_usage", {})
+        else:
+            rag_context = (
+                _retrieve_rag_context_for_ligation(shunt_type, retrieve_ligation_context_fn)
+                if retrieve_ligation_context_fn else "No RAG context available."
+            )
+            ligation = _call_llm_for_ligation(shunt_type, group, rag_context, leg_label, call_llm_fn)
+            ligation_usage = ligation.pop("_llm_usage", {})
 
         total_prompt_tokens += classification_usage.get("prompt_tokens", 0) + ligation_usage.get("prompt_tokens", 0)
         total_completion_tokens += classification_usage.get("completion_tokens", 0) + ligation_usage.get("completion_tokens", 0)

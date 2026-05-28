@@ -6,7 +6,27 @@
       "PowerShell(pip install opencv-python-headless --quiet)",
       "PowerShell(python -m pip install opencv-python-headless --quiet 2>&1)",
       "PowerShell(python -c \"import cv2; print\\('ok', cv2.__version__\\)\")",
-      "PowerShell(python \"c:\\\\Users\\\\Krish\\\\Downloads\\\\Task_3\\\\extract_frames.py\")"
+      "PowerShell(python \"c:\\\\Users\\\\Krish\\\\Downloads\\\\Task_3\\\\extract_frames.py\")",
+      "Read(//home/krish/**)",
+      "Bash(python3 -c \"import json; nb=json.load\\(open\\('02_vein_detection.ipynb'\\)\\); [print\\(f'Cell {i}: {c[\\\\\"cell_type\\\\\"]} - {str\\(c[\\\\\"source\\\\\"]\\)[:80]}'\\) for i,c in enumerate\\(nb['cells']\\)]\")",
+      "PowerShell(wsl -d Ubuntu -e bash -c \"find /home/krish -name '02_vein_detection.ipynb' 2>/dev/null; echo '---'; ls /home/krish/ 2>/dev/null\")",
+      "PowerShell(wsl -d Ubuntu -e bash -c \"ls /home/krish/vein_detection_task_3_training/ 2>/dev/null\")",
+      "PowerShell(wsl -d Ubuntu -e bash -c \"ls /home/krish/vein_detection_task_3_training/vein_detection_task_3_training/ 2>/dev/null\")",
+      "PowerShell(wsl -d Ubuntu -e bash -c \"python3 /tmp/check_nb.py\" 2>&1)",
+      "PowerShell(wsl -d Ubuntu -e bash -c \"python3 /tmp/check_nb.py\")",
+      "PowerShell(wsl -d Ubuntu -e bash -c \"ls /home/krish/vein_detection_task_3_training/output/vein/ 2>/dev/null && wc -l /home/krish/vein_detection_task_3_training/output/vein/metadata.csv 2>/dev/null\")",
+      "PowerShell(wsl -d Ubuntu -e bash -c \"head -2 /home/krish/vein_detection_task_3_training/output/vein/metadata.csv\")",
+      "PowerShell(wsl -d Ubuntu -e python3 /mnt/c/Users/Krish/Downloads/Task_3/build_nb2.py)",
+      "PowerShell(wsl -d Ubuntu -e bash -c \"find /home/krish/vein_detection_task_3_training/output -type f | sort\")",
+      "PowerShell(wsl -d Ubuntu -e bash -c \"ls /home/krish/vein_detection_task_3_training/Data/ && echo '---' && ls /home/krish/vein_detection_task_3_training/Data/1-Videos/ && echo '---' && ls '/home/krish/vein_detection_task_3_training/Data/2-Simple Annotated/' 2>/dev/null\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Task_3_App\\\\backend\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Task_3_App\\\\frontend\\\\src\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Task_3_App\\\\frontend\\\\public\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://api.groq.com/openai/v1/models -H \"Authorization: Bearer \")"
+    ],
+    "additionalDirectories": [
+      "\\mnt\\c\\Users\\Krish\\Downloads",
+      "C:\\Users\\Krish\\Downloads"
     ]
   }
 }

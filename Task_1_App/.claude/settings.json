@@ -25,7 +25,8 @@
       "PowerShell(Stop-Process -Force)",
       "Bash(pip show *)",
       "PowerShell(python -c \"import qdrant_client; print\\(qdrant_client.__version__\\)\")",
-      "PowerShell(python -c \"from qdrant_client import QdrantClient; c = QdrantClient\\(path='c:/Users/Krish/Downloads/Cygnus_Med_Demo/Task_1_App/backend/qdrant_storage'\\); cols = [x.name for x in c.get_collections\\(\\).collections]; print\\(cols\\)\")"
+      "PowerShell(python -c \"from qdrant_client import QdrantClient; c = QdrantClient\\(path='c:/Users/Krish/Downloads/Cygnus_Med_Demo/Task_1_App/backend/qdrant_storage'\\); cols = [x.name for x in c.get_collections\\(\\).collections]; print\\(cols\\)\")",
+      "Bash(Remove-Item -Recurse -Force \"c:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_1_App\\\\backend\\\\backend\")"
     ],
     "additionalDirectories": [
       "\\tmp",

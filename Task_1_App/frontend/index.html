@@ -863,55 +863,82 @@ function buildFindingHTML(f, showLegLabel) {
   }
   html += '</div>'; // close class-card
 
-  // Ligation card
-  html += `
-  <div class="lig-card">
-    <div class="lig-card-header">
-      <span class="card-title">Ligation Strategy</span>
-    </div>
-    <div class="lig-body">
-      ${steps.length ? `<ul class="lig-steps">${steps.map(s => `<li>${escHtml(s)}</li>`).join('')}</ul>` : ''}
-    </div>`;
+  // Ligation card — skip entirely for no-intervention types
+  const noIntervention = !steps.length && (
+    (f.shunt_type || '').toLowerCase().includes('no shunt') ||
+    (f.shunt_type || '').toLowerCase().includes('undetermined')
+  );
 
-  if (f.chiva_approach) {
+  if (noIntervention) {
     html += `
-    <button class="section-toggle" onclick="toggleSection('${uid}-ca', this)">
-      CHIVA Hemodynamic Reasoning <span class="chevron">▼</span>
-    </button>
-    <div class="section-body" id="${uid}-ca">
-      <p class="text-block">${escHtml(f.chiva_approach)}</p>
-    </div>`;
-  }
-  if (f.clinical_rationale) {
+    <div class="lig-card">
+      <div class="lig-card-header">
+        <span class="card-title">Treatment Plan</span>
+      </div>
+      <div class="lig-body">
+        <p class="text-block" style="color:var(--green-600);font-weight:600;">No surgical intervention required.</p>
+        ${f.clinical_rationale ? `<p class="text-block" style="margin-top:8px;">${escHtml(f.clinical_rationale)}</p>` : ''}
+      </div>`;
+    if (f.followup_schedule) {
+      html += `
+      <button class="section-toggle" onclick="toggleSection('${uid}-fu', this)">
+        Follow-up &amp; Monitoring <span class="chevron">▼</span>
+      </button>
+      <div class="section-body" id="${uid}-fu">
+        <p class="text-block">${escHtml(f.followup_schedule)}</p>
+      </div>`;
+    }
+    html += '</div>'; // close lig-card
+  } else {
     html += `
-    <button class="section-toggle" onclick="toggleSection('${uid}-cr', this)">
-      Clinical Rationale <span class="chevron">▼</span>
-    </button>
-    <div class="section-body" id="${uid}-cr">
-      <p class="text-block">${escHtml(f.clinical_rationale)}</p>
-    </div>`;
+    <div class="lig-card">
+      <div class="lig-card-header">
+        <span class="card-title">Ligation Strategy</span>
+      </div>
+      <div class="lig-body">
+        ${steps.length ? `<ul class="lig-steps">${steps.map(s => `<li>${escHtml(s)}</li>`).join('')}</ul>` : ''}
+      </div>`;
+
+    if (f.chiva_approach) {
+      html += `
+      <button class="section-toggle" onclick="toggleSection('${uid}-ca', this)">
+        CHIVA Hemodynamic Reasoning <span class="chevron">▼</span>
+      </button>
+      <div class="section-body" id="${uid}-ca">
+        <p class="text-block">${escHtml(f.chiva_approach)}</p>
+      </div>`;
+    }
+    if (f.clinical_rationale) {
+      html += `
+      <button class="section-toggle" onclick="toggleSection('${uid}-cr', this)">
+        Clinical Rationale <span class="chevron">▼</span>
+      </button>
+      <div class="section-body" id="${uid}-cr">
+        <p class="text-block">${escHtml(f.clinical_rationale)}</p>
+      </div>`;
+    }
+    if (f.followup_schedule) {
+      html += `
+      <button class="section-toggle" onclick="toggleSection('${uid}-fu', this)">
+        Follow-up Schedule <span class="chevron">▼</span>
+      </button>
+      <div class="section-body" id="${uid}-fu">
+        <p class="text-block">${escHtml(f.followup_schedule)}</p>
+      </div>`;
+    }
+    if (complications.length) {
+      html += `
+      <button class="section-toggle" onclick="toggleSection('${uid}-cx', this)">
+        Complications &amp; Contraindications <span class="chevron">▼</span>
+      </button>
+      <div class="section-body" id="${uid}-cx">
+        <ul class="complications-list">
+          ${complications.map(c => `<li>${escHtml(c)}</li>`).join('')}
+        </ul>
+      </div>`;
+    }
+    html += '</div>'; // close lig-card
   }
-  if (f.followup_schedule) {
-    html += `
-    <button class="section-toggle" onclick="toggleSection('${uid}-fu', this)">
-      Follow-up Schedule <span class="chevron">▼</span>
-    </button>
-    <div class="section-body" id="${uid}-fu">
-      <p class="text-block">${escHtml(f.followup_schedule)}</p>
-    </div>`;
-  }
-  if (complications.length) {
-    html += `
-    <button class="section-toggle" onclick="toggleSection('${uid}-cx', this)">
-      Complications &amp; Contraindications <span class="chevron">▼</span>
-    </button>
-    <div class="section-body" id="${uid}-cx">
-      <ul class="complications-list">
-        ${complications.map(c => `<li>${escHtml(c)}</li>`).join('')}
-      </ul>
-    </div>`;
-  }
-  html += '</div>'; // close lig-card
   html += '</div>'; // close finding-block
   return html;
 }
