@@ -70,7 +70,7 @@ export default function App() {
   // Settings
   const [groqKey, setGroqKey]   = useState('')
   const [fps, setFps]           = useState(5)
-  const [minArea, setMinArea]   = useState(150)
+  const [minArea, setMinArea]   = useState(80)
   const [useVlm, setUseVlm]     = useState(true)
   const [vlmModel, setVlmModel] = useState('meta-llama/llama-4-scout-17b-16e-instruct')
 

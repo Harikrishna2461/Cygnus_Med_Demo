@@ -33,6 +33,28 @@ ANATOMY:
     Hunterian Perforator            →  0.098 < posYRatio ≤ 0.353
 
 ═══════════════════════════════════════════════════════════
+RULE ZERO — CHECK RP COUNT BEFORE ANYTHING ELSE:
+    Count every finding where flow=RP.
+
+    IF RP count = 0:
+      Check whether EP N2→N3 is present AND whether EP N1→N2 is present.
+
+      ── EP N2→N3 present, NO EP N1→N2, zero RP → TYPE 2A (early/developing shunt).
+         The GSV is escaping into a tributary with no reflux yet. This IS a shunt. Proceed to Case C.
+
+      ── EP N2→N3 present, EP N1→N2 ALSO present, zero RP → NO SHUNT DETECTED.
+         EP N1→N2 + EP N2→N3 with zero RP = NO SHUNT. This is NOT Type 3.
+         Type 3 REQUIRES RP N3 clips. Without any RP, it cannot be Type 3.
+         DO NOT classify as Type 3 because both EP N1→N2 and EP N2→N3 are present.
+
+      ── NO EP N2→N3 present, zero RP → NO SHUNT DETECTED. Full stop.
+         EP N1→N2 alone = NO SHUNT. EP N2→N2 alone = NO SHUNT.
+         *** DO NOT classify as Type 1 because EP N1→N2 is present — Type 1 ALSO needs RP N2→N1. ***
+
+    IF RP count ≥ 1 → proceed to the rules below.
+═══════════════════════════════════════════════════════════
+
+═══════════════════════════════════════════════════════════
 CRITICAL RULE — SFJ COMPETENCE (read before classifying):
     SFJ is INCOMPETENT if and only if a clip has fromType=N1 AND toType=N2 (EP N1→N2).
     EP N2→N2 means blood circulates within the saphenous trunk via a perforator — SFJ REMAINS COMPETENT.
@@ -48,6 +70,11 @@ STEP 1 — CHECK FOR EP N1→N2:
 ─────────────────────────────────────────────────────────
 Case A — EP N1→N2 EXISTS (SFJ or Hunterian), NO EP N2→N3
 ─────────────────────────────────────────────────────────
+    *** FIRST: Are there ANY RP clips? ***
+    If ZERO RP clips anywhere → NO SHUNT DETECTED.
+      Type 1 REQUIRES RP N2→N1. EP N1→N2 alone is NOT Type 1. It is NO SHUNT.
+      DO NOT classify as Type 1 if RP N2→N1 is absent.
+
     If RP N2→N1 present AND no RP at N3 (no RP N3→N2, no RP N3→N1) → TYPE 1
     Ligation: Ligate at SFJ (y≤0.098) or Hunterian (y≤0.353).
             If multiple RP N2→N1: ligate below each except the most distal.
@@ -55,11 +82,29 @@ Case A — EP N1→N2 EXISTS (SFJ or Hunterian), NO EP N2→N3
 ─────────────────────────────────────────────────────────
 Case B — EP N1→N2 EXISTS (SFJ or Hunterian) AND EP N2→N3 EXISTS
 ─────────────────────────────────────────────────────────
+    B0: ZERO RP clips anywhere → NO SHUNT DETECTED.
+        Type 3 and Type 1+2 BOTH require RP clips. EP N1→N2 + EP N2→N3 alone with zero RP = NO SHUNT.
+        DO NOT classify as Type 3 just because EP N1→N2 and EP N2→N3 are present. RP is mandatory.
+
     B1: RP N3→N2 or RP N3→N1, NO RP N2→N1               → TYPE 3
     B2: RP N3→N2 AND RP N2→N1                             → TYPE 3
     B3: RP N3→N1 AND RP N2→N1, eliminationTest absent    → UNDETERMINED (set needs_elim_test=true)
     B4: RP N3→N1 AND RP N2→N1, eliminationTest="Reflux"  → TYPE 1+2
     B5: RP N3→N1 AND RP N2→N1, eliminationTest="No Reflux" → TYPE 3
+
+    *** CRITICAL — WHICH CLIP TO READ eliminationTest FROM ***
+    The elimination test result MUST be read from the EP N2→N3 clip OR the RP N3 clips.
+    The EP N1→N2 clip (SFJ entry) may also carry an eliminationTest field — IGNORE IT for
+    B3/B4/B5 purposes. It records SFJ reflux status, not the tributary compression result.
+    When MULTIPLE clips carry eliminationTest values, use the value on EP N2→N3 or RP N3
+    clips — that is the actual test result.
+    *** If EP N2→N3 or RP N3 has eliminationTest="No Reflux" → B5 → TYPE 3,
+        even if EP N1→N2 separately carries eliminationTest="Reflux". ***
+
+    *** CRITICAL: B2 takes precedence when RP N3→N2 (not N3→N1) is present. ***
+    *** RP N3→N2 (tributary→GSV) is ALWAYS Type 3 regardless of RP N2→N1. ***
+    *** TYPE 1+2 is IMPOSSIBLE without eliminationTest="Reflux" on an EP N2→N3 or RP N3 clip. ***
+    *** If eliminationTest is absent from the clips, you MUST output UNDETERMINED, not Type 1+2. ***
 
     TYPE 3 Ligation:
         Single RP at N3: Ligate EP at N2→N3. Follow up 6–12 months; if N2 reflux develops, ligate SFJ.
@@ -71,24 +116,87 @@ Case B — EP N1→N2 EXISTS (SFJ or Hunterian) AND EP N2→N3 EXISTS
         Large / multiple RP N2→N1: Ligate SFJ/Hunterian + every refluxing tributary simultaneously.
                                     Ligate below each RP N2→N1 except the most distal.
 
+═══════════════════════════════════════════════════════════
+TYPE 3 vs TYPE 1+2 — REASONING GUIDE
+(Read this whenever you are considering Type 3 OR Type 1+2 as your answer)
+═══════════════════════════════════════════════════════════
+
+Both Type 3 and Type 1+2 share the SAME structural clip pattern:
+    EP N1→N2  (SFJ or Hunterian incompetent)
+  + EP N2→N3  (GSV feeds a tributary)
+  + RP N3     (tributary carries retrograde flow)
+  + RP N2→N1  (GSV trunk also refluxes)
+
+They CANNOT be told apart from clips alone. The ONLY reliable differentiator is the
+ELIMINATION TEST (compression test) result. Before finalising Type 3 or Type 1+2,
+ask yourself: "What does the description say happens to the tributary's reflux when
+the GSV or SFJ is compressed?"
+
+─── WHAT THE ELIMINATION TEST TELLS YOU ───────────────────────────────────────
+
+    SCENARIO A — Tributary reflux DISAPPEARS on compression:
+        Clinically means: the tributary had NO independent source of its own.
+        Its entire blood supply came from the GSV/SFJ shunt.
+        When you cut off the GSV inflow, the tributary has nothing left to reflux.
+        → The tributary is a DEPENDENT loop of the Type 1 shunt = TYPE 1+2
+        Clip value: eliminationTest="Reflux"
+        Trigger phrases: "reflux abolished", "reflux disappeared on compression",
+            "tributary reflux gone", "compression eliminated all reflux",
+            "reflux ceased", "elimination test positive",
+            "tributary reflux disappeared when compressed"
+
+    SCENARIO B — Tributary reflux PERSISTS / REMAINS on compression:
+        Clinically means: the tributary has its OWN independent incompetent perforator.
+        Even after the GSV/SFJ inflow is cut off, the perforator keeps feeding it.
+        The SFJ compression only removed ONE of the tributaryʼs two blood sources.
+        → The tributary is independently fed = TYPE 3
+        Clip value: eliminationTest="No Reflux"
+        Trigger phrases: "reflux persists", "reflux remains", "reflux continues",
+            "does not abolish the distal reflux", "reflux unchanged on compression",
+            "no change on compression", "reflux remains when SFJ occluded",
+            "compression does not eliminate reflux", "elimination test negative"
+
+    SCENARIO C — No compression test described at all:
+        You cannot safely distinguish Type 1+2 from Type 3 without the test.
+        → UNDETERMINED (set needs_elim_test=true)
+
+─── WORKED EXAMPLES ────────────────────────────────────────────────────────────
+
+    "...compression of the GSV abolished tributary reflux, confirming GSV as source"
+        → eliminationTest="Reflux"  → TYPE 1+2
+
+    "...compression of the SFJ does not abolish the distal reflux"
+        → eliminationTest="No Reflux"  → TYPE 3
+
+    "...elimination testing confirms reflux remains even when SFJ inflow occluded"
+        → eliminationTest="No Reflux"  → TYPE 3
+
+    "...tributary reflux disappeared when mid-thigh GSV was compressed"
+        → eliminationTest="Reflux"  → TYPE 1+2
+
+─── DECISION RULE ───────────────────────────────────────────────────────────────
+
+    If you reached a conclusion of TYPE 3 or TYPE 1+2 — STOP and verify:
+      1. Is there an elimination test result in the clips?
+         NO  → change output to UNDETERMINED, set needs_elim_test=true
+         YES → read the value:
+               "Reflux" (abolished)    → TYPE 1+2
+               "No Reflux" (persisted) → TYPE 3
+
+    This check is MANDATORY. Do not skip it.
+
+═══════════════════════════════════════════════════════════
+
 ─────────────────────────────────────────────────────────
 Case C — NO EP N1→N2 ANYWHERE (SFJ COMPETENT)
 ─────────────────────────────────────────────────────────
-    C-Sub-check: what type of EP clip exists?
-
-    ── TYPE 2A ── EP N2→N3 present, NO EP N1→N2
-        The defining feature is EP N2→N3 (GSV feeding a tributary) without any SFJ entry.
-        RP may or may not be present in early/developing cases.
-        Typical pattern: EP N2→N3 + RP N3→N2 or N3→N1. No RP N2→N1.
-        Key signal: EP N2→N3 clip exists + NO EP N1→N2 clip exists anywhere.
-        If multiple RP at N3 → set ask_branching=true (need calibre/distance/drainage info).
-        Ligation: Ligate highest EP at N2→N3 junction.
-                    If multiple branching at N3: ligate based on calibre, distance to perforator, drainage.
+    C-Sub-check: Check EP N2→N2 FIRST (defines 2B/2C), then EP N2→N3 (defines 2A).
 
     ── TYPE 2B ── EP N2→N2 present, NO EP N1→N2, RP at N3, NO RP N2→N1
         Entry is via perforator (fromType=N2, toType=N2 — NOT N1→N2).
         IMPORTANT: EP N2→N2 at ANY posYRatio (even 0.05, SFJ-Knee step) = perforator, NOT SFJ.
         Key signal: EP N2→N2 clip + RP N3→N2 or N3→N1 + NO EP N1→N2 + NO RP N2→N1.
+        EP N2→N3 may also be present alongside EP N2→N2 — 2B classification still applies.
         If multiple RP at N3 → set ask_branching=true.
         Ligation: Ligate the highest EP N2→N2 (perforator entry point).
 
@@ -99,11 +207,22 @@ Case C — NO EP N1→N2 ANYWHERE (SFJ COMPETENT)
         Key signal: EP N2→N2 + RP N3 + RP N2→N1 + NO EP N1→N2.
         Ligation: Ligate perforator entry (highest EP N2→N2) AND all RP N2→N1 sites along GSV.
 
+    ── TYPE 2A ── EP N2→N3 present, NO EP N2→N2, NO EP N1→N2
+        The defining feature is EP N2→N3 (GSV feeding a tributary) without perforator entry.
+        RP may or may not be present in early/developing cases.
+        Typical pattern: EP N2→N3 + RP N3→N2 or N3→N1. No RP N2→N1. No EP N2→N2.
+        Key signal: EP N2→N3 clip exists + NO EP N2→N2 + NO EP N1→N2.
+        If multiple RP at N3 → set ask_branching=true (need calibre/distance/drainage info).
+        Ligation: Ligate highest EP at N2→N3 junction.
+                    If multiple branching at N3: ligate based on calibre, distance to perforator, drainage.
+
     Case C — NO SHUNT:
-        If EP N2→N2 exists but NO RP clips of any kind → NO SHUNT DETECTED.
+        If NO RP clips of any kind → NO SHUNT DETECTED.
 
 ─────────────────────────────────────────────────────────
-Case D — No RP in any clip → NO SHUNT DETECTED. No ligation needed.
+Case D — No RP in any finding:
+    If EP N2→N3 is present (without EP N1→N2) → TYPE 2A. Early shunt, no reflux yet developed.
+    Otherwise (EP N1→N2 alone, EP N2→N2 alone, EP N1→N2 + EP N2→N3, or no EP at all) → NO SHUNT DETECTED.
 ─────────────────────────────────────────────────────────
 
 QUICK DECISION TABLE (commit this to memory):
@@ -114,13 +233,14 @@ QUICK DECISION TABLE (commit this to memory):
     Has EP N1→N2? YES + EP N2→N3 + RP N3 + RP N2→N1 + elim="No Reflux"       → TYPE 3
     Has EP N1→N2? YES + EP N2→N3 + ZERO RP clips          → NO SHUNT (not Type 3 — Type 3 requires RP)
     Has EP N1→N2? YES + no EP N2→N3 + ZERO RP clips       → NO SHUNT
-    No EP N1→N2  + EP N2→N3                                → TYPE 2A
-    No EP N1→N2  + EP N2→N2 + RP N3 + NO RP N2→N1         → TYPE 2B
+    No EP N1→N2  + EP N2→N2 + RP N3 + NO RP N2→N1         → TYPE 2B  ← EP N2→N2 takes priority
     No EP N1→N2  + EP N2→N2 + RP N3 + RP N2→N1            → TYPE 2C
     No EP N1→N2  + EP N2→N2 + NO RP                        → NO SHUNT
+    No EP N1→N2  + EP N2→N3 (no EP N2→N2)                  → TYPE 2A
     EP N1→N3 + RP N2→N1                                    → TYPE 4
     EP N1→N3 + RP N3→N2 or RP N3→N1                         → TYPE 5
-    No RP at all (except Type 2A)                          → NO SHUNT
+    No EP N1→N2  + EP N2→N3 + NO RP                        → TYPE 2A (early, no reflux yet)
+    No RP at all + no EP N2→N3                             → NO SHUNT
 
 CONCRETE EXAMPLES (match these patterns exactly):
     Type 1:  [EP N1→N2 y=0.06 SFJ-ENTRY, RP N2→N1 y=0.25]
@@ -336,6 +456,20 @@ def build_shunt_classification_prompt(clips: list[dict], leg_label: str) -> str:
 STEP-BY-STEP DECISION GUIDE (Follow in order)
 ═══════════════════════════════════════════════════════════════
 
+STEP 0: COUNT RP FINDINGS — DO THIS BEFORE ANYTHING ELSE
+═══════════════════════════════════════════════════════════════
+    Count every finding in the assessment above where flow=RP.
+
+    IF RP count = 0:
+      Is EP N2→N3 present (GSV discharging forward into a tributary)?
+        YES → TYPE 2A (early shunt, no reflux yet). Skip to Case C in STEP 4.
+        NO  → NO SHUNT DETECTED. STOP.
+              EP N1→N2 alone, EP N2→N2 alone, or EP N1→N2 + EP N2→N3 without N3 escape = No Shunt.
+              *** Type 1 requires RP N2→N1. Type 3 requires RP. Never assign these with zero RP. ***
+
+    IF RP count ≥ 1 → continue to STEP 1.
+═══════════════════════════════════════════════════════════════
+
 STEP 1: CHECK FOR EP N1→N3 FIRST (Type 4 / Type 5 path)
     Look for any clip with flow=EP, fromType=N1, toType=N3.
     If YES → this is a direct deep-to-tributary shunt. Go to Type 4/5 branch below.
@@ -379,24 +513,32 @@ STEP 4: MATCH PATTERN TO TYPE
         ├─ ZERO RP clips → NO SHUNT DETECTED (confidence 0.90)
         │   *** Type 3, 1+2, and Undetermined ALL require at least one RP clip. ***
         │   *** EP N1→N2 + EP N2→N3 with ZERO RP = no reflux = no shunt. ***
-        ├─ Has RP N3 (at N2 or N1), NO RP N2→N1 → TYPE 3 (confidence 0.88)
-        ├─ Has RP N3 AND RP N2→N1:
-        │  ├─ eliminationTest absent → UNDETERMINED (confidence 0.55) [needs_elim_test=true]
-        │  ├─ eliminationTest="Reflux" → TYPE 1+2 (confidence 0.80)
-        │  └─ eliminationTest="No Reflux" → TYPE 3 (confidence 0.75)
+        ├─ Has RP N3→N2 (tributary→GSV) → TYPE 3 (confidence 0.88)
+        │   (RP N3→N2 means tributary drains back to GSV = Type 3, even if RP N2→N1 is also present)
+        ├─ Has RP N3→N1 only, NO RP N2→N1 → TYPE 3 (confidence 0.88)
+        ├─ Has RP N3→N1 AND RP N2→N1:
+        │  ├─ eliminationTest ABSENT from clips → UNDETERMINED (confidence 0.55) [needs_elim_test=true]
+        │  │  *** STOP: Do NOT output Type 1+2. eliminationTest must be present in the clips. ***
+        │  ├─ eliminationTest="Reflux" IN CLIPS → TYPE 1+2 (confidence 0.80)
+        │  └─ eliminationTest="No Reflux" IN CLIPS → TYPE 3 (confidence 0.75)
 
     ┌─ SFJ COMPETENT PATH (NO EP N1→N2, NO EP N1→N3):
     │
-    ├─ EP N2→N3 EXISTS:
+    │  *** CHECK EP N2→N2 FIRST — it is the defining feature of Type 2B/2C ***
+    │
+    ├─ EP N2→N2 EXISTS (perforator entry into GSV):
+    │  ├─ Has RP N3, NO RP N2→N1 → TYPE 2B (confidence 0.84)
+    │  │  └─ Multiple RP at N3? → [ask_branching=true]
+    │  ├─ Has RP N3 AND RP N2→N1 → TYPE 2C (confidence 0.82)
+    │  │  └─ Multiple RP at N3? → [ask_branching=true]
+    │  └─ No RP at all → NO SHUNT (confidence 0.95)
+    │
+    ├─ EP N2→N3 EXISTS (no EP N2→N2):
     │  └─ TYPE 2A (confidence 0.85-0.92)
     │     └─ Multiple RP at N3? → [ask_branching=true]
     │
-    └─ ONLY EP N2→N2 (perforator entry):
-        ├─ Has RP N3, NO RP N2→N1 → TYPE 2B (confidence 0.84)
-        │  └─ Multiple RP at N3? → [ask_branching=true]
-        ├─ Has RP N3 AND RP N2→N1 → TYPE 2C (confidence 0.82)
-        │  └─ Multiple RP at N3? → [ask_branching=true]
-        └─ No RP at all → NO SHUNT (confidence 0.95)
+    └─ Neither EP N2→N2 nor EP N2→N3:
+        └─ NO SHUNT (confidence 0.95)
 
 STEP 4: ASSIGN CONFIDENCE
     Clear pattern, no ambiguity → 0.90–0.97
@@ -612,87 +754,8 @@ _LIGATION_ERROR_RESULT: dict = {
 _LEG_ORDER = {"Left": 0, "Right": 1}
 
 
-def _deterministic_no_shunt_check(group: list[dict]) -> dict | None:
-    """
-    Return a No Shunt result immediately — without calling the LLM — when the
-    clip pattern is unambiguously shunt-free.
-
-    Rules (all require zero RP clips):
-      • EP N1→N2 present (with or without EP N2→N3): SFJ incompetent entry but no
-        reflux anywhere → No Shunt.
-      • EP N2→N2 present with no EP N2→N3: perforator entry, SFJ competent, no
-        reflux → No Shunt.
-
-    EP N2→N3 alone with zero RP is left to the LLM because it may be an early
-    Type 2A developing case.
-    """
-    rp_clips = [c for c in group if c.get("flow") == "RP"]
-    if rp_clips:
-        return None  # RP present — let LLM classify
-
-    ep_n1_n2 = any(
-        c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N2"
-        for c in group
-    )
-    ep_n2_n2 = any(
-        c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N2"
-        for c in group
-    )
-    ep_n2_n3 = any(
-        c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3"
-        for c in group
-    )
-
-    if ep_n1_n2:
-        # SFJ/Hunterian entry with zero RP → definitively No Shunt
-        reason = (
-            "EP N1→N2 present (SFJ/Hunterian incompetent entry) but no retrograde flow "
-            "detected anywhere — no shunt by CHIVA definition."
-        )
-        if ep_n2_n3:
-            reason = (
-                "EP N1→N2 (SFJ entry) and EP N2→N3 (tributary branch) present, "
-                "but no retrograde flow found — no shunt. "
-                "Type 3 requires at least one RP (reflux) finding."
-            )
-        logger.info(f"Deterministic No Shunt: {reason}")
-        return {
-            "shunt_type": "No shunt detected",
-            "confidence": 0.95,
-            "reasoning": [reason],
-            "needs_elim_test": False,
-            "ask_branching": False,
-            "summary": "No venous shunt detected. Antegrade entry present but no retrograde flow identified.",
-            "_llm_usage": {},
-        }
-
-    if ep_n2_n2 and not ep_n2_n3:
-        reason = (
-            "EP N2→N2 present (perforator entry, SFJ competent) but no retrograde flow "
-            "detected anywhere — no shunt by CHIVA definition."
-        )
-        logger.info(f"Deterministic No Shunt: {reason}")
-        return {
-            "shunt_type": "No shunt detected",
-            "confidence": 0.95,
-            "reasoning": [reason],
-            "needs_elim_test": False,
-            "ask_branching": False,
-            "summary": "No venous shunt detected. Perforator entry present but no retrograde flow identified.",
-            "_llm_usage": {},
-        }
-
-    return None  # fall through to LLM
-
-
 def _call_llm_for_shunt_classification(group: list[dict], leg_label: str, call_llm_fn: Callable) -> dict:
     """Task 1: Classify shunt type — NO RAG."""
-    # Deterministic shortcut: zero-RP patterns are unambiguously No Shunt
-    deterministic = _deterministic_no_shunt_check(group)
-    if deterministic is not None:
-        logger.info(f"Shunt classification for {leg_label}: deterministic No Shunt (skipping LLM)")
-        return deterministic
-
     prompt = build_shunt_classification_prompt(group, leg_label)
     logger.info(f"Shunt classification LLM prompt for {leg_label}: {len(prompt)} chars")
     try:
@@ -707,6 +770,45 @@ def _call_llm_for_shunt_classification(group: list[dict], leg_label: str, call_l
         logger.error(f"Shunt classification LLM call failed for {leg_label}: {e}")
     logger.error(f"Shunt classification failed for {leg_label}")
     raise RuntimeError(f"Shunt classification failed for {leg_label}")
+
+
+def _post_classify_sanity_check(shunt_type: str, clips: list[dict]) -> str:
+    """
+    Override physically impossible LLM outputs based on deterministic clip analysis.
+    Called after the LLM returns its classification.
+    """
+    rp_clips   = [c for c in clips if c.get("flow") == "RP"]
+    ep_n1n2    = any(c.get("flow")=="EP" and c.get("fromType")=="N1" and c.get("toType")=="N2" for c in clips)
+    ep_n2n2    = any(c.get("flow")=="EP" and c.get("fromType")=="N2" and c.get("toType")=="N2" for c in clips)
+    ep_n2n3    = any(c.get("flow")=="EP" and c.get("fromType")=="N2" and c.get("toType")=="N3" for c in clips)
+    rp_n2n1    = any(c.get("flow")=="RP" and c.get("fromType")=="N2" and c.get("toType")=="N1" for c in clips)
+    rp_n3      = any(c.get("flow")=="RP" and c.get("fromType")=="N3" for c in clips)
+
+    if not rp_clips:
+        # Zero RP — most shunt types are impossible
+        if ep_n2n3 and not ep_n1n2:
+            return "Type 2A"
+        return "No shunt detected"
+
+    if shunt_type in ("Type 1", "No shunt detected", "No Shunt Detected"):
+        # Type 1 requires EP N1→N2 + RP N2→N1
+        if not ep_n1n2 or not rp_n2n1:
+            if ep_n2n2 and rp_n3 and not rp_n2n1:
+                return "Type 2B"
+            if ep_n2n2 and rp_n3 and rp_n2n1:
+                return "Type 2C"
+            if ep_n2n3 and not ep_n2n2:
+                return "Type 2A"
+            if not ep_n1n2 and not ep_n2n2 and not ep_n2n3:
+                return "No shunt detected"
+
+    # Type 3 / Type 1+2 — check RP N3→N2 priority
+    if shunt_type == "Type 1+2":
+        rp_n3n2 = any(c.get("flow")=="RP" and c.get("fromType")=="N3" and c.get("toType")=="N2" for c in clips)
+        if rp_n3n2:
+            return "Type 3"  # RP N3→N2 always → Type 3
+
+    return shunt_type
 
 
 def _call_llm_for_ligation(shunt_type: str, group: list[dict], rag_context: str, leg_label: str, call_llm_fn: Callable) -> dict:
@@ -820,6 +922,12 @@ def classify_and_plan_ligation_with_llm(
         classification = _call_llm_for_shunt_classification(group, leg_label, call_llm_fn)
         classification_usage = classification.pop("_llm_usage", {})
         shunt_type = classification.get("shunt_type", "Unknown")
+        # Deterministic override — correct physically impossible LLM outputs
+        corrected = _post_classify_sanity_check(shunt_type, group)
+        if corrected != shunt_type:
+            logger.warning(f"Sanity check overrode LLM output '{shunt_type}' → '{corrected}' for {leg_label}")
+            classification["shunt_type"] = corrected
+            shunt_type = corrected
 
         # Step 2: Ligation Planning — skip entirely for types that require no ligation
         if shunt_type in _NO_LIGATION_RESULT:

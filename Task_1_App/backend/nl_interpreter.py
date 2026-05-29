@@ -41,7 +41,9 @@ KEY MAPPINGS FROM CLINICAL LANGUAGE:
   "GSV reflux" / "blood flows backward in GSV" / "GSV carries reflux downward"
       → RP  N2→N1  (at the level described, e.g. mid-thigh ≈ 0.30)
 
-  "blood escapes to tributaries" / "GSV feeds tributaries" / "EP from GSV to branch"
+  "blood escapes to tributaries" / "GSV feeds tributaries" / "EP from GSV to branch" /
+  "GSV feeds a tributary" / "GSV discharges into a tributary" / "discharges forward into a tributary" /
+  "GSV discharges blood into" / "blood exits the GSV into a tributary" / "GSV empties into a tributary"
       → EP  N2→N3  (at the level described)
 
   "blood refluxes back in the tributary" / "tributary drains backward"
@@ -160,6 +162,9 @@ CRITICAL RULE 1 — EP N2→N2 vs EP N1→N2 (most common error):
       ✗ "perforator entry from the deep system" → EP N2→N2 (positional phrase, not a drive from N1)
       ✗ "a deep perforating vessel enters the GSV" → EP N2→N2 ("deep" = anatomical depth only)
       ✗ "perforator at [location] enters/inserts into/feeds the GSV" → EP N2→N2
+      ✗ "a perforating vessel feeds into the GSV from the deep system" → EP N2→N2
+         (even though "from the deep system" is present — "perforating vessel feeds GSV" is a perforator entry, NOT N1→N2)
+      ✗ "feeds into the GSV from the deep system" → EP N2→N2 (perforator = N2→N2 regardless of depth qualifier)
 
     CRITICAL DISTINCTION:
       "connects the deep SYSTEM to the GSV" (deep system = the blood driver) → EP N1→N2
@@ -209,12 +214,24 @@ CRITICAL RULE 2 — DO NOT HALLUCINATE RP CLIPS:
   *** Negative reflux statements (global scope) = zero RP. SFJ entry alone ≠ GSV reflux. ***
   *** Never fabricate reflux to make the pattern fit a known shunt type. ***
 
-CRITICAL RULE 2B — DO NOT HALLUCINATE eliminationTest:
+CRITICAL RULE 2B — eliminationTest values and when to add:
   Only add "eliminationTest" to a finding if the description EXPLICITLY describes performing
   a compression or elimination test AND states its result (e.g. "reflux persists", "reflux
-  disappears", "elimination test positive/negative").
+  disappears", "elimination test positive/negative", "compression abolished reflux").
   If no elimination test is mentioned → do NOT add eliminationTest to any finding.
   *** Never infer or guess an eliminationTest result from the reflux pattern alone. ***
+
+  eliminationTest VALUE ASSIGNMENT:
+    Use "Reflux" when compression ABOLISHED / ELIMINATED tributary reflux:
+      Trigger phrases: "reflux disappeared on compression", "reflux abolished", "tributary reflux gone",
+      "compression eliminated all reflux", "reflux ceased", "tributary reflux disappeared",
+      "elimination test positive", "reflux disappeared", "reflux eliminated on compression"
+      → eliminationTest="Reflux"  (Type 1+2 pattern confirmed — GSV is the single feeder)
+
+    Use "No Reflux" when reflux PERSISTED / was UNCHANGED despite compression:
+      Trigger phrases: "reflux persists", "reflux unchanged", "no change on compression",
+      "tributary continued to reflux", "reflux not abolished"
+      → eliminationTest="No Reflux"  (Type 3 pattern — tributary has independent source)
 
 ═══════════════════════════════════════════════════════════
 
@@ -222,14 +239,26 @@ KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION:
   "SFJ incompetent" / "reflux at SFJ" / "deep blood enters GSV at groin"
       → EP  N1→N2
 
-  "GSV reflux" / "blood flows backward in GSV" / "GSV carries reflux downward"
+  "GSV reflux" / "blood flows backward in GSV" / "GSV carries reflux downward" /
+  "full-length GSV reflux" / "GSV refluxes throughout" / "GSV is incompetent and refluxes"
       → RP  N2→N1  (at the level described, e.g. mid-thigh ≈ 0.30)
+      *** Always generate RP N2→N1 as a SEPARATE clip from EP N1→N2.
+          EP N1→N2 = shunt entry. RP N2→N1 = GSV trunk reflux. Both can and DO coexist. ***
 
-  "blood escapes to tributaries" / "GSV feeds tributaries" / "EP from GSV to branch"
+  "blood escapes to tributaries" / "GSV feeds tributaries" / "EP from GSV to branch" /
+  "GSV feeds a tributary" / "GSV discharges into a tributary" / "discharges forward into a tributary" /
+  "GSV discharges blood into" / "blood exits the GSV into a tributary" / "GSV empties into a tributary"
       → EP  N2→N3  (at the level described)
 
-  "blood refluxes back in the tributary" / "tributary drains backward"
-      → RP  N3→N2 or RP N3→N1  (depending on where it drains to)
+  "blood refluxes back in the tributary" / "tributary drains backward" / "tributary shows retrograde flow"
+  / "tributary carries blood backward" / "tributary refluxes back toward the GSV"
+      → RP  N3→N2  (tributary carrying blood backward toward the GSV)
+      (If the GSV discharging INTO the tributary was also described separately, also generate EP N2→N3)
+
+  "tributary drains backward into the deep system via perforator" / "tributary re-enters the deep system" /
+  "tributary connects back to deep vein" / "tributary drains to deep via perforating vessel"
+      → RP  N3→N1  (tributary draining all the way to deep system via perforator)
+      (If the GSV discharging INTO the tributary was also described separately, also generate EP N2→N3)
 
   "perforator feeds GSV" / "perforating vessel enters the GSV" / "perforator inserts into the trunk"
       → EP  N2→N2  (perforator entry — fromType=N2, toType=N2, SFJ COMPETENT)
@@ -272,7 +301,11 @@ IMPORTANT DISTINCTIONS:
 9. Apply Critical Rule 2: generate RP findings ONLY when backward/retrograde/reflux is explicitly stated.
    "No reflux in [specific vessel]" is a partial statement — do NOT suppress RP findings in other vessels.
 10. Apply Critical Rule 2B: do NOT add eliminationTest unless the description explicitly describes
-    performing a compression/elimination test and states its result.
+    performing a compression/elimination test and states its result. Use "Reflux" when compression
+    ABOLISHED tributary reflux (confirming GSV is the source). Use "No Reflux" when reflux PERSISTED.
+11. CRITICAL — RP N2→N1 is separate from EP N1→N2: When "GSV refluxes" / "full-length GSV reflux" /
+    "GSV carries blood backward" is EXPLICITLY stated, always generate RP N2→N1 as a separate clip
+    in addition to EP N1→N2. These are two different flow events at two different clip positions.
 
 Output ONLY valid JSON — no markdown, no explanation:
 {{
