@@ -9,6 +9,33 @@ const LABEL_META = {
   unknown: { color: '#aaaaaa', bg: '#aaaaaa20', label: 'Unknown' },
 }
 
+const PIPELINES = {
+  dl: {
+    name: 'DL Pipeline',
+    icon: '🧠',
+    badge: 'DL',
+    subtitle: 'UNet-ResNet50 · LSTM Tracking · VLM Classification',
+    description: 'Task-specific deep learning models trained on annotated ultrasound data. Best accuracy on in-distribution scans.',
+    features: ['UNet-ResNet50 fascia segmentation', 'UNet-ResNet50 vein segmentation', 'LSTM motion predictor', 'Geometric + VLM classification'],
+    accent: '#5555cc',
+    accentDim: '#5555cc30',
+    endpoint: 'dl',
+  },
+  foundation: {
+    name: 'Foundation Pipeline',
+    icon: '🔬',
+    badge: 'FM',
+    subtitle: 'Depth Anything V2 · Grounding DINO · VLM Classification',
+    description: 'Zero-shot foundation models. No task-specific training required — works on any scan type including unseen anatomies.',
+    features: ['Depth Anything V2 fascia estimation', 'Grounding DINO vein detection', 'LSTM motion predictor', 'Geometric + VLM classification'],
+    accent: '#b044cc',
+    accentDim: '#b044cc30',
+    endpoint: 'foundation',
+  },
+}
+
+// ── Shared sub-components ─────────────────────────────────────────────────────
+
 function StatCard({ label, value, color, bg }) {
   return (
     <div style={{ background: bg, border: `1px solid ${color}`, borderRadius: 8,
@@ -30,9 +57,7 @@ function FrameStatsTable({ records }) {
           <tr style={{ background: '#1e1e2e', position: 'sticky', top: 0 }}>
             {cols.map(c => (
               <th key={c} style={{ padding: '6px 10px', color: '#888',
-                                   textAlign: 'left', borderBottom: '1px solid #333' }}>
-                {c}
-              </th>
+                                   textAlign: 'left', borderBottom: '1px solid #333' }}>{c}</th>
             ))}
           </tr>
         </thead>
@@ -53,36 +78,87 @@ function FrameStatsTable({ records }) {
   )
 }
 
-export default function App() {
-  const [phase, setPhase]           = useState('idle')   // idle | uploading | processing | done
-  const [uploadId, setUploadId]     = useState(null)
-  const [currentFrame, setCurrentFrame] = useState(null)
-  const [frameIdx, setFrameIdx]     = useState(0)
-  const [totalFrames, setTotalFrames]   = useState(0)
-  const [counts, setCounts]         = useState({ N1: 0, N2: 0, N3: 0, unknown: 0 })
-  const [detsThisFrame, setDetsThisFrame] = useState(0)
-  const [allRecords, setAllRecords] = useState([])
-  const [error, setError]           = useState('')
-  const [dragging, setDragging]     = useState(false)
-  const [videoFile, setVideoFile]   = useState(null)
-  const [speed, setSpeed]           = useState(0)
+// ── Landing page ──────────────────────────────────────────────────────────────
 
-  // Settings
+function Landing({ onSelect }) {
+  return (
+    <div className="app">
+      <header className="header">
+        <span className="header-icon">🩺</span>
+        <div>
+          <h1>Ultrasound Vein Tracker</h1>
+          <p>Select a pipeline to begin</p>
+        </div>
+      </header>
+
+      <div className="landing">
+        <div className="landing-title">
+          <h2>Choose Your Pipeline</h2>
+          <p>Both pipelines share the same LSTM tracker and VLM classifier. They differ in how fascia and veins are detected.</p>
+        </div>
+
+        <div className="pipeline-grid">
+          {Object.entries(PIPELINES).map(([key, p]) => (
+            <div key={key} className="pipeline-card" onClick={() => onSelect(key)}
+                 style={{ '--accent': p.accent, '--accent-dim': p.accentDim }}>
+              <div className="pc-header">
+                <span className="pc-icon">{p.icon}</span>
+                <span className="pc-badge" style={{ background: p.accentDim, color: p.accent, border: `1px solid ${p.accent}` }}>
+                  {p.badge}
+                </span>
+              </div>
+              <h3 className="pc-name" style={{ color: p.accent }}>{p.name}</h3>
+              <p className="pc-subtitle">{p.subtitle}</p>
+              <p className="pc-desc">{p.description}</p>
+              <ul className="pc-features">
+                {p.features.map(f => (
+                  <li key={f} style={{ color: '#999' }}>
+                    <span style={{ color: p.accent }}>✓</span> {f}
+                  </li>
+                ))}
+              </ul>
+              <button className="btn pc-btn" style={{ background: p.accent }}>
+                Launch {p.name} →
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Processing page (shared by both pipelines) ────────────────────────────────
+
+function ProcessingPage({ pipelineKey, onBack }) {
+  const p = PIPELINES[pipelineKey]
+
+  const [phase, setPhase]             = useState('idle')
+  const [uploadId, setUploadId]       = useState(null)
+  const [currentFrame, setCurrentFrame] = useState(null)
+  const [frameIdx, setFrameIdx]       = useState(0)
+  const [totalFrames, setTotalFrames] = useState(0)
+  const [counts, setCounts]           = useState({ N1: 0, N2: 0, N3: 0, unknown: 0 })
+  const [detsThisFrame, setDetsThisFrame] = useState(0)
+  const [allRecords, setAllRecords]   = useState([])
+  const [error, setError]             = useState('')
+  const [dragging, setDragging]       = useState(false)
+  const [videoFile, setVideoFile]     = useState(null)
+  const [speed, setSpeed]             = useState(0)
+
   const [groqKey, setGroqKey]   = useState('')
   const [fps, setFps]           = useState(5)
   const [minArea, setMinArea]   = useState(80)
   const [useVlm, setUseVlm]     = useState(true)
   const [vlmModel, setVlmModel] = useState('meta-llama/llama-4-scout-17b-16e-instruct')
 
-  const esRef    = useRef(null)
-  const t0Ref    = useRef(null)
-  const recsRef  = useRef([])
+  const esRef   = useRef(null)
+  const t0Ref   = useRef(null)
 
   const resetState = () => {
     setPhase('idle'); setUploadId(null); setCurrentFrame(null)
     setFrameIdx(0); setTotalFrames(0); setCounts({ N1:0, N2:0, N3:0, unknown:0 })
     setDetsThisFrame(0); setAllRecords([]); setError(''); setSpeed(0)
-    recsRef.current = []
     if (esRef.current) { esRef.current.close(); esRef.current = null }
   }
 
@@ -92,8 +168,7 @@ export default function App() {
     if (!['mp4','avi','mov'].includes(ext)) {
       setError('Please upload an mp4, avi, or mov file.'); return
     }
-    setVideoFile(file)
-    setError('')
+    setVideoFile(file); setError('')
   }
 
   const onDrop = useCallback((e) => {
@@ -103,9 +178,7 @@ export default function App() {
 
   const startProcessing = async () => {
     if (!videoFile) { setError('Please select a video first.'); return }
-    setError('')
-    setPhase('uploading')
-
+    setError(''); setPhase('uploading')
     try {
       const form = new FormData()
       form.append('video', videoFile)
@@ -116,16 +189,12 @@ export default function App() {
       setPhase('processing')
       t0Ref.current = Date.now()
 
-      const params = new URLSearchParams({
-        fps, min_area: minArea, use_vlm: useVlm,
-        groq_key: groqKey, vlm_model: vlmModel,
-      })
-      const es = new EventSource(`${API}/api/process/${upload_id}?${params}`)
+      const params = new URLSearchParams({ fps, min_area: minArea, use_vlm: useVlm, groq_key: groqKey, vlm_model: vlmModel })
+      const es = new EventSource(`${API}/api/process/${p.endpoint}/${upload_id}?${params}`)
       esRef.current = es
 
       es.onmessage = async (e) => {
         const msg = JSON.parse(e.data)
-
         if (msg.type === 'meta') {
           setTotalFrames(msg.total)
         } else if (msg.type === 'frame') {
@@ -134,12 +203,10 @@ export default function App() {
           setTotalFrames(msg.total)
           setCounts({ ...msg.counts })
           setDetsThisFrame(msg.dets)
-          const elapsed = (Date.now() - t0Ref.current) / 1000
-          setSpeed(((msg.frame_idx + 1) / elapsed).toFixed(1))
+          setSpeed(((msg.frame_idx + 1) / ((Date.now() - t0Ref.current) / 1000)).toFixed(1))
         } else if (msg.type === 'done') {
           es.close()
           setCounts({ ...msg.counts })
-          // Fetch the CSV records and parse for table display
           try {
             const res = await fetch(`${API}/api/report/${upload_id}`)
             const text = await res.text()
@@ -152,13 +219,10 @@ export default function App() {
               return obj
             })
             setAllRecords(rows)
-          } catch (err) {
-            console.error('Failed to fetch report:', err)
-          }
+          } catch {}
           setPhase('done')
         }
       }
-
       es.onerror = () => {
         es.close()
         if (phase !== 'done') setError('Connection error during processing.')
@@ -169,7 +233,7 @@ export default function App() {
     }
   }
 
-  const downloadReport = async () => {
+  const downloadReport = () => {
     if (!uploadId) return
     const a = document.createElement('a')
     a.href = `${API}/api/report/${uploadId}`
@@ -181,21 +245,32 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* ── Header ── */}
       <header className="header">
-        <span className="header-icon">🩺</span>
+        <span className="header-icon">{p.icon}</span>
         <div>
-          <h1>Ultrasound Vein Tracker</h1>
-          <p>Fascia detection · Vein segmentation · LSTM tracking · VLM classification</p>
+          <h1>{p.name}</h1>
+          <p>{p.subtitle}</p>
         </div>
-        {phase !== 'idle' && (
-          <button className="btn btn-ghost" onClick={resetState}>↩ Reset</button>
-        )}
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          {phase !== 'idle' && (
+            <button className="btn btn-ghost" onClick={resetState}>↩ Reset</button>
+          )}
+          <button className="btn btn-ghost" onClick={() => { resetState(); onBack() }}>
+            ← Pipelines
+          </button>
+        </div>
       </header>
 
+      {/* Pipeline accent bar */}
+      <div style={{ height: 3, background: `linear-gradient(90deg, ${p.accent}, transparent)` }} />
+
       <div className="layout">
-        {/* ── Sidebar ── */}
+        {/* Sidebar */}
         <aside className="sidebar">
+          <div className="pipeline-badge-sidebar" style={{ background: p.accentDim, border: `1px solid ${p.accent}`, borderRadius: 8, padding: '8px 12px', marginBottom: 12 }}>
+            <span style={{ color: p.accent, fontWeight: 700, fontSize: 13 }}>{p.icon} {p.name}</span>
+          </div>
+
           <h3>⚙️ Settings</h3>
 
           <label>Groq API Key</label>
@@ -211,18 +286,21 @@ export default function App() {
 
           <div className="toggle-row">
             <label>VLM Classification</label>
-            <div className={`toggle ${useVlm ? 'on' : ''}`} onClick={() => setUseVlm(!useVlm)}>
+            <div className={`toggle ${useVlm ? 'on' : ''}`} style={{ '--toggle-on': p.accent }}
+                 onClick={() => setUseVlm(!useVlm)}>
               <div className="thumb" />
             </div>
           </div>
 
           <label>Sample FPS: <strong>{fps}</strong></label>
           <input type="range" min={1} max={15} value={fps}
-                 onChange={e => setFps(+e.target.value)} className="slider" />
+                 onChange={e => setFps(+e.target.value)} className="slider"
+                 style={{ accentColor: p.accent }} />
 
           <label>Min Detection Area: <strong>{minArea}px</strong></label>
           <input type="range" min={10} max={200} value={minArea}
-                 onChange={e => setMinArea(+e.target.value)} className="slider" />
+                 onChange={e => setMinArea(+e.target.value)} className="slider"
+                 style={{ accentColor: p.accent }} />
 
           <div className="divider" />
 
@@ -239,12 +317,12 @@ export default function App() {
           </div>
         </aside>
 
-        {/* ── Main ── */}
+        {/* Main */}
         <main className="main">
-          {/* Upload zone */}
           {phase === 'idle' && (
             <div
               className={`upload-zone ${dragging ? 'dragging' : ''} ${videoFile ? 'has-file' : ''}`}
+              style={videoFile ? {} : { '--dz-border': p.accent + '40' }}
               onDragOver={e => { e.preventDefault(); setDragging(true) }}
               onDragLeave={() => setDragging(false)}
               onDrop={onDrop}
@@ -261,7 +339,7 @@ export default function App() {
                 </>
               ) : (
                 <>
-                  <div className="upload-icon">📹</div>
+                  <div className="upload-icon">{p.icon}</div>
                   <p className="upload-title">Drop video here or click to browse</p>
                   <p className="upload-sub">MP4 · AVI · MOV</p>
                 </>
@@ -272,16 +350,14 @@ export default function App() {
           {error && <div className="error-banner">⚠️ {error}</div>}
 
           {phase === 'idle' && videoFile && (
-            <button className="btn btn-primary btn-start" onClick={startProcessing}>
-              ▶ Start Processing
+            <button className="btn btn-primary btn-start" onClick={startProcessing}
+                    style={{ background: `linear-gradient(135deg, ${p.accent}, ${p.accent}99)` }}>
+              ▶ Start {p.name}
             </button>
           )}
 
-          {phase === 'uploading' && (
-            <div className="status-msg">⬆️ Uploading video...</div>
-          )}
+          {phase === 'uploading' && <div className="status-msg">⬆️ Uploading video...</div>}
 
-          {/* Live frame viewer */}
           {(phase === 'processing' || phase === 'done') && currentFrame && (
             <div className="frame-section">
               <div className="frame-header">
@@ -291,25 +367,20 @@ export default function App() {
                   {phase === 'processing' && ` · ${speed} fps · ${detsThisFrame} detections`}
                 </span>
                 {phase === 'done' && (
-                  <button className="btn btn-download" onClick={downloadReport}>
-                    ⬇ Download Report CSV
-                  </button>
+                  <button className="btn btn-download" onClick={downloadReport}>⬇ Download CSV</button>
                 )}
               </div>
 
-              {/* Progress bar */}
               <div className="progress-track">
-                <div className="progress-fill" style={{ width: `${progress}%` }} />
+                <div className="progress-fill" style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${p.accent}, #32ff64)` }} />
               </div>
 
-              {/* Frame + stats side by side */}
               <div className="frame-layout">
                 <img src={currentFrame} alt="frame" className="frame-img" />
                 <div className="stats-panel">
                   <h4 style={{ color: '#888', marginBottom: 12 }}>Cumulative Detections</h4>
                   {Object.entries(LABEL_META).map(([k, v]) => (
-                    <StatCard key={k} label={v.label} value={counts[k] ?? 0}
-                              color={v.color} bg={v.bg} />
+                    <StatCard key={k} label={v.label} value={counts[k] ?? 0} color={v.color} bg={v.bg} />
                   ))}
                   <div className="divider" />
                   <div style={{ color: '#555', fontSize: 12, textAlign: 'center' }}>
@@ -320,18 +391,14 @@ export default function App() {
             </div>
           )}
 
-          {/* Report table */}
           {phase === 'done' && (
             <div className="report-section">
               <div className="report-header">
                 <h3>📊 Frame-by-Frame Report</h3>
-                <button className="btn btn-download" onClick={downloadReport}>
-                  ⬇ Download CSV
-                </button>
+                <button className="btn btn-download" onClick={downloadReport}>⬇ Download CSV</button>
               </div>
               <p style={{ color: '#666', fontSize: 13, marginBottom: 12 }}>
-                Showing all {allRecords.length} detection records across {frameIdx} processed frames.
-                Each row = one tracked vein in one frame.
+                {allRecords.length} detection records across {frameIdx} processed frames.
               </p>
               {allRecords.length === 0 ? (
                 <div style={{ color: '#555', textAlign: 'center', padding: 32 }}>
@@ -346,4 +413,15 @@ export default function App() {
       </div>
     </div>
   )
+}
+
+// ── Root ──────────────────────────────────────────────────────────────────────
+
+export default function App() {
+  const [selectedPipeline, setSelectedPipeline] = useState(null)
+
+  if (!selectedPipeline) {
+    return <Landing onSelect={setSelectedPipeline} />
+  }
+  return <ProcessingPage pipelineKey={selectedPipeline} onBack={() => setSelectedPipeline(null)} />
 }

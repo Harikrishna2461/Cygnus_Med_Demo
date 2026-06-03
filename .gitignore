@@ -3,8 +3,13 @@ venv/
 .venv/
 env/
 ENV/
+venv_pytorch/
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+.ipynb_checkpoints/
 
 # Videos
 *.mp4
@@ -20,12 +25,17 @@ __pycache__/
 *.flv
 *.webm
 
-# Excluded training folders
-Task_3/vein_detection_task_3_training/
-
-# Large model weights and checkpoints
+# Model weights
+*.safetensors
 *.pth
 *.pt
+*.bin
+
+# Cache directories
+.cache/
+*.cache
+.pytest_cache/
+.mypy_cache/
 
 # SQLite databases
 *.db
@@ -36,17 +46,9 @@ Task_3/vein_detection_task_3_training/
 # Logs
 *.log
 
-# Environment files (keep .env.example)
+# Environment files
 .env
 .env.local
-
-# Cache
-.cache/
-*.cache
-.pytest_cache/
-__pycache__/
-*.pyc
-.ipynb_checkpoints/
 
 # IDE
 .vscode/
@@ -62,3 +64,12 @@ node_modules/
 dist/
 build/
 *.egg-info/
+
+# Large training output folder
+Task_3/vein_detection_task_3_training/
+
+# PyInstaller build output
+Task_1_App/_internal/
+*.pyd
+*.dll
+*.exe

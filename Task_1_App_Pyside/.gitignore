@@ -1,0 +1,38 @@
+# Secrets and credentials
+backend/.env
+*.env
+*.pem
+*credentials*.json
+
+# Database and logs
+*.db
+*.log
+backend/cmed_chat.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+backend/venv/
+venv/
+*.egg-info/
+.eggs/
+
+# Qdrant local lock files (keep qdrant_storage/ but not locks)
+backend/qdrant_storage/*.lock
+
+# PyInstaller artifacts (Windows desktop build — not needed for server)
+_internal/
+CHIVA_Assistant.exe
+build.bat
+start.bat
+launcher.py
+
+# Dev tools
+.claude/
+Miscellaneous/
+
+# macOS
+.DS_Store
+**/.DS_Store

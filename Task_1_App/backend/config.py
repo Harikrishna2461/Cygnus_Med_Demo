@@ -47,3 +47,10 @@ DB_PATH = str(BASE_DIR / "chat_history.db")
 # Logging
 LOG_LEVEL = "INFO"
 LOG_FILE = str(BASE_DIR / "cmed_chat.log")
+
+# Google Sheets logging (optional — leave blank to disable)
+# GOOGLE_SHEETS_CREDENTIALS_FILE: path to your service account JSON key
+# GOOGLE_SHEETS_ID: the long ID from your sheet URL
+#   e.g. https://docs.google.com/spreadsheets/d/<THIS_PART>/edit
+GOOGLE_SHEETS_CREDENTIALS_FILE = os.getenv("GOOGLE_SHEETS_CREDENTIALS_FILE", "")
+GOOGLE_SHEETS_ID = os.getenv("GOOGLE_SHEETS_ID", "")

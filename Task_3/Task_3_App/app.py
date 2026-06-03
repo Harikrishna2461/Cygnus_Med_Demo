@@ -59,14 +59,37 @@ LABEL_COLOR = {
 }
 
 VLM_PROMPT = (
-    "Ultrasound image. CYAN line = fascia boundary. "
-    "Numbered yellow boxes = detected veins.\n"
-    "Classify each numbered vein:\n"
+    "Ultrasound image. Numbered yellow boxes = detected veins.\n"
+    "If CYAN lines are visible they mark the fascia boundary.\n"
+    "Classify each numbered vein using fascia lines if present, "
+    "otherwise use tissue depth (shallow=N3, mid-depth at bright fascial layer=N2, deep=N1):\n"
     "- N3: vein is ABOVE the fascia (superficial)\n"
     "- N2: vein is ON or VERY CLOSE to fascia (GSV)\n"
     "- N1: vein is BELOW the fascia (deep)\n"
     "Reply ONLY with JSON: {\"1\": \"N2\", \"2\": \"N3\"}"
 )
+
+FOUNDATION_FEW_SHOT_PROMPT = (
+    "You are analysing B-mode ultrasound images.\n"
+    "The annotated reference images you already saw show:\n"
+    "  • YELLOW lines  = fascia band (bright hyperechoic layer between fat and muscle)\n"
+    "  • Coloured numbered boxes = veins (dark hypoechoic oval/circular structures)\n"
+    "  • Labels: N3=above fascia (superficial), N2=at/near fascia (GSV), N1=below fascia (deep)\n\n"
+    "Now analyse this new unannotated frame using the same anatomy.\n"
+    "Find: (1) the fascia band row, (2) any dark oval vein structures.\n"
+    "Reply ONLY with valid JSON — no extra text:\n"
+    "{\"fascia_y\":<integer 0-255 for fascia centre row in this 256x256 image, or null>,"
+    "\"veins\":[{\"x\":<int>,\"y\":<int>,\"w\":<int>,\"h\":<int>,\"label\":\"N2\"}]}\n"
+    "All pixel coords are in 256x256 space (0,0 = top-left)."
+)
+
+# ── Hardcoded API keys ────────────────────────────────────────────────────────
+DEFAULT_GROQ_KEY = ""
+HF_TOKEN         = ""
+
+def _make_groq(user_key: str = ''):
+    from groq import Groq
+    return Groq(api_key=user_key or DEFAULT_GROQ_KEY)
 
 _store: dict = {}
 
@@ -119,8 +142,13 @@ def get_scan_x_limits(bgr):
     col_bright = (opened > 0).sum(axis=0)
     xs = np.where(col_bright > h * 0.05)[0]
     if len(xs) < 10:
-        return 0, w    # fallback: full width
-    return int(xs[0]), int(xs[-1] + 1)
+        return 0, w
+    x_left, x_right = int(xs[0]), int(xs[-1] + 1)
+    # If detected scan width is less than 40% of frame width the detection is
+    # unreliable (e.g. transducer coupling artifact in corner triggers it).
+    if (x_right - x_left) < w * 0.4:
+        return 0, w
+    return x_left, x_right
 
 NEAR_PX = 20
 
@@ -143,7 +171,7 @@ def get_fascia_boundary(mask):
     #    estimate of fascia depth.  Sparse outlier columns at wrong depths
     #    contribute ≤1 pixel/row there vs ~150 pixels/row at the true fascia.
     row_class1 = (mask == 1).sum(axis=1)
-    if int(row_class1.max()) < 5:
+    if int(row_class1.max()) < 2:
         return None, None
     fascia_cy = int(np.argmax(row_class1))
     win  = 25
@@ -164,7 +192,7 @@ def get_fascia_boundary(mask):
         half_w[x]   = float((ys[-1] - ys[0]) / 2) if len(ys) > 1 else 1.0
 
     valid = ~np.isnan(center_y)
-    if valid.sum() < 4:
+    if valid.sum() < 20:   # require fascia spanning at least 20 columns to draw
         return None, None
 
     # 3. Use a FIXED half-width (median across all valid columns) so both lines
@@ -206,6 +234,597 @@ def extract_detections(mask, min_area=50):
             'area':     int(a),
         })
     return nms(dets)
+
+# ── Pipeline B: Foundation-Model Fallback ─────────────────────────────────────
+class PipelineB:
+    """
+    Activated when Pipeline A (task-specific DL) cannot detect the fascia or
+    finds no veins.  Uses only foundation models so no task-specific training
+    is required.
+
+    Fascia  → Depth Anything V2 (monocular depth gradient) with a
+              brightness-profile fallback.
+    Veins   → Grounding DINO zero-shot detection with an OpenCV dark-blob
+              fallback.
+
+    All models are loaded lazily on first use so server start-up is unaffected.
+    """
+
+    def __init__(self):
+        self._depth_pipe       = None   # HF depth-estimation pipeline (unused for US)
+        self._gdino            = None   # (processor, model, device) tuple
+        self._sam              = None   # (model, processor, device) tuple
+        self._few_shot_b64     = []
+        self._vlm_context_msgs = []
+        self._tried            = False
+
+    def ensure_loaded(self):
+        if self._tried:
+            return
+        self._tried = True
+        self._load_depth()
+        self._load_gdino()
+        self._load_sam()
+        self._load_few_shot()
+
+    # ── loaders ───────────────────────────────────────────────────────────────
+
+    def _load_depth(self):
+        try:
+            from transformers import pipeline as hf_pipe
+            import torch
+            dev = 0 if torch.cuda.is_available() else -1
+            print("PipelineB: loading Depth Anything V2 Small …")
+            self._depth_pipe = hf_pipe(
+                "depth-estimation",
+                model="depth-anything/Depth-Anything-V2-Small-hf",
+                device=dev,
+                token=HF_TOKEN,
+            )
+            print("PipelineB: Depth Anything V2 ready.")
+        except Exception as e:
+            print(f"PipelineB: depth model unavailable ({e}); brightness fallback active.")
+
+    def _load_gdino(self):
+        try:
+            import torch
+            from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection
+            dev = "cuda" if torch.cuda.is_available() else "cpu"
+            print("PipelineB: loading Grounding DINO Tiny …")
+            proc  = AutoProcessor.from_pretrained("IDEA-Research/grounding-dino-tiny", token=HF_TOKEN)
+            model = AutoModelForZeroShotObjectDetection.from_pretrained(
+                "IDEA-Research/grounding-dino-tiny", token=HF_TOKEN
+            ).to(dev).eval()
+            self._gdino = (proc, model, dev)
+            print("PipelineB: Grounding DINO ready.")
+        except Exception as e:
+            print(f"PipelineB: GDINO unavailable ({e}); blob fallback active.")
+
+    def _load_sam(self):
+        try:
+            from transformers import SamModel, SamProcessor
+            import torch
+            dev = "cuda" if torch.cuda.is_available() else "cpu"
+            print("PipelineB: loading SAM ViT-Base ...")
+            model = SamModel.from_pretrained("facebook/sam-vit-base", token=HF_TOKEN).to(dev).eval()
+            proc  = SamProcessor.from_pretrained("facebook/sam-vit-base", token=HF_TOKEN)
+            self._sam = (model, proc, dev)
+            print("PipelineB: SAM ready.")
+        except Exception as e:
+            print(f"PipelineB: SAM unavailable ({e}); per-column brightness fallback active.")
+
+    def _load_few_shot(self):
+        """
+        Extract annotated reference frames and pre-build the VLM context messages.
+        Everything is encoded HERE at startup — vlm_detect_classify only sends
+        the current query frame at inference time.
+        """
+        self._few_shot_b64     = []
+        self._vlm_context_msgs = []
+        data_dir = DATA_ROOT / 'Data'
+
+        for folder_prefix in ['3', '2']:
+            anno_dir = next((p for p in sorted(data_dir.glob(f'{folder_prefix}*')) if p.is_dir()), None)
+            if anno_dir is None:
+                continue
+            for fname in ['sample_data.mp4', '202207191643_00-Moving.mp4', '202207111318_38-Perf.mp4']:
+                p = anno_dir / fname
+                if not p.exists():
+                    continue
+                cap   = cv2.VideoCapture(str(p))
+                total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                if total < 5:
+                    cap.release(); continue
+                # 20 % and 50 % tend to show the large GSV vein and a range of anatomy
+                for pct in [0.20, 0.50]:
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, max(0, int(total * pct)))
+                    ret, frm = cap.read()
+                    if ret:
+                        small = cv2.resize(frm, (IMG_SIZE, IMG_SIZE))
+                        _, buf = cv2.imencode('.jpg', small, [cv2.IMWRITE_JPEG_QUALITY, 85])
+                        self._few_shot_b64.append(base64.b64encode(buf.tobytes()).decode())
+                cap.release()
+                if len(self._few_shot_b64) >= 2:
+                    break
+            if len(self._few_shot_b64) >= 2:
+                print(f"PipelineB: {len(self._few_shot_b64)} reference frames loaded from {anno_dir.name}")
+                break
+
+        if not self._few_shot_b64:
+            print(f"PipelineB: no reference frames found under {data_dir}")
+            return
+
+        # ── Pre-build the VLM conversation context ONCE (startup cost, not per-frame) ──
+        # Structured as a completed first turn so the model already "knows" the
+        # annotated examples when each new query frame arrives.
+        ref_content = [
+            {"type": "text", "text": (
+                "These are annotated B-mode ultrasound reference images.\n"
+                "YELLOW lines    = fascia band (bright hyperechoic layer dividing fat from muscle).\n"
+                "Coloured boxes  = veins — dark anechoic/hypoechoic ovals. "
+                "Veins can be LARGE (filling 20-50%% of the image) or small.\n"
+                "Labels: N3 = above fascia (superficial), "
+                "N2 = at or very near fascia (GSV), N1 = below fascia (deep)."
+            )},
+        ]
+        for b64 in self._few_shot_b64[:2]:
+            ref_content.append({"type": "image_url",
+                                 "image_url": {"url": f"data:image/jpeg;base64,{b64}"}})
+
+        self._vlm_context_msgs = [
+            {"role": "user",      "content": ref_content},
+            {"role": "assistant", "content": (
+                "Understood. I can see both annotated reference frames: yellow fascia lines "
+                "and numbered vein boxes (including large dark oval vessels) with N1/N2/N3 labels. "
+                "Ready to analyse new frames."
+            )},
+        ]
+        print(f"PipelineB: VLM context pre-built with {len(self._few_shot_b64)} reference images "
+              f"({sum(len(b) for b in self._few_shot_b64) // 1024} KB encoded at startup).")
+
+    def vlm_detect_classify(self, bgr, groq_client, vlm_model_nm):
+        """
+        Combined fascia detection + vein detection + classification via few-shot VLM.
+        Passes annotated reference frames as examples before the query frame.
+        Returns (fascia_y_int_or_None, dets_list_with_vlm_label).
+        """
+        vis = cv2.resize(bgr, (IMG_SIZE, IMG_SIZE))
+        _, buf = cv2.imencode('.jpg', vis, [cv2.IMWRITE_JPEG_QUALITY, 82])
+        cur_b64 = base64.b64encode(buf.tobytes()).decode()
+
+        # Append the new query frame to the pre-built context (reference images are
+        # already encoded in self._vlm_context_msgs — not re-sent each call).
+        query_msg = {
+            "role": "user",
+            "content": [
+                {"type": "text",      "text": "Analyse this new frame:"},
+                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{cur_b64}"}},
+                {"type": "text",      "text": FOUNDATION_FEW_SHOT_PROMPT},
+            ],
+        }
+        messages = (self._vlm_context_msgs or []) + [query_msg]
+
+        try:
+            resp = groq_client.chat.completions.create(
+                model=vlm_model_nm,
+                messages=messages,
+                max_tokens=500, temperature=0.0,
+            )
+            raw = resp.choices[0].message.content.strip()
+            m = re.search(r'\{.*\}', raw, re.DOTALL)
+            if not m:
+                return None, []
+            data = json.loads(m.group())
+
+            fascia_y = data.get('fascia_y')
+            if fascia_y is not None:
+                fascia_y = int(np.clip(int(fascia_y), 0, IMG_SIZE - 1))
+
+            dets = []
+            for v in data.get('veins', []):
+                try:
+                    x = int(np.clip(int(v['x']), 0, IMG_SIZE - 1))
+                    y = int(np.clip(int(v['y']), 0, IMG_SIZE - 1))
+                    w = max(4, int(np.clip(int(v['w']), 1, IMG_SIZE - x)))
+                    h = max(4, int(np.clip(int(v['h']), 1, IMG_SIZE - y)))
+                    label = v.get('label', 'N2')
+                    if label not in ('N1', 'N2', 'N3'):
+                        label = 'N2'
+                    dets.append({
+                        'bbox':      (x, y, w, h),
+                        'centroid':  (float(x + w / 2), float(y + h / 2)),
+                        'area':      w * h,
+                        'vlm_label': label,
+                    })
+                except (KeyError, ValueError, TypeError):
+                    continue
+            return fascia_y, dets
+        except Exception as e:
+            print(f"Foundation VLM detect error: {e}")
+            return None, []
+
+    # ── fascia ────────────────────────────────────────────────────────────────
+
+    def detect_fascia(self, bgr):
+        """
+        Fascia detection chain:
+          1. GDINO text-prompt → approximate fascia row
+          2. SAM box-prompt around that row → per-column segmentation mask → curved band
+          3. Brightness-gradient fallback if GDINO or SAM fails
+        """
+        approx_y = self._gdino_fascia(bgr)
+        if approx_y is not None:
+            result = self._fascia_from_sam(bgr, approx_y)
+            if result[0] is not None:
+                return result
+        return self._fascia_from_brightness(bgr)
+
+    def _gdino_fascia(self, bgr):
+        """Use GDINO to detect the fascia band. Returns approx fascia row in IMG_SIZE coords, or None."""
+        if self._gdino is None:
+            return None
+        try:
+            import torch
+            from PIL import Image as PILImage
+            proc, model, dev = self._gdino
+            h0, w0 = bgr.shape[:2]
+            pil = PILImage.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB))
+
+            inputs = proc(
+                images=pil,
+                text="fascia . bright horizontal band . connective tissue layer",
+                return_tensors="pt",
+            ).to(dev)
+            with torch.no_grad():
+                outputs = model(**inputs)
+
+            try:
+                results = proc.post_process_grounded_object_detection(
+                    outputs, inputs.input_ids, target_sizes=[(h0, w0)]
+                )[0]
+                keep  = results['scores'].cpu() >= 0.25
+                boxes = results['boxes'][keep].cpu().numpy()
+            except TypeError:
+                results = proc.post_process_grounded_object_detection(
+                    outputs, inputs.input_ids,
+                    box_threshold=0.25, text_threshold=0.20, target_sizes=[(h0, w0)]
+                )[0]
+                boxes = results['boxes'].cpu().numpy()
+
+            if len(boxes) == 0:
+                return None
+
+            # Pick the widest, flattest box in the expected fascia zone (12–75 % depth)
+            best_y, best_score = None, -1.0
+            for x1, y1, x2, y2 in boxes:
+                cy = (y1 + y2) / 2
+                cy_norm = cy / h0
+                if cy_norm < 0.12 or cy_norm > 0.75:
+                    continue
+                bw, bh = x2 - x1, max(y2 - y1, 1)
+                score = (bw / w0) * (bw / bh)   # favour wide + flat
+                if score > best_score:
+                    best_score = score
+                    best_y = int(cy * IMG_SIZE / h0)
+            return best_y
+        except Exception as e:
+            print(f"PipelineB GDINO fascia error: {e}")
+            return None
+
+    def _fascia_from_sam(self, bgr, approx_y):
+        """
+        Run SAM with a wide box prompt around approx_y to segment the fascia band.
+        Extracts a per-column curved (top_y, bot_y) from the resulting mask.
+        Falls through to brightness refinement if SAM is unavailable or mask is too sparse.
+        """
+        if self._sam is None:
+            return self._refine_fascia_per_column(bgr, approx_y)
+        try:
+            import torch
+            from PIL import Image as PILImage
+            model, proc, dev = self._sam
+            h0, w0 = bgr.shape[:2]
+            pil = PILImage.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB))
+
+            # Wide box spanning full width, ±30 px around approx_y (in original coords)
+            search = 30
+            y1_box = max(0,  int((approx_y - search) * h0 / IMG_SIZE))
+            y2_box = min(h0, int((approx_y + search) * h0 / IMG_SIZE))
+            inputs = proc(
+                pil,
+                input_boxes=[[[0, y1_box, w0, y2_box]]],
+                return_tensors="pt",
+            ).to(dev)
+            with torch.no_grad():
+                outputs = model(**inputs)
+
+            masks = proc.post_process_masks(
+                outputs.pred_masks.cpu(),
+                inputs["original_sizes"].cpu(),
+                inputs["reshaped_input_sizes"].cpu(),
+            )
+            # masks[0]: [num_masks, H, W] boolean
+            iou_scores = outputs.iou_scores[0, 0].cpu().numpy()
+            best_mask  = masks[0][int(np.argmax(iou_scores))].numpy().astype(np.uint8)
+            mask_r     = cv2.resize(best_mask, (IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_NEAREST)
+
+            top_out = np.full(IMG_SIZE, np.nan, np.float32)
+            bot_out = np.full(IMG_SIZE, np.nan, np.float32)
+            for x in range(IMG_SIZE):
+                ys = np.where(mask_r[:, x] > 0)[0]
+                if len(ys) == 0:
+                    continue
+                cy_col = float(np.median(ys))
+                top_out[x] = float(max(0,            cy_col - 8))
+                bot_out[x] = float(min(IMG_SIZE - 1, cy_col + 8))
+
+            valid = ~np.isnan(top_out)
+            if valid.sum() < 20:
+                return self._refine_fascia_per_column(bgr, approx_y)
+
+            xs  = np.arange(IMG_SIZE, dtype=np.float32)
+            xv  = xs[valid]
+            top_out = uniform_filter1d(np.interp(xs, xv, top_out[valid]), 15).astype(np.float32)
+            bot_out = uniform_filter1d(np.interp(xs, xv, bot_out[valid]), 15).astype(np.float32)
+            return top_out, bot_out
+        except Exception as e:
+            print(f"PipelineB SAM fascia error: {e}")
+            return self._refine_fascia_per_column(bgr, approx_y)
+
+    def _refine_fascia_per_column(self, bgr, approx_y, search_half=25):
+        """
+        Refine a rough fascia row estimate into a curved per-column representation.
+
+        For each column finds the brightest pixel within [approx_y ± search_half]
+        and uses that as the fascia peak.  This follows the actual hyperechoic band
+        contour instead of drawing a flat horizontal line.
+
+        Returns (top_y, bot_y) arrays of shape (IMG_SIZE,).
+        Falls back to flat lines centred on approx_y if too few columns have signal.
+        """
+        gray   = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+        gray_r = cv2.resize(gray.astype(np.float32), (IMG_SIZE, IMG_SIZE))
+        gray_s = cv2.GaussianBlur(gray_r, (7, 7), 0)
+
+        y_lo = int(np.clip(approx_y - search_half, 0, IMG_SIZE - 1))
+        y_hi = int(np.clip(approx_y + search_half + 1, 1, IMG_SIZE))
+        half = 8
+
+        top_out = np.full(IMG_SIZE, np.nan, np.float32)
+        bot_out = np.full(IMG_SIZE, np.nan, np.float32)
+
+        for x in range(IMG_SIZE):
+            col_strip = gray_s[y_lo:y_hi, x]
+            if float(col_strip.max()) < 15:   # dark gel/shadow column — skip
+                continue
+            peak = y_lo + int(np.argmax(col_strip))
+            top_out[x] = float(max(0,            peak - half))
+            bot_out[x] = float(min(IMG_SIZE - 1, peak + half))
+
+        valid = ~np.isnan(top_out)
+        if valid.sum() < 20:
+            # Not enough per-column signal — fall back to flat lines
+            cy   = float(np.clip(approx_y, half, IMG_SIZE - 1 - half))
+            top_out[:] = cy - half
+            bot_out[:] = cy + half
+            return top_out, bot_out
+
+        xs = np.arange(IMG_SIZE, dtype=np.float32)
+        xv = xs[valid]
+        top_out = uniform_filter1d(np.interp(xs, xv, top_out[valid]), 15).astype(np.float32)
+        bot_out = uniform_filter1d(np.interp(xs, xv, bot_out[valid]), 15).astype(np.float32)
+        return top_out, bot_out
+
+    def _fascia_from_brightness(self, bgr):
+        gray   = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+        gray_r = cv2.resize(gray.astype(np.float32), (IMG_SIZE, IMG_SIZE))
+        row_sm = uniform_filter1d(gray_r.mean(axis=1).astype(np.float64), 15)
+
+        # Fascia = steepest dark→bright transition (fat → hyperechoic band).
+        # Use gradient rather than argmax so we find the band edge, not the
+        # brightest artifact.  Search 12–72 % of frame height.
+        y0 = max(1, int(IMG_SIZE * 0.12))
+        y1 = int(IMG_SIZE * 0.72)
+        grad = np.gradient(row_sm)
+        fascia_cy = y0 + int(np.argmax(grad[y0:y1]))
+
+        # Refine to per-column curves so the drawn band follows actual anatomy
+        return self._refine_fascia_per_column(bgr, fascia_cy)
+
+    # ── veins ─────────────────────────────────────────────────────────────────
+
+    def detect_veins(self, bgr, min_area=80):
+        """
+        Vein detection chain:
+          1. GDINO text-prompt → rough bounding boxes
+          2. SAM box-prompt for each GDINO box → precise segmentation → tight bbox
+          3. Blob fallback if GDINO finds nothing
+        """
+        if self._gdino is not None:
+            dets = self._gdino_detect(bgr, min_area)
+            if dets:
+                return self._sam_refine_dets(bgr, dets)
+        return self._blob_detect(bgr, min_area)
+
+    def _sam_refine_dets(self, bgr, gdino_dets):
+        """
+        Refine GDINO bounding boxes with SAM segmentation.
+        Each GDINO box is used as a SAM prompt; the resulting mask gives a tighter,
+        more accurate bounding box and centroid.
+        Falls back to the original GDINO det if SAM is unavailable or mask is empty.
+        """
+        if self._sam is None or not gdino_dets:
+            return gdino_dets
+        try:
+            import torch
+            from PIL import Image as PILImage
+            model, proc, dev = self._sam
+            h0, w0 = bgr.shape[:2]
+            pil = PILImage.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB))
+
+            refined = []
+            for det in gdino_dets:
+                x, y, bw, bh = det['bbox']
+                # Convert IMG_SIZE coords → original frame coords for SAM
+                x1 = int(x  * w0 / IMG_SIZE);  y1 = int(y  * h0 / IMG_SIZE)
+                x2 = int((x + bw) * w0 / IMG_SIZE); y2 = int((y + bh) * h0 / IMG_SIZE)
+
+                inputs = proc(
+                    pil,
+                    input_boxes=[[[x1, y1, x2, y2]]],
+                    return_tensors="pt",
+                ).to(dev)
+                with torch.no_grad():
+                    outputs = model(**inputs)
+
+                masks = proc.post_process_masks(
+                    outputs.pred_masks.cpu(),
+                    inputs["original_sizes"].cpu(),
+                    inputs["reshaped_input_sizes"].cpu(),
+                )
+                iou_scores = outputs.iou_scores[0, 0].cpu().numpy()
+                best_mask  = masks[0][int(np.argmax(iou_scores))].numpy().astype(np.uint8)
+                mask_r     = cv2.resize(best_mask, (IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_NEAREST)
+
+                ys_m, xs_m = np.where(mask_r > 0)
+                if len(xs_m) < 4:
+                    refined.append(det)
+                    continue
+
+                nx, ny = int(xs_m.min()), int(ys_m.min())
+                nw = int(xs_m.max()) - nx
+                nh = int(ys_m.max()) - ny
+                if nw < 2 or nh < 2:
+                    refined.append(det)
+                    continue
+
+                refined.append({
+                    'bbox':     (nx, ny, nw, nh),
+                    'centroid': (float(nx + nw / 2), float(ny + nh / 2)),
+                    'area':     int(mask_r.sum()),
+                })
+            return nms(refined)
+        except Exception as e:
+            print(f"PipelineB SAM refine error: {e}")
+            return gdino_dets
+
+    def _gdino_detect(self, bgr, min_area):
+        try:
+            import torch
+            from PIL import Image as PILImage
+            proc, model, dev = self._gdino
+            h0, w0 = bgr.shape[:2]
+            pil = PILImage.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB))
+
+            inputs = proc(
+                images=pil,
+                text="vein . blood vessel",
+                return_tensors="pt",
+            ).to(dev)
+
+            with torch.no_grad():
+                outputs = model(**inputs)
+
+            # transformers >=4.44 dropped box_threshold from post_process;
+            # try new API first, fall back to old signature.
+            try:
+                results = proc.post_process_grounded_object_detection(
+                    outputs, inputs.input_ids, target_sizes=[(h0, w0)]
+                )[0]
+                keep = results['scores'].cpu() >= 0.30
+                results = {'boxes': results['boxes'][keep]}
+            except TypeError:
+                results = proc.post_process_grounded_object_detection(
+                    outputs, inputs.input_ids,
+                    box_threshold=0.30, text_threshold=0.25, target_sizes=[(h0, w0)]
+                )[0]
+
+            edge_skip = int(IMG_SIZE * 0.08)   # ignore scan-border region at top
+            dets = []
+            for box in results['boxes'].cpu().numpy():
+                x1, y1, x2, y2 = box
+                x  = int(x1 * IMG_SIZE / w0)
+                y  = int(y1 * IMG_SIZE / h0)
+                bw = max(1, int((x2 - x1) * IMG_SIZE / w0))
+                bh = max(1, int((y2 - y1) * IMG_SIZE / h0))
+                area = bw * bh
+                if area < min_area:
+                    continue
+                # Reject scan-border artifacts: too close to top edge
+                if y < edge_skip:
+                    continue
+                # Veins are roughly oval — reject very wide flat bars (bw > 4×bh)
+                if bh > 0 and bw > bh * 4:
+                    continue
+                dets.append({
+                    'bbox':     (x, y, bw, bh),
+                    'centroid': (float(x + bw / 2), float(y + bh / 2)),
+                    'area':     int(area),
+                })
+            return nms(dets)
+        except Exception as e:
+            print(f"PipelineB GDINO detect error: {e}")
+            return []
+
+    def _blob_detect(self, bgr, min_area):
+        """
+        Dark-blob fallback for vein detection.
+
+        Uses a global intensity threshold (pixels must be meaningfully darker
+        than the frame mean) rather than adaptive thresholding — adaptive
+        thresholds find every speckle/texture element, not just true veins.
+        Adds a circularity gate to reject elongated tissue interfaces.
+        """
+        gray   = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+        gray_r = cv2.resize(gray, (IMG_SIZE, IMG_SIZE)).astype(np.float32)
+        # Mild Gaussian to reduce ultrasound speckle before thresholding
+        blurred = cv2.GaussianBlur(gray_r, (9, 9), 0)
+
+        # Threshold: keep only pixels significantly darker than the image mean.
+        # Veins are typically at least 40 % darker than surrounding tissue.
+        mean_val   = float(blurred.mean())
+        thresh_val = max(25, int(mean_val * 0.52))
+        _, binary  = cv2.threshold(
+            blurred.astype(np.uint8), thresh_val, 255, cv2.THRESH_BINARY_INV
+        )
+
+        # Close small intra-vein gaps then open to remove isolated noise pixels
+        k_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        k_open  = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+        binary  = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, k_close)
+        binary  = cv2.morphologyEx(binary, cv2.MORPH_OPEN,  k_open)
+        # Blank top 8 % (scan coupling line)
+        binary[:int(IMG_SIZE * 0.08), :] = 0
+
+        n, labels, stats, centroids = cv2.connectedComponentsWithStats(binary, connectivity=8)
+        dets = []
+        for i in range(1, n):
+            a  = stats[i, cv2.CC_STAT_AREA]
+            bw = stats[i, cv2.CC_STAT_WIDTH]
+            bh = stats[i, cv2.CC_STAT_HEIGHT]
+            if a < min_area:
+                continue
+            # Aspect ratio: veins are roughly circular/oval in cross-section
+            if min(bw, bh) == 0 or max(bw, bh) / min(bw, bh) > 3.5:
+                continue
+            # Circularity: 4π·A / P²  (circle = 1.0)
+            comp = (labels == i).astype(np.uint8)
+            contours, _ = cv2.findContours(comp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            if not contours:
+                continue
+            perim = cv2.arcLength(contours[0], True)
+            if perim > 0 and (4 * np.pi * a / perim ** 2) < 0.20:
+                continue   # too elongated or irregular to be a vein
+            dets.append({
+                'bbox':     (stats[i, cv2.CC_STAT_LEFT], stats[i, cv2.CC_STAT_TOP], bw, bh),
+                'centroid': (float(centroids[i][0]), float(centroids[i][1])),
+                'area':     int(a),
+            })
+        return nms(dets)
+
+
+_pipe_b = PipelineB()   # singleton — shared across all SSE requests
+
 
 def vlm_classify(bgr, track_recs, top_y, bot_y, groq_client, vlm_model_name):
     """Classify a list of track_recs. Returns {1-based-index: label}."""
@@ -342,8 +961,8 @@ def draw_frame(bgr, records, top_y, bot_y):
         w   = int(r['w'] * sx)
         h   = int(r['h'] * sy)
         cv2.rectangle(vis, (x, y), (x+w, y+h), col, 2)
-        cv2.putText(vis, r.get('label', '?'), (x, y-6),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, col, 2)
+        tag = f"T{r['track_id']} {r.get('label', '?')}"
+        cv2.putText(vis, tag, (x, y-6), cv2.FONT_HERSHEY_SIMPLEX, 0.55, col, 2)
     return vis
 
 def frame_to_b64(bgr):
@@ -364,24 +983,39 @@ def upload():
     return jsonify({'upload_id': uid})
 
 
-@app.route('/api/process/<upload_id>', methods=['GET'])
-def process(upload_id):
-    if upload_id not in _store:
-        return jsonify({'error': 'Unknown upload_id'}), 404
+# ── Detection strategies ──────────────────────────────────────────────────────
 
-    target_fps   = float(request.args.get('fps', 5))
-    min_area     = int(request.args.get('min_area', 150))
-    use_vlm      = request.args.get('use_vlm', 'true').lower() == 'true'
-    groq_key     = request.args.get('groq_key', '')
-    vlm_model_nm = request.args.get('vlm_model', 'meta-llama/llama-4-scout-17b-16e-instruct')
+def _dl_fascia_fn(frame, scan_xl_m, scan_xr_m):
+    fascia_mask = predict_fascia(frame)
+    fascia_mask[:, :scan_xl_m] = 0
+    fascia_mask[:, scan_xr_m:] = 0
+    return get_fascia_boundary(fascia_mask)
 
-    groq_client = None
-    if use_vlm and groq_key:
-        try:
-            from groq import Groq
-            groq_client = Groq(api_key=groq_key)
-        except Exception as e:
-            print(f'Groq init error: {e}')
+def _dl_vein_fn(frame, s_bot, min_area):
+    vein_mask = predict_vein(frame)
+    if s_bot is not None:
+        for x in range(IMG_SIZE):
+            if not np.isnan(s_bot[x]):
+                cutoff = min(IMG_SIZE, int(s_bot[x]) + NEAR_PX + 1)
+                vein_mask[cutoff:, x] = 0
+    return extract_detections(vein_mask, min_area)
+
+def _foundation_fascia_fn(frame, scan_xl_m, scan_xr_m):
+    _pipe_b.ensure_loaded()
+    return _pipe_b.detect_fascia(frame)
+
+def _foundation_vein_fn(frame, s_bot, min_area):
+    _pipe_b.ensure_loaded()
+    return _pipe_b.detect_veins(frame, min_area)
+
+
+def _make_generate(upload_id, target_fps, min_area, use_vlm, groq_key, vlm_model_nm,
+                   fascia_fn, vein_fn):
+    """
+    fascia_fn(frame, scan_xl_m, scan_xr_m) -> (top_y, bot_y) or (None, None)
+    vein_fn(frame, s_bot, min_area)        -> list[det]
+    """
+    groq_client = _make_groq(groq_key) if use_vlm else None
 
     tmp_path = _store[upload_id]['tmp_path']
 
@@ -392,19 +1026,19 @@ def process(upload_id):
         skip    = max(1, round(src_fps / target_fps))
         n_proc  = max(1, total // skip)
 
-        tracker         = Tracker()
-        all_recs        = []
-        counts          = {'N1': 0, 'N2': 0, 'N3': 0, 'unknown': 0}
-        track_labels    = {}   # track_id -> label, locked once non-unknown
-        known_tids      = set()
-        last_centroids  = {}   # track_id -> (cx, cy) from previous frame
-        ghost_labels    = []   # (cx, cy, label) of recently dropped tracks
-        scan_xl_m       = None  # scan x-limits in model (IMG_SIZE) space, cached
-        scan_xr_m       = None
-        fascia_buf      = []   # rolling buffer of (top_y, bot_y) for temporal smoothing
-        FASCIA_SMOOTH   = 7
-        raw_idx         = 0
-        proc_idx        = 0
+        tracker        = Tracker()
+        all_recs       = []
+        counts         = {'N1': 0, 'N2': 0, 'N3': 0, 'unknown': 0}
+        track_labels   = {}
+        known_tids     = set()
+        last_centroids = {}
+        ghost_labels   = []
+        scan_xl_m      = None
+        scan_xr_m      = None
+        fascia_buf     = []
+        FASCIA_SMOOTH  = 7
+        raw_idx        = 0
+        proc_idx       = 0
 
         yield f"data: {json.dumps({'type':'meta','total':n_proc,'src_fps':src_fps,'skip':skip})}\n\n"
 
@@ -416,25 +1050,13 @@ def process(upload_id):
             if raw_idx % skip == 0:
                 h0, w0 = frame.shape[:2]
 
-                # Cache scan x-limits from the first processed frame (camera is fixed)
                 if scan_xl_m is None:
                     xl_px, xr_px = get_scan_x_limits(frame)
                     scan_xl_m = max(0, round(xl_px * IMG_SIZE / w0))
                     scan_xr_m = min(IMG_SIZE, round(xr_px * IMG_SIZE / w0))
 
-                # Full frame → models exactly as training (resize only, no crop/mask)
-                fascia_mask  = predict_fascia(frame)
-                vein_mask    = predict_vein(frame)
+                top_y, bot_y = fascia_fn(frame, scan_xl_m, scan_xr_m)
 
-                # Zero out fascia mask outside scan x-range BEFORE boundary extraction
-                # so the dominant-row calc only sees actual scan content columns.
-                fascia_mask[:, :scan_xl_m] = 0
-                fascia_mask[:, scan_xr_m:] = 0
-
-                top_y, bot_y = get_fascia_boundary(fascia_mask)
-
-                # Temporal fascia smoothing: median of last FASCIA_SMOOTH frames
-                # prevents single-frame jitter from flipping borderline N2/N3 labels
                 if top_y is not None:
                     fascia_buf.append((top_y, bot_y))
                     if len(fascia_buf) > FASCIA_SMOOTH:
@@ -445,34 +1067,31 @@ def process(upload_id):
                 else:
                     s_top = s_bot = None
 
-                dets         = extract_detections(vein_mask, min_area)
+                dets = vein_fn(frame, s_bot, min_area)
+
                 track_recs   = tracker.update(dets, proc_idx)
                 current_tids = {r['track_id'] for r in track_recs}
 
-                # Dropped tracks → save centroid+label to ghost
                 for tid in known_tids - current_tids:
                     lbl = track_labels.get(tid, 'unknown')
                     if lbl != 'unknown' and tid in last_centroids:
                         ghost_labels.append((*last_centroids[tid], lbl))
+                if len(ghost_labels) > 40:
+                    ghost_labels = ghost_labels[-40:]
 
-                # New tracks: try ghost inheritance first, then geometric classify
                 for r in track_recs:
-                    if r['track_id'] not in track_labels:
-                        inherited = None
-                        for gcx, gcy, glbl in ghost_labels:
+                    if s_top is not None and r['age'] >= 2:
+                        geo = geometric_classify(r['cx'], r['cy'], s_top, s_bot)
+                        if geo != 'unknown':
+                            track_labels[r['track_id']] = geo
+                    elif r['track_id'] not in track_labels:
+                        for gcx, gcy, glbl in reversed(ghost_labels):
                             if abs(r['cx'] - gcx) < 60 and abs(r['cy'] - gcy) < 60:
-                                inherited = glbl; break
-                        if inherited:
-                            track_labels[r['track_id']] = inherited
-                        else:
-                            geo = geometric_classify(r['cx'], r['cy'], s_top, s_bot)
-                            if geo != 'unknown':
-                                track_labels[r['track_id']] = geo
+                                track_labels[r['track_id']] = glbl; break
 
                 known_tids     = current_tids
                 last_centroids = {r['track_id']: (r['cx'], r['cy']) for r in track_recs}
 
-                # VLM for any still-unclassified tracks (fascia not detected case)
                 unclassified = [r for r in track_recs
                                 if track_labels.get(r['track_id'], 'unknown') == 'unknown']
                 if use_vlm and groq_client and unclassified:
@@ -507,9 +1126,220 @@ def process(upload_id):
         _store[upload_id]['records'] = all_recs
         yield f"data: {json.dumps({'type':'done','counts':counts,'total_processed':proc_idx})}\n\n"
 
+    return generate
+
+
+def _process_view(upload_id, fascia_fn, vein_fn):
+    if upload_id not in _store:
+        return jsonify({'error': 'Unknown upload_id'}), 404
+    target_fps   = float(request.args.get('fps', 5))
+    min_area     = int(request.args.get('min_area', 150))
+    use_vlm      = request.args.get('use_vlm', 'true').lower() == 'true'
+    groq_key     = request.args.get('groq_key', '')
+    vlm_model_nm = request.args.get('vlm_model', 'meta-llama/llama-4-scout-17b-16e-instruct')
+    generate = _make_generate(upload_id, target_fps, min_area, use_vlm, groq_key, vlm_model_nm,
+                              fascia_fn, vein_fn)
     return Response(generate(),
                     mimetype='text/event-stream',
                     headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+
+
+@app.route('/api/process/dl/<upload_id>', methods=['GET'])
+def process_dl(upload_id):
+    return _process_view(upload_id, _dl_fascia_fn, _dl_vein_fn)
+
+
+VLM_DETECT_INTERVAL = 5   # run combined VLM detection every N processed frames
+
+
+def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key, vlm_model_nm):
+    """
+    Foundation Pipeline generate loop.
+
+    When a Groq key is provided every VLM_DETECT_INTERVAL processed frames the
+    VLM receives 2 annotated reference frames (few-shot examples from
+    3-Simple_Annotated_Videos) plus the current unannotated frame and returns:
+      • fascia_y  — row of fascia centre in 256-px space
+      • veins     — bounding boxes + N1/N2/N3 labels
+
+    Between VLM calls (or when no Groq key) fascia falls back to the
+    brightness-gradient heuristic and veins to GDINO / blob detection.
+    """
+    groq_client = _make_groq(groq_key)
+
+    _pipe_b.ensure_loaded()
+    tmp_path = _store[upload_id]['tmp_path']
+
+    def generate():
+        cap     = cv2.VideoCapture(tmp_path)
+        src_fps = cap.get(cv2.CAP_PROP_FPS) or 25
+        total   = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        skip    = max(1, round(src_fps / target_fps))
+        n_proc  = max(1, total // skip)
+
+        tracker        = Tracker()
+        all_recs       = []
+        counts         = {'N1': 0, 'N2': 0, 'N3': 0, 'unknown': 0}
+        track_labels   = {}
+        known_tids     = set()
+        last_centroids = {}
+        ghost_labels   = []
+        FASCIA_SMOOTH  = 7
+        raw_idx        = 0
+        proc_idx       = 0
+
+        vlm_vein_dets  = []  # most-recent vein detections from VLM (have 'vlm_label')
+        vlm_fascia_buf = []  # smoothing buffer fed ONLY from VLM fascia_y results
+        brt_fascia_buf = []  # smoothing buffer fed ONLY from brightness-gradient fallback
+
+        yield f"data: {json.dumps({'type':'meta','total':n_proc,'src_fps':src_fps,'skip':skip})}\n\n"
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            if raw_idx % skip == 0:
+
+                # ── Combined VLM detection (with few-shot annotated examples) ──
+                if groq_client and (proc_idx % VLM_DETECT_INTERVAL == 0):
+                    print(f"[Foundation VLM] frame {proc_idx}: calling few-shot detect "
+                          f"({len(_pipe_b._few_shot_b64)} ref images)")
+                    fy, vd = _pipe_b.vlm_detect_classify(frame, groq_client, vlm_model_nm)
+                    print(f"[Foundation VLM] → fascia_y={fy}, veins={len(vd)}")
+                    if fy is not None:
+                        # Refine VLM's single-row estimate to a curved per-column band
+                        t, b = _pipe_b._refine_fascia_per_column(frame, fy)
+                        vlm_fascia_buf.append((t, b))
+                        if len(vlm_fascia_buf) > FASCIA_SMOOTH:
+                            vlm_fascia_buf.pop(0)
+                    if vd:
+                        vlm_vein_dets = vd
+
+                # ── Fascia: VLM buffer takes priority; brightness is independent fallback ──
+                # Keeping VLM and brightness results in separate buffers prevents them
+                # from polluting each other's median when they disagree on fascia position.
+                if vlm_fascia_buf:
+                    s_top = np.nanmedian(np.stack([f[0] for f in vlm_fascia_buf]), axis=0).astype(np.float32)
+                    s_bot = np.nanmedian(np.stack([f[1] for f in vlm_fascia_buf]), axis=0).astype(np.float32)
+                else:
+                    top_y, bot_y = _pipe_b.detect_fascia(frame)
+                    if top_y is not None:
+                        brt_fascia_buf.append((top_y, bot_y))
+                        if len(brt_fascia_buf) > FASCIA_SMOOTH:
+                            brt_fascia_buf.pop(0)
+                    if brt_fascia_buf:
+                        s_top = np.nanmedian(np.stack([f[0] for f in brt_fascia_buf]), axis=0).astype(np.float32)
+                        s_bot = np.nanmedian(np.stack([f[1] for f in brt_fascia_buf]), axis=0).astype(np.float32)
+                    else:
+                        s_top = s_bot = None
+
+                # ── Veins: on VLM frames use VLM boxes; on all other frames run
+                # fresh GDINO/blob so the tracker never gets stale positions ──
+                if groq_client and (proc_idx % VLM_DETECT_INTERVAL == 0) and vlm_vein_dets:
+                    dets = vlm_vein_dets
+                else:
+                    dets = _pipe_b.detect_veins(frame, min_area)
+
+                # Remove any detection whose centroid is below the fascia band —
+                # same anatomical constraint as the DL pipeline.
+                if s_bot is not None:
+                    dets = [d for d in dets
+                            if np.isnan(s_bot[int(np.clip(d['centroid'][0], 0, IMG_SIZE - 1))])
+                            or d['centroid'][1] <= (
+                                s_bot[int(np.clip(d['centroid'][0], 0, IMG_SIZE - 1))] + NEAR_PX)]
+
+                track_recs   = tracker.update(dets, proc_idx)
+                current_tids = {r['track_id'] for r in track_recs}
+
+                for tid in known_tids - current_tids:
+                    lbl = track_labels.get(tid, 'unknown')
+                    if lbl != 'unknown' and tid in last_centroids:
+                        ghost_labels.append((*last_centroids[tid], lbl))
+                if len(ghost_labels) > 40:
+                    ghost_labels = ghost_labels[-40:]
+
+                # Classify: geometric > VLM-embedded label > ghost label
+                for r in track_recs:
+                    if s_top is not None and r['age'] >= 2:
+                        geo = geometric_classify(r['cx'], r['cy'], s_top, s_bot)
+                        if geo != 'unknown':
+                            track_labels[r['track_id']] = geo
+                    elif r['track_id'] not in track_labels:
+                        # Use the VLM label that arrived with the detection
+                        matched = next(
+                            (d for d in dets
+                             if 'vlm_label' in d
+                             and abs(d['centroid'][0] - r['cx']) < 20
+                             and abs(d['centroid'][1] - r['cy']) < 20),
+                            None
+                        )
+                        if matched:
+                            track_labels[r['track_id']] = matched['vlm_label']
+                        else:
+                            for gcx, gcy, glbl in reversed(ghost_labels):
+                                if abs(r['cx'] - gcx) < 60 and abs(r['cy'] - gcy) < 60:
+                                    track_labels[r['track_id']] = glbl; break
+
+                known_tids     = current_tids
+                last_centroids = {r['track_id']: (r['cx'], r['cy']) for r in track_recs}
+
+                # Standalone VLM classification for any still-unknown tracks
+                unclassified = [r for r in track_recs
+                                if track_labels.get(r['track_id'], 'unknown') == 'unknown']
+                if use_vlm and groq_client and unclassified:
+                    raw_vlm = vlm_classify(frame, unclassified, s_top, s_bot, groq_client, vlm_model_nm)
+                    for idx, label in raw_vlm.items():
+                        if 1 <= idx <= len(unclassified):
+                            track_labels[unclassified[idx - 1]['track_id']] = label
+
+                for r in track_recs:
+                    r['label']     = track_labels.get(r['track_id'], 'unknown')
+                    r['frame_idx'] = proc_idx
+                    counts[r['label']] = counts.get(r['label'], 0) + 1
+                    all_recs.append(r)
+
+                annotated = draw_frame(frame, track_recs, s_top, s_bot)
+                b64 = frame_to_b64(annotated)
+
+                payload = {
+                    'type':      'frame',
+                    'frame_idx': proc_idx,
+                    'total':     n_proc,
+                    'image':     b64,
+                    'counts':    counts.copy(),
+                    'dets':      len(track_recs),
+                }
+                yield f"data: {json.dumps(payload)}\n\n"
+                proc_idx += 1
+
+            raw_idx += 1
+
+        cap.release()
+        _store[upload_id]['records'] = all_recs
+        yield f"data: {json.dumps({'type':'done','counts':counts,'total_processed':proc_idx})}\n\n"
+
+    return generate
+
+
+@app.route('/api/process/foundation/<upload_id>', methods=['GET'])
+def process_foundation(upload_id):
+    if upload_id not in _store:
+        return jsonify({'error': 'Unknown upload_id'}), 404
+    target_fps   = float(request.args.get('fps', 5))
+    min_area     = int(request.args.get('min_area', 150))
+    use_vlm      = request.args.get('use_vlm', 'true').lower() == 'true'
+    groq_key     = request.args.get('groq_key', '')
+    vlm_model_nm = request.args.get('vlm_model', 'meta-llama/llama-4-scout-17b-16e-instruct')
+    generate = _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key, vlm_model_nm)
+    return Response(generate(),
+                    mimetype='text/event-stream',
+                    headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+
+
+@app.route('/api/process/<upload_id>', methods=['GET'])
+def process(upload_id):
+    return _process_view(upload_id, _dl_fascia_fn, _dl_vein_fn)
 
 
 @app.route('/api/report/<upload_id>', methods=['GET'])
