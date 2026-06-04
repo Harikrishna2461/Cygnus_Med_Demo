@@ -1,0 +1,1 @@
+ssh -i "chiva-deploy.pem" root@47.84.228.159

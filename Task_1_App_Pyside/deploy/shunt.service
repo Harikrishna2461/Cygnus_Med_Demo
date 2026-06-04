@@ -1,0 +1,17 @@
+﻿[Unit]
+Description=Shunt Classification and Ligation Assistant
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/var/www/shunt_classification_and_ligation/backend
+EnvironmentFile=/var/www/shunt_classification_and_ligation/backend/.env
+ExecStart=/var/www/shunt_classification_and_ligation/backend/venv/bin/gunicorn -c /var/www/shunt_classification_and_ligation/backend/gunicorn.conf.py wsgi:app
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/shunt_classification_and_ligation/app.log
+StandardError=append:/var/log/shunt_classification_and_ligation/app-error.log
+
+[Install]
+WantedBy=multi-user.target

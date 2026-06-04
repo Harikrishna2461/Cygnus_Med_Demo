@@ -1,8 +1,7 @@
-#!/bin/bash
-# Pull latest code and restart service (run as ubuntu user)
+﻿#!/bin/bash
 set -e
 
-APP_DIR=/var/www/chiva
+APP_DIR=/var/www/shunt_classification_and_ligation
 
 cd $APP_DIR
 git pull origin main
@@ -10,5 +9,5 @@ git pull origin main
 source backend/venv/bin/activate
 pip install -r backend/requirements.txt -q
 
-sudo systemctl restart chiva
+sudo systemctl restart shunt
 echo "Deployed: $(date)"

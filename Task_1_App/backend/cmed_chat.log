@@ -18392,3 +18392,469 @@ AttributeError: 'dict' object has no attribute 'strip'
 2026-06-02 18:45:46,940 werkzeug INFO 127.0.0.1 - - [02/Jun/2026 18:45:46] "GET /api/status HTTP/1.1" 200 -
 2026-06-02 18:46:17,657 werkzeug INFO 127.0.0.1 - - [02/Jun/2026 18:46:17] "GET /api/status HTTP/1.1" 200 -
 2026-06-02 18:46:47,625 werkzeug INFO 127.0.0.1 - - [02/Jun/2026 18:46:47] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:14:14,677 services INFO Services initialised (Groq + Qdrant).
+2026-06-04 12:14:14,691 __main__ INFO Database initialised.
+2026-06-04 12:14:14,693 rag_engine INFO BM25 index built (10 chunks).
+2026-06-04 12:14:14,693 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-06-04 12:14:14,693 __main__ INFO Clinical collection ready (10 points).
+2026-06-04 12:14:14,945 general_chat_engine INFO BM25 index built (2653 chunks).
+2026-06-04 12:14:14,954 general_chat_engine INFO BM25 index loaded from 'final_structured_rag' (2653 chunks).
+2026-06-04 12:14:14,954 __main__ INFO General collection ready (2653 points).
+2026-06-04 12:14:14,954 __main__ INFO Medical Assistant ready at http://127.0.0.1:7860
+2026-06-04 12:14:14,963 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-06-04 12:14:14,963 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-06-04 12:14:17,011 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:14:17] "GET / HTTP/1.1" 200 -
+2026-06-04 12:14:17,052 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:14:17] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-06-04 12:14:19,094 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:14:19] "GET /clinical HTTP/1.1" 200 -
+2026-06-04 12:14:21,193 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:14:21] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:14:21,197 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:14:21] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 12:14:21,207 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:14:21] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 12:14:21,221 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:14:21] "GET /api/session/5e89aa91-9e5a-4d08-9e40-7bef255d9ff3/messages HTTP/1.1" 200 -
+2026-06-04 12:14:21,243 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:14:21] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 12:14:36,756 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 12:14:40,067 services INFO Loading Qwen tokenizer: HariKrishna1824/medical_qwen_3b_cpt
+2026-06-04 12:14:40,571 httpx INFO HTTP Request: HEAD https://huggingface.co/HariKrishna1824/medical_qwen_3b_cpt/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:14:40,571 huggingface_hub.utils._http WARNING Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-06-04 12:14:40,585 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HariKrishna1824/medical_qwen_3b_cpt/6a7eac356efbc07467415fdcb3f32ff4fa4a74b2/config.json "HTTP/1.1 200 OK"
+2026-06-04 12:14:40,832 httpx INFO HTTP Request: HEAD https://huggingface.co/HariKrishna1824/medical_qwen_3b_cpt/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:14:40,842 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HariKrishna1824/medical_qwen_3b_cpt/6a7eac356efbc07467415fdcb3f32ff4fa4a74b2/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-06-04 12:14:41,082 httpx INFO HTTP Request: GET https://huggingface.co/api/models/HariKrishna1824/medical_qwen_3b_cpt/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-06-04 12:14:41,334 httpx INFO HTTP Request: GET https://huggingface.co/api/models/HariKrishna1824/medical_qwen_3b_cpt/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-06-04 12:14:41,961 httpx INFO HTTP Request: GET https://huggingface.co/api/models/HariKrishna1824/medical_qwen_3b_cpt "HTTP/1.1 200 OK"
+2026-06-04 12:14:41,974 services INFO Loading Qwen model weights (~6 GB, CPU)…
+2026-06-04 12:14:42,206 httpx INFO HTTP Request: HEAD https://huggingface.co/HariKrishna1824/medical_qwen_3b_cpt/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:14:42,221 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HariKrishna1824/medical_qwen_3b_cpt/6a7eac356efbc07467415fdcb3f32ff4fa4a74b2/config.json "HTTP/1.1 200 OK"
+2026-06-04 12:14:44,072 httpx INFO HTTP Request: HEAD https://huggingface.co/HariKrishna1824/medical_qwen_3b_cpt/resolve/main/generation_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:14:44,083 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HariKrishna1824/medical_qwen_3b_cpt/6a7eac356efbc07467415fdcb3f32ff4fa4a74b2/generation_config.json "HTTP/1.1 200 OK"
+2026-06-04 12:14:44,343 httpx INFO HTTP Request: HEAD https://huggingface.co/HariKrishna1824/medical_qwen_3b_cpt/resolve/main/custom_generate/generate.py "HTTP/1.1 404 Not Found"
+2026-06-04 12:14:44,346 services INFO Qwen model ready.
+2026-06-04 12:14:53,288 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:14:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:15:23,300 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:15:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:15:36,472 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Unspecified: 22122 chars
+2026-06-04 12:15:53,292 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:15:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:16:23,305 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:16:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:16:51,031 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Unspecified): '{\n    "shunt_type": "Type 2A",\n    "confidence": 0.85,\n    "reasoning": [\n        "Unspecified assessment: 1 RP finding(s) present — full classification rules apply.",\n        "SFJ is INCOMPETENT if and only if a clip has fromType=N1 AND toType=N2 (EP N1→N2).",\n        "SFJ COMPETENT → go to Case C.'
+2026-06-04 12:16:51,031 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Unspecified): prompt=0, completion=0
+2026-06-04 12:16:53,318 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:16:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:16:54,716 rag_engine INFO Loading cross-encoder: cross-encoder/ms-marco-MiniLM-L-6-v2
+2026-06-04 12:16:54,717 sentence_transformers.base.model INFO No device provided, using cpu
+2026-06-04 12:16:55,021 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/modules.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:55,288 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/modules.json "HTTP/1.1 404 Not Found"
+2026-06-04 12:16:55,298 sentence_transformers.base.model INFO No modules.json found for cross-encoder/ms-marco-MiniLM-L-6-v2, initializing a new CrossEncoder model.
+2026-06-04 12:16:55,548 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L-6-v2 "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:56,212 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L6-v2 "HTTP/1.1 200 OK"
+2026-06-04 12:16:56,456 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:56,699 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:56,720 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json "HTTP/1.1 200 OK"
+2026-06-04 12:16:56,973 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/adapter_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:57,230 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/adapter_config.json "HTTP/1.1 404 Not Found"
+2026-06-04 12:16:57,485 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:57,730 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:57,744 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json "HTTP/1.1 200 OK"
+2026-06-04 12:16:58,059 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:58,305 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-06-04 12:16:58,566 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:58,808 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-06-04 12:16:59,055 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/video_preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:59,321 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/video_preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-06-04 12:16:59,569 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:16:59,822 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-06-04 12:17:00,072 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:17:00,343 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:17:00,361 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-06-04 12:17:00,612 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:17:00,850 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:17:00,861 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json "HTTP/1.1 200 OK"
+2026-06-04 12:17:01,110 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:17:01,348 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:17:01,366 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json "HTTP/1.1 200 OK"
+2026-06-04 12:17:01,609 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:17:01,857 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:17:01,867 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-06-04 12:17:02,115 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L-6-v2/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:17:02,358 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L6-v2/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-06-04 12:17:02,611 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L-6-v2/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 12:17:02,860 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L6-v2/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-06-04 12:17:02,890 rag_engine INFO Cross-encoder ready.
+2026-06-04 12:17:03,082 rag_engine INFO Reranked 10 candidates → top-3 (best score: 7.556)
+2026-06-04 12:17:03,083 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Unspecified: 9238 chars
+2026-06-04 12:17:23,278 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:17:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:17:53,302 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:17:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:18:23,291 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:18:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:18:53,285 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:18:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:18:53,605 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Unspecified): 'AYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\nAYOUT\n'
+2026-06-04 12:18:53,606 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Unspecified): prompt=0, completion=0
+2026-06-04 12:18:53,606 shunt_classification_and_ligation_llm ERROR Ligation planning failed for Unspecified
+2026-06-04 12:18:53,606 routes.clinical ERROR Classification pipeline failed: Ligation planning failed for Unspecified
+Traceback (most recent call last):
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\Task_1_App\backend\routes\clinical.py", line 70, in api_chat
+    result = classify_and_plan_ligation_with_llm(
+        clip_list=clips,
+        call_llm_fn=call_llm_fn,
+        retrieve_ligation_context_fn=services.retrieve_ligation_context,
+    )
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\Task_1_App\backend\shunt_classification_and_ligation_llm.py", line 1121, in classify_and_plan_ligation_with_llm
+    ligation = _call_llm_for_ligation(shunt_type, group, rag_context, leg_label, call_llm_fn)
+  File "C:\Users\Krish\Downloads\Cygnus_Med_Demo\Task_1_App\backend\shunt_classification_and_ligation_llm.py", line 1015, in _call_llm_for_ligation
+    raise RuntimeError(f"Ligation planning failed for {leg_label}")
+RuntimeError: Ligation planning failed for Unspecified
+2026-06-04 12:18:53,613 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:18:53] "[35m[1mPOST /api/chat HTTP/1.1[0m" 500 -
+2026-06-04 12:18:53,614 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 12:18:53,617 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:18:53] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 12:19:23,341 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:19:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:19:53,314 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:19:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:20:23,313 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:20:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:20:53,321 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:20:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:21:23,353 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:21:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:21:53,316 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:21:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:22:23,330 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:22:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:22:53,324 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:22:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:23:23,306 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:23:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:23:53,340 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:23:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:24:23,324 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:24:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:24:53,335 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:24:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:25:23,304 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:25:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:25:53,317 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:25:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:26:23,329 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:26:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:26:53,288 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:26:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:27:23,317 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:27:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:27:53,318 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:27:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:28:23,303 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:28:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:28:53,514 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:28:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:29:23,504 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:29:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:30:24,483 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:30:24] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:31:25,475 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:31:25] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:32:26,493 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:32:26] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:33:27,495 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:33:27] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:34:28,491 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:34:28] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:35:29,484 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:35:29] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:36:30,488 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:36:30] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:37:31,480 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:37:31] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:38:32,507 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:38:32] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:39:33,513 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:39:33] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:40:34,493 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:40:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:41:35,503 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:41:35] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:42:36,491 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:42:36] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:43:37,519 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:43:37] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:44:38,501 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:44:38] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:45:39,472 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:45:39] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:46:40,501 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:46:40] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:47:41,500 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:47:41] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:48:42,472 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:48:42] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:49:43,493 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:49:43] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:50:44,495 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:50:44] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:51:45,513 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:51:45] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:52:46,496 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:52:46] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:53:47,494 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:53:47] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:54:48,482 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:54:48] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:55:49,463 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:55:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:56:50,451 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:56:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:57:50,493 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:57:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:58:50,511 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:58:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 12:59:50,494 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 12:59:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:00:50,505 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:00:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:01:50,498 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:01:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:02:50,496 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:02:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:03:50,505 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:03:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:04:50,461 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:04:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:05:50,492 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:05:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:06:50,495 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:06:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:07:50,495 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:07:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:08:50,481 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:08:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:09:50,509 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:09:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:10:50,482 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:10:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:11:50,511 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:11:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:12:50,501 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:12:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:13:50,514 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:13:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:14:50,491 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:14:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:15:50,508 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:15:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:16:50,472 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:16:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:17:50,492 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:17:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:18:50,520 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:18:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:19:50,502 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:19:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:20:50,496 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:20:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:21:50,506 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:21:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:22:50,497 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:22:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:23:50,503 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:23:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:24:50,457 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:24:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:25:50,478 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:25:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:26:50,487 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:26:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:27:50,490 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:27:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:30:38,802 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:30:38] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:30:53,284 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:30:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:31:23,307 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:31:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:31:53,286 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:31:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:32:23,279 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:32:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:32:53,317 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:32:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:33:23,327 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:33:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:33:53,322 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:33:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:34:23,302 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:34:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:34:53,310 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:34:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:35:23,325 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:35:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:35:53,319 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:35:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:36:23,317 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:36:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:36:53,333 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:36:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:37:23,331 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:37:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:37:53,287 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:37:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:38:23,333 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:38:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:38:53,326 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:38:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:39:23,309 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:39:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:39:53,323 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:39:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:40:23,291 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:40:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:40:53,295 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:40:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:41:23,289 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:41:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:41:53,279 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:41:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:42:23,306 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:42:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:42:53,324 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:42:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:43:23,301 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:43:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:43:53,337 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:43:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:44:23,348 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:44:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:44:53,308 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:44:53] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:45:23,332 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:45:23] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:45:56,735 services INFO Services initialised (Groq + Qdrant).
+2026-06-04 13:45:56,751 __main__ INFO Database initialised.
+2026-06-04 13:45:56,752 rag_engine INFO BM25 index built (10 chunks).
+2026-06-04 13:45:56,752 rag_engine INFO BM25 index loaded from 'ligation_knowledgebase_db_v2' (10 chunks).
+2026-06-04 13:45:56,753 __main__ INFO Clinical collection ready (10 points).
+2026-06-04 13:45:57,007 general_chat_engine INFO BM25 index built (2653 chunks).
+2026-06-04 13:45:57,016 general_chat_engine INFO BM25 index loaded from 'final_structured_rag' (2653 chunks).
+2026-06-04 13:45:57,016 __main__ INFO General collection ready (2653 points).
+2026-06-04 13:45:57,016 __main__ INFO Medical Assistant ready at http://127.0.0.1:7860
+2026-06-04 13:45:57,027 werkzeug INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:7860
+2026-06-04 13:45:57,027 werkzeug INFO [33mPress CTRL+C to quit[0m
+2026-06-04 13:45:59,143 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:45:59] "GET / HTTP/1.1" 200 -
+2026-06-04 13:46:00,602 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:46:00] "[36mGET /clinical HTTP/1.1[0m" 304 -
+2026-06-04 13:46:02,636 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:46:02] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:46:02,640 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:46:02] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 13:46:02,649 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:46:02] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 13:46:02,657 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:46:02] "GET /api/session/5e89aa91-9e5a-4d08-9e40-7bef255d9ff3/messages HTTP/1.1" 200 -
+2026-06-04 13:46:02,680 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:46:02] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 13:46:17,231 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:46:18,589 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-04 13:46:18,596 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Unspecified: 22331 chars
+2026-06-04 13:46:19,992 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-04 13:46:19,993 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Unspecified): '{\n    "shunt_type": "Type 2C",\n    "confidence": 0.82,\n    "reasoning": [\n        "The presence of EP N2→N2 indicates a perforator entry into the GSV, suggesting SFJ competence.",\n        "The existence of RP N3 and RP N2→N1 findings indicates both tributary reflux and GSV trunk reflux.",\n        "G'
+2026-06-04 13:46:19,993 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Unspecified): prompt=7692, completion=162
+2026-06-04 13:46:26,820 rag_engine INFO Loading cross-encoder: cross-encoder/ms-marco-MiniLM-L-6-v2
+2026-06-04 13:46:26,821 sentence_transformers.base.model INFO No device provided, using cpu
+2026-06-04 13:46:27,315 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/modules.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:27,570 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/modules.json "HTTP/1.1 404 Not Found"
+2026-06-04 13:46:27,570 huggingface_hub.utils._http WARNING Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-06-04 13:46:27,574 sentence_transformers.base.model INFO No modules.json found for cross-encoder/ms-marco-MiniLM-L-6-v2, initializing a new CrossEncoder model.
+2026-06-04 13:46:27,822 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L-6-v2 "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:28,067 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L6-v2 "HTTP/1.1 200 OK"
+2026-06-04 13:46:28,318 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:28,554 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:28,570 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json "HTTP/1.1 200 OK"
+2026-06-04 13:46:28,820 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/adapter_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:29,069 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/adapter_config.json "HTTP/1.1 404 Not Found"
+2026-06-04 13:46:29,317 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:29,570 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:29,588 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json "HTTP/1.1 200 OK"
+2026-06-04 13:46:29,922 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:30,182 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-06-04 13:46:30,436 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:30,677 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-06-04 13:46:30,931 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/video_preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:31,181 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/video_preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-06-04 13:46:31,431 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:31,679 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-06-04 13:46:31,923 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:32,171 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:32,187 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-06-04 13:46:32,445 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:32,687 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:32,701 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json "HTTP/1.1 200 OK"
+2026-06-04 13:46:32,942 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:33,273 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:33,283 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json "HTTP/1.1 200 OK"
+2026-06-04 13:46:33,524 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:33,781 httpx INFO HTTP Request: HEAD https://huggingface.co/cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:33,797 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-06-04 13:46:34,055 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L-6-v2/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:34,294 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L6-v2/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-06-04 13:46:34,534 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L-6-v2/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:34,758 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:46:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:46:34,781 httpx INFO HTTP Request: GET https://huggingface.co/api/models/cross-encoder/ms-marco-MiniLM-L6-v2/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-06-04 13:46:34,806 rag_engine INFO Cross-encoder ready.
+2026-06-04 13:46:34,992 rag_engine INFO Reranked 10 candidates → top-3 (best score: 7.100)
+2026-06-04 13:46:34,992 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Unspecified: 9768 chars
+2026-06-04 13:46:36,302 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-04 13:46:36,303 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Unspecified): '```json\n{\n    "shunt_type": "Type 2C",\n    "ligation_steps": [\n        "Ligate highest EP at N2->N2 at groin / SFJ level",\n        "Ligate the GSV below each RP N2->N1 segment except the most distal",\n        "Preserve competent GSV trunk segments",\n        "Divide and double-ligate the EP N2->N3 br'
+2026-06-04 13:46:36,303 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Unspecified): prompt=2863, completion=300
+2026-06-04 13:46:36,308 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:46:36] "POST /api/chat HTTP/1.1" 200 -
+2026-06-04 13:46:36,308 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:46:36,311 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:46:36] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 13:46:54,352 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:46:54,356 services INFO Loading Qwen tokenizer: HariKrishna1824/medical_qwen_3b_cpt
+2026-06-04 13:46:54,708 httpx INFO HTTP Request: HEAD https://huggingface.co/HariKrishna1824/medical_qwen_3b_cpt/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:54,719 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HariKrishna1824/medical_qwen_3b_cpt/6a7eac356efbc07467415fdcb3f32ff4fa4a74b2/config.json "HTTP/1.1 200 OK"
+2026-06-04 13:46:54,973 httpx INFO HTTP Request: HEAD https://huggingface.co/HariKrishna1824/medical_qwen_3b_cpt/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:54,988 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HariKrishna1824/medical_qwen_3b_cpt/6a7eac356efbc07467415fdcb3f32ff4fa4a74b2/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-06-04 13:46:55,241 httpx INFO HTTP Request: GET https://huggingface.co/api/models/HariKrishna1824/medical_qwen_3b_cpt/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-06-04 13:46:55,500 httpx INFO HTTP Request: GET https://huggingface.co/api/models/HariKrishna1824/medical_qwen_3b_cpt/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-06-04 13:46:56,290 httpx INFO HTTP Request: GET https://huggingface.co/api/models/HariKrishna1824/medical_qwen_3b_cpt "HTTP/1.1 200 OK"
+2026-06-04 13:46:56,303 services INFO Loading Qwen model weights (~6 GB, CPU)…
+2026-06-04 13:46:56,553 httpx INFO HTTP Request: HEAD https://huggingface.co/HariKrishna1824/medical_qwen_3b_cpt/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:56,567 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HariKrishna1824/medical_qwen_3b_cpt/6a7eac356efbc07467415fdcb3f32ff4fa4a74b2/config.json "HTTP/1.1 200 OK"
+2026-06-04 13:46:58,146 httpx INFO HTTP Request: HEAD https://huggingface.co/HariKrishna1824/medical_qwen_3b_cpt/resolve/main/generation_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-06-04 13:46:58,168 httpx INFO HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HariKrishna1824/medical_qwen_3b_cpt/6a7eac356efbc07467415fdcb3f32ff4fa4a74b2/generation_config.json "HTTP/1.1 200 OK"
+2026-06-04 13:46:58,422 httpx INFO HTTP Request: HEAD https://huggingface.co/HariKrishna1824/medical_qwen_3b_cpt/resolve/main/custom_generate/generate.py "HTTP/1.1 404 Not Found"
+2026-06-04 13:46:58,424 services INFO Qwen model ready.
+2026-06-04 13:47:04,719 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:47:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:47:34,721 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:47:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:47:40,368 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Unspecified: 22949 chars
+2026-06-04 13:48:04,727 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:48:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:48:34,723 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:48:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:48:45,150 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Unspecified): '{\n    "shunt_type": "No shunt detected",\n    "confidence": 0.95,\n    "reasoning": [\n        "Zero RP clips means ZERO retrograde/reflux flow exists anywhere in this leg. This single fact FULLY DETERMINES the classification: Required output: shunt_type = \\"No shunt detected\\", confidence = 0.97, reas'
+2026-06-04 13:48:45,150 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Unspecified): prompt=0, completion=0
+2026-06-04 13:48:45,155 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:48:45] "POST /api/chat HTTP/1.1" 200 -
+2026-06-04 13:48:45,156 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:48:45,163 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:48:45] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 13:49:04,751 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:49:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:49:34,755 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:49:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:49:56,928 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:50:04,736 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:50:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:50:34,741 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:50:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:50:46,267 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Unspecified: 22096 chars
+2026-06-04 13:51:04,708 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:51:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:51:34,721 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:51:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:52:04,738 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:52:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:52:05,686 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Unspecified): '{\n    "shunt_type": "Type 2A",\n    "confidence": 0.90,\n    "reasoning": [\n        "There is an EP N2→N3 finding with no EP N1→N2, indicating an early shunt with no reflux yet.",\n        "There are no RP clips, indicating no reflux from the deep system into the saphenous vein.",\n        "There is no '
+2026-06-04 13:52:05,686 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Unspecified): prompt=0, completion=0
+2026-06-04 13:52:08,589 rag_engine INFO Reranked 10 candidates → top-3 (best score: 7.556)
+2026-06-04 13:52:08,589 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Unspecified: 9212 chars
+2026-06-04 13:52:19,892 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Unspecified): 'AYOUT\nAYOUTassistant\nAYOUTassistant'
+2026-06-04 13:52:19,892 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Unspecified): prompt=0, completion=0
+2026-06-04 13:52:19,892 shunt_classification_and_ligation_llm ERROR Ligation planning failed for Unspecified — returning fallback
+2026-06-04 13:52:19,896 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:52:19] "POST /api/chat HTTP/1.1" 200 -
+2026-06-04 13:52:19,896 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:52:19,900 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:52:19] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 13:52:34,784 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:52:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:52:44,497 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:52:46,581 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-04 13:52:46,582 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Unspecified: 22179 chars
+2026-06-04 13:52:47,884 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-04 13:52:47,885 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Unspecified): '{\n    "shunt_type": "Type 3",\n    "confidence": 0.88,\n    "reasoning": [\n        "EP N1→N2 is present, indicating SFJ incompetence.",\n        "EP N2→N3 is also present, showing that the GSV feeds a tributary.",\n        "A reflux finding RP N3→N1 is present, indicating tributary reflux.",\n        "Th'
+2026-06-04 13:52:47,885 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Unspecified): prompt=7616, completion=190
+2026-06-04 13:52:50,031 rag_engine INFO Reranked 10 candidates → top-3 (best score: 8.325)
+2026-06-04 13:52:50,031 shunt_classification_and_ligation_llm INFO Ligation planning LLM prompt for Unspecified: 9973 chars
+2026-06-04 13:52:51,497 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-04 13:52:51,499 shunt_classification_and_ligation_llm INFO Ligation planning LLM response (Unspecified): '```json\n{\n    "shunt_type": "Type 3",\n    "ligation_steps": [\n        "Ligate the EP at N2->N3 at mid-thigh (Hunterian area) using selective tributary ligation with flush tie",\n        "Assess for N2 reflux development during follow-up",\n        "If N2 reflux confirmed, proceed with high tie / flush'
+2026-06-04 13:52:51,499 shunt_classification_and_ligation_llm INFO Ligation planning tokens (Unspecified): prompt=2894, completion=298
+2026-06-04 13:52:51,508 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:52:51] "POST /api/chat HTTP/1.1" 200 -
+2026-06-04 13:52:51,509 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:52:51,517 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:52:51] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 13:53:04,739 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:53:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:53:15,024 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:53:15,816 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-04 13:53:15,817 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Unspecified: 22956 chars
+2026-06-04 13:53:17,236 httpx INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-04 13:53:17,237 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Unspecified): '{\n    "shunt_type": "No shunt detected",\n    "confidence": 0.97,\n    "reasoning": ["Zero RP clips means zero retrograde flow anywhere. No shunt.", "EP N2→N2 finding indicates a perforator entry point, but without any RP findings, it does not constitute a shunt."],\n    "ask_branching": false,\n    "su'
+2026-06-04 13:53:17,237 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Unspecified): prompt=7779, completion=104
+2026-06-04 13:53:17,241 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:53:17] "POST /api/chat HTTP/1.1" 200 -
+2026-06-04 13:53:17,242 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:53:17,245 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:53:17] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 13:53:34,768 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:53:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:53:57,145 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:54:04,718 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:54:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:54:34,721 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:54:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:54:41,348 shunt_classification_and_ligation_llm INFO Shunt classification LLM prompt for Unspecified: 22949 chars
+2026-06-04 13:55:04,712 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:55:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:55:34,724 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:55:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:55:45,967 shunt_classification_and_ligation_llm INFO Shunt classification LLM response (Unspecified): '{\n    "shunt_type": "No shunt detected",\n    "confidence": 0.95,\n    "reasoning": [\n        "Zero RP clips means ZERO retrograde/reflux flow exists anywhere in this leg.",\n        "This single fact FULLY DETERMINES the classification:",\n        "REQUIRED OUTPUT:",\n        "shunt_type  = \\"No shunt d'
+2026-06-04 13:55:45,967 shunt_classification_and_ligation_llm INFO Shunt classification tokens (Unspecified): prompt=0, completion=0
+2026-06-04 13:55:45,974 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:55:45] "POST /api/chat HTTP/1.1" 200 -
+2026-06-04 13:55:45,974 sheets_logger WARNING Sheets: gspread not installed — run: pip install gspread
+2026-06-04 13:55:45,980 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:55:45] "GET /api/sessions?mode=clinical HTTP/1.1" 200 -
+2026-06-04 13:56:04,741 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:56:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:56:35,482 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:56:35] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:57:05,486 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:57:05] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:57:34,768 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:57:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:58:05,504 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:58:05] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:58:35,464 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:58:35] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 13:59:36,485 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 13:59:36] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:00:27,317 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:00:27] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:00:34,755 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:00:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:01:05,511 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:01:05] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:01:35,494 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:01:35] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:02:14,404 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:02:14] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:02:34,735 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:02:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:03:04,750 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:03:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:03:35,487 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:03:35] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:04:05,507 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:04:05] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:04:50,497 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:04:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:05:50,521 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:05:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:06:50,507 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:06:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:07:50,493 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:07:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:08:50,490 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:08:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:09:50,516 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:09:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:10:50,512 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:10:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:11:50,511 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:11:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:12:50,480 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:12:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:13:50,510 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:13:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:14:50,480 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:14:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:15:50,478 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:15:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:16:50,471 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:16:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:17:50,465 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:17:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:18:50,489 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:18:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:19:50,492 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:19:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:20:50,484 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:20:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:21:50,480 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:21:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:22:04,906 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:22:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:22:35,491 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:22:35] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:23:04,729 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:23:04] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:23:34,758 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:23:34] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:24:05,504 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:24:05] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:24:35,489 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:24:35] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:25:36,463 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:25:36] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:26:37,489 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:26:37] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:27:38,496 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:27:38] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:28:39,501 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:28:39] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:29:40,461 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:29:40] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:30:41,457 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:30:41] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:31:42,473 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:31:42] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:32:43,516 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:32:43] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:33:44,476 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:33:44] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:34:45,495 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:34:45] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:35:46,486 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:35:46] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:36:47,482 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:36:47] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:37:48,467 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:37:48] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:38:49,500 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:38:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:39:50,519 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:39:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:40:50,479 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:40:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:41:50,491 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:41:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:42:50,491 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:42:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:43:50,459 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:43:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:44:50,479 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:44:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:45:50,482 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:45:50] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:46:49,142 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:46:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:47:49,167 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:47:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:48:49,163 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:48:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:49:49,179 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:49:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:50:49,152 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:50:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:51:49,159 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:51:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:52:49,178 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:52:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:53:49,151 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:53:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:54:49,165 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:54:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:55:49,171 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:55:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:56:49,177 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:56:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:57:49,176 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:57:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:58:49,141 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:58:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 14:59:49,160 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 14:59:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:00:49,143 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:00:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:01:49,173 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:01:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:02:49,167 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:02:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:03:49,168 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:03:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:04:49,154 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:04:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:05:49,141 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:05:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:06:49,163 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:06:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:07:49,161 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:07:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:08:49,159 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:08:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:09:49,198 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:09:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:10:49,131 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:10:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:11:49,175 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:11:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:12:49,181 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:12:49] "GET /api/status HTTP/1.1" 200 -
+2026-06-04 15:13:49,185 werkzeug INFO 127.0.0.1 - - [04/Jun/2026 15:13:49] "GET /api/status HTTP/1.1" 200 -
