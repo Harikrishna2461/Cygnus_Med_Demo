@@ -62,8 +62,28 @@ def api_chat():
 
     interpretation = parse_nl_to_clips(user_message, services.call_llm)
     is_clinical = interpretation.get("is_clinical", False)
+    sufficient = interpretation.get("sufficient_information", True)
+    missing_info = interpretation.get("missing_information") or ""
     clips = interpretation.get("clips", [])
     interp_text = interpretation.get("interpretation") or ""
+
+    if is_clinical and not sufficient:
+        decline_msg = (
+            missing_info
+            if missing_info
+            else (
+                "I don't have enough clinical information to perform a CHIVA classification. "
+                "Please describe the specific venous flow findings from duplex scan — for example, "
+                "whether the SFJ is competent or incompetent, the flow direction in the GSV "
+                "(antegrade or reflux), and any tributary or perforator involvement."
+            )
+        )
+        save_message(session_id, "assistant", decline_msg)
+        return jsonify({
+            "type": "conversational",
+            "conversational_response": decline_msg,
+            "message_id": user_msg_id,
+        })
 
     if is_clinical and clips:
         try:

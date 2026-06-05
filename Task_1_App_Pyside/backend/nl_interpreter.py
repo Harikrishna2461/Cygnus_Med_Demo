@@ -306,10 +306,29 @@ IMPORTANT DISTINCTIONS:
 11. CRITICAL — RP N2→N1 is separate from EP N1→N2: When "GSV refluxes" / "full-length GSV reflux" /
     "GSV carries blood backward" is EXPLICITLY stated, always generate RP N2→N1 as a separate clip
     in addition to EP N1→N2. These are two different flow events at two different clip positions.
+12. SUFFICIENCY CHECK: After interpreting the description, assess whether it contains enough
+    specific venous flow information to perform a meaningful CHIVA classification.
+    Set sufficient_information=true only if the description provides at least one clear,
+    explicit indication of a flow direction (reflux/antegrade) at a specific anatomical level,
+    OR an explicit statement about SFJ/perforator competence/incompetence with flow context.
+    Set sufficient_information=false if ANY of the following apply:
+      - The description is too vague to identify any specific flow pattern
+        (e.g. "patient has varicose veins" alone, "leg swelling", "varicosities present")
+      - Anatomical location is mentioned but NO flow direction information is provided
+      - The input describes symptoms only (pain, swelling, heaviness) without flow findings
+      - The description is gibberish, nonsensical, or an incomplete fragment that cannot yield reliable clips
+      - The input asks a question or requests information rather than describing a patient's findings
+    When sufficient_information=false, set missing_information to a specific, helpful sentence
+    telling the clinician exactly what additional duplex/clinical data is needed
+    (e.g. "Please describe whether the SFJ is competent or incompetent, the direction of flow
+    in the GSV, and any reflux or antegrade flow observed in tributaries on duplex scan.").
+    When sufficient_information=true, set missing_information=null.
 
 Output ONLY valid JSON — no markdown, no explanation:
 {{
     "is_clinical": true,
+    "sufficient_information": true,
+    "missing_information": null,
     "interpretation": "<2-3 sentences summarising the findings in CHIVA terms>",
     "clips": [
         {{
@@ -326,6 +345,8 @@ Output ONLY valid JSON — no markdown, no explanation:
 If not clinical:
 {{
     "is_clinical": false,
+    "sufficient_information": false,
+    "missing_information": null,
     "interpretation": null,
     "clips": []
 }}"""
@@ -402,6 +423,8 @@ def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
     Returns:
         {
             "is_clinical": bool,
+            "sufficient_information": bool,
+            "missing_information": str | None,
             "interpretation": str | None,
             "clips": list[dict]
         }
@@ -424,10 +447,13 @@ def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
                         f"Post-processing stripped {before - after} hallucinated RP clip(s) "
                         f"because description contains explicit no-reflux statement."
                     )
+            # Default sufficient_information to True if LLM omitted the field (backwards compat)
+            if "sufficient_information" not in result:
+                result["sufficient_information"] = bool(result.get("clips"))
             return result
     except Exception as e:
         logger.error(f"NL interpretation failed: {e}")
-    return {"is_clinical": False, "interpretation": None, "clips": []}
+    return {"is_clinical": False, "sufficient_information": False, "missing_information": None, "clips": []}
 
 
 def build_conversational_response(
