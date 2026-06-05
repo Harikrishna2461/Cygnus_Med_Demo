@@ -287,6 +287,42 @@ IMPORTANT DISTINCTIONS:
 {description}
 
 === INSTRUCTIONS ===
+
+─── STEP 1: SUFFICIENCY GATE (decide this before generating any clips) ───
+
+Ask yourself one question: "Does this input describe a specific blood-movement
+event through named venous structures — i.e., does it tell me what the blood
+is actually DOING and WHERE?"
+
+sufficient_information = true ONLY when the input contains at least one explicit,
+concrete flow event such as:
+  • Blood enters / flows / refluxes / drains / feeds / escapes through a named vessel
+  • An identified reflux segment (e.g. "GSV refluxes from groin to mid-thigh")
+  • A described junction finding with downstream consequence (not just a structural label)
+
+sufficient_information = false when the input is:
+  • A bare list of anatomical terms or abbreviations — even if they include "incompetent"
+    (e.g. "GSV SFJ N1 N4", "Mid thigh GSV SSV SFJ incompetent Saphenous Trunk")
+  • A structural label alone with NO description of blood movement
+    (e.g. "SFJ incompetent" by itself — says a junction is leaky but not what blood does)
+  • Gibberish, random characters, or incomplete word fragments
+  • Symptoms only (pain, swelling, heaviness, heaviness) with no duplex flow findings
+  • A question or request for information rather than a patient description
+  • Any input where you cannot confidently describe a specific blood-movement event in
+    CHIVA terms without making assumptions
+
+If sufficient_information = false:
+  → Set clips = [], interpretation = null
+  → Set missing_information = a specific, friendly sentence explaining what duplex
+    data is needed (e.g. "Please describe what the blood is doing — for example,
+    whether the GSV is refluxing, where it exits into tributaries, and whether the
+    SFJ or any perforators are feeding the system.")
+  → Output the JSON immediately — DO NOT proceed to clip generation
+
+If sufficient_information = true → continue to STEP 2.
+
+─── STEP 2: CLIP GENERATION (only if STEP 1 passed) ───
+
 1. Read the description carefully.
 2. Identify each distinct blood flow event EXPLICITLY mentioned.
 3. Generate one virtual clip per flow event.
@@ -306,23 +342,6 @@ IMPORTANT DISTINCTIONS:
 11. CRITICAL — RP N2→N1 is separate from EP N1→N2: When "GSV refluxes" / "full-length GSV reflux" /
     "GSV carries blood backward" is EXPLICITLY stated, always generate RP N2→N1 as a separate clip
     in addition to EP N1→N2. These are two different flow events at two different clip positions.
-12. SUFFICIENCY CHECK: After interpreting the description, assess whether it contains enough
-    specific venous flow information to perform a meaningful CHIVA classification.
-    Set sufficient_information=true only if the description provides at least one clear,
-    explicit indication of a flow direction (reflux/antegrade) at a specific anatomical level,
-    OR an explicit statement about SFJ/perforator competence/incompetence with flow context.
-    Set sufficient_information=false if ANY of the following apply:
-      - The description is too vague to identify any specific flow pattern
-        (e.g. "patient has varicose veins" alone, "leg swelling", "varicosities present")
-      - Anatomical location is mentioned but NO flow direction information is provided
-      - The input describes symptoms only (pain, swelling, heaviness) without flow findings
-      - The description is gibberish, nonsensical, or an incomplete fragment that cannot yield reliable clips
-      - The input asks a question or requests information rather than describing a patient's findings
-    When sufficient_information=false, set missing_information to a specific, helpful sentence
-    telling the clinician exactly what additional duplex/clinical data is needed
-    (e.g. "Please describe whether the SFJ is competent or incompetent, the direction of flow
-    in the GSV, and any reflux or antegrade flow observed in tributaries on duplex scan.").
-    When sufficient_information=true, set missing_information=null.
 
 Output ONLY valid JSON — no markdown, no explanation:
 {{
@@ -342,7 +361,16 @@ Output ONLY valid JSON — no markdown, no explanation:
     ]
 }}
 
-If not clinical:
+If not clinical or insufficient information:
+{{
+    "is_clinical": true,
+    "sufficient_information": false,
+    "missing_information": "<specific sentence about what duplex data is needed>",
+    "interpretation": null,
+    "clips": []
+}}
+
+If not clinical at all (question, greeting, concept):
 {{
     "is_clinical": false,
     "sufficient_information": false,
@@ -404,53 +432,6 @@ _NO_REFLUX_PHRASES = [
 ]
 
 
-# Specific venous anatomy terms — presence means the input is talking about vascular anatomy
-_ANATOMY_TERMS = (
-    "sfj", "gsv", "ssv", "saphenous", "femoral", "popliteal",
-    "perforator", "perforating", "tributary", "tributaries",
-    "varicose", "varicosit", "saphena", "sapheno",
-)
-
-# Flow-direction words — at least one MUST be present for a classifiable description.
-# Intentionally excludes "incompetent"/"competent" — those are STATE adjectives, not flow descriptions.
-# "SFJ incompetent" alone names a structural state but does not describe what the blood does.
-# Require actual blood-movement language: reflux, retrograde, flows, enters, drains, etc.
-_FLOW_TERMS = (
-    "reflux", "retrograde", "antegrade",
-    "flow", "flows", "flowing",
-    "feeds", "feed", "enters", "drains", "draining",
-    "backward", "carries", "discharges", "escapes", "passes into",
-    "blood enters", "blood flows", "blood carries",
-)
-
-# If the message starts with these words it's almost certainly a question, not a patient description
-_QUESTION_STARTERS = (
-    "what", "how", "why", "when", "where", "who",
-    "is ", "are ", "can ", "should ", "does ", "do ", "will ",
-    "explain", "tell me", "describe",
-)
-
-_MISSING_INFO_MSG = (
-    "To classify this case I need a description of the actual venous flow findings — "
-    "for example: whether the SFJ is competent or incompetent, whether the GSV is refluxing, "
-    "and any antegrade or retrograde flow observed in tributaries or perforators on duplex scan. "
-    "Could you provide those details?"
-)
-
-
-def _is_question(description: str) -> bool:
-    dl = description.lower().strip()
-    return "?" in dl or any(dl.startswith(q) for q in _QUESTION_STARTERS)
-
-
-def _has_anatomy_terms(desc_lower: str) -> bool:
-    return any(term in desc_lower for term in _ANATOMY_TERMS)
-
-
-def _has_flow_terms(desc_lower: str) -> bool:
-    return any(term in desc_lower for term in _FLOW_TERMS)
-
-
 def _has_no_reflux_statement(description: str) -> bool:
     desc_lower = description.lower()
     return any(phrase in desc_lower for phrase in _NO_REFLUX_PHRASES)
@@ -476,24 +457,6 @@ def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
             "clips": list[dict]
         }
     """
-    # Deterministic pre-check: anatomy terms present but zero flow direction language
-    # means the input is either a list of abbreviations, a partial fragment, or gibberish.
-    # Don't bother calling the LLM — reject immediately with a helpful message.
-    desc_lower = user_message.lower()
-    if (
-        _has_anatomy_terms(desc_lower)
-        and not _has_flow_terms(desc_lower)
-        and not _is_question(user_message)
-    ):
-        logger.info("Pre-check rejected input: anatomy terms present but no flow description.")
-        return {
-            "is_clinical": True,
-            "sufficient_information": False,
-            "missing_information": _MISSING_INFO_MSG,
-            "interpretation": None,
-            "clips": [],
-        }
-
     prompt = _NL_TO_CHIVA_PROMPT.format(description=user_message.strip())
     try:
         raw, _ = call_llm_fn(prompt, return_usage=True, max_tokens=1024)
