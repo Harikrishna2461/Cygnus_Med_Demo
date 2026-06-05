@@ -7,6 +7,7 @@ User=root
 Group=root
 WorkingDirectory=/var/www/shunt_classification_and_ligation/backend
 EnvironmentFile=/var/www/shunt_classification_and_ligation/backend/.env
+ExecStartPre=/bin/bash -c 'cd /var/www/shunt_classification_and_ligation && git pull origin main && backend/venv/bin/pip install -r backend/requirements.txt -q'
 ExecStart=/var/www/shunt_classification_and_ligation/backend/venv/bin/gunicorn -c /var/www/shunt_classification_and_ligation/backend/gunicorn.conf.py wsgi:app
 Restart=always
 RestartSec=5
