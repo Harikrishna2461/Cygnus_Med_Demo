@@ -404,6 +404,50 @@ _NO_REFLUX_PHRASES = [
 ]
 
 
+# Specific venous anatomy terms — presence means the input is talking about vascular anatomy
+_ANATOMY_TERMS = (
+    "sfj", "gsv", "ssv", "saphenous", "femoral", "popliteal",
+    "perforator", "perforating", "tributary", "tributaries",
+    "varicose", "varicosit", "saphena", "sapheno",
+)
+
+# Flow-direction words — at least one MUST be present for a classifiable description
+_FLOW_TERMS = (
+    "reflux", "retrograde", "antegrade",
+    "incompetent", "competent", "incompetence", "competence",
+    "flow", "feeds", "feed", "enters", "drains",
+    "backward", "carries", "discharges", "escapes", "passes into",
+    "blood flows", "blood enters",
+)
+
+# If the message starts with these words it's almost certainly a question, not a patient description
+_QUESTION_STARTERS = (
+    "what", "how", "why", "when", "where", "who",
+    "is ", "are ", "can ", "should ", "does ", "do ", "will ",
+    "explain", "tell me", "describe",
+)
+
+_MISSING_INFO_MSG = (
+    "To classify this case I need a description of the actual venous flow findings — "
+    "for example: whether the SFJ is competent or incompetent, whether the GSV is refluxing, "
+    "and any antegrade or retrograde flow observed in tributaries or perforators on duplex scan. "
+    "Could you provide those details?"
+)
+
+
+def _is_question(description: str) -> bool:
+    dl = description.lower().strip()
+    return "?" in dl or any(dl.startswith(q) for q in _QUESTION_STARTERS)
+
+
+def _has_anatomy_terms(desc_lower: str) -> bool:
+    return any(term in desc_lower for term in _ANATOMY_TERMS)
+
+
+def _has_flow_terms(desc_lower: str) -> bool:
+    return any(term in desc_lower for term in _FLOW_TERMS)
+
+
 def _has_no_reflux_statement(description: str) -> bool:
     desc_lower = description.lower()
     return any(phrase in desc_lower for phrase in _NO_REFLUX_PHRASES)
@@ -429,6 +473,24 @@ def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
             "clips": list[dict]
         }
     """
+    # Deterministic pre-check: anatomy terms present but zero flow direction language
+    # means the input is either a list of abbreviations, a partial fragment, or gibberish.
+    # Don't bother calling the LLM — reject immediately with a helpful message.
+    desc_lower = user_message.lower()
+    if (
+        _has_anatomy_terms(desc_lower)
+        and not _has_flow_terms(desc_lower)
+        and not _is_question(user_message)
+    ):
+        logger.info("Pre-check rejected input: anatomy terms present but no flow description.")
+        return {
+            "is_clinical": True,
+            "sufficient_information": False,
+            "missing_information": _MISSING_INFO_MSG,
+            "interpretation": None,
+            "clips": [],
+        }
+
     prompt = _NL_TO_CHIVA_PROMPT.format(description=user_message.strip())
     try:
         raw, _ = call_llm_fn(prompt, return_usage=True, max_tokens=1024)
