@@ -290,26 +290,32 @@ IMPORTANT DISTINCTIONS:
 
 ─── STEP 1: SUFFICIENCY GATE (decide this before generating any clips) ───
 
-Ask yourself one question: "Does this input describe a specific blood-movement
-event through named venous structures — i.e., does it tell me what the blood
-is actually DOING and WHERE?"
+CRITICAL RULE: "X is incompetent" or "X incompetent" — even combined with anatomical
+location words — is a STRUCTURAL STATE LABEL, not a blood-movement description.
+It tells you a valve is leaky but says NOTHING about what blood actually does.
+These ALWAYS get sufficient_information = false, no matter what other anatomy words surround them.
 
-sufficient_information = true ONLY when the input contains at least one explicit,
-concrete flow event such as:
-  • Blood enters / flows / refluxes / drains / feeds / escapes through a named vessel
-  • An identified reflux segment (e.g. "GSV refluxes from groin to mid-thigh")
-  • A described junction finding with downstream consequence (not just a structural label)
+sufficient_information = false — ALWAYS reject inputs like these:
+  ✗ "SFJ incompetent"
+  ✗ "SSV SFJ incompetent Groin"
+  ✗ "SSV SFJ incompetent Groin at Saphenous Trunk"
+  ✗ "Mid thigh GSV SSV SFJ incompetent Saphenous Trunk"
+  ✗ "GSV SFJ N1 N4 N5 N20"
+  ✗ "patient has varicose veins"
+  ✗ "leg swelling"
+  ✗ "SFJ incompetent, mid-thigh perforator" (state labels + anatomy, still no flow event)
 
-sufficient_information = false when the input is:
-  • A bare list of anatomical terms or abbreviations — even if they include "incompetent"
-    (e.g. "GSV SFJ N1 N4", "Mid thigh GSV SSV SFJ incompetent Saphenous Trunk")
-  • A structural label alone with NO description of blood movement
-    (e.g. "SFJ incompetent" by itself — says a junction is leaky but not what blood does)
-  • Gibberish, random characters, or incomplete word fragments
-  • Symptoms only (pain, swelling, heaviness, heaviness) with no duplex flow findings
-  • A question or request for information rather than a patient description
-  • Any input where you cannot confidently describe a specific blood-movement event in
-    CHIVA terms without making assumptions
+The pattern: if the whole input is anatomy names / state labels / locations with no verb
+describing blood MOVEMENT — it is insufficient.
+
+sufficient_information = true — only when blood movement is explicitly described:
+  ✓ "There is reflux at the SFJ flowing into the GSV down to mid-thigh"
+  ✓ "SFJ incompetent, GSV refluxes full-length to the knee"  ← "refluxes" = flow verb
+  ✓ "Blood enters GSV at groin, discharges into a calf tributary which then refluxes back"
+  ✓ "Perforator feeds the GSV at mid-thigh, no reflux present"  ← "feeds" = flow verb
+
+The test: can you complete the sentence "blood is ___ing through ___"? If yes → sufficient.
+If all you can say is "the SFJ is incompetent / is present / is at the groin" → insufficient.
 
 If sufficient_information = false:
   → Set clips = [], interpretation = null
