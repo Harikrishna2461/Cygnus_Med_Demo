@@ -324,32 +324,36 @@ _SUFFICIENCY_PROMPT = """A clinician typed this into a venous shunt classificati
 
 "{description}"
 
-Your only job: decide whether this message describes actual venous blood movement in enough detail to classify a haemodynamic shunt.
+Your only job: decide whether this is a coherent, real clinical description of a patient's venous haemodynamic findings — the kind of thing a vascular surgeon would actually say after reviewing a duplex scan.
 
-Think about it plainly — not as a CHIVA expert, just as someone reading the words:
-Does this message tell you WHAT THE BLOOD IS DOING and WHERE?
+Ask yourself these three questions:
+1. Could a real vascular surgeon have written this to describe an actual patient?
+2. Does it describe what blood is DOING through specific vessels — not just naming anatomy or structural states?
+3. Is it genuinely interpretable clinical language — not made-up notation, jargon salad, nonsense strings, or fragments?
 
 Return ONE of three verdicts:
 
 "sufficient"
-  The message describes at least one explicit blood-flow event —
-  e.g. blood refluxing, entering, draining, or feeding through named vessels.
-  There is enough to say "blood is doing X through Y".
+  Coherent, clinically interpretable description of blood-flow events.
+  A real surgeon described real duplex findings: blood refluxing, entering, draining,
+  feeding through named vessels. You can say "blood is doing X through Y."
 
 "insufficient"
-  The message is about venous anatomy but does not describe blood movement.
-  Includes: keyword lists, state labels only ("SFJ incompetent"), location names,
-  symptom descriptions, partial fragments, gibberish.
-  You cannot say what the blood is actually doing.
+  NOT a coherent clinical description of a real patient. Includes:
+  - Keyword or abbreviation lists ("GSV SFJ N1 N4", "SSV SFJ incompetent Groin")
+  - Structural state labels with no flow description ("SFJ incompetent" alone or with location words)
+  - Made-up, non-standard, or unrecognisable notation that no real surgeon would use
+    (e.g. "Phase wise G1 – N33 Reflux Pattern from 56th pair SFJ competence")
+  - Symptoms only ("leg swelling", "varicose veins", "pain")
+  - Gibberish, random characters, or incomplete fragments
 
 "question"
-  The message is a question, a greeting, a request for information,
-  or is unrelated to describing a patient's venous findings.
+  A question, greeting, or request for information — not a patient description.
 
 Output ONLY valid JSON — no markdown:
 {{"verdict": "sufficient"}}
 or
-{{"verdict": "insufficient", "missing": "<one sentence: what specific flow information is needed>"}}
+{{"verdict": "insufficient", "missing": "<one sentence: what specific duplex flow information is needed>"}}
 or
 {{"verdict": "question"}}"""
 
