@@ -1,7 +1,5 @@
-﻿import multiprocessing
-
-bind = "unix:/var/www/shunt_classification_and_ligation/shunt.sock"
-workers = 2
+﻿bind = "unix:/var/www/shunt_classification_and_ligation/shunt.sock"
+workers = 1
 worker_class = "sync"
 timeout = 120
 keepalive = 5

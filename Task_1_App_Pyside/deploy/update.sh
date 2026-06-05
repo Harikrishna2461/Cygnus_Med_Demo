@@ -1,13 +1,13 @@
-﻿#!/bin/bash
+#!/bin/bash
 set -e
 
-APP_DIR=/var/www/shunt_classification_and_ligation
+REPO_DIR=/var/www/Cygnus_Med_Demo
+APP_DIR=$REPO_DIR/Task_1_App_Pyside/backend
 
-cd $APP_DIR
+cd $REPO_DIR
 git pull origin main
 
-source backend/venv/bin/activate
-pip install -r backend/requirements.txt -q
+$APP_DIR/venv/bin/pip install -r $APP_DIR/requirements.txt -q
 
-sudo systemctl restart shunt
+systemctl restart shunt
 echo "Deployed: $(date)"

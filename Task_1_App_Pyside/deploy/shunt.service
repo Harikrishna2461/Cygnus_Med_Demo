@@ -1,14 +1,14 @@
-﻿[Unit]
+[Unit]
 Description=Shunt Classification and Ligation Assistant
 After=network.target
 
 [Service]
 User=root
 Group=root
-WorkingDirectory=/var/www/shunt_classification_and_ligation/backend
-EnvironmentFile=/var/www/shunt_classification_and_ligation/backend/.env
-ExecStartPre=/bin/bash -c 'cd /var/www/shunt_classification_and_ligation && git pull origin main && backend/venv/bin/pip install -r backend/requirements.txt -q'
-ExecStart=/var/www/shunt_classification_and_ligation/backend/venv/bin/gunicorn -c /var/www/shunt_classification_and_ligation/backend/gunicorn.conf.py wsgi:app
+WorkingDirectory=/var/www/Cygnus_Med_Demo/Task_1_App_Pyside/backend
+EnvironmentFile=/var/www/Cygnus_Med_Demo/Task_1_App_Pyside/backend/.env
+ExecStartPre=/bin/bash -c 'cd /var/www/Cygnus_Med_Demo && git pull origin main && Task_1_App_Pyside/backend/venv/bin/pip install -r Task_1_App_Pyside/backend/requirements.txt -q'
+ExecStart=/var/www/Cygnus_Med_Demo/Task_1_App_Pyside/backend/venv/bin/gunicorn -c /var/www/Cygnus_Med_Demo/Task_1_App_Pyside/backend/gunicorn.conf.py wsgi:app
 Restart=always
 RestartSec=5
 StandardOutput=append:/var/log/shunt_classification_and_ligation/app.log

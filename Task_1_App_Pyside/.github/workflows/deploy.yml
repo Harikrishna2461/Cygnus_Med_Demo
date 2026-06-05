@@ -15,4 +15,4 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.SERVER_IP }}" >> ~/.ssh/known_hosts
           ssh -i ~/.ssh/deploy_key root@"${{ secrets.SERVER_IP }}" \
-            'bash /var/www/shunt_classification_and_ligation/deploy/update.sh'
+            'bash /var/www/Cygnus_Med_Demo/Task_1_App_Pyside/deploy/update.sh'
