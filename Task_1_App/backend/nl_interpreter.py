@@ -448,6 +448,7 @@ def build_conversational_response(
         history="\n".join(history_lines) or "(start of conversation)",
         user_message=user_message.strip(),
     )
+
     try:
         response, _ = call_llm_fn(prompt, return_usage=True, max_tokens=900)
         return response.strip()

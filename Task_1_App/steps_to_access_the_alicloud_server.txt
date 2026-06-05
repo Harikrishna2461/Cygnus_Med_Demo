@@ -1,1 +1,23 @@
 ssh -i "chiva-deploy.pem" root@47.84.228.159
+
+
+Folder Structure on server
+/var/www/Cygnus_Med_Demo/Task_1_App_Pyside/
+├── backend/          ← Python code, .env, chat_history.db
+├── frontend/         ← HTML files (index.html, general.html, login.html, admin.html)
+└── deploy/           ← shunt.service, nginx.conf, update.sh
+
+# Browse files
+ls /var/www/Cygnus_Med_Demo/Task_1_App_Pyside/
+ls /var/www/Cygnus_Med_Demo/Task_1_App_Pyside/backend/
+ls /var/www/Cygnus_Med_Demo/Task_1_App_Pyside/frontend/
+
+# View a file
+cat /var/www/Cygnus_Med_Demo/Task_1_App_Pyside/backend/.env
+
+# Edit a file
+nano /var/www/Cygnus_Med_Demo/Task_1_App_Pyside/backend/.env
+
+# View app logs
+tail -f /var/log/shunt_classification_and_ligation/app.log
+tail -f /var/log/shunt_classification_and_ligation/app-error.log

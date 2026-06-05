@@ -1,0 +1,9 @@
+http://47.84.228.159
+
+That's it. They'll land on the login page. Credentials to share:
+
+User	Password
+jeffry	Cygnus1
+krish	Cygnus1
+harin	Cygnus1
+Each user only sees their own chat history. Admin panel is at http://47.84.228.159/admin (log in as admin / admin123 — change that password once your manager has seen it).
