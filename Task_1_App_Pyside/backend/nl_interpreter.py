@@ -411,13 +411,16 @@ _ANATOMY_TERMS = (
     "varicose", "varicosit", "saphena", "sapheno",
 )
 
-# Flow-direction words — at least one MUST be present for a classifiable description
+# Flow-direction words — at least one MUST be present for a classifiable description.
+# Intentionally excludes "incompetent"/"competent" — those are STATE adjectives, not flow descriptions.
+# "SFJ incompetent" alone names a structural state but does not describe what the blood does.
+# Require actual blood-movement language: reflux, retrograde, flows, enters, drains, etc.
 _FLOW_TERMS = (
     "reflux", "retrograde", "antegrade",
-    "incompetent", "competent", "incompetence", "competence",
-    "flow", "feeds", "feed", "enters", "drains",
+    "flow", "flows", "flowing",
+    "feeds", "feed", "enters", "drains", "draining",
     "backward", "carries", "discharges", "escapes", "passes into",
-    "blood flows", "blood enters",
+    "blood enters", "blood flows", "blood carries",
 )
 
 # If the message starts with these words it's almost certainly a question, not a patient description
