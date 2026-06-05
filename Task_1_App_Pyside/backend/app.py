@@ -23,6 +23,7 @@ from config import (
     QDRANT_COLLECTION,
     QDRANT_PATH,
     CORS_ORIGINS,
+    SECRET_KEY,
 )
 
 # ── Logging ───────────────────────────────────────────────────────────────────
@@ -41,7 +42,10 @@ from flask import Flask
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder=None)
-CORS(app, origins=CORS_ORIGINS)
+app.secret_key = SECRET_KEY
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+CORS(app, origins=CORS_ORIGINS, supports_credentials=True)
 
 # ── Services (Groq + Qdrant clients) ─────────────────────────────────────────
 import services
@@ -76,6 +80,7 @@ set_parent_module_flag(_PARENT_MODULE)
 from routes import (
     views_bp, status_bp, sessions_bp,
     clinical_bp, general_bp, feedback_bp,
+    auth_bp, admin_bp,
 )
 
 app.register_blueprint(views_bp)
@@ -84,6 +89,8 @@ app.register_blueprint(sessions_bp)
 app.register_blueprint(clinical_bp)
 app.register_blueprint(general_bp)
 app.register_blueprint(feedback_bp)
+app.register_blueprint(auth_bp)
+app.register_blueprint(admin_bp)
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────

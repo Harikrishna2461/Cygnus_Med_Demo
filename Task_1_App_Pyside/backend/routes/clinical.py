@@ -1,4 +1,5 @@
 import logging
+from auth import login_required
 from flask import Blueprint, jsonify, request
 
 from chat_db import save_message, get_messages, update_session_title
@@ -21,6 +22,7 @@ def set_classification_fn(loaded: bool, fn) -> None:
 
 
 @bp.route("/api/chat", methods=["POST"])
+@login_required
 def api_chat():
     try:
         data = request.get_json(force=True, silent=False)

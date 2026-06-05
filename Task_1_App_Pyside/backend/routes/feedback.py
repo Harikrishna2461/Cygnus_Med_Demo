@@ -1,4 +1,5 @@
 import logging
+from auth import login_required
 from flask import Blueprint, jsonify, request
 
 from chat_db import save_feedback, get_all_feedback
@@ -8,11 +9,13 @@ bp = Blueprint("feedback", __name__)
 
 
 @bp.route("/api/feedback", methods=["GET"])
+@login_required
 def api_get_feedback():
     return jsonify(get_all_feedback())
 
 
 @bp.route("/api/feedback", methods=["POST"])
+@login_required
 def api_submit_feedback():
     try:
         data = request.get_json(force=True, silent=False)

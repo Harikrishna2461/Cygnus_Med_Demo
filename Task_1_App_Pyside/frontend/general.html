@@ -198,6 +198,7 @@
           <span id="status-dot"></span>
           <span id="status-text">Checking…</span>
         </div>
+        <button id="home-btn" style="margin-top:4px;color:#ef4444" onclick="logout()">&#8594; Log out</button>
       </div>
     </div>
 
@@ -238,6 +239,12 @@
 
     // ── Init ───────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
+      // Auth check
+      try {
+        const r = await fetch('/api/me', { credentials: 'include' });
+        if (r.status === 401) { window.location.href = '/login'; return; }
+      } catch { window.location.href = '/login'; return; }
+
       setupInputHandlers();
       await checkStatus();
       await loadSessions();
@@ -473,6 +480,11 @@
       const d = document.createElement('div');
       d.textContent = s;
       return d.innerHTML;
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      window.location.href = '/login';
     }
 
     function formatDate(isoStr) {

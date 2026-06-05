@@ -429,6 +429,7 @@
         View Feedback Log
         <span id="status-dot"></span>
       </button>
+      <button id="home-btn" style="margin-top:4px;color:#ef4444" onclick="logout()">&#8594; Log out</button>
     </div>
   </div>
 
@@ -486,6 +487,12 @@ let chatMode = 'clinical'; // 'clinical' or 'general'
 
 // ── Init ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  // Auth check — redirect to login if not authenticated
+  try {
+    const r = await fetch('/api/me', { credentials: 'include' });
+    if (r.status === 401) { window.location.href = '/login'; return; }
+  } catch { window.location.href = '/login'; return; }
+
   // Detect mode from URL
   const path = window.location.pathname;
   if (path.includes('/general')) {
@@ -1236,6 +1243,11 @@ function formatDate(iso) {
       hour: '2-digit', minute: '2-digit',
     });
   } catch { return iso; }
+}
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+  window.location.href = '/login';
 }
 </script>
 </body>
