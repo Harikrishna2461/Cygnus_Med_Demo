@@ -320,40 +320,41 @@ Output ONLY valid JSON — no markdown, no explanation:
     ]
 }}"""
 
-_SUFFICIENCY_PROMPT = """A clinician typed this into a venous shunt classification tool:
+_SUFFICIENCY_PROMPT = """A clinician typed this into a CHIVA venous shunt classification tool:
 
 "{description}"
 
-Your only job: decide whether this is a coherent, real clinical description of a patient's venous haemodynamic findings — the kind of thing a vascular surgeon would actually say after reviewing a duplex scan.
+CHIVA classification requires knowing the actual blood flow path — not just that reflux exists, but where blood enters the superficial system, where it travels, and in what direction. Reporting findings (grades, labels, diagnoses) is NOT the same as describing a flow path.
 
-Ask yourself these three questions:
-1. Could a real vascular surgeon have written this to describe an actual patient?
-2. Does it describe what blood is DOING through specific vessels — not just naming anatomy or structural states?
-3. Is it genuinely interpretable clinical language — not made-up notation, jargon salad, nonsense strings, or fragments?
+Decide: does this input describe an actual blood flow path in enough detail to classify?
+
+INSUFFICIENT — reject all of these patterns:
+- Reflux grades without flow path: "Reflux grade 2 at SFJ", "GSV reflux grade 3" — a grade is a severity score, not a description of what blood does
+- Diagnosis or summary labels: "Chronic venous insufficiency with saphenous reflux", "Varicose veins with GSV incompetence"
+- Structural finding lists: "SFJ incompetent", "SFJ incompetent and GSV reflux", "Right leg GSV reflux grade 3, SFJ incompetent" — listing findings is NOT describing a flow path
+- Keyword lists or abbreviations: "GSV SFJ N1 N2", "SSV SFJ incompetent Groin"
+- Symptoms: "leg swelling", "varicose veins"
+- Gibberish or made-up notation
+
+SUFFICIENT — only accept descriptions that explicitly describe the flow path:
+- "SFJ incompetent, blood enters GSV at groin and refluxes full-length to the knee" — entry point + flow path described
+- "There is reflux at the SFJ flowing into the GSV down to mid-thigh, exiting to a tributary" — complete circuit
+- "Perforator at mid-thigh feeds the GSV, no reflux detected downstream" — entry + downstream state
+
+The critical test: does the input say WHERE blood enters AND WHERE/HOW it travels?
+If you only know reflux exists (by grade, label, or finding) but not the actual movement path — it is INSUFFICIENT.
+Listing multiple findings ("GSV reflux + SFJ incompetent") is still INSUFFICIENT if the flow path between them is not described.
 
 Return ONE of three verdicts:
 
-"sufficient"
-  Coherent, clinically interpretable description of blood-flow events.
-  A real surgeon described real duplex findings: blood refluxing, entering, draining,
-  feeding through named vessels. You can say "blood is doing X through Y."
-
-"insufficient"
-  NOT a coherent clinical description of a real patient. Includes:
-  - Keyword or abbreviation lists ("GSV SFJ N1 N4", "SSV SFJ incompetent Groin")
-  - Structural state labels with no flow description ("SFJ incompetent" alone or with location words)
-  - Made-up, non-standard, or unrecognisable notation that no real surgeon would use
-    (e.g. "Phase wise G1 – N33 Reflux Pattern from 56th pair SFJ competence")
-  - Symptoms only ("leg swelling", "varicose veins", "pain")
-  - Gibberish, random characters, or incomplete fragments
-
-"question"
-  A question, greeting, or request for information — not a patient description.
+"sufficient" — explicit flow path described, can classify
+"insufficient" — missing actual flow path description
+"question" — question, greeting, or not a patient description
 
 Output ONLY valid JSON — no markdown:
 {{"verdict": "sufficient"}}
 or
-{{"verdict": "insufficient", "missing": "<one sentence: what specific duplex flow information is needed>"}}
+{{"verdict": "insufficient", "missing": "<one sentence describing what specific flow path information is needed>"}}
 or
 {{"verdict": "question"}}"""
 
