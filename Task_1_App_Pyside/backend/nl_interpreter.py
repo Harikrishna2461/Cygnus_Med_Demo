@@ -287,73 +287,26 @@ IMPORTANT DISTINCTIONS:
 {description}
 
 === INSTRUCTIONS ===
-
-─── STEP 1: SUFFICIENCY GATE (decide this before generating any clips) ───
-
-CRITICAL RULE: "X is incompetent" or "X incompetent" — even combined with anatomical
-location words — is a STRUCTURAL STATE LABEL, not a blood-movement description.
-It tells you a valve is leaky but says NOTHING about what blood actually does.
-These ALWAYS get sufficient_information = false, no matter what other anatomy words surround them.
-
-sufficient_information = false — ALWAYS reject inputs like these:
-  ✗ "SFJ incompetent"
-  ✗ "SSV SFJ incompetent Groin"
-  ✗ "SSV SFJ incompetent Groin at Saphenous Trunk"
-  ✗ "Mid thigh GSV SSV SFJ incompetent Saphenous Trunk"
-  ✗ "GSV SFJ N1 N4 N5 N20"
-  ✗ "patient has varicose veins"
-  ✗ "leg swelling"
-  ✗ "SFJ incompetent, mid-thigh perforator" (state labels + anatomy, still no flow event)
-
-The pattern: if the whole input is anatomy names / state labels / locations with no verb
-describing blood MOVEMENT — it is insufficient.
-
-sufficient_information = true — only when blood movement is explicitly described:
-  ✓ "There is reflux at the SFJ flowing into the GSV down to mid-thigh"
-  ✓ "SFJ incompetent, GSV refluxes full-length to the knee"  ← "refluxes" = flow verb
-  ✓ "Blood enters GSV at groin, discharges into a calf tributary which then refluxes back"
-  ✓ "Perforator feeds the GSV at mid-thigh, no reflux present"  ← "feeds" = flow verb
-
-The test: can you complete the sentence "blood is ___ing through ___"? If yes → sufficient.
-If all you can say is "the SFJ is incompetent / is present / is at the groin" → insufficient.
-
-If sufficient_information = false:
-  → Set clips = [], interpretation = null
-  → Set missing_information = a specific, friendly sentence explaining what duplex
-    data is needed (e.g. "Please describe what the blood is doing — for example,
-    whether the GSV is refluxing, where it exits into tributaries, and whether the
-    SFJ or any perforators are feeding the system.")
-  → Output the JSON immediately — DO NOT proceed to clip generation
-
-If sufficient_information = true → continue to STEP 2.
-
-─── STEP 2: CLIP GENERATION (only if STEP 1 passed) ───
-
 1. Read the description carefully.
 2. Identify each distinct blood flow event EXPLICITLY mentioned.
 3. Generate one virtual clip per flow event.
 4. Use the mappings above to assign EP/RP and N1/N2/N3 notation.
 5. Estimate posYRatio from anatomical location clues.
 6. If left/right leg is explicitly mentioned, assign legSide accordingly. If NOT mentioned, use "Unspecified" — never assume or default to Left or Right.
-7. If the description is NOT about patient venous anatomy (e.g., it is a question,
-   a greeting, or asks about a concept without describing a patient), set is_clinical=false.
-8. Apply Critical Rule 1: perforator entering GSV = EP N2→N2, UNLESS the description uses the
+7. Apply Critical Rule 1: perforator entering GSV = EP N2→N2, UNLESS the description uses the
    exact phrase "connects the deep system to the GSV" or calls the Hunterian perforator incompetent.
    "from the deep system" or "from a deep perforating vessel" = anatomical description → EP N2→N2.
-9. Apply Critical Rule 2: generate RP findings ONLY when backward/retrograde/reflux is explicitly stated.
+8. Apply Critical Rule 2: generate RP findings ONLY when backward/retrograde/reflux is explicitly stated.
    "No reflux in [specific vessel]" is a partial statement — do NOT suppress RP findings in other vessels.
-10. Apply Critical Rule 2B: do NOT add eliminationTest unless the description explicitly describes
-    performing a compression/elimination test and states its result. Use "Reflux" when compression
-    ABOLISHED tributary reflux (confirming GSV is the source). Use "No Reflux" when reflux PERSISTED.
-11. CRITICAL — RP N2→N1 is separate from EP N1→N2: When "GSV refluxes" / "full-length GSV reflux" /
+9. Apply Critical Rule 2B: do NOT add eliminationTest unless the description explicitly describes
+   performing a compression/elimination test and states its result. Use "Reflux" when compression
+   ABOLISHED tributary reflux (confirming GSV is the source). Use "No Reflux" when reflux PERSISTED.
+10. CRITICAL — RP N2→N1 is separate from EP N1→N2: When "GSV refluxes" / "full-length GSV reflux" /
     "GSV carries blood backward" is EXPLICITLY stated, always generate RP N2→N1 as a separate clip
     in addition to EP N1→N2. These are two different flow events at two different clip positions.
 
 Output ONLY valid JSON — no markdown, no explanation:
 {{
-    "is_clinical": true,
-    "sufficient_information": true,
-    "missing_information": null,
     "interpretation": "<2-3 sentences summarising the findings in CHIVA terms>",
     "clips": [
         {{
@@ -365,25 +318,40 @@ Output ONLY valid JSON — no markdown, no explanation:
             "legSide": "Unspecified"
         }}
     ]
-}}
-
-If not clinical or insufficient information:
-{{
-    "is_clinical": true,
-    "sufficient_information": false,
-    "missing_information": "<specific sentence about what duplex data is needed>",
-    "interpretation": null,
-    "clips": []
-}}
-
-If not clinical at all (question, greeting, concept):
-{{
-    "is_clinical": false,
-    "sufficient_information": false,
-    "missing_information": null,
-    "interpretation": null,
-    "clips": []
 }}"""
+
+_SUFFICIENCY_PROMPT = """A clinician typed this into a venous shunt classification tool:
+
+"{description}"
+
+Your only job: decide whether this message describes actual venous blood movement in enough detail to classify a haemodynamic shunt.
+
+Think about it plainly — not as a CHIVA expert, just as someone reading the words:
+Does this message tell you WHAT THE BLOOD IS DOING and WHERE?
+
+Return ONE of three verdicts:
+
+"sufficient"
+  The message describes at least one explicit blood-flow event —
+  e.g. blood refluxing, entering, draining, or feeding through named vessels.
+  There is enough to say "blood is doing X through Y".
+
+"insufficient"
+  The message is about venous anatomy but does not describe blood movement.
+  Includes: keyword lists, state labels only ("SFJ incompetent"), location names,
+  symptom descriptions, partial fragments, gibberish.
+  You cannot say what the blood is actually doing.
+
+"question"
+  The message is a question, a greeting, a request for information,
+  or is unrelated to describing a patient's venous findings.
+
+Output ONLY valid JSON — no markdown:
+{{"verdict": "sufficient"}}
+or
+{{"verdict": "insufficient", "missing": "<one sentence: what specific flow information is needed>"}}
+or
+{{"verdict": "question"}}"""
 
 _CONVERSATIONAL_PROMPT = """You are a knowledgeable CHIVA vascular surgery assistant helping a clinician understand venous shunt classification and CHIVA treatment decisions.
 
@@ -452,7 +420,11 @@ def _clean_json(raw: str) -> str:
 
 def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
     """
-    Ask the LLM to convert a natural-language description to CHIVA clip notation.
+    Two-stage pipeline:
+      1. Focused sufficiency check — a separate call whose only job is to decide
+         whether the input describes actual blood movement. No CHIVA clip context,
+         so the model can't rationalise sufficiency to justify generating clips.
+      2. Full CHIVA interpretation — only reached if stage 1 passes.
 
     Returns:
         {
@@ -463,31 +435,55 @@ def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
             "clips": list[dict]
         }
     """
-    prompt = _NL_TO_CHIVA_PROMPT.format(description=user_message.strip())
+    # ── Stage 1: sufficiency check ──────────────────────────────────────────
     try:
-        raw, _ = call_llm_fn(prompt, return_usage=True, max_tokens=1024)
-        raw = _clean_json(raw)
-        result = json.loads(raw)
-        if isinstance(result, dict) and "is_clinical" in result and "clips" in result:
-            # Deterministic post-process: strip hallucinated RP clips when description
-            # explicitly states no reflux/retrograde flow. LLM training data strongly
-            # associates SFJ incompetence with GSV reflux and overrides prompt rules.
+        check_raw, _ = call_llm_fn(
+            _SUFFICIENCY_PROMPT.format(description=user_message.strip()),
+            return_usage=True,
+            max_tokens=200,
+        )
+        check = json.loads(_clean_json(check_raw))
+        verdict = check.get("verdict", "sufficient")
+    except Exception as e:
+        logger.error(f"Sufficiency check failed: {e}")
+        verdict = "sufficient"  # fall through to CHIVA call on error
+
+    if verdict == "question":
+        return {"is_clinical": False, "sufficient_information": False, "missing_information": None, "interpretation": None, "clips": []}
+
+    if verdict == "insufficient":
+        missing = check.get("missing") or (
+            "Please describe what the blood is doing — for example, whether the GSV is "
+            "refluxing, where it exits into tributaries, and whether the SFJ or any "
+            "perforators are feeding the system."
+        )
+        return {"is_clinical": True, "sufficient_information": False, "missing_information": missing, "interpretation": None, "clips": []}
+
+    # ── Stage 2: CHIVA interpretation (only if verdict == "sufficient") ─────
+    try:
+        raw, _ = call_llm_fn(
+            _NL_TO_CHIVA_PROMPT.format(description=user_message.strip()),
+            return_usage=True,
+            max_tokens=1024,
+        )
+        result = json.loads(_clean_json(raw))
+        if isinstance(result, dict) and "clips" in result:
             if _has_no_reflux_statement(user_message) and result.get("clips"):
                 before = len(result["clips"])
                 result["clips"] = [c for c in result["clips"] if c.get("flow") != "RP"]
                 after = len(result["clips"])
                 if before != after:
-                    logger.info(
-                        f"Post-processing stripped {before - after} hallucinated RP clip(s) "
-                        f"because description contains explicit no-reflux statement."
-                    )
-            # Default sufficient_information to True if LLM omitted the field (backwards compat)
-            if "sufficient_information" not in result:
-                result["sufficient_information"] = bool(result.get("clips"))
-            return result
+                    logger.info(f"Stripped {before - after} hallucinated RP clip(s) — explicit no-reflux statement.")
+            return {
+                "is_clinical": True,
+                "sufficient_information": True,
+                "missing_information": None,
+                "interpretation": result.get("interpretation"),
+                "clips": result.get("clips", []),
+            }
     except Exception as e:
-        logger.error(f"NL interpretation failed: {e}")
-    return {"is_clinical": False, "sufficient_information": False, "missing_information": None, "clips": []}
+        logger.error(f"CHIVA interpretation failed: {e}")
+    return {"is_clinical": False, "sufficient_information": False, "missing_information": None, "interpretation": None, "clips": []}
 
 
 def build_conversational_response(
