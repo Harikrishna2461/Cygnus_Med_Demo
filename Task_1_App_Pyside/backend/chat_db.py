@@ -112,14 +112,13 @@ def _now() -> str:
 
 # -- Users --------------------------------------------------------------------
 
-def create_user(username: str, password: str, is_admin: bool = False) -> str:
+def create_user(username: str, password: str = "", is_admin: bool = False) -> str:
     uid = str(uuid.uuid4())
     now = _now()
-    password_hash = generate_password_hash(password)
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute(
             "INSERT INTO users (user_id, username, password_hash, is_admin, is_active, created_at) VALUES (?, ?, ?, ?, 1, ?)",
-            (uid, username.lower(), password_hash, int(is_admin), now),
+            (uid, username.lower(), "", int(is_admin), now),
         )
         conn.commit()
     return uid

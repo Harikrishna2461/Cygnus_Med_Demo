@@ -1,6 +1,5 @@
 import logging
 from flask import Blueprint, jsonify, request, session
-from werkzeug.security import check_password_hash
 from chat_db import get_user_by_username
 
 logger = logging.getLogger(__name__)
@@ -11,15 +10,14 @@ bp = Blueprint("auth", __name__)
 def api_login():
     data = request.get_json(force=True, silent=True) or {}
     username = (data.get("username") or "").strip().lower()
-    password = data.get("password") or ""
 
-    if not username or not password:
-        return jsonify({"error": "Username and password are required"}), 400
+    if not username:
+        return jsonify({"error": "Username is required"}), 400
 
     user = get_user_by_username(username)
-    if not user or not check_password_hash(user["password_hash"], password):
+    if not user:
         logger.warning(f"Failed login attempt for username: {username}")
-        return jsonify({"error": "Invalid username or password"}), 401
+        return jsonify({"error": "Username not recognised"}), 401
 
     session.clear()
     session["user_id"] = user["user_id"]

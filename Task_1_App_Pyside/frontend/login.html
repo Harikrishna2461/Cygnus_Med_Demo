@@ -21,7 +21,7 @@
     .logo p { font-size: 0.82em; color: #64748b; }
     .field { margin-bottom: 18px; }
     label { display: block; font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    input[type="text"], input[type="password"] {
+    input[type="text"] {
       width: 100%; padding: 10px 14px; border-radius: 8px;
       border: 1.5px solid #334155; background: #0f172a;
       color: #e2e8f0; font-size: 14px; font-family: inherit; outline: none;
@@ -56,34 +56,25 @@
     <label for="username">Username</label>
     <input id="username" type="text" placeholder="Enter your username" autocomplete="username" />
   </div>
-  <div class="field">
-    <label for="password">Password</label>
-    <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password" />
-  </div>
   <button id="login-btn" class="btn-login" onclick="doLogin()">Sign In</button>
   <div class="footer-note">Contact your administrator to get access.</div>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('username').focus();
-  document.getElementById('password').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doLogin();
-  });
   document.getElementById('username').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('password').focus();
+    if (e.key === 'Enter') doLogin();
   });
 });
 
 async function doLogin() {
   const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value;
   const btn = document.getElementById('login-btn');
-  const errEl = document.getElementById('error-msg');
 
-  errEl.className = 'error-msg';
+  document.getElementById('error-msg').className = 'error-msg';
 
-  if (!username || !password) {
-    showError('Please enter your username and password.');
+  if (!username) {
+    showError('Please enter your username.');
     return;
   }
 
@@ -95,7 +86,7 @@ async function doLogin() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username }),
     });
     const data = await r.json();
     if (r.ok) {
