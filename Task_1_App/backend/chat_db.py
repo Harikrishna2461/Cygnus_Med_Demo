@@ -221,7 +221,7 @@ def get_sessions(mode: str | None = None, user_id: str | None = None) -> list[di
             base += " AND mode=?"
             params.append(mode)
         if user_id:
-            base += " AND user_id=?"
+            base += " AND (user_id=? OR user_id IS NULL)"
             params.append(user_id)
         base += " ORDER BY updated_at DESC LIMIT 50"
         rows = conn.execute(base, params).fetchall()
