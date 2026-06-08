@@ -1028,7 +1028,12 @@ function buildFindingHTML(f, showLegLabel) {
   html += `</div>`;
 
   if (cot) {
-    const cotBullets = cot.split('\n').filter(l => l.trim()).map(l => `<li>${escHtml(l.trim())}</li>`).join('');
+    // Split on newlines first; if only 1 line, fall back to sentence splitting
+    let cotLines = cot.split('\n').map(l => l.trim()).filter(l => l);
+    if (cotLines.length <= 1) {
+      cotLines = cot.replace(/([.!?])\s+(?=[A-Z])/g, '$1\n').split('\n').map(l => l.trim()).filter(l => l);
+    }
+    const cotBullets = cotLines.map(l => `<li>${escHtml(l)}</li>`).join('');
     html += `
     <button class="section-toggle cot-toggle" onclick="toggleSection('${uid}-cot', this)">
       Model Thinking <span class="chevron">▼</span>

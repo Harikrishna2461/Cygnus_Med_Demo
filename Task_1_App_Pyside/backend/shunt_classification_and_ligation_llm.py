@@ -727,7 +727,13 @@ CONFIDENCE CALIBRATION:
 Reason about this patient's venous hemodynamics as a clinician and classify the shunt for: {leg_label}.
 
 STRICT OUTPUT RULES:
-- chain_of_thought: Reason through the hemodynamics in plain clinical language. Explain: (1) what each significant finding tells you about where blood is entering the superficial system, how it is circulating, and how it returns to the deep system; (2) what the overall flow pattern reveals as a hemodynamic circuit; (3) which CHIVA type this circuit matches and — critically — why it fits that type and not the one or two types it most closely resembles. Your reasoning must demonstrate understanding of venous physiology, not enumeration of lookup rules.
+- chain_of_thought: Reason through the hemodynamics in plain clinical language. Write EACH distinct reasoning point as its OWN SEPARATE LINE — do NOT write a continuous paragraph. Use this structure, one line per point:
+    Line 1: What the entry finding(s) tell you physiologically (where blood enters, what valve/junction has failed)
+    Line 2: What the reflux finding(s) tell you (where blood travels backward and what circuit that forms)
+    Line 3: The overall hemodynamic circuit these findings describe together
+    Line 4: Why this matches the chosen CHIVA type
+    Line 5: Why it does NOT match the one or two types it most closely resembles
+  Separate each line with a literal newline character (\n) inside the JSON string. Never write all reasoning as one long paragraph.
 - summary: 1 sentence clinical summary. Do NOT mention "left leg" or "right leg" unless {leg_label} is explicitly Left or Right (i.e. not "Unspecified").
 - reasoning: describe each decision step in plain clinical language (e.g. "EP N1→N2 present, indicating SFJ incompetence"). Do NOT reference internal clip indices ("Clip 00", "Clip 01", etc.), y-coordinates, or posYRatio values in any reasoning step.
 - STRICT NO-INFERENCE RULE: classify ONLY based on flow findings listed in the assessment above. Do NOT write "RP might be present", "could have reflux", or any similar inference. If no RP finding is listed, no RP exists.
@@ -736,7 +742,7 @@ STRICT OUTPUT RULES:
 Output ONLY the JSON below — no other text, no markdown.
 
 {{
-    "chain_of_thought": "<clinical reasoning: what each finding means physiologically, what hemodynamic circuit the overall pattern describes, and why it matches one specific CHIVA type rather than the types it most resembles>",
+    "chain_of_thought": "<what entry finding(s) mean physiologically>\\n<what reflux finding(s) mean physiologically>\\n<the overall hemodynamic circuit these form>\\n<why this matches the chosen type>\\n<why it does not match the closest alternative type(s)>",
     "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 4 / Type 5 / Type 1+2 / No shunt detected / Undetermined>",
     "confidence": <0.0-1.0>,
     "reasoning": ["<decision step 1>", "<decision step 2>", "..."],
