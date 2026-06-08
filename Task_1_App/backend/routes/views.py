@@ -161,3 +161,8 @@ def admin_panel():
     if redir:
         return redir
     return send_file(str(_FRONTEND_DIR / "admin.html"))
+
+
+@bp.route("/shunt-diagram/<path:filename>")
+def shunt_diagram(filename):
+    return send_file(str(_FRONTEND_DIR / "shunt_diagrams" / filename))

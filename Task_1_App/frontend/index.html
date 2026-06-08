@@ -270,6 +270,20 @@
     .section-toggle.cot-toggle { color: var(--amber-600); }
     .section-toggle.cot-toggle:hover { background: var(--amber-100); }
 
+    /* ── Shunt Diagram block ────────────────────────────────────────────── */
+    .section-toggle.diagram-toggle { color: #0369a1; }
+    .section-toggle.diagram-toggle:hover { background: #e0f2fe; }
+    .shunt-diagram-img {
+      display: block; max-width: 100%; height: auto;
+      border: 1px solid var(--slate-200); border-radius: 6px;
+      margin-bottom: 10px; background: #fff;
+    }
+    .shunt-diagram-desc {
+      font-size: 12.5px; color: var(--slate-600); line-height: 1.6;
+      padding: 8px 10px; background: #f0f9ff;
+      border-left: 3px solid #0369a1; border-radius: 0 6px 6px 0;
+    }
+
     /* Ligation card */
     .lig-card {
       background: var(--white); border: 1px solid var(--slate-200);
@@ -1043,6 +1057,18 @@ function buildFindingHTML(f, showLegLabel) {
     </div>`;
   }
 
+  const diagramData = getShuntDiagram(f.shunt_type);
+  if (diagramData) {
+    html += `
+    <button class="section-toggle diagram-toggle" onclick="toggleSection('${uid}-diag', this)">
+      Reference Diagram <span class="chevron">▼</span>
+    </button>
+    <div class="section-body" id="${uid}-diag">
+      <img src="${diagramData.img}" alt="${escHtml(f.shunt_type)} diagram" class="shunt-diagram-img">
+      <p class="shunt-diagram-desc">${diagramData.desc}</p>
+    </div>`;
+  }
+
   if (reasoning.length) {
     html += `
     <button class="section-toggle" onclick="toggleSection('${uid}-r', this)">
@@ -1191,6 +1217,29 @@ function buildFindingHTML(f, showLegLabel) {
   }
   html += '</div>'; // close finding-block
   return html;
+}
+
+const _SHUNT_DIAGRAMS = {
+  'Type 1':   { img: '/shunt-diagram/type_1.png',
+    desc: 'Deep vein (R1) fills the saphenous vein (R2) directly via the SFJ or a perforating vein. Blood travels down the refluxive saphenous segment and re-enters the deep system through a perforating vein (R1). The most common shunt (~34%). Ligation target: the re-entry perforating vein.' },
+  'Type 2A':  { img: '/shunt-diagram/type_2a.png',
+    desc: 'Reflux originates within the saphenous vein itself (R2) — not from deep veins — and fills a tributary (R3) that drains back into the same saphenous vein. A closed superficial loop with a competent SFJ. No deep vein involvement; typically presents as mildly dilated tributaries.' },
+  'Type 2B':  { img: '/shunt-diagram/type_2b.png',
+    desc: 'The saphenous vein becomes incompetent just above a refluxive tributary due to retrograde filling from healthy proximal tributaries. Reflux enters a tributary (R3) which drains back into the saphenous (R2). SFJ remains competent. Distinguished from 2A by retrograde saphenous flow above the tributary entry point.' },
+  'Type 2C':  { img: '/shunt-diagram/type_2c.png',
+    desc: 'Left (f) — Type 2C: saphenous (R2) reflux enters a tributary (R3) that drains into the deep system via a perforating vein (R1) — an open shunt with no recirculation loop, so the system is not volume-overloaded. Right (g) — Type I+II: a Type 1 recirculation circuit (R1→R2→R1) with an additional tributary branch (R3→R1) running in parallel.' },
+  'Type 1+2': { img: '/shunt-diagram/type_1plus2.png',
+    desc: 'Left (f) — Type 2C: saphenous (R2) reflux enters a tributary (R3) that drains into the deep system via a perforating vein (R1) — an open shunt with no recirculation loop, so the system is not volume-overloaded. Right (g) — Type I+II: a Type 1 recirculation circuit (R1→R2→R1) with an additional tributary branch (R3→R1) running in parallel.' },
+  'Type 3':   { img: '/shunt-diagram/type_3.png',
+    desc: 'Deep vein (R1) fills the saphenous vein (R2) via SFJ/perforator, but the entire reflux volume drains through a tributary (R3) rather than directly from the saphenous vein. The tributary is the essential re-entry vessel. Key diagnostic sign: digital compression of the tributary eliminates the saphenous reflux (unlike Type 1). Ligation target: the refluxive tributary.' },
+  'Type 4':   { img: '/shunt-diagram/type_4.png',
+    desc: 'Reflux enters the saphenous vein from a pelvic vein (SP variant, left) or a perforating vein bypassing the SFJ (P variant, right). Re-entry is directly from the saphenous vein via a perforating vein — the same R2→R1 drainage as Type 1. The non-junction reflux source distinguishes it from Type 1.' },
+  'Type 5':   { img: '/shunt-diagram/type_5.png',
+    desc: 'Same pelvic or perforating vein reflux source as Type 4, but re-entry uses a tributary (R3) rather than the saphenous vein directly — analogous to Type 3\'s drainage mechanism. No saphenous perforating veins participate in re-entry. Circuit: R1→R3→R2→R3→R1.' },
+};
+
+function getShuntDiagram(shuntType) {
+  return _SHUNT_DIAGRAMS[shuntType] || null;
 }
 
 function toggleSection(id, btn) {
