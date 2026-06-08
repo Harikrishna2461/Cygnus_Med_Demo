@@ -225,7 +225,7 @@ Case D — No RP in any finding:
     Otherwise (EP N1→N2 alone, EP N2→N2 alone, EP N1→N2 + EP N2→N3, or no EP at all) → NO SHUNT DETECTED.
 ─────────────────────────────────────────────────────────
 
-QUICK DECISION TABLE (commit this to memory):
+QUICK DECISION TABLE:
     Has EP N1→N2? YES + no EP N2→N3 + RP N2→N1           → TYPE 1
     Has EP N1→N2? YES + EP N2→N3 + RP N3 only             → TYPE 3
     Has EP N1→N2? YES + EP N2→N3 + RP N3 + RP N2→N1 + eliminationTest absent → UNDETERMINED
@@ -242,7 +242,7 @@ QUICK DECISION TABLE (commit this to memory):
     No EP N1→N2  + EP N2→N3 + NO RP                        → TYPE 2A (early, no reflux yet)
     No RP at all + no EP N2→N3                             → NO SHUNT
 
-CONCRETE EXAMPLES (match these patterns exactly):
+CONCRETE EXAMPLES:
     Type 1:  [EP N1→N2 y=0.06 SFJ-ENTRY, RP N2→N1 y=0.25]
             → EP N1→N2 present, RP N2→N1, no EP N2→N3, no N3 reflux → TYPE 1
     Type 2A: [EP N2→N3 y=0.20]  OR  [EP N2→N3 y=0.20, RP N3→N2 y=0.47]
@@ -710,17 +710,21 @@ CRITICAL REMINDERS:
 ═══════════════════════════════════════════════════════════════
 
 === TASK ===
-Follow the Step-by-Step Decision Guide above. Classify the venous shunt for: {leg_label}.
+Before producing the final answer, trace through the Step-by-Step Decision Guide above in order. Write that trace in the "chain_of_thought" field.
+
+Classify the venous shunt for: {leg_label}.
 
 STRICT OUTPUT RULES:
+- chain_of_thought: Apply STEP 0 → STEP 1 → STEP 2 → STEP 3 → STEP 4 sequentially. For each step write three things on a single line: (a) what the step checks, (b) exactly what you see or do not see in the assessment findings listed above, and (c) the decision you made. Prefix every step with "STEP N: ". Stop at the step where the type is determined and note why no further steps are needed.
 - summary: 1 sentence clinical summary. Do NOT mention "left leg" or "right leg" unless {leg_label} is explicitly Left or Right (i.e. not "Unspecified").
 - reasoning: describe each decision step in plain clinical language (e.g. "EP N1→N2 present, indicating SFJ incompetence"). Do NOT reference internal clip indices ("Clip 00", "Clip 01", etc.), y-coordinates, or posYRatio values in any reasoning step.
 - STRICT NO-INFERENCE RULE: classify ONLY based on flow findings listed in the assessment above. Do NOT write "RP might be present", "could have reflux", or any similar inference. If no RP finding is listed, no RP exists.
-- NEVER use the word "clip" or "clips" anywhere in summary or reasoning. Say "finding", "flow finding", "entry point", "reflux finding", or "EP/RP finding" instead.
+- NEVER use the word "clip" or "clips" anywhere in summary, reasoning, or chain_of_thought. Say "finding", "flow finding", "entry point", "reflux finding", or "EP/RP finding" instead.
 
 Output ONLY the JSON below — no other text, no markdown.
 
 {{
+    "chain_of_thought": "STEP 0: <what I checked | what I found | decision>\\nSTEP 1: <what I checked | what I found | decision>\\nSTEP 2: <what I checked | what I found | decision>\\nSTEP 3: <what I checked | what I found | decision>\\nSTEP 4: <what I checked | what I found | decision>",
     "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 4 / Type 5 / Type 1+2 / No shunt detected / Undetermined>",
     "confidence": <0.0-1.0>,
     "reasoning": ["<decision step 1>", "<decision step 2>", "..."],
@@ -955,6 +959,7 @@ def _repair_and_parse(text: str) -> dict | None:
 _CLASSIFICATION_ERROR_RESULT: dict = {
     "shunt_type": "Classification failed",
     "confidence": 0.0,
+    "chain_of_thought": "",
     "reasoning": ["The LLM did not return a parseable classification response. Please retry."],
     "needs_elim_test": False,
     "ask_branching": False,
@@ -982,7 +987,7 @@ def _call_llm_for_shunt_classification(group: list[dict], leg_label: str, call_l
     prompt = build_shunt_classification_prompt(group, leg_label)
     logger.info(f"Shunt classification LLM prompt for {leg_label}: {len(prompt)} chars")
     try:
-        raw, usage = call_llm_fn(prompt, return_usage=True)
+        raw, usage = call_llm_fn(prompt, max_tokens=2048, return_usage=True)
         logger.info(f"Shunt classification LLM response ({leg_label}): {raw[:300]!r}")
         logger.info(f"Shunt classification tokens ({leg_label}): prompt={usage.get('prompt_tokens', 0)}, completion={usage.get('completion_tokens', 0)}")
         result = _repair_and_parse(raw)
@@ -1133,6 +1138,7 @@ def classify_and_plan_ligation_with_llm(
             "shunt_type": classification.get("shunt_type"),
             "assessment": classification.get("shunt_type"),
             "confidence": classification.get("confidence", 0.0),
+            "chain_of_thought": classification.get("chain_of_thought", ""),
             "reasoning": classification.get("reasoning", []),
             "needs_elim_test": classification.get("needs_elim_test", False),
             #"ask_diameter": classification.get("ask_diameter", False),
@@ -1163,6 +1169,7 @@ def classify_and_plan_ligation_with_llm(
         "findings": findings,
         "shunt_type": primary.get("shunt_type"),
         "confidence": primary.get("confidence", 0.0),
+        "chain_of_thought": primary.get("chain_of_thought", ""),
         "reasoning": primary.get("reasoning", []),
         "ligation": primary.get("ligation_steps", []),  # For backward compat with old API
         "point_of_ligation": primary.get("point_of_ligation", primary.get("ligation_steps", [""])[0] if primary.get("ligation_steps") else ""),

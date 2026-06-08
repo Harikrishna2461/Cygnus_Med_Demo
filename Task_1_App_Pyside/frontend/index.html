@@ -255,6 +255,17 @@
     .reasoning-list li::before { content: counter(li) ". "; counter-increment: li; font-weight: 700; color: var(--blue-600); }
     .reasoning-list { counter-reset: li; }
 
+    /* ── Chain-of-thought block ─────────────────────────────────────────── */
+    .cot-content {
+      white-space: pre-wrap; word-break: break-word;
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+      font-size: 12px; line-height: 1.6; color: var(--slate-700);
+      background: #fffbeb; border-left: 3px solid var(--amber-600);
+      border-radius: 0 6px 6px 0; padding: 10px 12px;
+    }
+    .section-toggle.cot-toggle { color: var(--amber-600); }
+    .section-toggle.cot-toggle:hover { background: var(--amber-100); }
+
     /* Ligation card */
     .lig-card {
       background: var(--white); border: 1px solid var(--slate-200);
@@ -944,6 +955,7 @@ function buildSummaryText(data) {
 }
 
 function buildFindingHTML(f, showLegLabel) {
+  const cot = f.chain_of_thought || '';
   const reasoning = f.reasoning || [];
   const steps = f.ligation_steps || [];
   const complications = f.complications_contraindications || [];
@@ -968,6 +980,16 @@ function buildFindingHTML(f, showLegLabel) {
   if (flags.length) html += `<div class="flag-row">${flags.join('')}</div>`;
 
   html += `</div>`;
+
+  if (cot) {
+    html += `
+    <button class="section-toggle cot-toggle" onclick="toggleSection('${uid}-cot', this)">
+      Chain of Thought <span class="chevron">▼</span>
+    </button>
+    <div class="section-body" id="${uid}-cot">
+      <div class="cot-content">${escHtml(cot)}</div>
+    </div>`;
+  }
 
   if (reasoning.length) {
     html += `
