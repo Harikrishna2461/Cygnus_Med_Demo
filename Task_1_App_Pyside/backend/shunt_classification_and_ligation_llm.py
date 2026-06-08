@@ -600,122 +600,134 @@ ABSOLUTE RULES when RP count = 0:
 {clips_str}
 
 ═══════════════════════════════════════════════════════════════
-STEP-BY-STEP DECISION GUIDE (Follow in order)
+HEMODYNAMIC REASONING — Reason like a clinician, not a flowchart
 ═══════════════════════════════════════════════════════════════
 
-STEP 0: COUNT RP FINDINGS — DO THIS BEFORE ANYTHING ELSE
-═══════════════════════════════════════════════════════════════
-    Count every finding in the assessment above where flow=RP.
+You are a CHIVA-trained vascular clinician. Do not follow a mechanical checklist.
+Reason about what these findings mean physiologically, then arrive at a classification
+by understanding the hemodynamic circuit — not by matching patterns to a lookup table.
 
-    IF RP count = 0:
-      Is EP N2→N3 present (GSV discharging forward into a tributary)?
-        YES → TYPE 2A (early shunt, no reflux yet). Skip to Case C in STEP 4.
-        NO  → NO SHUNT DETECTED. STOP.
-              EP N1→N2 alone, EP N2→N2 alone, or EP N1→N2 + EP N2→N3 without N3 escape = No Shunt.
-              *** Type 1 requires RP N2→N1. Type 3 requires RP. Never assign these with zero RP. ***
+WHAT EACH FINDING TELLS YOU ABOUT THIS PATIENT'S VENOUS PHYSIOLOGY:
 
-    IF RP count ≥ 1 → continue to STEP 1.
-═══════════════════════════════════════════════════════════════
+  EP N1→N2  — Blood is escaping from the deep venous system into the GSV at the
+               SFJ or Hunterian junction. The valve at that point has failed.
+               This is the hallmark of SFJ or Hunterian incompetence. Without
+               accompanying reflux (RP), this entry alone does not constitute an
+               active shunt — the valve is incompetent but no closed circuit exists yet.
 
-STEP 1: CHECK FOR EP N1→N3 FIRST (Type 4 / Type 5 path)
-    Look for any clip with flow=EP, fromType=N1, toType=N3.
-    If YES → this is a direct deep-to-tributary shunt. Go to Type 4/5 branch below.
-    If NO  → continue to STEP 2.
+  EP N2→N2  — A perforator is injecting blood laterally into the mid-GSV trunk.
+               The SFJ valve is intact and competent. This is fundamentally different
+               from EP N1→N2: it represents mid-segment perforator pathology, not
+               junction failure. EP N2→N2 and EP N1→N2 can look similar in notation
+               but describe completely different anatomical events.
 
-    ┌─ EP N1→N3 PATH (direct deep-to-tributary escape):
-    │
-    ├─ Has RP N2→N1 (return through saphenous trunk)?
-    │  └─ YES → TYPE 4 (confidence 0.88)
-    │           Key: the return loop goes THROUGH the N2 trunk (RP N2→N1)
-    │
-    └─ Has RP N3→N1 or RP N3→N2 (return stays in tributaries)?
-       └─ YES → TYPE 5 (confidence 0.88)
-               Key: the return loop stays within N3 tributaries (RP N3→N1 or N3→N2)
-               *** EP N1→N3 + RP N3→N1 = TYPE 5, NOT TYPE 4 ***
+  EP N1→N3  — Blood escapes directly from the deep system into a tributary, entirely
+               bypassing the GSV trunk. A pelvic point or deep perforator connects
+               directly to superficial tributaries. When present, this finding defines
+               the shunt architecture as Type 4 or 5 before any other consideration —
+               the GSV trunk is not the primary conduit.
 
-STEP 2: CHECK FOR EP N1→N2 (SFJ or Hunterian ENTRY)
-    Look for: "EP N1→N2" with y≤0.098 (SFJ) or y≤0.353 (Hunterian)
-    If YES with SFJ-ENTRY/Hunterian-ENTRY label → SFJ INCOMPETENT
-    If NO  → SFJ COMPETENT (go to Case C)
-    ✓ Found EP N1→N2? YES/NO
+  EP N2→N3  — The GSV trunk is overflowing forward into a tributary. This is antegrade
+               overflow, not reflux. Alone with no RP, it indicates an early developing
+               shunt (Type 2A) where pressure has built enough to push blood forward
+               into tributaries but retrograde flow has not yet established. Combined
+               with SFJ entry (EP N1→N2), it means the shunt extends into tributaries.
 
-    STEP 3: IF YES to EP N1→N2, CHECK FOR REFLUX PATTERNS
-    3a) ANY RP N3→N2 or RP N3→N1? (tributary reflux)
-    3b) ANY RP N2→N1? (GSV reflux)
-    3c) ANY RP anywhere else?
-    3d) ANY EP N2→N3? (extra antegrade to tributary)
+  RP N2→N1  — The GSV trunk is refluxing retrograde toward the deep system. Blood
+               that entered the GSV is flowing backward under pressure. This is
+               pathological GSV trunk incompetence — the core reflux pathway in
+               Type 1. Without this finding, Type 1 cannot be present.
 
-STEP 4: MATCH PATTERN TO TYPE
+  RP N3→N2  — A tributary is draining retrograde back into the GSV trunk. The shunt
+               loop closes through the saphenous trunk — overflow from the GSV reaches
+               a tributary and then refluxes back into the GSV rather than draining
+               toward the foot.
 
-    ┌─ SFJ INCOMPETENT PATH (has EP N1→N2):
-    │
-    │  *** FIRST CHECK FOR ALL BRANCHES: Count RP clips. ZERO RP → NO SHUNT immediately. ***
-    │
-    ├─ NO EP N2→N3:
-    │  ├─ ZERO RP clips anywhere → NO SHUNT DETECTED (confidence 0.95)
-    │  │   *** EP N1→N2 alone with no reflux = entry without shunt. Do NOT classify as Type 1. ***
-    │  └─ Has RP N2→N1, no RP at N3 → TYPE 1 (confidence 0.90)
-    │
-    └─ YES EP N2→N3 EXISTS:
-        ├─ ZERO RP clips → NO SHUNT DETECTED (confidence 0.90)
-        │   *** Type 3, 1+2, and Undetermined ALL require at least one RP clip. ***
-        │   *** EP N1→N2 + EP N2→N3 with ZERO RP = no reflux = no shunt. ***
-        ├─ Has RP N3→N2 (tributary→GSV) → TYPE 3 (confidence 0.88)
-        │   (RP N3→N2 means tributary drains back to GSV = Type 3, even if RP N2→N1 is also present)
-        ├─ Has RP N3→N1 only, NO RP N2→N1 → TYPE 3 (confidence 0.88)
-        ├─ Has RP N3→N1 AND RP N2→N1:
-        │  ├─ eliminationTest ABSENT from clips → UNDETERMINED (confidence 0.55) [needs_elim_test=true]
-        │  │  *** STOP: Do NOT output Type 1+2. eliminationTest must be present in the clips. ***
-        │  ├─ eliminationTest="Reflux" IN CLIPS → TYPE 1+2 (confidence 0.80)
-        │  └─ eliminationTest="No Reflux" IN CLIPS → TYPE 3 (confidence 0.75)
+  RP N3→N1  — Tributary reflux drains directly back to the deep system without using
+               the GSV trunk as a return highway. The reflux loop closes entirely within
+               the tributary network.
 
-    ┌─ SFJ COMPETENT PATH (NO EP N1→N2, NO EP N1→N3):
-    │
-    │  *** CHECK EP N2→N2 FIRST — it is the defining feature of Type 2B/2C ***
-    │
-    ├─ EP N2→N2 EXISTS (perforator entry into GSV):
-    │  ├─ Has RP N3, NO RP N2→N1 → TYPE 2B (confidence 0.84)
-    │  │  └─ Multiple RP at N3? → [ask_branching=true]
-    │  ├─ Has RP N3 AND RP N2→N1 → TYPE 2C (confidence 0.82)
-    │  │  └─ Multiple RP at N3? → [ask_branching=true]
-    │  └─ No RP at all → NO SHUNT (confidence 0.95)
-    │
-    ├─ EP N2→N3 EXISTS (no EP N2→N2):
-    │  └─ TYPE 2A (confidence 0.85-0.92)
-    │     └─ Multiple RP at N3? → [ask_branching=true]
-    │
-    └─ Neither EP N2→N2 nor EP N2→N3:
-        └─ NO SHUNT (confidence 0.95)
+  Zero RP   — No retrograde flow exists anywhere in this leg. Without reflux there is
+               no closed shunt circuit — blood that enters the superficial system has
+               somewhere to go physiologically. The sole exception: EP N2→N3 alone
+               (early Type 2A) where antegrade overflow is the presenting finding
+               before reflux develops. All other entries without RP = no active shunt.
 
-STEP 4: ASSIGN CONFIDENCE
-    Clear pattern, no ambiguity → 0.90–0.97
-    Pattern present, minor noise → 0.80–0.89
-    Ambiguous / needs elimination test → 0.50–0.65
-    Insufficient clips → 0.40–0.55
+THE HEMODYNAMIC CIRCUIT EACH SHUNT TYPE REPRESENTS:
 
-═══════════════════════════════════════════════════════════════
-CRITICAL REMINDERS:
-    • Check EP N1→N3 FIRST — if present, it is Type 4 or Type 5, not Type 1/2/3
-    • TYPE 4 vs TYPE 5 — the ONLY difference is the return path:
-        Type 4: EP N1→N3 + RP N2→N1  (return via saphenous TRUNK)
-        Type 5: EP N1→N3 + RP N3→N1 or RP N3→N2  (return via TRIBUTARIES)
-        EP N1→N3 + RP N3→N1 = TYPE 5 — NEVER classify this as Type 4
-    • EP N1→N2 is THE KEY decision point for Types 1/2/3 — check after ruling out N1→N3
-    • EP N2→N2 means perforator (SFJ COMPETENT), never confuse with N1→N2
-    • Type 2A has EP N2→N3; Type 2B/2C have EP N2→N2 (NOT N2→N3)
-    • Type 2C differs from Type 1+2: 2C has EP N2→N2, Type 1+2 has EP N1→N2
-    • RP only at N3 (not N2→N1) + EP N1→N2 = TYPE 3 (not 1+2)
-    • EP N1→N2 + EP N2→N3 with ZERO RP clips = NO SHUNT — never classify as Type 3 without RP
-    • NEVER infer, hypothesize, or assume RP clips that are not listed in the assessment above
+  Type 1   — Full SFJ trunk loop: deep blood enters GSV at the SFJ (EP N1→N2)
+              and the GSV trunk itself refluxes backward (RP N2→N1). A closed
+              saphenous trunk circuit using the GSV as both the inflow and the
+              reflux highway. No tributary escape needed.
+
+  Type 2A  — Early antegrade tributary escape: GSV overflows forward into a tributary
+              (EP N2→N3) without established retrograde flow yet. The shunt is present
+              but immature — reflux has not developed. No SFJ failure required.
+
+  Type 2B  — Perforator-fed tributary circuit: a perforator pushes blood into the
+              GSV mid-segment (EP N2→N2), and the loop closes via tributary reflux
+              (RP N3) back to the deep system. The GSV trunk does not itself reflux
+              backward — the circuit bypasses SFJ entirely.
+
+  Type 2C  — Perforator-fed with secondary GSV trunk involvement: same perforator
+              entry (EP N2→N2) but the shunt circuit has expanded to also drive GSV
+              trunk reflux (RP N2→N1) alongside tributary reflux (RP N3). Greater
+              hemodynamic load than Type 2B.
+
+  Type 3   — SFJ-entry with tributary extension, trunk-sparing return: SFJ is
+              incompetent (EP N1→N2) and the overflow extends into tributaries
+              (EP N2→N3), with the loop closing via tributary reflux (RP N3 back
+              to deep). Critically, the GSV trunk does NOT reflux backward — the
+              shunt circuit routes through tributaries rather than the trunk.
+
+  Type 4   — Direct deep-to-tributary escape, GSV trunk return: blood bypasses the
+              SFJ entirely via a direct connection from deep to tributary (EP N1→N3),
+              then refluxes back via the GSV trunk (RP N2→N1). The trunk is the
+              return limb but not the entry conduit.
+
+  Type 5   — Direct deep-to-tributary escape, tributary-only return: same direct
+              escape anatomy as Type 4 (EP N1→N3) but the reflux stays entirely
+              within tributaries (RP N3→N1 or RP N3→N2) and never uses the GSV
+              trunk as a return pathway.
+
+  Type 1+2 — Two concurrent entry points: SFJ incompetence (EP N1→N2) AND tributary
+              escape (EP N2→N3), with BOTH trunk reflux (RP N2→N1) AND tributary
+              reflux (RP N3). Requires the elimination test to confirm, because this
+              pattern overlaps with Type 3 until that test is performed.
+
+  Undetermined — The hemodynamic picture raises Type 1+2 vs Type 3 but the
+                 elimination test result is absent from the findings, making it
+                 impossible to resolve the circuit definitively.
+
+PHYSIOLOGICAL TRUTHS THAT MUST HOLD IN YOUR REASONING:
+  • A closed shunt circuit requires retrograde flow. Zero RP = no active circuit
+    in all cases except Type 2A (antegrade overflow without established reflux).
+  • Type 1 physically requires GSV trunk reflux (RP N2→N1). A failed SFJ valve
+    (EP N1→N2) alone means the valve is open, not that a circuit is flowing.
+  • EP N2→N2 and EP N1→N2 are anatomically distinct events. Confusing them
+    means confusing perforator pathology with SFJ failure — entirely different
+    clinical significance and treatment implications.
+  • EP N1→N3, when present, defines a Type 4/5 architecture. The return path
+    (trunk vs tributaries) then determines which of the two it is.
+  • Type 4 vs Type 5: both share EP N1→N3. The differentiating finding is
+    HOW the blood returns — via GSV trunk (Type 4) or via tributaries (Type 5).
+  • Type 3 vs Type 1+2: both share EP N1→N2 + EP N2→N3 + RP N3. The difference
+    is whether RP N2→N1 is also present AND what the elimination test shows.
+    Without both, the case is Undetermined.
+  • Never infer, assume, or hypothesize findings not explicitly listed above.
+
+CONFIDENCE CALIBRATION:
+  Complete, unambiguous hemodynamic picture → 0.90–0.97
+  Pattern present but minor uncertainty → 0.80–0.89
+  Ambiguous or elimination test needed → 0.50–0.65
+  Insufficient findings to form a full picture → 0.40–0.55
 ═══════════════════════════════════════════════════════════════
 
 === TASK ===
-Before producing the final answer, trace through the Step-by-Step Decision Guide above in order. Write that trace in the "chain_of_thought" field.
-
-Classify the venous shunt for: {leg_label}.
+Reason about this patient's venous hemodynamics as a clinician and classify the shunt for: {leg_label}.
 
 STRICT OUTPUT RULES:
-- chain_of_thought: Apply STEP 0 → STEP 1 → STEP 2 → STEP 3 → STEP 4 sequentially. For each step write three things on a single line: (a) what the step checks, (b) exactly what you see or do not see in the assessment findings listed above, and (c) the decision you made. Prefix every step with "STEP N: ". Stop at the step where the type is determined and note why no further steps are needed.
+- chain_of_thought: Reason through the hemodynamics in plain clinical language. Explain: (1) what each significant finding tells you about where blood is entering the superficial system, how it is circulating, and how it returns to the deep system; (2) what the overall flow pattern reveals as a hemodynamic circuit; (3) which CHIVA type this circuit matches and — critically — why it fits that type and not the one or two types it most closely resembles. Your reasoning must demonstrate understanding of venous physiology, not enumeration of lookup rules.
 - summary: 1 sentence clinical summary. Do NOT mention "left leg" or "right leg" unless {leg_label} is explicitly Left or Right (i.e. not "Unspecified").
 - reasoning: describe each decision step in plain clinical language (e.g. "EP N1→N2 present, indicating SFJ incompetence"). Do NOT reference internal clip indices ("Clip 00", "Clip 01", etc.), y-coordinates, or posYRatio values in any reasoning step.
 - STRICT NO-INFERENCE RULE: classify ONLY based on flow findings listed in the assessment above. Do NOT write "RP might be present", "could have reflux", or any similar inference. If no RP finding is listed, no RP exists.
@@ -724,7 +736,7 @@ STRICT OUTPUT RULES:
 Output ONLY the JSON below — no other text, no markdown.
 
 {{
-    "chain_of_thought": "STEP 0: <what I checked | what I found | decision>\\nSTEP 1: <what I checked | what I found | decision>\\nSTEP 2: <what I checked | what I found | decision>\\nSTEP 3: <what I checked | what I found | decision>\\nSTEP 4: <what I checked | what I found | decision>",
+    "chain_of_thought": "<clinical reasoning: what each finding means physiologically, what hemodynamic circuit the overall pattern describes, and why it matches one specific CHIVA type rather than the types it most resembles>",
     "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 4 / Type 5 / Type 1+2 / No shunt detected / Undetermined>",
     "confidence": <0.0-1.0>,
     "reasoning": ["<decision step 1>", "<decision step 2>", "..."],
