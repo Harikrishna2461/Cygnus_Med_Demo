@@ -358,25 +358,46 @@ _SUFFICIENCY_PROMPT = """A clinician typed this into a CHIVA venous shunt classi
 "{description}"
 
 ═══════════════════════════════════════════════════════════
-RULE 1 — CHECK THIS FIRST BEFORE ANYTHING ELSE:
-A description of a SINGLE flow event between two anatomical points is ALWAYS
-insufficient, even if it mentions direction or the word "reflux".
+THE ONLY TEST THAT MATTERS — APPLY THIS BEFORE ANYTHING ELSE:
+A sufficient description must explicitly cover BOTH of these components:
 
-These are all SINGLE-EVENT descriptions — all are INSUFFICIENT:
-  "There is a reflux from SFJ into GSV"      → one transition. INSUFFICIENT.
-  "Reflux at the SFJ"                        → one event label. INSUFFICIENT.
-  "Blood enters GSV at SFJ"                  → entry only. INSUFFICIENT.
-  "SFJ reflux into the GSV"                  → one transition. INSUFFICIENT.
-  "GSV refluxes"                             → one event, no entry point. INSUFFICIENT.
-  "Perforator enters the GSV"                → one event, no downstream. INSUFFICIENT.
-  "Blood flows backward in the GSV"          → one event, no entry point. INSUFFICIENT.
+  (A) ENTRY — WHERE and HOW blood enters the superficial venous system
+      e.g. "SFJ incompetent", "deep blood enters GSV at groin",
+           "perforator feeds mid-GSV", "deep blood enters a tributary directly"
 
-A sufficient description MUST contain at minimum TWO distinct flow events:
-  (1) WHERE/HOW blood enters the superficial system
-  (2) What happens DOWNSTREAM — GSV refluxes backward, blood escapes to a tributary,
-      tributary refluxes, or an explicit statement that no downstream reflux occurs.
+  (B) DOWNSTREAM — what blood DOES in the superficial system AFTER it enters
+      e.g. "GSV refluxes backward full-length", "blood escapes into a tributary",
+           "tributary drains back to deep", "no reflux detected downstream"
 
-If only ONE flow transition is described → verdict is "insufficient". No exceptions.
+If EITHER (A) or (B) is absent or too vague → INSUFFICIENT.
+This applies regardless of how many locations are mentioned, how many times the
+word "reflux" appears, or how many sentences the description has.
+
+INSUFFICIENT EXAMPLES — notice WHY each fails:
+  "There is a reflux from SFJ into GSV"
+      → Has (A) entry at SFJ. Missing (B): what does the GSV do downstream? INSUFFICIENT.
+  "There is SFJ reflux and the blood goes into the GSV"
+      → Has (A). Missing (B): does the GSV reflux backward? escape to a tributary? INSUFFICIENT.
+  "SFJ reflux and reflux in the GSV"
+      → Two findings listed. But (A) vague — is this entry or just a label? (B) vague — how far, which direction? INSUFFICIENT.
+  "The GSV is refluxing backward"
+      → Has (B) GSV reflux. Missing (A): what is driving this reflux? where does blood enter? INSUFFICIENT.
+  "Blood enters at SFJ and there is some reflux"
+      → Has (A). But (B) "some reflux" is too vague — where? which direction? INSUFFICIENT.
+  "Reflux grade 2 at SFJ, GSV incompetent"
+      → Severity grades and labels. Neither (A) nor (B) described as a flow path. INSUFFICIENT.
+  "SFJ incompetent"
+      → Finding label only. No (B) at all. INSUFFICIENT.
+
+SUFFICIENT EXAMPLES — notice what makes each one complete:
+  "SFJ incompetent, blood enters GSV at groin and the GSV refluxes backward full-length"
+      → (A) SFJ entry + (B) GSV trunk reflux. SUFFICIENT.
+  "Blood enters GSV at SFJ and escapes forward into a tributary, the tributary then refluxes back"
+      → (A) SFJ entry + (B) tributary escape and return. SUFFICIENT.
+  "Perforator at mid-thigh feeds the GSV, no reflux detected downstream"
+      → (A) perforator entry + (B) explicit no-reflux confirmation. SUFFICIENT.
+  "SFJ incompetent and the GSV refluxes backward, also a tributary escapes and drains back"
+      → (A) SFJ entry + (B) trunk reflux and tributary return. SUFFICIENT.
 ═══════════════════════════════════════════════════════════
 
 CHIVA classification requires knowing the actual blood flow path — not just that reflux exists, but where blood enters the superficial system, where it travels, and in what direction. Reporting findings (grades, labels, diagnoses) is NOT the same as describing a flow path.
