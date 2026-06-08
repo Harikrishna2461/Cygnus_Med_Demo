@@ -283,6 +283,39 @@ IMPORTANT DISTINCTIONS:
   - RP N3→N2 means tributary reflux back into GSV
   - RP N3→N1 means tributary/superficial reflux all the way back to deep system
 
+═══════════════════════════════════════════════════════════
+QUICK REFERENCE — WHAT EACH SHUNT TYPE REQUIRES:
+═══════════════════════════════════════════════════════════
+Use this to understand what flow information makes a complete description.
+
+  TYPE 1   = EP N1→N2  +  RP N2→N1
+             (SFJ/Hunterian entry into GSV  +  GSV trunk refluxes backward)
+
+  TYPE 2A  = EP N2→N3  only  (no RP required)
+             (GSV overflows forward into tributary; no reflux established yet)
+
+  TYPE 2B  = EP N2→N2  +  RP N3→N2 or RP N3→N1  (no RP N2→N1)
+             (perforator feeds GSV mid-segment + tributary reflux; trunk does NOT reflux)
+
+  TYPE 2C  = EP N2→N2  +  RP N3  +  RP N2→N1
+             (perforator entry + tributary reflux + GSV trunk also refluxes backward)
+
+  TYPE 3   = EP N1→N2  +  EP N2→N3  +  RP N3  (no RP N2→N1)
+             (SFJ entry + GSV escapes to tributary + tributary refluxes; trunk does NOT reflux)
+
+  TYPE 4   = EP N1→N3  +  RP N2→N1
+             (deep blood enters tributary directly, bypassing GSV + GSV trunk refluxes back)
+
+  TYPE 5   = EP N1→N3  +  RP N3→N1 or RP N3→N2
+             (deep blood enters tributary directly + reflux stays within tributaries)
+
+  TYPE 1+2 = EP N1→N2  +  EP N2→N3  +  RP N3  +  RP N2→N1  +  eliminationTest result
+             (dual entry at SFJ and tributary + both trunk and tributary reflux + test)
+
+  NO SHUNT = No RP findings anywhere
+             (all flow antegrade; sole exception is Type 2A which has EP N2→N3 only)
+═══════════════════════════════════════════════════════════
+
 === CLINICAL DESCRIPTION TO INTERPRET ===
 {description}
 
@@ -326,35 +359,70 @@ _SUFFICIENCY_PROMPT = """A clinician typed this into a CHIVA venous shunt classi
 
 CHIVA classification requires knowing the actual blood flow path — not just that reflux exists, but where blood enters the superficial system, where it travels, and in what direction. Reporting findings (grades, labels, diagnoses) is NOT the same as describing a flow path.
 
-Decide: does this input describe an actual blood flow path in enough detail to classify?
+=== CHIVA SHUNT TYPES AND THEIR REQUIRED FLOW INFORMATION ===
 
-INSUFFICIENT — reject all of these patterns:
-- Reflux grades without flow path: "Reflux grade 2 at SFJ", "GSV reflux grade 3" — a grade is a severity score, not a description of what blood does
-- Diagnosis or summary labels: "Chronic venous insufficiency with saphenous reflux", "Varicose veins with GSV incompetence"
-- Structural finding lists: "SFJ incompetent", "SFJ incompetent and GSV reflux", "Right leg GSV reflux grade 3, SFJ incompetent" — listing findings is NOT describing a flow path
-- Keyword lists or abbreviations: "GSV SFJ N1 N2", "SSV SFJ incompetent Groin"
-- Symptoms: "leg swelling", "varicose veins"
-- Gibberish or made-up notation
+  TYPE 1   needs: entry point from deep system into GSV (SFJ or Hunterian incompetent)
+                  PLUS GSV trunk refluxing backward toward deep system
+           Missing if: no mention of WHERE blood enters GSV, or no mention of GSV refluxing backward
 
-SUFFICIENT — only accept descriptions that explicitly describe the flow path:
-- "SFJ incompetent, blood enters GSV at groin and refluxes full-length to the knee" — entry point + flow path described
-- "There is reflux at the SFJ flowing into the GSV down to mid-thigh, exiting to a tributary" — complete circuit
-- "Perforator at mid-thigh feeds the GSV, no reflux detected downstream" — entry + downstream state
+  TYPE 2A  needs: GSV overflowing forward into a tributary (no reflux required yet)
+           Missing if: no mention of GSV discharging into a branch/tributary
 
-The critical test: does the input say WHERE blood enters AND WHERE/HOW it travels?
-If you only know reflux exists (by grade, label, or finding) but not the actual movement path — it is INSUFFICIENT.
-Listing multiple findings ("GSV reflux + SFJ incompetent") is still INSUFFICIENT if the flow path between them is not described.
+  TYPE 2B  needs: a perforator entering the GSV mid-segment (not the SFJ)
+                  PLUS tributary reflux draining back (without GSV trunk reflux)
+           Missing if: entry point not specified, or reflux direction/destination unclear
 
-Return ONE of three verdicts:
+  TYPE 2C  needs: perforator entry into GSV mid-segment
+                  PLUS both tributary reflux AND GSV trunk reflux
+           Missing if: entry point unclear, or not stated whether trunk refluxes
 
-"sufficient" — explicit flow path described, can classify
-"insufficient" — missing actual flow path description
+  TYPE 3   needs: entry from deep system at SFJ into GSV (SFJ incompetent)
+                  PLUS GSV escape into tributary PLUS tributary reflux
+                  PLUS confirmation GSV trunk itself does NOT reflux backward
+           Missing if: any of these three components not described
+
+  TYPE 4   needs: deep blood entering a tributary DIRECTLY (bypassing GSV entirely)
+                  PLUS GSV trunk refluxing backward
+           Missing if: whether GSV trunk is involved not stated
+
+  TYPE 5   needs: deep blood entering a tributary directly (bypassing GSV)
+                  PLUS reflux staying within tributaries (NOT using GSV trunk)
+           Missing if: return path of reflux not described
+
+  TYPE 1+2 needs: SFJ entry + tributary escape + tributary reflux + GSV trunk reflux
+                  PLUS the result of an elimination/compression test
+           Missing if: any component absent
+
+=== SUFFICIENCY RULES ===
+
+INSUFFICIENT — reject all of these:
+- Reflux grades: "Reflux grade 2 at SFJ", "GSV reflux grade 3" — grades are severity scores, not flow descriptions
+- Diagnosis labels: "Chronic venous insufficiency", "Varicose veins with GSV incompetence"
+- Structural finding lists: "SFJ incompetent", "GSV reflux grade 3, SFJ incompetent" — listing findings ≠ flow path
+- Abbreviations without context: "GSV SFJ N1 N2"
+- Symptoms only: "leg swelling", "varicose veins"
+
+SUFFICIENT — accept when ALL of these are described:
+- WHERE blood enters the superficial system (e.g., at SFJ, via perforator, directly to tributary)
+- WHERE/HOW it travels (e.g., forward along GSV, escapes to tributary)
+- WHERE/HOW it returns (e.g., GSV refluxes backward, tributary drains back, or no reflux)
+
+Return ONE verdict:
+
+"sufficient" — explicit, complete flow path described
+"insufficient" — flow path missing or incomplete
 "question" — question, greeting, or not a patient description
+
+If "insufficient", the "missing" field MUST be a detailed, verbose explanation structured as follows:
+1. State what was provided and exactly why it is insufficient
+2. List specifically what flow path information is missing
+3. Map the partial description to the shunt types it COULD represent, and state what each would additionally require
+4. Give a concrete example of what a sufficient description would look like for the most likely type
 
 Output ONLY valid JSON — no markdown:
 {{"verdict": "sufficient"}}
 or
-{{"verdict": "insufficient", "missing": "<one sentence describing what specific flow path information is needed>"}}
+{{"verdict": "insufficient", "missing": "<detailed multi-sentence explanation per structure above>"}}
 or
 {{"verdict": "question"}}"""
 

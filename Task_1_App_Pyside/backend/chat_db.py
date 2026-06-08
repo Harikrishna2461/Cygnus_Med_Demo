@@ -57,6 +57,21 @@ def _migrate_sessions_table():
         print(f"Migration warning: {e}")
 
 
+def _migrate_feedback_type():
+    """Add feedback_type column to feedback table without losing existing data."""
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.execute("PRAGMA table_info(feedback)")
+            columns = {row[1] for row in cursor.fetchall()}
+            if "feedback_type" not in columns:
+                conn.execute(
+                    "ALTER TABLE feedback ADD COLUMN feedback_type TEXT NOT NULL DEFAULT 'classification'"
+                )
+                conn.commit()
+    except Exception as e:
+        print(f"Migration warning (feedback_type): {e}")
+
+
 def init_db():
     with sqlite3.connect(DB_PATH) as conn:
         conn.executescript("""
@@ -97,6 +112,7 @@ def init_db():
                 doctor_feedback   TEXT,
                 doctor_rating     INTEGER CHECK(doctor_rating >= 1 AND doctor_rating <= 5),
                 created_at        TEXT NOT NULL,
+                feedback_type     TEXT NOT NULL DEFAULT 'classification',
                 FOREIGN KEY (session_id) REFERENCES sessions(session_id)
             );
         """)
@@ -104,6 +120,7 @@ def init_db():
 
     _migrate_sessions_table()
     _ensure_default_admin()
+    _migrate_feedback_type()
 
 
 def _now() -> str:
@@ -262,13 +279,14 @@ def save_feedback(
     ai_response: str,
     doctor_feedback: str = "",
     doctor_rating: int | None = None,
+    feedback_type: str = "classification",
 ) -> str:
     fid = str(uuid.uuid4())
     now = _now()
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute(
-            "INSERT INTO feedback VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (fid, session_id, doctor_question, ai_response, doctor_feedback or None, doctor_rating, now),
+            "INSERT INTO feedback (feedback_id, session_id, doctor_question, ai_response, doctor_feedback, doctor_rating, created_at, feedback_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (fid, session_id, doctor_question, ai_response, doctor_feedback or None, doctor_rating, now, feedback_type),
         )
         conn.commit()
     _sheets.log_feedback(fid, session_id, doctor_question, ai_response, doctor_feedback or "", doctor_rating, now)

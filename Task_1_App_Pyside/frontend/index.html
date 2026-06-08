@@ -412,6 +412,43 @@
 
     .feedback-success { background: var(--green-100); border: 1px solid var(--green-600); color: var(--green-600); padding: 10px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-align: center; }
 
+    /* ── Insufficient info card ─────────────────────────────────────────── */
+    .insufficient-card {
+      background: #fffbeb; border: 1px solid var(--amber-600);
+      border-radius: 10px; padding: 16px; margin-top: 4px;
+    }
+    .insufficient-header {
+      font-size: 13px; font-weight: 700; color: var(--amber-600);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    .insufficient-body {
+      font-size: 12.5px; color: var(--slate-700); line-height: 1.6;
+      white-space: pre-wrap; word-break: break-word; margin-bottom: 14px;
+    }
+    .insufficient-input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--amber-600);
+      border-radius: 7px; font-size: 13px; font-family: inherit;
+      resize: vertical; min-height: 80px; margin-bottom: 10px;
+      outline: none; transition: border-color .15s; background: var(--white);
+    }
+    .insufficient-input:focus { border-color: var(--blue-600); }
+    .insufficient-submit {
+      padding: 9px 18px; background: var(--blue-600); color: var(--white);
+      border: none; border-radius: 7px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background .15s;
+    }
+    .insufficient-submit:hover { background: var(--blue-700); }
+
+    /* ── Inline feedback forms (classification & ligation) ──────────────── */
+    .fb-section {
+      background: var(--slate-50); border-top: 1px solid var(--slate-200);
+      padding: 12px 14px;
+    }
+    .fb-section-label {
+      font-size: 10.5px; font-weight: 700; color: var(--slate-500);
+      text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px;
+    }
+
     /* ── Misc ───────────────────────────────────────────────────────────── */
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -745,7 +782,9 @@ async function sendMessage() {
     return;
   }
 
-  if (data.type === 'clinical') {
+  if (data.type === 'insufficient') {
+    appendInsufficient(data);
+  } else if (data.type === 'clinical') {
     appendClinicalResult(data);
   } else if (data.type === 'conversational' || data.type === 'general') {
     appendBubble('bot', data.conversational_response, null);
@@ -865,6 +904,37 @@ function renderMessage(role, content, metadata) {
   }
 }
 
+function appendInsufficient(data) {
+  const wrap = document.getElementById('messages-wrap');
+  const missingInfo = data.missing_info || data.conversational_response || '';
+  const iid = 'ins-' + Math.random().toString(36).slice(2, 8);
+  const el = document.createElement('div');
+  el.className = 'msg-row';
+  el.innerHTML = `
+    <div class="avatar bot">AI</div>
+    <div class="msg-bubble" style="max-width:92%;padding:0;background:transparent;border:none;">
+      <div class="insufficient-card">
+        <div class="insufficient-header">⚠ More information needed to classify</div>
+        <div class="insufficient-body">${escHtml(missingInfo)}</div>
+        <div style="font-size:11px;color:var(--slate-500);margin-bottom:6px;font-weight:600;">ADD MISSING DETAILS BELOW:</div>
+        <textarea id="${iid}" class="insufficient-input" placeholder="Describe the missing flow information here (e.g. 'The GSV refluxes full-length to the knee…')"></textarea>
+        <button class="insufficient-submit" onclick="sendSupplementalInfo('${iid}')">Send Updated Description</button>
+      </div>
+    </div>`;
+  wrap.appendChild(el);
+  wrap.scrollTop = wrap.scrollHeight;
+  document.getElementById(iid)?.focus();
+}
+
+function sendSupplementalInfo(textareaId) {
+  const ta = document.getElementById(textareaId);
+  if (!ta) return;
+  const text = ta.value.trim();
+  if (!text) { ta.focus(); return; }
+  ta.closest('.msg-row').remove();
+  sendMessage(text);
+}
+
 function appendClinicalResult(data) {
   const wrap = document.getElementById('messages-wrap');
   const el = document.createElement('div');
@@ -879,32 +949,22 @@ function appendClinicalResult(data) {
       ${buildClinicalHTML(data, doctorQuestion)}
     </div>`;
 
-  // Store data on the feedback form element
   wrap.appendChild(el);
-  const fbForm = el.querySelector('.feedback-form');
-  if (fbForm) {
+  // Set feedback data on every feedback form in this result
+  el.querySelectorAll('.feedback-form').forEach(fbForm => {
     fbForm._doctorQuestion = doctorQuestion;
-    fbForm._aiResponse = summaryText;
     fbForm._sessionId = currentSessionId;
-    console.log('Stored feedback data on element:', {
-      doctorQuestion: doctorQuestion.substring(0, 50),
-      aiResponse: summaryText.substring(0, 50),
-      sessionId: currentSessionId,
-    });
-  }
+    const fbType = fbForm.dataset.feedbackType || 'classification';
+    fbForm._feedbackType = fbType;
+    fbForm._aiResponse = fbType === 'ligation'
+      ? (summaryText + ' — Ligation Plan')
+      : summaryText;
+  });
 }
 
 function buildClinicalHTML(data, doctorQuestion = '') {
   const findings = data.findings || [];
   const interp = data.interpretation || '';
-  const summaryText = buildSummaryText(data);
-  const fbId = 'fb-' + Math.random().toString(36).slice(2, 8);
-
-  console.log('Building feedback form with:', {
-    doctorQuestion: doctorQuestion.substring(0, 50),
-    summaryText: summaryText.substring(0, 50),
-    sessionId: currentSessionId,
-  });
 
   let html = '<div class="clinical-result">';
 
@@ -920,26 +980,6 @@ function buildClinicalHTML(data, doctorQuestion = '') {
   findings.forEach(f => {
     html += buildFindingHTML(f, findings.length > 1);
   });
-
-  // Feedback form
-  html += `<div class="feedback-form" id="${fbId}">
-    <label class="fb-label">Provide Feedback</label>
-    <textarea placeholder="Enter any feedback, concerns, or suggestions about this classification…" class="fb-textarea" data-fb-id="${fbId}"></textarea>
-    <div style="margin-bottom: 10px;">
-      <div style="font-size: 11px; color: var(--slate-600); margin-bottom: 6px; font-weight: 600;">Rate this response (1-5):</div>
-      <div class="rating-group" data-fb-id="${fbId}">
-        <button class="rating-star" data-rating="1" onclick="selectRating(this, '${fbId}')">1</button>
-        <button class="rating-star" data-rating="2" onclick="selectRating(this, '${fbId}')">2</button>
-        <button class="rating-star" data-rating="3" onclick="selectRating(this, '${fbId}')">3</button>
-        <button class="rating-star" data-rating="4" onclick="selectRating(this, '${fbId}')">4</button>
-        <button class="rating-star" data-rating="5" onclick="selectRating(this, '${fbId}')">5</button>
-      </div>
-    </div>
-    <div class="feedback-buttons">
-      <button class="feedback-btn submit" onclick="submitFeedback('${fbId}')">Submit Feedback</button>
-      <button class="feedback-btn cancel" onclick="clearFeedback('${fbId}')">Clear</button>
-    </div>
-  </div>`;
 
   html += '</div>';
   return html;
@@ -1002,6 +1042,25 @@ function buildFindingHTML(f, showLegLabel) {
       </ul>
     </div>`;
   }
+  // Classification feedback
+  const clsFbId = 'fb-cls-' + uid;
+  html += `
+  <div class="fb-section">
+    <div class="fb-section-label">Classification Feedback</div>
+    <div class="feedback-form" id="${clsFbId}" data-feedback-type="classification">
+      <textarea placeholder="Feedback on the shunt classification…" class="fb-textarea" data-fb-id="${clsFbId}"></textarea>
+      <div style="margin:6px 0 8px;">
+        <div style="font-size:11px;color:var(--slate-500);margin-bottom:5px;font-weight:600;">Rate (1–5):</div>
+        <div class="rating-group" data-fb-id="${clsFbId}">
+          ${[1,2,3,4,5].map(n=>`<button class="rating-star" data-rating="${n}" onclick="selectRating(this,'${clsFbId}')">${n}</button>`).join('')}
+        </div>
+      </div>
+      <div class="feedback-buttons">
+        <button class="feedback-btn submit" onclick="submitFeedback('${clsFbId}')">Submit</button>
+        <button class="feedback-btn cancel" onclick="clearFeedback('${clsFbId}')">Clear</button>
+      </div>
+    </div>
+  </div>`;
   html += '</div>'; // close class-card
 
   // Ligation card — skip entirely for no-intervention types
@@ -1029,6 +1088,25 @@ function buildFindingHTML(f, showLegLabel) {
         <p class="text-block">${escHtml(f.followup_schedule)}</p>
       </div>`;
     }
+    // Ligation feedback
+    const ligFbId = 'fb-lig-' + uid;
+    html += `
+  <div class="fb-section">
+    <div class="fb-section-label">Treatment Plan Feedback</div>
+    <div class="feedback-form" id="${ligFbId}" data-feedback-type="ligation">
+      <textarea placeholder="Feedback on the treatment plan…" class="fb-textarea" data-fb-id="${ligFbId}"></textarea>
+      <div style="margin:6px 0 8px;">
+        <div style="font-size:11px;color:var(--slate-500);margin-bottom:5px;font-weight:600;">Rate (1–5):</div>
+        <div class="rating-group" data-fb-id="${ligFbId}">
+          ${[1,2,3,4,5].map(n=>`<button class="rating-star" data-rating="${n}" onclick="selectRating(this,'${ligFbId}')">${n}</button>`).join('')}
+        </div>
+      </div>
+      <div class="feedback-buttons">
+        <button class="feedback-btn submit" onclick="submitFeedback('${ligFbId}')">Submit</button>
+        <button class="feedback-btn cancel" onclick="clearFeedback('${ligFbId}')">Clear</button>
+      </div>
+    </div>
+  </div>`;
     html += '</div>'; // close lig-card
   } else {
     html += `
@@ -1078,6 +1156,25 @@ function buildFindingHTML(f, showLegLabel) {
         </ul>
       </div>`;
     }
+    // Ligation feedback
+    const ligFbId2 = 'fb-lig2-' + uid;
+    html += `
+  <div class="fb-section">
+    <div class="fb-section-label">Treatment Plan Feedback</div>
+    <div class="feedback-form" id="${ligFbId2}" data-feedback-type="ligation">
+      <textarea placeholder="Feedback on the treatment plan…" class="fb-textarea" data-fb-id="${ligFbId2}"></textarea>
+      <div style="margin:6px 0 8px;">
+        <div style="font-size:11px;color:var(--slate-500);margin-bottom:5px;font-weight:600;">Rate (1–5):</div>
+        <div class="rating-group" data-fb-id="${ligFbId2}">
+          ${[1,2,3,4,5].map(n=>`<button class="rating-star" data-rating="${n}" onclick="selectRating(this,'${ligFbId2}')">${n}</button>`).join('')}
+        </div>
+      </div>
+      <div class="feedback-buttons">
+        <button class="feedback-btn submit" onclick="submitFeedback('${ligFbId2}')">Submit</button>
+        <button class="feedback-btn cancel" onclick="clearFeedback('${ligFbId2}')">Clear</button>
+      </div>
+    </div>
+  </div>`;
     html += '</div>'; // close lig-card
   }
   html += '</div>'; // close finding-block
@@ -1216,6 +1313,7 @@ async function submitFeedback(fbId) {
     ai_response: aiResponse,
     doctor_feedback: feedback,
     doctor_rating: rating,
+    feedback_type: container._feedbackType || container.dataset.feedbackType || 'classification',
   };
 
   console.log('Submitting feedback:', payload);

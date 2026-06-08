@@ -31,6 +31,9 @@ def api_submit_feedback():
     ai_response = (data.get("ai_response") or "").strip()
     doctor_feedback = (data.get("doctor_feedback") or "").strip()
     doctor_rating = data.get("doctor_rating")
+    feedback_type = (data.get("feedback_type") or "classification").strip()
+    if feedback_type not in ("classification", "ligation"):
+        feedback_type = "classification"
 
     logger.info(
         f"Feedback: session={session_id[:20] if session_id else 'EMPTY'}, "
@@ -58,5 +61,6 @@ def api_submit_feedback():
         ai_response=ai_response,
         doctor_feedback=doctor_feedback,
         doctor_rating=doctor_rating,
+        feedback_type=feedback_type,
     )
     return jsonify({"feedback_id": feedback_id, "status": "saved"})

@@ -72,15 +72,16 @@ def api_chat():
             missing_info
             if missing_info
             else (
-                "I don't have enough clinical information to perform a CHIVA classification. "
-                "Please describe the specific venous flow findings from duplex scan — for example, "
-                "whether the SFJ is competent or incompetent, the flow direction in the GSV "
-                "(antegrade or reflux), and any tributary or perforator involvement."
+                "To classify this case I need a complete flow path description from your duplex scan. "
+                "Please describe: (1) where blood enters the superficial system (e.g. SFJ incompetent, perforator entry, direct deep-to-tributary), "
+                "(2) how it travels (e.g. forward along GSV, escapes into tributary), and "
+                "(3) whether and where reflux occurs (e.g. GSV refluxes backward, tributary drains back, no reflux anywhere)."
             )
         )
         save_message(session_id, "assistant", decline_msg)
         return jsonify({
-            "type": "conversational",
+            "type": "insufficient",
+            "missing_info": decline_msg,
             "conversational_response": decline_msg,
             "message_id": user_msg_id,
         })
