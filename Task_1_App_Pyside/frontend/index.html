@@ -255,13 +255,17 @@
     .reasoning-list li::before { content: counter(li) ". "; counter-increment: li; font-weight: 700; color: var(--blue-600); }
     .reasoning-list { counter-reset: li; }
 
-    /* ── Chain-of-thought block ─────────────────────────────────────────── */
-    .cot-content {
-      white-space: pre-wrap; word-break: break-word;
-      font-family: "SF Mono", "Fira Code", Consolas, monospace;
-      font-size: 12px; line-height: 1.6; color: var(--slate-700);
-      background: #fffbeb; border-left: 3px solid var(--amber-600);
-      border-radius: 0 6px 6px 0; padding: 10px 12px;
+    /* ── Model Thinking block ───────────────────────────────────────────── */
+    .cot-list { list-style: none; display: flex; flex-direction: column; gap: 5px; padding: 0; margin: 0; }
+    .cot-list li {
+      padding: 7px 10px 7px 30px; background: #fffbeb;
+      border-left: 3px solid var(--amber-600); border-radius: 0 6px 6px 0;
+      font-size: 12.5px; color: var(--slate-700); line-height: 1.5;
+      position: relative; word-break: break-word;
+    }
+    .cot-list li::before {
+      content: '→'; position: absolute; left: 9px;
+      color: var(--amber-600); font-weight: 700;
     }
     .section-toggle.cot-toggle { color: var(--amber-600); }
     .section-toggle.cot-toggle:hover { background: var(--amber-100); }
@@ -932,7 +936,9 @@ function sendSupplementalInfo(textareaId) {
   const text = ta.value.trim();
   if (!text) { ta.focus(); return; }
   ta.closest('.msg-row').remove();
-  sendMessage(text);
+  const input = document.getElementById('msg-input');
+  input.value = text;
+  sendMessage();
 }
 
 function appendClinicalResult(data) {
@@ -1022,12 +1028,13 @@ function buildFindingHTML(f, showLegLabel) {
   html += `</div>`;
 
   if (cot) {
+    const cotBullets = cot.split('\n').filter(l => l.trim()).map(l => `<li>${escHtml(l.trim())}</li>`).join('');
     html += `
     <button class="section-toggle cot-toggle" onclick="toggleSection('${uid}-cot', this)">
-      Chain of Thought <span class="chevron">▼</span>
+      Model Thinking <span class="chevron">▼</span>
     </button>
     <div class="section-body" id="${uid}-cot">
-      <div class="cot-content">${escHtml(cot)}</div>
+      <ul class="cot-list">${cotBullets}</ul>
     </div>`;
   }
 
