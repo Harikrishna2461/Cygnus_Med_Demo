@@ -357,6 +357,28 @@ _SUFFICIENCY_PROMPT = """A clinician typed this into a CHIVA venous shunt classi
 
 "{description}"
 
+═══════════════════════════════════════════════════════════
+RULE 1 — CHECK THIS FIRST BEFORE ANYTHING ELSE:
+A description of a SINGLE flow event between two anatomical points is ALWAYS
+insufficient, even if it mentions direction or the word "reflux".
+
+These are all SINGLE-EVENT descriptions — all are INSUFFICIENT:
+  "There is a reflux from SFJ into GSV"      → one transition. INSUFFICIENT.
+  "Reflux at the SFJ"                        → one event label. INSUFFICIENT.
+  "Blood enters GSV at SFJ"                  → entry only. INSUFFICIENT.
+  "SFJ reflux into the GSV"                  → one transition. INSUFFICIENT.
+  "GSV refluxes"                             → one event, no entry point. INSUFFICIENT.
+  "Perforator enters the GSV"                → one event, no downstream. INSUFFICIENT.
+  "Blood flows backward in the GSV"          → one event, no entry point. INSUFFICIENT.
+
+A sufficient description MUST contain at minimum TWO distinct flow events:
+  (1) WHERE/HOW blood enters the superficial system
+  (2) What happens DOWNSTREAM — GSV refluxes backward, blood escapes to a tributary,
+      tributary refluxes, or an explicit statement that no downstream reflux occurs.
+
+If only ONE flow transition is described → verdict is "insufficient". No exceptions.
+═══════════════════════════════════════════════════════════
+
 CHIVA classification requires knowing the actual blood flow path — not just that reflux exists, but where blood enters the superficial system, where it travels, and in what direction. Reporting findings (grades, labels, diagnoses) is NOT the same as describing a flow path.
 
 === CHIVA SHUNT TYPES AND THEIR REQUIRED FLOW INFORMATION ===
@@ -535,7 +557,7 @@ def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
         check_raw, _ = call_llm_fn(
             _SUFFICIENCY_PROMPT.format(description=user_message.strip()),
             return_usage=True,
-            max_tokens=200,
+            max_tokens=800,
         )
         check = json.loads(_clean_json(check_raw))
         verdict = check.get("verdict", "sufficient")
