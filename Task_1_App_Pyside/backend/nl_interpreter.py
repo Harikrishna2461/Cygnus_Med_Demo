@@ -395,17 +395,39 @@ CHIVA classification requires knowing the actual blood flow path — not just th
 
 === SUFFICIENCY RULES ===
 
-INSUFFICIENT — reject all of these:
+CORE RULE — A SINGLE FLOW EVENT IS ALWAYS INSUFFICIENT:
+CHIVA classification requires knowing a complete hemodynamic circuit. That means at minimum
+TWO distinct flow events must be described:
+  (1) WHERE blood enters the superficial system
+  (2) What happens DOWNSTREAM — does the GSV reflux backward? does blood escape to a tributary?
+      does a tributary reflux? OR an explicit statement that no reflux occurs anywhere.
+
+A description that names only ONE transition between two anatomical points — even if it mentions
+direction or the word "reflux" — is INSUFFICIENT. Examples:
+  "There is a reflux from SFJ into GSV"          → ONE event. No downstream GSV behaviour stated. INSUFFICIENT.
+  "Reflux at the SFJ"                            → ONE event label. No circuit. INSUFFICIENT.
+  "Blood enters GSV at SFJ"                      → Entry only. No downstream. INSUFFICIENT.
+  "SFJ reflux into the GSV"                      → One transition. No downstream. INSUFFICIENT.
+  "GSV refluxes"                                 → One event. No entry point or source. INSUFFICIENT.
+  "Blood flows backward in the GSV to the knee"  → One event. No entry point stated. INSUFFICIENT.
+  "Perforator enters the GSV"                    → One event. No downstream reflux/escape. INSUFFICIENT.
+
+Notice: "There is a reflux from SFJ into GSV" contains the word "reflux" and mentions two
+anatomical locations (SFJ and GSV), but it is still ONE event. The word "from SFJ into GSV"
+describes where this single event happens — it does NOT describe what the blood does IN the GSV
+after it enters. That downstream behaviour is missing.
+
+INSUFFICIENT — also reject all of these:
 - Reflux grades: "Reflux grade 2 at SFJ", "GSV reflux grade 3" — grades are severity scores, not flow descriptions
 - Diagnosis labels: "Chronic venous insufficiency", "Varicose veins with GSV incompetence"
-- Structural finding lists: "SFJ incompetent", "GSV reflux grade 3, SFJ incompetent" — listing findings ≠ flow path
+- Structural finding lists: "SFJ incompetent", "SFJ incompetent and GSV reflux" — listing labels ≠ flow path
 - Abbreviations without context: "GSV SFJ N1 N2"
 - Symptoms only: "leg swelling", "varicose veins"
 
-SUFFICIENT — accept when ALL of these are described:
-- WHERE blood enters the superficial system (e.g., at SFJ, via perforator, directly to tributary)
-- WHERE/HOW it travels (e.g., forward along GSV, escapes to tributary)
-- WHERE/HOW it returns (e.g., GSV refluxes backward, tributary drains back, or no reflux)
+SUFFICIENT — accept ONLY when the description explicitly covers a complete circuit:
+- Entry: WHERE and HOW blood enters the superficial system
+- Downstream: what happens AFTER entry (GSV refluxes backward / blood escapes to tributary / tributary refluxes / no reflux confirmed)
+Both components must be present. If either is absent, verdict is "insufficient".
 
 Return ONE verdict:
 
