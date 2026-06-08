@@ -54,3 +54,11 @@ LOG_FILE = str(BASE_DIR / "cmed_chat.log")
 #   e.g. https://docs.google.com/spreadsheets/d/<THIS_PART>/edit
 GOOGLE_SHEETS_CREDENTIALS_FILE = os.getenv("GOOGLE_SHEETS_CREDENTIALS_FILE", "")
 GOOGLE_SHEETS_ID = os.getenv("GOOGLE_SHEETS_ID", "")
+
+# CORS — set to specific origin(s) to restrict, or "*" to allow all (production default)
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
+
+# Auth
+SECRET_KEY = os.getenv("SECRET_KEY", "change-this-in-production-use-a-long-random-string")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")

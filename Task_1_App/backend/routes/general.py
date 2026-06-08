@@ -1,4 +1,5 @@
 import logging
+from auth import login_required
 from flask import Blueprint, jsonify, request
 
 from chat_db import save_message, get_messages, update_session_title
@@ -66,6 +67,7 @@ Use the appropriate format based on question complexity. Do not copy chunks. Rea
 
 
 @bp.route("/api/general-chat", methods=["POST"])
+@login_required
 def api_general_chat():
     try:
         data = request.get_json(force=True, silent=False)

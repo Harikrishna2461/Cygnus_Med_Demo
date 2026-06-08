@@ -3,6 +3,8 @@
 
 flask>=3.0.0
 flask-cors>=4.0.0
+werkzeug>=3.0.0
+gunicorn>=21.0.0
 groq>=0.15.0
 qdrant-client>=1.9.0
 requests>=2.31.0
@@ -11,8 +13,9 @@ numpy>=1.26.0
 # RAG Stage 1b: BM25 keyword search
 rank-bm25>=0.2.2
 
-# RAG Stage 2: cross-encoder reranking (~80MB model downloaded on first use)
-sentence-transformers>=3.0.0
+# RAG Stage 2: cross-encoder reranking (~2GB, requires torch)
+# Only install locally. On server set CROSS_ENCODER_ENABLED=False in .env to skip loading.
+# sentence-transformers>=3.0.0
 
 # Knowledge base ingestion
 PyPDF2>=3.0.0

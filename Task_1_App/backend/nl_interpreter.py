@@ -283,6 +283,39 @@ IMPORTANT DISTINCTIONS:
   - RP N3→N2 means tributary reflux back into GSV
   - RP N3→N1 means tributary/superficial reflux all the way back to deep system
 
+═══════════════════════════════════════════════════════════
+QUICK REFERENCE — WHAT EACH SHUNT TYPE REQUIRES:
+═══════════════════════════════════════════════════════════
+Use this to understand what flow information makes a complete description.
+
+  TYPE 1   = EP N1→N2  +  RP N2→N1
+             (SFJ/Hunterian entry into GSV  +  GSV trunk refluxes backward)
+
+  TYPE 2A  = EP N2→N3  only  (no RP required)
+             (GSV overflows forward into tributary; no reflux established yet)
+
+  TYPE 2B  = EP N2→N2  +  RP N3→N2 or RP N3→N1  (no RP N2→N1)
+             (perforator feeds GSV mid-segment + tributary reflux; trunk does NOT reflux)
+
+  TYPE 2C  = EP N2→N2  +  RP N3  +  RP N2→N1
+             (perforator entry + tributary reflux + GSV trunk also refluxes backward)
+
+  TYPE 3   = EP N1→N2  +  EP N2→N3  +  RP N3  (no RP N2→N1)
+             (SFJ entry + GSV escapes to tributary + tributary refluxes; trunk does NOT reflux)
+
+  TYPE 4   = EP N1→N3  +  RP N2→N1
+             (deep blood enters tributary directly, bypassing GSV + GSV trunk refluxes back)
+
+  TYPE 5   = EP N1→N3  +  RP N3→N1 or RP N3→N2
+             (deep blood enters tributary directly + reflux stays within tributaries)
+
+  TYPE 1+2 = EP N1→N2  +  EP N2→N3  +  RP N3  +  RP N2→N1  +  eliminationTest result
+             (dual entry at SFJ and tributary + both trunk and tributary reflux + test)
+
+  NO SHUNT = No RP findings anywhere
+             (all flow antegrade; sole exception is Type 2A which has EP N2→N3 only)
+═══════════════════════════════════════════════════════════
+
 === CLINICAL DESCRIPTION TO INTERPRET ===
 {description}
 
@@ -293,23 +326,20 @@ IMPORTANT DISTINCTIONS:
 4. Use the mappings above to assign EP/RP and N1/N2/N3 notation.
 5. Estimate posYRatio from anatomical location clues.
 6. If left/right leg is explicitly mentioned, assign legSide accordingly. If NOT mentioned, use "Unspecified" — never assume or default to Left or Right.
-7. If the description is NOT about patient venous anatomy (e.g., it is a question,
-   a greeting, or asks about a concept without describing a patient), set is_clinical=false.
-8. Apply Critical Rule 1: perforator entering GSV = EP N2→N2, UNLESS the description uses the
+7. Apply Critical Rule 1: perforator entering GSV = EP N2→N2, UNLESS the description uses the
    exact phrase "connects the deep system to the GSV" or calls the Hunterian perforator incompetent.
    "from the deep system" or "from a deep perforating vessel" = anatomical description → EP N2→N2.
-9. Apply Critical Rule 2: generate RP findings ONLY when backward/retrograde/reflux is explicitly stated.
+8. Apply Critical Rule 2: generate RP findings ONLY when backward/retrograde/reflux is explicitly stated.
    "No reflux in [specific vessel]" is a partial statement — do NOT suppress RP findings in other vessels.
-10. Apply Critical Rule 2B: do NOT add eliminationTest unless the description explicitly describes
-    performing a compression/elimination test and states its result. Use "Reflux" when compression
-    ABOLISHED tributary reflux (confirming GSV is the source). Use "No Reflux" when reflux PERSISTED.
-11. CRITICAL — RP N2→N1 is separate from EP N1→N2: When "GSV refluxes" / "full-length GSV reflux" /
+9. Apply Critical Rule 2B: do NOT add eliminationTest unless the description explicitly describes
+   performing a compression/elimination test and states its result. Use "Reflux" when compression
+   ABOLISHED tributary reflux (confirming GSV is the source). Use "No Reflux" when reflux PERSISTED.
+10. CRITICAL — RP N2→N1 is separate from EP N1→N2: When "GSV refluxes" / "full-length GSV reflux" /
     "GSV carries blood backward" is EXPLICITLY stated, always generate RP N2→N1 as a separate clip
     in addition to EP N1→N2. These are two different flow events at two different clip positions.
 
 Output ONLY valid JSON — no markdown, no explanation:
 {{
-    "is_clinical": true,
     "interpretation": "<2-3 sentences summarising the findings in CHIVA terms>",
     "clips": [
         {{
@@ -321,14 +351,145 @@ Output ONLY valid JSON — no markdown, no explanation:
             "legSide": "Unspecified"
         }}
     ]
-}}
-
-If not clinical:
-{{
-    "is_clinical": false,
-    "interpretation": null,
-    "clips": []
 }}"""
+
+_SUFFICIENCY_PROMPT = """A clinician typed this into a CHIVA venous shunt classification tool:
+
+"{description}"
+
+═══════════════════════════════════════════════════════════
+THE ONLY TEST THAT MATTERS — APPLY THIS BEFORE ANYTHING ELSE:
+A sufficient description must explicitly cover BOTH of these components:
+
+  (A) ENTRY — WHERE and HOW blood enters the superficial venous system
+      e.g. "SFJ incompetent", "deep blood enters GSV at groin",
+           "perforator feeds mid-GSV", "deep blood enters a tributary directly"
+
+  (B) DOWNSTREAM — what blood DOES in the superficial system AFTER it enters
+      e.g. "GSV refluxes backward full-length", "blood escapes into a tributary",
+           "tributary drains back to deep", "no reflux detected downstream"
+
+If EITHER (A) or (B) is absent or too vague → INSUFFICIENT.
+This applies regardless of how many locations are mentioned, how many times the
+word "reflux" appears, or how many sentences the description has.
+
+INSUFFICIENT EXAMPLES — notice WHY each fails:
+  "There is a reflux from SFJ into GSV"
+      → Has (A) entry at SFJ. Missing (B): what does the GSV do downstream? INSUFFICIENT.
+  "There is SFJ reflux and the blood goes into the GSV"
+      → Has (A). Missing (B): does the GSV reflux backward? escape to a tributary? INSUFFICIENT.
+  "SFJ reflux and reflux in the GSV"
+      → Two findings listed. But (A) vague — is this entry or just a label? (B) vague — how far, which direction? INSUFFICIENT.
+  "The GSV is refluxing backward"
+      → Has (B) GSV reflux. Missing (A): what is driving this reflux? where does blood enter? INSUFFICIENT.
+  "Blood enters at SFJ and there is some reflux"
+      → Has (A). But (B) "some reflux" is too vague — where? which direction? INSUFFICIENT.
+  "Reflux grade 2 at SFJ, GSV incompetent"
+      → Severity grades and labels. Neither (A) nor (B) described as a flow path. INSUFFICIENT.
+  "SFJ incompetent"
+      → Finding label only. No (B) at all. INSUFFICIENT.
+
+SUFFICIENT EXAMPLES — notice what makes each one complete:
+  "SFJ incompetent, blood enters GSV at groin and the GSV refluxes backward full-length"
+      → (A) SFJ entry + (B) GSV trunk reflux. SUFFICIENT.
+  "Blood enters GSV at SFJ and escapes forward into a tributary, the tributary then refluxes back"
+      → (A) SFJ entry + (B) tributary escape and return. SUFFICIENT.
+  "Perforator at mid-thigh feeds the GSV, no reflux detected downstream"
+      → (A) perforator entry + (B) explicit no-reflux confirmation. SUFFICIENT.
+  "SFJ incompetent and the GSV refluxes backward, also a tributary escapes and drains back"
+      → (A) SFJ entry + (B) trunk reflux and tributary return. SUFFICIENT.
+═══════════════════════════════════════════════════════════
+
+CHIVA classification requires knowing the actual blood flow path — not just that reflux exists, but where blood enters the superficial system, where it travels, and in what direction. Reporting findings (grades, labels, diagnoses) is NOT the same as describing a flow path.
+
+=== CHIVA SHUNT TYPES AND THEIR REQUIRED FLOW INFORMATION ===
+
+  TYPE 1   needs: entry point from deep system into GSV (SFJ or Hunterian incompetent)
+                  PLUS GSV trunk refluxing backward toward deep system
+           Missing if: no mention of WHERE blood enters GSV, or no mention of GSV refluxing backward
+
+  TYPE 2A  needs: GSV overflowing forward into a tributary (no reflux required yet)
+           Missing if: no mention of GSV discharging into a branch/tributary
+
+  TYPE 2B  needs: a perforator entering the GSV mid-segment (not the SFJ)
+                  PLUS tributary reflux draining back (without GSV trunk reflux)
+           Missing if: entry point not specified, or reflux direction/destination unclear
+
+  TYPE 2C  needs: perforator entry into GSV mid-segment
+                  PLUS both tributary reflux AND GSV trunk reflux
+           Missing if: entry point unclear, or not stated whether trunk refluxes
+
+  TYPE 3   needs: entry from deep system at SFJ into GSV (SFJ incompetent)
+                  PLUS GSV escape into tributary PLUS tributary reflux
+                  PLUS confirmation GSV trunk itself does NOT reflux backward
+           Missing if: any of these three components not described
+
+  TYPE 4   needs: deep blood entering a tributary DIRECTLY (bypassing GSV entirely)
+                  PLUS GSV trunk refluxing backward
+           Missing if: whether GSV trunk is involved not stated
+
+  TYPE 5   needs: deep blood entering a tributary directly (bypassing GSV)
+                  PLUS reflux staying within tributaries (NOT using GSV trunk)
+           Missing if: return path of reflux not described
+
+  TYPE 1+2 needs: SFJ entry + tributary escape + tributary reflux + GSV trunk reflux
+                  PLUS the result of an elimination/compression test
+           Missing if: any component absent
+
+=== SUFFICIENCY RULES ===
+
+CORE RULE — A SINGLE FLOW EVENT IS ALWAYS INSUFFICIENT:
+CHIVA classification requires knowing a complete hemodynamic circuit. That means at minimum
+TWO distinct flow events must be described:
+  (1) WHERE blood enters the superficial system
+  (2) What happens DOWNSTREAM — does the GSV reflux backward? does blood escape to a tributary?
+      does a tributary reflux? OR an explicit statement that no reflux occurs anywhere.
+
+A description that names only ONE transition between two anatomical points — even if it mentions
+direction or the word "reflux" — is INSUFFICIENT. Examples:
+  "There is a reflux from SFJ into GSV"          → ONE event. No downstream GSV behaviour stated. INSUFFICIENT.
+  "Reflux at the SFJ"                            → ONE event label. No circuit. INSUFFICIENT.
+  "Blood enters GSV at SFJ"                      → Entry only. No downstream. INSUFFICIENT.
+  "SFJ reflux into the GSV"                      → One transition. No downstream. INSUFFICIENT.
+  "GSV refluxes"                                 → One event. No entry point or source. INSUFFICIENT.
+  "Blood flows backward in the GSV to the knee"  → One event. No entry point stated. INSUFFICIENT.
+  "Perforator enters the GSV"                    → One event. No downstream reflux/escape. INSUFFICIENT.
+
+Notice: "There is a reflux from SFJ into GSV" contains the word "reflux" and mentions two
+anatomical locations (SFJ and GSV), but it is still ONE event. The word "from SFJ into GSV"
+describes where this single event happens — it does NOT describe what the blood does IN the GSV
+after it enters. That downstream behaviour is missing.
+
+INSUFFICIENT — also reject all of these:
+- Reflux grades: "Reflux grade 2 at SFJ", "GSV reflux grade 3" — grades are severity scores, not flow descriptions
+- Diagnosis labels: "Chronic venous insufficiency", "Varicose veins with GSV incompetence"
+- Structural finding lists: "SFJ incompetent", "SFJ incompetent and GSV reflux" — listing labels ≠ flow path
+- Abbreviations without context: "GSV SFJ N1 N2"
+- Symptoms only: "leg swelling", "varicose veins"
+
+SUFFICIENT — accept ONLY when the description explicitly covers a complete circuit:
+- Entry: WHERE and HOW blood enters the superficial system
+- Downstream: what happens AFTER entry (GSV refluxes backward / blood escapes to tributary / tributary refluxes / no reflux confirmed)
+Both components must be present. If either is absent, verdict is "insufficient".
+
+Return ONE verdict:
+
+"sufficient" — explicit, complete flow path described
+"insufficient" — flow path missing or incomplete
+"question" — question, greeting, or not a patient description
+
+If "insufficient", the "missing" field MUST be a detailed, verbose explanation structured as follows:
+1. State what was provided and exactly why it is insufficient
+2. List specifically what flow path information is missing
+3. Map the partial description to the shunt types it COULD represent, and state what each would additionally require
+4. Give a concrete example of what a sufficient description would look like for the most likely type
+
+Output ONLY valid JSON — no markdown:
+{{"verdict": "sufficient"}}
+or
+{{"verdict": "insufficient", "missing": "<detailed multi-sentence explanation per structure above>"}}
+or
+{{"verdict": "question"}}"""
 
 _CONVERSATIONAL_PROMPT = """You are a knowledgeable CHIVA vascular surgery assistant helping a clinician understand venous shunt classification and CHIVA treatment decisions.
 
@@ -397,37 +558,70 @@ def _clean_json(raw: str) -> str:
 
 def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
     """
-    Ask the LLM to convert a natural-language description to CHIVA clip notation.
+    Two-stage pipeline:
+      1. Focused sufficiency check — a separate call whose only job is to decide
+         whether the input describes actual blood movement. No CHIVA clip context,
+         so the model can't rationalise sufficiency to justify generating clips.
+      2. Full CHIVA interpretation — only reached if stage 1 passes.
 
     Returns:
         {
             "is_clinical": bool,
+            "sufficient_information": bool,
+            "missing_information": str | None,
             "interpretation": str | None,
             "clips": list[dict]
         }
     """
-    prompt = _NL_TO_CHIVA_PROMPT.format(description=user_message.strip())
+    # ── Stage 1: sufficiency check ──────────────────────────────────────────
     try:
-        raw, _ = call_llm_fn(prompt, return_usage=True, max_tokens=1024)
-        raw = _clean_json(raw)
-        result = json.loads(raw)
-        if isinstance(result, dict) and "is_clinical" in result and "clips" in result:
-            # Deterministic post-process: strip hallucinated RP clips when description
-            # explicitly states no reflux/retrograde flow. LLM training data strongly
-            # associates SFJ incompetence with GSV reflux and overrides prompt rules.
+        check_raw, _ = call_llm_fn(
+            _SUFFICIENCY_PROMPT.format(description=user_message.strip()),
+            return_usage=True,
+            max_tokens=800,
+        )
+        check = json.loads(_clean_json(check_raw))
+        verdict = check.get("verdict", "sufficient")
+    except Exception as e:
+        logger.error(f"Sufficiency check failed: {e}")
+        verdict = "sufficient"  # fall through to CHIVA call on error
+
+    if verdict == "question":
+        return {"is_clinical": False, "sufficient_information": False, "missing_information": None, "interpretation": None, "clips": []}
+
+    if verdict == "insufficient":
+        missing = check.get("missing") or (
+            "Please describe what the blood is doing — for example, whether the GSV is "
+            "refluxing, where it exits into tributaries, and whether the SFJ or any "
+            "perforators are feeding the system."
+        )
+        return {"is_clinical": True, "sufficient_information": False, "missing_information": missing, "interpretation": None, "clips": []}
+
+    # ── Stage 2: CHIVA interpretation (only if verdict == "sufficient") ─────
+    try:
+        raw, _ = call_llm_fn(
+            _NL_TO_CHIVA_PROMPT.format(description=user_message.strip()),
+            return_usage=True,
+            max_tokens=1024,
+        )
+        result = json.loads(_clean_json(raw))
+        if isinstance(result, dict) and "clips" in result:
             if _has_no_reflux_statement(user_message) and result.get("clips"):
                 before = len(result["clips"])
                 result["clips"] = [c for c in result["clips"] if c.get("flow") != "RP"]
                 after = len(result["clips"])
                 if before != after:
-                    logger.info(
-                        f"Post-processing stripped {before - after} hallucinated RP clip(s) "
-                        f"because description contains explicit no-reflux statement."
-                    )
-            return result
+                    logger.info(f"Stripped {before - after} hallucinated RP clip(s) — explicit no-reflux statement.")
+            return {
+                "is_clinical": True,
+                "sufficient_information": True,
+                "missing_information": None,
+                "interpretation": result.get("interpretation"),
+                "clips": result.get("clips", []),
+            }
     except Exception as e:
-        logger.error(f"NL interpretation failed: {e}")
-    return {"is_clinical": False, "interpretation": None, "clips": []}
+        logger.error(f"CHIVA interpretation failed: {e}")
+    return {"is_clinical": False, "sufficient_information": False, "missing_information": None, "interpretation": None, "clips": []}
 
 
 def build_conversational_response(
@@ -448,7 +642,6 @@ def build_conversational_response(
         history="\n".join(history_lines) or "(start of conversation)",
         user_message=user_message.strip(),
     )
-
     try:
         response, _ = call_llm_fn(prompt, return_usage=True, max_tokens=900)
         return response.strip()

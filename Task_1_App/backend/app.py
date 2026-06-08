@@ -12,7 +12,8 @@ from pathlib import Path
 # ── Path bootstrap ────────────────────────────────────────────────────────────
 _SELF_DIR = Path(__file__).resolve().parent
 _PARENT_BACKEND = _SELF_DIR.parent.parent / "backend"
-sys.path.insert(0, str(_PARENT_BACKEND))
+if _PARENT_BACKEND.exists():
+    sys.path.insert(0, str(_PARENT_BACKEND))
 sys.path.insert(0, str(_SELF_DIR))
 
 # ── Config (must come after path bootstrap) ───────────────────────────────────
@@ -21,6 +22,8 @@ from config import (
     LOG_FILE, LOG_LEVEL,
     QDRANT_COLLECTION,
     QDRANT_PATH,
+    CORS_ORIGINS,
+    SECRET_KEY,
 )
 
 # ── Logging ───────────────────────────────────────────────────────────────────
@@ -39,7 +42,10 @@ from flask import Flask
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder=None)
-CORS(app, origins=[f"http://localhost:{PORT}", f"http://127.0.0.1:{PORT}"])
+app.secret_key = SECRET_KEY
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+CORS(app, origins=CORS_ORIGINS, supports_credentials=True)
 
 # ── Services (Groq + Qdrant clients) ─────────────────────────────────────────
 import services
@@ -74,6 +80,7 @@ set_parent_module_flag(_PARENT_MODULE)
 from routes import (
     views_bp, status_bp, sessions_bp,
     clinical_bp, general_bp, feedback_bp,
+    auth_bp, admin_bp,
 )
 
 app.register_blueprint(views_bp)
@@ -82,6 +89,8 @@ app.register_blueprint(sessions_bp)
 app.register_blueprint(clinical_bp)
 app.register_blueprint(general_bp)
 app.register_blueprint(feedback_bp)
+app.register_blueprint(auth_bp)
+app.register_blueprint(admin_bp)
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────

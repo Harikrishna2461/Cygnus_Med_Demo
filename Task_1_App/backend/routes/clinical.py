@@ -1,4 +1,5 @@
 import logging
+from auth import login_required
 from flask import Blueprint, jsonify, request
 
 from chat_db import save_message, get_messages, update_session_title
@@ -21,6 +22,7 @@ def set_classification_fn(loaded: bool, fn) -> None:
 
 
 @bp.route("/api/chat", methods=["POST"])
+@login_required
 def api_chat():
     try:
         data = request.get_json(force=True, silent=False)
@@ -60,8 +62,29 @@ def api_chat():
 
     interpretation = parse_nl_to_clips(user_message, services.call_llm)
     is_clinical = interpretation.get("is_clinical", False)
+    sufficient = interpretation.get("sufficient_information", True)
+    missing_info = interpretation.get("missing_information") or ""
     clips = interpretation.get("clips", [])
     interp_text = interpretation.get("interpretation") or ""
+
+    if is_clinical and not sufficient:
+        decline_msg = (
+            missing_info
+            if missing_info
+            else (
+                "To classify this case I need a complete flow path description from your duplex scan. "
+                "Please describe: (1) where blood enters the superficial system (e.g. SFJ incompetent, perforator entry, direct deep-to-tributary), "
+                "(2) how it travels (e.g. forward along GSV, escapes into tributary), and "
+                "(3) whether and where reflux occurs (e.g. GSV refluxes backward, tributary drains back, no reflux anywhere)."
+            )
+        )
+        save_message(session_id, "assistant", decline_msg)
+        return jsonify({
+            "type": "insufficient",
+            "missing_info": decline_msg,
+            "conversational_response": decline_msg,
+            "message_id": user_msg_id,
+        })
 
     if is_clinical and clips:
         try:
