@@ -11,22 +11,31 @@ Each factory creates a fresh Agent instance; do not share instances across reque
 
 import logging
 
+import litellm
 from crewai import Agent, LLM
 
 from config import GROQ_API_KEY, GROQ_MODEL
 
 logger = logging.getLogger(__name__)
 
-# Use Groq's OpenAI-compatible endpoint via the openai provider.
-# This bypasses litellm's Groq-specific code that injects cache_breakpoint
-# into system messages, which Groq rejects with a 400 error.
-_GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+# crewai's internal flow system injects 'cache_breakpoint' into message dicts
+# before calling litellm. Groq rejects any message with unknown properties.
+# Patch litellm.completion to strip it before the HTTP request is made.
+_orig_completion = litellm.completion
+
+
+def _patched_completion(*args, **kwargs):
+    for msg in kwargs.get("messages", []):
+        msg.pop("cache_breakpoint", None)
+    return _orig_completion(*args, **kwargs)
+
+
+litellm.completion = _patched_completion
 
 
 def _make_llm() -> LLM:
     return LLM(
-        model=f"openai/{GROQ_MODEL}",
-        base_url=_GROQ_BASE_URL,
+        model=f"groq/{GROQ_MODEL}",
         api_key=GROQ_API_KEY,
         temperature=0.3,
     )
