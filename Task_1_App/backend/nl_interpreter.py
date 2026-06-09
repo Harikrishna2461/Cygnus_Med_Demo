@@ -284,76 +284,70 @@ CRITICAL RULE 2B — eliminationTest values and when to add:
 
 ═══════════════════════════════════════════════════════════
 
-KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION:
-  "SFJ incompetent" / "reflux at SFJ" / "deep blood enters GSV at groin" /
-  "common femoral vein feeds GSV" / "terminal valve incompetent at SFJ" /
-  "preterminal valve incompetent" / "SFJ incompetence with femoral vein reflux into GSV"
-      → EP  N1→N2  posYRatio≈0.06
+CLIP TYPE REFERENCE — understand each clip by its hemodynamic concept, not by trigger phrases.
+Match by MEANING. Clinicians phrase the same event in countless ways; do not look for specific words.
+Ask: "What is this blood doing, and between which compartments?"
 
-  "SPJ incompetent" / "SSV incompetent at popliteal junction" / "popliteal vein feeds SSV" /
-  "deep blood enters SSV at popliteal fossa" / "reflux at SPJ" / "SPJ failure" /
-  "SSV junction incompetent" / "saphenopopliteal junction incompetent"
-      → EP  N1→N2  posYRatio≈0.45
+  ── EP N1→N2 ── Deep system delivers blood INTO the named saphenous trunk (GSV or SSV)
+    Concept: A named junction between the deep and saphenous system has failed.
+             Blood is crossing from N1 into N2 — the "door" is open.
+    Covers: SFJ incompetence (posYRatio≈0.06), SPJ incompetence (posYRatio≈0.45),
+            incompetent Hunterian perforator where N1 is the explicit blood source (posYRatio≈0.25).
+    Examples: "SFJ incompetent", "popliteal vein feeds SSV at the SPJ", "deep blood enters GSV at groin",
+              "Hunterian perforator incompetent, delivering deep blood into GSV".
+    NOT this: a perforator that inserts into mid-GSV with SFJ stated competent → that is EP N2→N2.
 
-  "GSV reflux" / "blood flows backward in GSV" / "GSV carries reflux downward" /
-  "full-length GSV reflux" / "GSV refluxes throughout" / "GSV is incompetent and refluxes" /
-  "blood travels backward down the GSV trunk" / "GSV trunk reflux" /
-  "retrograde flow in the GSV" / "blood refluxes in the great saphenous vein"
-      → RP  N2→N1  (at the level described, e.g. mid-thigh ≈ 0.30)
-      *** Always generate RP N2→N1 as a SEPARATE clip from EP N1→N2.
-          EP N1→N2 = shunt entry. RP N2→N1 = trunk reflux. Both can and DO coexist. ***
+  ── EP N2→N2 ── A perforating vessel delivers blood INTO the saphenous trunk; SFJ remains competent
+    Concept: A perforating vein (not a named junction) connects to the GSV. SFJ/SPJ are working.
+    The word "deep" alone (e.g. "deep perforating vessel") does NOT make this N1→N2 — it is still N2→N2.
+    See Critical Rule 1 for the full distinction.
 
-  "SSV reflux" / "blood flows backward in SSV" / "SSV carries blood backward" /
-  "retrograde flow in the SSV trunk" / "SSV trunk reflux" / "blood refluxes in the small saphenous vein"
-      → RP  N2→N1  posYRatio≈0.65 (posterior calf — SSV territory)
+  ── EP N2→N3 ── The saphenous trunk delivers blood INTO a tributary or branch
+    Concept: Blood is leaving the GSV/SSV and entering any side vessel — in any direction, any phrasing.
+             It does not matter how the clinician words it. If blood is moving FROM the saphenous trunk
+             INTO a tributary, branch, varicosity, or side vessel, this is EP N2→N3.
+    Examples: "GSV feeds a branch", "overflows into a tributary", "spills forward into a branch",
+              "blood escapes from the GSV into a side vessel", "tributary fills from the GSV",
+              "the GSV discharges into a branch", "blood enters the tributary from the saphenous".
 
-  "AASV reflux" / "anterior accessory saphenous vein reflux" / "AASV incompetent" /
-  "accessory saphenous vein carries blood backward"
-      → RP  N3→N2  if draining backward toward the GSV trunk
-      → EP  N2→N3  if the GSV is overflowing into the AASV
-      AASV is N3 — not an independent N2 trunk unless clinician explicitly states otherwise.
+  ── RP N2→N1 ── The saphenous trunk carries blood BACKWARD (away from heart, toward the foot)
+    Concept: Blood in the GSV/SSV is flowing in the wrong direction — downward, retrograde, toward the foot.
+             This is a separate clip from EP N1→N2. Both can coexist in the same case.
+    Examples: "GSV refluxes", "blood flows backward in the GSV", "GSV carries reflux downward",
+              "retrograde flow in the saphenous trunk", "GSV is incompetent and refluxes full-length".
+    IMPORTANT: see Critical Rule 2C — do NOT generate this when the GSV is acting purely as a conduit
+               to an escape point with no further reflux below that escape point.
 
-  "blood escapes to tributaries" / "GSV feeds tributaries" / "EP from GSV to branch" /
-  "GSV feeds a tributary" / "GSV discharges into a tributary" / "discharges forward into a tributary" /
-  "GSV discharges blood into" / "blood exits the GSV into a tributary" / "GSV empties into a tributary" /
-  "GSV overflows into a tributary" / "GSV overflows forward into a tributary" /
-  "GSV overflows forward into a branch" / "overflows into a tributary branch" /
-  "GSV spills into a tributary" / "blood spills from the GSV into" / "GSV fills a tributary" /
-  "tributary fills from the GSV" / "tributary is fed by the GSV" / "GSV drains into a tributary"
-      → EP  N2→N3  (at the level described)
+  ── RP N3→N2 ── A tributary carries blood BACKWARD toward the saphenous trunk
+    Concept: Blood in a branch vessel is flowing in reverse — toward the GSV, not away from it.
+             It does not matter how the clinician words it. If blood is moving BACKWARD through a
+             tributary and heading TOWARD the GSV/saphenous trunk, this is RP N3→N2.
+    Examples: "tributary refluxes back toward the GSV", "branch shows retrograde flow toward the saphenous",
+              "blood flows backward through the tributary", "tributary carries blood back toward the trunk".
 
-  "blood refluxes back in the tributary" / "tributary drains backward" / "tributary shows retrograde flow"
-  / "tributary carries blood backward" / "tributary refluxes back toward the GSV"
-      → RP  N3→N2  (tributary carrying blood backward toward the GSV)
-      (If the GSV discharging INTO the tributary was also described separately, also generate EP N2→N3)
+  ── RP N3→N1 ── A tributary carries blood BACKWARD into the deep venous system
+    Concept: Blood in a branch vessel is flowing backward and re-entering the deep system (N1) via a
+             perforating vein — it bypasses the saphenous trunk and drains directly to deep.
+    Examples: "tributary drains backward into the deep vein via a perforator",
+              "branch re-enters the deep system", "tributary connects back to the deep vein".
 
-  "tributary drains backward into the deep system via perforator" / "tributary re-enters the deep system" /
-  "tributary connects back to deep vein" / "tributary drains to deep via perforating vessel"
-      → RP  N3→N1  (tributary draining all the way to deep system via perforator)
-      (If the GSV discharging INTO the tributary was also described separately, also generate EP N2→N3)
+  ── EP N1→N3 ── Deep system delivers blood DIRECTLY into a tributary, bypassing the saphenous trunk
+    Concept: A pelvic, gluteal, or perforating vessel delivers blood straight to a varicosity/tributary
+             without going through the GSV. The GSV is not involved in the entry.
+    Examples: "deep blood enters a superficial branch directly", "pelvic vein feeds a varicosity".
 
-  "perforator feeds GSV" / "perforating vessel enters the GSV" / "perforator inserts into the trunk"
-      → EP  N2→N2  (perforator entry — fromType=N2, toType=N2, SFJ COMPETENT)
+  ── AASV note ── Anterior Accessory Saphenous Vein is N3 (not N2) unless explicitly called a trunk.
+    If the GSV is overflowing INTO the AASV → EP N2→N3.
+    If the AASV is flowing BACKWARD toward the GSV → RP N3→N2.
 
-  "deep vein to superficial veins" / "deep to superficial" (GSV NOT named)
-      → EP  N1→N3
-
-  "superficial veins reflux back to deep" / "superficial back to deep vein" (GSV NOT named)
-      → RP  N3→N1
-
-  "deep vein directly feeds a tributary" / "N1 to N3 direct connection"
-      → EP  N1→N3
-
-  "Hunterian perforator incompetent" / "mid-thigh perforator entry from deep system allows deep blood into GSV"
-      → EP  N1→N2 (SFJ INCOMPETENT via Hunterian — only when explicitly stated as incompetent)
-
-IMPORTANT DISTINCTIONS:
-  - EP N1→N2 means deep system → named saphenous trunk GSV/SSV (SFJ or Hunterian INCOMPETENT)
-  - EP N1→N3 means deep system → generic superficial veins/tributaries (when GSV/SSV NOT named)
-  - EP N2→N2 means perforator/communicating vein → saphenous trunk (SFJ COMPETENT)
-  - RP N2→N1 means saphenous trunk reflux (backward in GSV)
-  - RP N3→N2 means tributary reflux back into GSV
-  - RP N3→N1 means tributary/superficial reflux all the way back to deep system
+IMPORTANT DISTINCTIONS (summary):
+  - EP N1→N2: deep system → named saphenous trunk (SFJ/SPJ/Hunterian junction FAILED)
+  - EP N1→N3: deep system → tributary directly (no saphenous trunk involvement)
+  - EP N2→N2: perforating vessel → saphenous trunk (SFJ COMPETENT — perforator not a named junction)
+  - EP N2→N3: saphenous trunk → tributary (blood leaving GSV into a side vessel, any phrasing)
+  - RP N2→N1: saphenous trunk carries blood backward (downward, toward foot)
+  - RP N3→N2: tributary carries blood backward toward the saphenous trunk
+  - RP N3→N1: tributary carries blood backward into the deep venous system via perforator
 
 ═══════════════════════════════════════════════════════════
 QUICK REFERENCE — WHAT EACH SHUNT TYPE REQUIRES:
@@ -413,16 +407,12 @@ Use this to understand what flow information makes a complete description.
 10. CRITICAL — RP N2→N1 is separate from EP N1→N2: When "GSV refluxes" / "full-length GSV reflux" /
     "GSV carries blood backward" is EXPLICITLY stated, always generate RP N2→N1 as a separate clip
     in addition to EP N1→N2. These are two different flow events at two different clip positions.
-11. CRITICAL — DO NOT STOP AFTER FINDING EP N1→N2 + RP N2→N1. Generating those two clips does NOT
-    mean the description is complete. After generating every RP/EP clip you have identified so far,
-    scan the description AGAIN for tributary escape events. Specifically:
-      - Does the description mention blood leaving the GSV into a branch/tributary at any level?
-        → Generate EP N2→N3 for each such event, even if RP N2→N1 was already generated.
-      - Does the description mention backward/retrograde flow in a tributary?
-        → Generate RP N3→N2 or RP N3→N1 for each such event.
-    A description that mentions GSV reflux + tributary overflow + tributary retrograde flow requires
-    FOUR clips (EP N1→N2 + RP N2→N1 + EP N2→N3 + RP N3), NOT two. Missing the tributary clips will
-    cause the classifier to output the wrong shunt type. Generate ALL described flow events.
+11. CRITICAL — Generate a clip for EVERY flow event described, regardless of what clips you have
+    already generated. Finding EP N1→N2 + RP N2→N1 does not mean the description is finished.
+    After your first pass, re-read the description and ask: "Is there also a tributary escape?
+    Is there also backward flow in a tributary?" If yes, those are additional clips.
+    A case with GSV reflux + tributary escape + tributary retrograde = FOUR clips minimum.
+    Missing tributary clips causes the wrong shunt type to be output.
 
 Output ONLY valid JSON — no markdown, no explanation:
 {{
