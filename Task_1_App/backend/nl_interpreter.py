@@ -354,14 +354,20 @@ Output ONLY valid JSON — no markdown, no explanation:
     ]
 }}"""
 
-_SUFFICIENCY_PROMPT = """You are a helpful chatbot like Claude. Below is the accumulated clinical description from a clinician using a CHIVA venous shunt classification tool. It may span multiple messages — treat it as one combined description and understand the context accross the messages and do not ask for the same information already provided again and again unless you feel it might be contradictory or wrong, If you feel it is contradictory, then explain the user why it is contradictory.:
+_SUFFICIENCY_PROMPT = """You are a strict clinical gatekeeper for a CHIVA venous shunt classification tool. Your ONLY job is to decide whether the accumulated description below contains enough explicitly confirmed information to classify the shunt — nothing more.
+
+The description below may span multiple clinician messages. Treat it as one combined description. Do NOT ask about information already clearly provided — only flag what is genuinely missing. If a detail seems contradictory rather than missing, say so.
 
 "{description}"
 
 ═══════════════════════════════════════════════════════════
-CRITICAL PRINCIPLE — DO NOT ASSUME ANYTHING THAT IS NOT EXPLICITLY STATED IN THE DESCRIPTION:
-Do not assume the clinician has given a complete description. Do not assume the clinician has described every relevant flow event. 
-UNKNOWN = INSUFFICIENT. Every differentiating component must be explicitly confirmed YES or NO.
+CRITICAL PRINCIPLE — INFERENCE IS NOT CONFIRMATION:
+Every differentiating component must be EXPLICITLY stated. You may NOT infer, imply, or deduce:
+  - "reflux in tributaries" does NOT confirm how blood entered the superficial system (C1 MISSING)
+  - "blood drains to deep via perforator" does NOT confirm whether the GSV trunk has reflux (C2 status UNKNOWN)
+  - describing downstream events does NOT confirm the entry source
+  - "perforator" mentioned as an outflow does NOT count as a perforator ENTRY into the GSV
+UNKNOWN = INSUFFICIENT. Each required component must be explicitly confirmed YES or NO.
 ═══════════════════════════════════════════════════════════
 
 STEP 1 — CHECK FOR BASIC VALIDITY FIRST:
@@ -379,8 +385,9 @@ Scan the description for these four components. Each must be EXPLICIT — inferr
                                      "Hunterian perforator incompetent", "deep blood enters GSV at mid-thigh"
     Confirmed perforator entry:     "perforator enters the GSV", "perforator feeds GSV mid-segment",
                                      "perforating vessel inserts into the GSV" (SFJ is competent)
-    Confirmed GSV overflow only:    "GSV overflows forward into a tributary" with NO SFJ/perforator entry stated
-                                     (Type 2A pattern — acceptable as confirmed entry-type)
+    Confirmed GSV overflow only:    "GSV overflows forward into a tributary", "blood overflows from the GSV into a tributary"
+                                     with NO SFJ/perforator entry stated (Type 2A pattern).
+                                     *** "reflux in tributaries" alone does NOT confirm this — the GSV overflow must be explicitly stated. ***
     Confirmed no entry/no shunt:    "no reflux anywhere", "SFJ competent, no perforator entry"
     NOT CONFIRMED: if none of the above is explicitly stated → COMPONENT 1 MISSING
 
