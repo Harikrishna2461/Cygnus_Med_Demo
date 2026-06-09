@@ -385,10 +385,11 @@ Scan the description for these four components. Each must be EXPLICIT — inferr
     NOT CONFIRMED: if none of the above is explicitly stated → COMPONENT 1 MISSING
 
   COMPONENT 2 — GSV TRUNK REFLUX STATUS (does RP N2→N1 exist?):
-    Confirmed YES:  "GSV refluxes backward", "full-length GSV reflux", "GSV carries reflux downward",
-                     "reflux in the GSV trunk", "GSV trunk is incompetent and refluxing"
-    Confirmed NO:   "GSV does not reflux", "no reflux in the GSV trunk", "GSV trunk is not refluxing",
-                     "GSV is not carrying blood backward", "no GSV trunk reflux"
+    Confirmed YES:  "reflux in the GSV trunk", "blood refluxes backward through the GSV",
+                     "full-length reflux in the GSV", "blood travels backward through the GSV trunk",
+                     "reflux detected in the GSV trunk", "GSV trunk has reflux"
+    Confirmed NO:   "no reflux in the GSV trunk", "blood does not reflux through the GSV trunk",
+                     "no reflux detected in the GSV", "GSV trunk is competent", "no GSV trunk reflux"
     NOT CONFIRMED: if neither YES nor NO is explicitly stated → COMPONENT 2 MISSING
     REQUIRED WHEN: COMPONENT 1 is SFJ entry, Hunterian entry, or perforator entry.
     NOT REQUIRED WHEN: COMPONENT 1 is "GSV overflow only" (Type 2A) with explicit no-reflux-anywhere.
@@ -422,36 +423,36 @@ confirmed YES or NO. Any REQUIRED component that is NOT CONFIRMED → INSUFFICIE
 ═══════════════════════════════════════════════════════════
 WORKED EXAMPLES:
 
-"SFJ incompetent, blood enters GSV, GSV refluxes backward full-length"
-  C1=SFJ entry ✓  C2=GSV reflux YES ✓  C3=tributary escape? NOT STATED ✗
+"SFJ incompetent, blood enters GSV, reflux present in GSV trunk full-length"
+  C1=SFJ entry ✓  C2=reflux in GSV trunk YES ✓  C3=tributary escape? NOT STATED ✗
   → MISSING: whether blood also escapes into any tributary. → INSUFFICIENT
 
-"SFJ incompetent, GSV refluxes backward, no tributary involvement confirmed"
-  C1=SFJ entry ✓  C2=GSV reflux YES ✓  C3=NO tributaries ✓  C4=N/A
+"SFJ incompetent, reflux in GSV trunk, no tributary involvement confirmed"
+  C1=SFJ entry ✓  C2=reflux in GSV trunk YES ✓  C3=NO tributaries ✓  C4=N/A
   → All required components addressed. → SUFFICIENT (Type 1)
 
-"SFJ incompetent, blood escapes into a tributary, tributary refluxes backward"
-  C1=SFJ entry ✓  C2=GSV trunk reflux? NOT STATED ✗  C3=YES ✓  C4=YES ✓
-  → MISSING: whether the GSV trunk itself also refluxes backward. → INSUFFICIENT
+"SFJ incompetent, blood escapes into a tributary, blood refluxes backward through the tributary"
+  C1=SFJ entry ✓  C2=reflux in GSV trunk? NOT STATED ✗  C3=YES ✓  C4=YES ✓
+  → MISSING: whether blood also refluxes backward through the GSV trunk. → INSUFFICIENT
 
-"SFJ incompetent, blood escapes into a tributary, tributary refluxes backward, GSV trunk does NOT reflux"
+"SFJ incompetent, blood escapes into a tributary, blood refluxes backward through the tributary, no reflux in the GSV trunk"
   C1=SFJ entry ✓  C2=NO ✓  C3=YES ✓  C4=YES ✓
   → All required components addressed. → SUFFICIENT (Type 3)
 
-"SFJ incompetent, GSV refluxes backward, blood escapes to a tributary"
+"SFJ incompetent, reflux in GSV trunk, blood escapes to a tributary"
   C1=SFJ entry ✓  C2=YES ✓  C3=YES ✓  C4=tributary reflux? NOT STATED ✗
-  → MISSING: whether that tributary also refluxes backward. → INSUFFICIENT
+  → MISSING: whether blood also refluxes backward through that tributary. → INSUFFICIENT
 
-"SFJ incompetent, GSV refluxes backward, blood escapes to a tributary, tributary also refluxes backward"
+"SFJ incompetent, reflux in GSV trunk, blood escapes to a tributary, blood also refluxes backward through the tributary"
   C1=SFJ entry ✓  C2=YES ✓  C3=YES ✓  C4=YES ✓
   → All present; elimination test absent but NOT a sufficiency requirement.
   → Classification engine will return UNDETERMINED. → SUFFICIENT
 
-"Perforator enters the GSV at mid-thigh, a tributary refluxes backward"
-  C1=perforator entry ✓  C2=GSV trunk reflux? NOT STATED ✗  C3/C4=tributary reflux ✓
-  → MISSING: does the GSV trunk also reflux backward? → INSUFFICIENT
+"Perforator enters the GSV at mid-thigh, blood refluxes backward through the tributary"
+  C1=perforator entry ✓  C2=reflux in GSV trunk? NOT STATED ✗  C3/C4=tributary reflux ✓
+  → MISSING: does blood also reflux backward through the GSV trunk? → INSUFFICIENT
 
-"Perforator enters the GSV at mid-thigh, tributary refluxes backward, GSV trunk does not reflux"
+"Perforator enters the GSV at mid-thigh, blood refluxes backward through the tributary, no reflux in the GSV trunk"
   C1=perforator entry ✓  C2=NO ✓  C3/C4=tributary reflux ✓
   → All required components addressed. → SUFFICIENT (Type 2B)
 
@@ -474,7 +475,7 @@ Write it as a single flowing paragraph that:
 The tone is direct and clinical — like a colleague asking a quick follow-up question with no small talk.
 
 GOOD EXAMPLE (do this):
-"To distinguish between Type 1, Type 3, and combined patterns I still need to know: does the GSV trunk itself carry blood backward down the leg? And does any blood escape sideways into a tributary branch? If a tributary is involved, does it also reflux? For example: 'SFJ incompetent, GSV refluxes backward full-length, blood escapes into a mid-thigh tributary, and that tributary refluxes backward toward the knee.'"
+"To distinguish between Type 1, Type 3, and combined patterns I still need to know: is there reflux in the GSV trunk — does blood travel backward through it? And does any blood escape sideways into a tributary branch? If a tributary is involved, does blood reflux through it as well? For example: 'SFJ incompetent, blood enters the GSV at the groin, reflux present in the GSV trunk full-length, blood escapes into a mid-thigh tributary, and blood refluxes backward through that tributary toward the knee.'"
 
 BAD EXAMPLE (never do this):
 "Thanks for providing that information. Based on what you've described, I can see the SFJ is incompetent. Component 2 (GSV trunk reflux status) is missing. Please confirm YES or NO."
