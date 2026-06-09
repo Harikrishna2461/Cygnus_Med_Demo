@@ -382,7 +382,11 @@ Reject immediately (insufficient or question) if:
   - Only ONE flow transition named with no entry source AND no downstream stated → verdict: "insufficient"
 
 STEP 2 — IDENTIFY WHAT IS EXPLICITLY STATED:
-Scan the description for these four components. Each must be EXPLICIT — inferred or implied does not count.
+Read the description for its MEANING, not for exact keywords. A clinician will use natural language.
+"The GSV carries this blood backward down the thigh" means the same as "reflux in the GSV trunk" — both confirm C2=YES.
+"Explicit" means the clinician said it clearly in any natural wording — not that they used a specific phrase from a list.
+What is NOT explicit: vague hints, incomplete sentences with no clear direction, or describing one component
+and merely implying another (e.g. describing downstream events without stating the entry source).
 
   COMPONENT 1 — ENTRY SOURCE (how blood enters the superficial system):
     Confirmed SFJ/Hunterian entry:  "SFJ incompetent", "deep blood enters GSV", "blood enters GSV at groin",
@@ -409,39 +413,64 @@ Scan the description for these four components. Each must be EXPLICIT — inferr
     NOT CONFIRMED: if none of the above is explicitly stated → COMPONENT 1 MISSING
 
   COMPONENT 2 — GSV TRUNK REFLUX STATUS (does RP N2→N1 exist?):
-    Confirmed YES:  "reflux in the GSV trunk", "blood refluxes backward through the GSV",
-                     "full-length reflux in the GSV", "blood travels backward through the GSV trunk",
-                     "reflux detected in the GSV trunk", "GSV trunk has reflux"
-    Confirmed NO:   "no reflux in the GSV trunk", "blood does not reflux through the GSV trunk",
-                     "no reflux detected in the GSV", "GSV trunk is competent", "no GSV trunk reflux"
-    NOT CONFIRMED: if neither YES nor NO is explicitly stated → COMPONENT 2 MISSING
+    *** SEMANTIC RULE: Any phrase that describes blood moving BACKWARD, DOWNWARD against normal flow,
+        or in RETROGRADE direction THROUGH or IN or ALONG the GSV trunk confirms C2 = YES.
+        You are reading for MEANING, not matching keywords. ***
+
+    Confirmed YES — any of these meanings expressed in any wording:
+      - Blood travels backward / downward / in reverse / in retrograde direction through/along/in the GSV
+      - The GSV carries / conducts / transmits blood backward or downward
+      - Backward flow / retrograde flow exists in the GSV
+      - The GSV is incompetent and blood flows down it
+      Examples: "GSV carries this blood backward down the thigh", "blood flows backward along the GSV",
+                "GSV conducts blood downward", "retrograde flow in the GSV", "reflux in the GSV trunk",
+                "blood moves backward through the GSV", "GSV carries reflux down the leg",
+                "blood travels backward through the GSV trunk", "full-length reflux in the GSV"
+
+    Confirmed NO — any of these meanings expressed in any wording:
+      - No backward / retrograde flow in the GSV
+      - GSV does not carry blood backward
+      - GSV trunk is competent / normal flow only
+      Examples: "no reflux in the GSV trunk", "GSV does not carry blood backward",
+                "no retrograde flow in the GSV", "GSV trunk is competent", "no GSV trunk reflux"
+
+    NOT CONFIRMED: if neither YES nor NO meaning is expressed → COMPONENT 2 MISSING
     REQUIRED WHEN: COMPONENT 1 is SFJ entry, Hunterian entry, or perforator entry.
     NOT REQUIRED WHEN: COMPONENT 1 is "GSV overflow only" (Type 2A) with explicit no-reflux-anywhere.
 
   COMPONENT 3 — TRIBUTARY ESCAPE STATUS (does EP N2→N3 exist?):
-    Confirmed YES:  "blood escapes into a tributary", "blood exits into a tributary", "blood exits into a branch",
-                     "blood flows into a tributary", "blood enters a tributary", "blood exits the GSV into a tributary",
-                     "blood exits the GSV into a branch", "GSV feeds a tributary", "tributary escape present",
-                     "blood exits into branches", "blood leaks into a tributary"
-    Confirmed NO:   "no tributary involvement", "no escape into tributaries", "blood does not escape into tributaries",
-                     "blood does not escape into any tributary", "blood does not exit into tributaries",
-                     "blood does not exit into any branch", "blood does not enter any tributary",
-                     "blood does not flow into any tributary", "no branch filling", "no tributaries affected",
-                     "tributaries not involved", "blood stays in the GSV", "no branch involvement",
-                     "no escape to tributaries", "blood does not escape into branches"
-    NOT CONFIRMED: if neither YES nor NO is explicitly stated → COMPONENT 3 MISSING
+    *** SEMANTIC RULE: Any phrase meaning blood leaves the GSV and enters a side branch / tributary
+        confirms C3 = YES. Any phrase meaning there is no branch involvement confirms C3 = NO.
+        Read for MEANING, not keywords. ***
+
+    Confirmed YES — blood leaves the GSV into a tributary/branch, in any wording:
+      "blood escapes into a tributary", "GSV feeds a branch", "blood exits into a tributary",
+      "blood spills into a side branch", "tributary fills from the GSV", "branch fills with blood",
+      "blood enters a tributary branch", "GSV discharges into a branch"
+
+    Confirmed NO — no branch involvement, in any wording:
+      "no tributary involvement", "blood does not escape into any tributary",
+      "blood does not enter any branch", "no branch filling", "tributaries not involved",
+      "blood stays within the GSV", "no escape into tributaries", "no blood escaping into the tributary"
+
+    NOT CONFIRMED: if neither YES nor NO meaning is expressed → COMPONENT 3 MISSING
     REQUIRED WHEN: COMPONENT 1 is SFJ entry, Hunterian entry, or perforator entry.
     NOT REQUIRED WHEN: COMPONENT 1 is "GSV overflow only" (already implies tributary escape).
 
   COMPONENT 4 — TRIBUTARY REFLUX STATUS (does RP N3 exist?):
-    Confirmed YES:  "blood refluxes backward through the tributary", "reflux in the tributary",
-                     "blood drains backward through the tributary", "blood flows backward through the tributary",
-                     "blood re-enters the deep system via the tributary", "reflux detected in the tributary",
-                     "blood travels backward through the tributary"
-    Confirmed NO:   "no reflux in the tributary", "blood does not reflux through the tributary",
-                     "no reflux through the tributary", "no tributary reflux",
-                     "blood does not flow backward through the tributary"
-    NOT CONFIRMED: if neither YES nor NO is explicitly stated → COMPONENT 4 MISSING
+    *** SEMANTIC RULE: Any phrase meaning blood flows backward / in retrograde direction
+        through or in a tributary confirms C4 = YES. ***
+
+    Confirmed YES — backward/retrograde flow in the tributary, in any wording:
+      "blood refluxes backward through the tributary", "reflux in the tributary",
+      "blood flows backward through the tributary", "tributary carries blood backward",
+      "blood drains backward through the branch", "retrograde flow in the tributary"
+
+    Confirmed NO — no backward flow in the tributary, in any wording:
+      "no reflux in the tributary", "blood does not flow backward through the tributary",
+      "no tributary reflux", "tributary is competent"
+
+    NOT CONFIRMED: if neither YES nor NO meaning is expressed → COMPONENT 4 MISSING
     REQUIRED WHEN: COMPONENT 3 is confirmed YES (tributary escape present).
     NOT REQUIRED WHEN: COMPONENT 3 is confirmed NO.
 
