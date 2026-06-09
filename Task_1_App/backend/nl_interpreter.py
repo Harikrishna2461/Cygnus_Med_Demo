@@ -318,6 +318,11 @@ Use this to understand what flow information makes a complete description.
 
 === CLINICAL DESCRIPTION TO INTERPRET ===
 {description}
+=== CHAT HISTORY ===
+{history}
+=== PRIOR CLINICAL ANALYSIS ===
+{analysis_context}
+
 
 === INSTRUCTIONS ===
 1. Read the description carefully.
@@ -353,14 +358,13 @@ Output ONLY valid JSON — no markdown, no explanation:
     ]
 }}"""
 
-_SUFFICIENCY_PROMPT = """Below is the accumulated clinical description from a clinician using a CHIVA venous shunt classification tool. It may span multiple messages — treat it as one combined description:
+_SUFFICIENCY_PROMPT = """You are a helpful chatbot like Claude. Below is the accumulated clinical description from a clinician using a CHIVA venous shunt classification tool. It may span multiple messages — treat it as one combined description and understand the context accross the messages and do not ask for the same information already provided again and again unless you feel it might be contradictory or wrong, If you feel it is contradictory, then explain the user why it is contradictory.:
 
 "{description}"
 
 ═══════════════════════════════════════════════════════════
-CRITICAL PRINCIPLE — DO NOT ASSUME NEGATIVES:
-If a component is not mentioned, it is UNKNOWN — not absent.
-A description that says nothing about tributaries does NOT confirm "no tributary involvement."
+CRITICAL PRINCIPLE — DO NOT ASSUME ANYTHING THAT IS NOT EXPLICITLY STATED IN THE DESCRIPTION:
+Do not assume the clinician has given a complete description. Do not assume the clinician has described every relevant flow event. 
 UNKNOWN = INSUFFICIENT. Every differentiating component must be explicitly confirmed YES or NO.
 ═══════════════════════════════════════════════════════════
 
