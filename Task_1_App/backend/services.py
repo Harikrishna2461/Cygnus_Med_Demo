@@ -4,9 +4,11 @@ Initialised once at startup and injected into route modules via module globals.
 """
 
 import logging
+import time
 from pathlib import Path
 
 from groq import Groq as GroqClient
+from groq import RateLimitError as GroqRateLimitError
 from qdrant_client import QdrantClient
 
 from config import (
@@ -51,30 +53,43 @@ def call_llm(
     max_tokens: int = 1536,
     return_usage: bool = False,
 ):
-    """Call the Groq LLM. Returns (text, usage) when return_usage=True."""
-    try:
-        resp = groq_client.chat.completions.create(
-            model=GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
-        text = resp.choices[0].message.content or ""
-        if return_usage:
-            u = resp.usage
-            usage = {
-                "prompt_tokens":     getattr(u, "prompt_tokens",     0) if u else 0,
-                "completion_tokens": getattr(u, "completion_tokens", 0) if u else 0,
-                "total_tokens":      getattr(u, "total_tokens",      0) if u else 0,
-            }
-            return text, usage
-        return text
-    except Exception as e:
-        logger.error(f"Groq LLM error: {e}")
-        err = f"LLM error: {e}"
-        if return_usage:
-            return err, {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
-        return err
+    """Call the Groq LLM with automatic retry on rate-limit errors.
+    Returns (text, usage) when return_usage=True, raises on persistent failure.
+    """
+    _RETRY_DELAYS = (2, 5, 15)  # seconds between attempts
+    last_exc: Exception | None = None
+
+    for attempt, delay in enumerate((*_RETRY_DELAYS, None)):
+        try:
+            resp = groq_client.chat.completions.create(
+                model=GROQ_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            text = resp.choices[0].message.content or ""
+            if return_usage:
+                u = resp.usage
+                usage = {
+                    "prompt_tokens":     getattr(u, "prompt_tokens",     0) if u else 0,
+                    "completion_tokens": getattr(u, "completion_tokens", 0) if u else 0,
+                    "total_tokens":      getattr(u, "total_tokens",      0) if u else 0,
+                }
+                return text, usage
+            return text
+
+        except GroqRateLimitError as e:
+            last_exc = e
+            if delay is not None:
+                logger.warning(f"Groq rate limit hit (attempt {attempt + 1}), retrying in {delay}s: {e}")
+                time.sleep(delay)
+            else:
+                logger.error(f"Groq rate limit persists after retries: {e}")
+                raise RuntimeError(f"Groq rate limit — please wait a moment and try again. ({e})") from e
+
+        except Exception as e:
+            logger.error(f"Groq LLM error: {e}")
+            raise RuntimeError(f"LLM call failed: {e}") from e
 
 
 def retrieve_ligation_context(query: str, k: int = 5) -> list[str]:

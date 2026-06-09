@@ -1012,10 +1012,13 @@ def _call_llm_for_shunt_classification(group: list[dict], leg_label: str, call_l
         if result and "shunt_type" in result:
             result['_llm_usage'] = usage
             return result
+        logger.error(f"Shunt classification returned unparseable response for {leg_label}: {raw[:200]!r}")
+        raise RuntimeError(f"The model returned an unreadable response for {leg_label}. Please retry.")
+    except RuntimeError:
+        raise
     except Exception as e:
         logger.error(f"Shunt classification LLM call failed for {leg_label}: {e}")
-    logger.error(f"Shunt classification failed for {leg_label}")
-    raise RuntimeError(f"Shunt classification failed for {leg_label}")
+        raise RuntimeError(str(e)) from e
 
 
 
