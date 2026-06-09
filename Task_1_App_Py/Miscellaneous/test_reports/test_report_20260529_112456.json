@@ -1,0 +1,268 @@
+[
+  {
+    "id": "T1-1",
+    "expected": "Type 1",
+    "question": "The SFJ is incompetent \u2014 blood enters the GSV from the deep system at the groin. The GSV then carries this blood backward down the thigh. There is no involvement of any tributary branches.",
+    "actual": "Type 1",
+    "ok": true
+  },
+  {
+    "id": "T1-2",
+    "expected": "Type 1",
+    "question": "At the saphenofemoral junction, deep venous blood refluxes into the great saphenous vein. The GSV is incompetent and blood travels retrograde along the entire thigh segment. No branches are filling from the GSV.",
+    "actual": "Type 1",
+    "ok": true
+  },
+  {
+    "id": "T1-3",
+    "expected": "Type 1",
+    "question": "Duplex shows SFJ incompetence with antegrade flow from femoral vein into GSV at the groin. GSV demonstrates retrograde flow throughout the thigh. No perforators or tributaries are involved.",
+    "actual": "Type 1",
+    "ok": true
+  },
+  {
+    "id": "T1-4",
+    "expected": "Type 1",
+    "question": "The deep-to-superficial junction at the groin is incompetent \u2014 blood flows forward from the deep system into the GSV. From there, the GSV refluxes backward without filling any side branches.",
+    "actual": "Type 1",
+    "ok": true
+  },
+  {
+    "id": "T1-5",
+    "expected": "Type 1",
+    "question": "A Hunterian perforator in the mid-thigh is incompetent, allowing deep venous blood to enter the GSV directly at that level. The GSV then carries blood backward both above and below. No tributaries are involved.",
+    "actual": "Type 1",
+    "ok": true
+  },
+  {
+    "id": "T2A-1",
+    "expected": "Type 2A",
+    "question": "The SFJ is competent \u2014 no deep venous inflow into the GSV is detected. However the GSV is seen discharging blood forward into a tributary branch at the groin level, with no retrograde flow identified in the GSV or the tributary.",
+    "actual": "Type 2A",
+    "ok": true
+  },
+  {
+    "id": "T2A-2",
+    "expected": "Type 2A",
+    "question": "Duplex scanning shows an isolated tributary filling from the GSV with forward flow. The SFJ is competent and closed. No reflux is present in the GSV trunk. The GSV feeds the branch but does not reflux.",
+    "actual": "Type 2A",
+    "ok": true
+  },
+  {
+    "id": "T2A-3",
+    "expected": "Type 2A",
+    "question": "The GSV is mildly dilated at mid-thigh and discharges into a branch at that level. The SFJ shows no incompetence and there is no entry from the deep system. No reflux in any vessel \u2014 flow from GSV into the tributary is forward only.",
+    "actual": "Type 2A",
+    "ok": true
+  },
+  {
+    "id": "T2A-4",
+    "expected": "Type 2A",
+    "question": "A superficial branch arises from the GSV at the knee level. Blood flows forward from the GSV into this branch. The SFJ is competent and no retrograde flow is detected anywhere in the limb.",
+    "actual": "Type 2A",
+    "ok": true
+  },
+  {
+    "id": "T2A-5",
+    "expected": "Type 2A",
+    "question": "Blood is seen flowing forward from the GSV into a tributary near the knee region. The SFJ is competent, no perforator feeds the GSV from the deep system, and there is no retrograde flow in any vessel.",
+    "actual": "Type 2A",
+    "ok": true
+  },
+  {
+    "id": "T2B-1",
+    "expected": "Type 2B",
+    "question": "The SFJ is competent. Blood flows forward along the GSV trunk and then refluxes backward into a tributary branch at the knee. The GSV itself does not reflux backward toward the SFJ \u2014 reflux is limited to the tributary branch only.",
+    "actual": "Type 2B",
+    "ok": true
+  },
+  {
+    "id": "T2B-2",
+    "expected": "Type 2B",
+    "question": "No deep-to-superficial incompetence at the SFJ. The GSV carries blood forward to the calf where it enters a tributary. That tributary shows retrograde flow back toward the GSV. The main GSV trunk does not reflux.",
+    "actual": "Type 2A",
+    "ok": false
+  },
+  {
+    "id": "T2B-3",
+    "expected": "Type 2B",
+    "question": "Duplex shows the GSV is competent above the knee. Below the knee the GSV discharges forward into a branch which then refluxes back. No SFJ incompetence, no retrograde flow in the GSV trunk itself.",
+    "actual": "Type 2A",
+    "ok": false
+  },
+  {
+    "id": "T2B-4",
+    "expected": "Type 2B",
+    "question": "The deep system is normal. The GSV trunk shows forward flow down to the calf. At the calf a tributary fills from the GSV and carries blood backward \u2014 retrograde flow in the tributary only. No reflux in the GSV trunk or SFJ.",
+    "actual": "Type 2A",
+    "ok": false
+  },
+  {
+    "id": "T2B-5",
+    "expected": "Type 2B",
+    "question": "A perforating vessel at the calf level feeds into the GSV from the deep system \u2014 but this is antegrade flow into N2, not a shunt entry. The GSV then discharges into a branch, and that branch refluxes backward. No retrograde flow in the GSV trunk itself.",
+    "actual": "Type 3",
+    "ok": false
+  },
+  {
+    "id": "T2C-1",
+    "expected": "Type 2C",
+    "question": "The SFJ is competent. The GSV carries blood forward down to the calf. At the calf the GSV fills a tributary which refluxes backward and re-enters the deep venous system through a perforator. The GSV itself does not reflux backward toward the groin.",
+    "actual": "Type 2A",
+    "ok": false
+  },
+  {
+    "id": "T2C-2",
+    "expected": "Type 2C",
+    "question": "No SFJ incompetence. Blood flows forward in the GSV trunk to the lower leg where it escapes into a tributary. The tributary carries reflux back and connects to the deep system via a perforating vein. No reflux in the GSV trunk.",
+    "actual": "Type 2A",
+    "ok": false
+  },
+  {
+    "id": "T2C-3",
+    "expected": "Type 2C",
+    "question": "The great saphenous vein carries antegrade flow down the thigh. At mid-calf it discharges into a branch which subsequently drains backward into the deep system through a perforator. The SFJ is competent and the GSV trunk does not reflux.",
+    "actual": "Type 2A",
+    "ok": false
+  },
+  {
+    "id": "T2C-4",
+    "expected": "Type 2C",
+    "question": "Duplex scanning: SFJ closed and competent. GSV carries forward flow to the ankle region. At the ankle, blood enters a superficial branch which drains backward into the deep veins via a perforating vessel. No GSV reflux.",
+    "actual": "Type 2A",
+    "ok": false
+  },
+  {
+    "id": "T2C-5",
+    "expected": "Type 2C",
+    "question": "The GSV is competent from groin to calf. In the calf a branch arises from the GSV, fills with reflux, and connects directly to the deep system via an incompetent perforator. No retrograde flow in the GSV main trunk.",
+    "actual": "Type 2A",
+    "ok": false
+  },
+  {
+    "id": "T3-1",
+    "expected": "Type 3",
+    "question": "The SFJ is incompetent \u2014 deep blood enters the GSV at the groin. The GSV refluxes down to the knee. At the knee the GSV discharges blood forward into a tributary. That tributary then refluxes backward. The GSV does not reflux beyond the knee.",
+    "actual": "Type 3",
+    "ok": true
+  },
+  {
+    "id": "T3-2",
+    "expected": "Type 3",
+    "question": "There is SFJ incompetence with antegrade flow from the deep system into the GSV. The GSV carries reflux down to mid-thigh. At mid-thigh the GSV feeds a branch with forward flow, and that branch shows retrograde flow. No reflux in the main GSV beyond the branch.",
+    "actual": "Type 3",
+    "ok": true
+  },
+  {
+    "id": "T3-3",
+    "expected": "Type 3",
+    "question": "Blood enters the GSV from the deep system at the groin (SFJ incompetent). The GSV refluxes down to the calf. In the calf the GSV discharges blood forward into a branch, and no retrograde flow in the GSV below that point. The branch carries retrograde flow back toward the GSV.",
+    "actual": "Type 3",
+    "ok": true
+  },
+  {
+    "id": "T3-4",
+    "expected": "Type 3",
+    "question": "Duplex shows SFJ incompetence. Blood flows antegrade from deep into GSV at the groin, then the GSV refluxes to the ankle. At the ankle it feeds a superficial branch with forward flow. No backward flow in the GSV trunk itself below the ankle level \u2014 the branch refluxes.",
+    "actual": "Type 3",
+    "ok": true
+  },
+  {
+    "id": "T3-5",
+    "expected": "Type 3",
+    "question": "A Hunterian perforator in the upper thigh is incompetent and blood enters the GSV from the deep system at that level. The GSV refluxes both above and below the entry point. At the knee the GSV discharges forward into a tributary. That tributary refluxes backward. No SFJ incompetence.",
+    "actual": "Type 3",
+    "ok": true
+  },
+  {
+    "id": "T12-1",
+    "expected": "Type 1+2",
+    "question": "The SFJ is incompetent \u2014 blood enters the GSV at the groin from the deep system. The GSV refluxes throughout the thigh. At mid-thigh the GSV also feeds a tributary which refluxes backward. When the mid-thigh GSV was compressed, the tributary reflux disappeared, confirming the GSV is the feeding source.",
+    "actual": "Type 3",
+    "ok": false
+  },
+  {
+    "id": "T12-2",
+    "expected": "Type 1+2",
+    "question": "SFJ incompetent with full-length GSV reflux. A tributary at the knee fills from the GSV with retrograde flow. Elimination test performed at the knee \u2014 tributary reflux abolished on compression, confirming Type 1+2 combined shunt.",
+    "actual": "Type 3",
+    "ok": false
+  },
+  {
+    "id": "T12-3",
+    "expected": "Type 1+2",
+    "question": "Blood enters the GSV from the deep system at the groin. The entire GSV refluxes. A large tributary at the calf arises from the GSV and shows retrograde flow. Elimination test at the GSV feeding point eliminated all tributary reflux.",
+    "actual": "Type 3",
+    "ok": false
+  },
+  {
+    "id": "T12-4",
+    "expected": "Type 1+2",
+    "question": "SFJ incompetence confirmed. GSV refluxes from groin to calf. At the calf, a tributary branch fills from the GSV and also refluxes backward. Compression of the GSV above the calf tributary abolished all tributary reflux \u2014 elimination test positive.",
+    "actual": "Type 1+2",
+    "ok": true
+  },
+  {
+    "id": "T12-5",
+    "expected": "Type 1+2",
+    "question": "Full-length GSV reflux with SFJ incompetence. A large tributary at mid-thigh also refluxes backward. A Trendelenburg test (compression of the groin) eliminated all reflux in both the GSV and the tributary, confirming single source shunt with combined Type 1+2 pattern.",
+    "actual": "Type 1",
+    "ok": false
+  },
+  {
+    "id": "NS-1",
+    "expected": "No Shunt",
+    "question": "The SFJ appears competent. Blood flows forward from the deep femoral vein into the GSV at the groin normally. The GSV demonstrates forward antegrade flow throughout the thigh. No retrograde flow is detected anywhere in the GSV or any tributary branches. The deep venous system shows normal phasic flow.",
+    "actual": "Type 1",
+    "ok": false
+  },
+  {
+    "id": "NS-2",
+    "expected": "No Shunt",
+    "question": "Duplex assessment shows normal venous function. The SFJ is competent with no reflux. The GSV demonstrates physiological forward flow only. No retrograde flow is identified anywhere. No tributary varicosities are seen.",
+    "actual": "No Shunt",
+    "ok": true
+  },
+  {
+    "id": "NS-3",
+    "expected": "No Shunt",
+    "question": "Complete duplex assessment of the lower limb reveals no pathological reflux. The saphenofemoral junction is competent. The GSV is patent and shows forward flow only. No retrograde flow detected anywhere in the limb. The system is reflux-free throughout.",
+    "actual": "Type 3",
+    "ok": false
+  },
+  {
+    "id": "NS-4",
+    "expected": "No Shunt",
+    "question": "Venous duplex: The SFJ is competent. There is no evidence of deep-to-superficial incompetence. The GSV is patent with antegrade flow. No reflux is present anywhere \u2014 no retrograde flow in the GSV trunk, no tributary reflux, and no perforator incompetence detected.",
+    "actual": "No Shunt",
+    "ok": true
+  },
+  {
+    "id": "NS-5",
+    "expected": "No Shunt",
+    "question": "The SFJ appears incompetent with forward flow from deep into GSV at the groin. The GSV carries blood forward in the normal direction throughout. No retrograde flow is detected anywhere in the GSV or any tributary branches. No perforator incompetence.",
+    "actual": "Type 1",
+    "ok": false
+  },
+  {
+    "id": "NS-6",
+    "expected": "No Shunt",
+    "question": "Duplex shows normal venous hemodynamics. SFJ is closed and competent. The GSV shows forward antegrade flow from groin to calf. No retrograde flow identified anywhere in the system \u2014 no GSV reflux, no tributary filling, no perforator incompetence.",
+    "actual": "No Shunt",
+    "ok": true
+  },
+  {
+    "id": "NS-7",
+    "expected": "No Shunt",
+    "question": "The deep venous system is normal with phasic flow. The SFJ is competent and no deep-to-superficial reflux is present. The entire GSV trunk shows forward physiological flow. No retrograde flow is detected anywhere. Patient has no pathological shunt.",
+    "actual": "No Shunt",
+    "ok": true
+  },
+  {
+    "id": "NS-8",
+    "expected": "No Shunt",
+    "question": "Venous assessment shows a competent venous system throughout. The GSV is patent and non-refluxing. No retrograde flow is detected anywhere in the limb \u2014 not at the SFJ, not in the GSV trunk, and no tributary filling. Venous function is normal.",
+    "actual": "No Shunt",
+    "ok": true
+  }
+]

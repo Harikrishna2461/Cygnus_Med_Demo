@@ -69,6 +69,21 @@ VLM_PROMPT = (
     "Reply ONLY with JSON: {\"1\": \"N2\", \"2\": \"N3\"}"
 )
 
+ECHOVLM_PROMPT = (
+    "This is a B-mode ultrasound image (256x256 pixels, 0,0 = top-left).\n"
+    "Identify:\n"
+    "  1. The fascia band — the bright hyperechoic horizontal layer separating "
+    "subcutaneous fat (above) from muscle (below).\n"
+    "  2. Any veins — dark anechoic or hypoechoic oval/circular structures.\n"
+    "Classify each vein:\n"
+    "  N3 = above fascia (superficial vein)\n"
+    "  N2 = at or very near the fascia (Great Saphenous Vein)\n"
+    "  N1 = below fascia (deep vein)\n"
+    "Reply ONLY with valid JSON, no extra text:\n"
+    "{\"fascia_y\":<integer 0-255 for the fascia centre row, or null if not visible>,"
+    "\"veins\":[{\"x\":<int>,\"y\":<int>,\"w\":<int>,\"h\":<int>,\"label\":\"N2\"}]}"
+)
+
 FOUNDATION_FEW_SHOT_PROMPT = (
     "You are analysing B-mode ultrasound images.\n"
     "The annotated reference images you already saw show:\n"
@@ -254,6 +269,7 @@ class PipelineB:
         self._depth_pipe       = None   # HF depth-estimation pipeline (unused for US)
         self._gdino            = None   # (processor, model, device) tuple
         self._sam              = None   # (model, processor, device) tuple
+        self._echovlm          = None   # (model, processor) tuple — primary VLM
         self._few_shot_b64     = []
         self._vlm_context_msgs = []
         self._tried            = False
@@ -265,6 +281,7 @@ class PipelineB:
         self._load_depth()
         self._load_gdino()
         self._load_sam()
+        self._load_echovlm()
         self._load_few_shot()
 
     # ── loaders ───────────────────────────────────────────────────────────────
@@ -312,6 +329,53 @@ class PipelineB:
             print("PipelineB: SAM ready.")
         except Exception as e:
             print(f"PipelineB: SAM unavailable ({e}); per-column brightness fallback active.")
+
+    def _load_echovlm(self):
+        """
+        Load EchoVLM (Qwen2.5VL-MoE fine-tuned on ultrasound) as the primary VLM.
+        The repo has no setup.py so we clone it and add to sys.path directly.
+        Falls back to Groq if unavailable (no GPU, git unavailable, etc.).
+        Also requires: pip install qwen-vl-utils
+        """
+        try:
+            import sys, subprocess, torch
+            from transformers import AutoProcessor
+
+            # Clone repo once into vendor/EchoVLM alongside this file
+            echovlm_dir = HERE / 'vendor' / 'EchoVLM'
+            if not echovlm_dir.exists():
+                print("PipelineB: cloning EchoVLM repo (first run)...")
+                subprocess.run(
+                    ['git', 'clone', '--depth=1',
+                     'https://github.com/Asunatan/EchoVLM.git',
+                     str(echovlm_dir)],
+                    check=True,
+                )
+                print("PipelineB: EchoVLM repo cloned.")
+
+            if str(echovlm_dir) not in sys.path:
+                sys.path.insert(0, str(echovlm_dir))
+
+            from EchoVLM import Qwen2VLMOEForConditionalGeneration
+
+            dev   = "cuda" if torch.cuda.is_available() else "cpu"
+            dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
+            attn  = "flash_attention_2" if torch.cuda.is_available() else "eager"
+
+            print("PipelineB: loading EchoVLM weights (chaoyinshe/EchoVLM)...")
+            model = Qwen2VLMOEForConditionalGeneration.from_pretrained(
+                "chaoyinshe/EchoVLM",
+                torch_dtype=dtype,
+                attn_implementation=attn,
+                device_map="auto",
+            )
+            model.config.output_router_logits = False
+            proc = AutoProcessor.from_pretrained("chaoyinshe/EchoVLM")
+            self._echovlm = (model, proc)
+            print(f"PipelineB: EchoVLM ready on {dev}.")
+        except Exception as e:
+            print(f"PipelineB: EchoVLM unavailable ({e}); Groq VLM fallback active.")
+            self._echovlm = None
 
     def _load_few_shot(self):
         """
@@ -382,6 +446,93 @@ class PipelineB:
         print(f"PipelineB: VLM context pre-built with {len(self._few_shot_b64)} reference images "
               f"({sum(len(b) for b in self._few_shot_b64) // 1024} KB encoded at startup).")
 
+    def vlm_detect_classify_echo(self, bgr):
+        """
+        Combined fascia + vein detection + N1/N2/N3 classification via EchoVLM
+        (chaoyinshe/EchoVLM — Qwen2-VL-7B MoE fine-tuned on ultrasound).
+        No few-shot examples needed — the model understands US anatomy natively.
+        Returns (fascia_y_int_or_None, dets_list_with_vlm_label).
+        """
+        if self._echovlm is None:
+            return None, []
+        try:
+            import torch
+            from qwen_vl_utils import process_vision_info
+            import tempfile, os
+
+            model, proc = self._echovlm
+
+            # Save frame to a temp JPEG — qwen_vl_utils expects a file path or URL
+            vis = cv2.resize(bgr, (IMG_SIZE, IMG_SIZE))
+            tmp = tempfile.NamedTemporaryFile(suffix='.jpg', delete=False)
+            cv2.imwrite(tmp.name, vis)
+            tmp.close()
+
+            messages = [{"role": "user", "content": [
+                {"type": "image", "image": tmp.name},
+                {"type": "text",  "text":  ECHOVLM_PROMPT},
+            ]}]
+
+            text = proc.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+            image_inputs, video_inputs = process_vision_info(messages)
+            inputs = proc(
+                text=[text],
+                images=image_inputs,
+                videos=video_inputs,
+                padding=True,
+                return_tensors="pt",
+            ).to(model.device)
+
+            with torch.no_grad():
+                generated_ids = model.generate(**inputs, max_new_tokens=300)
+
+            # Trim prompt tokens exactly as shown in the HF README
+            trimmed = [
+                out[len(inp):]
+                for inp, out in zip(inputs.input_ids, generated_ids)
+            ]
+            raw = proc.batch_decode(
+                trimmed,
+                skip_special_tokens=True,
+                clean_up_tokenization_spaces=False,
+            )[0].strip()
+
+            os.unlink(tmp.name)
+
+            m = re.search(r'\{.*\}', raw, re.DOTALL)
+            if not m:
+                return None, []
+            data = json.loads(m.group())
+
+            fascia_y = data.get('fascia_y')
+            if fascia_y is not None:
+                fascia_y = int(np.clip(int(fascia_y), 0, IMG_SIZE - 1))
+
+            dets = []
+            for v in data.get('veins', []):
+                try:
+                    x = int(np.clip(int(v['x']), 0, IMG_SIZE - 1))
+                    y = int(np.clip(int(v['y']), 0, IMG_SIZE - 1))
+                    w = max(4, int(np.clip(int(v['w']), 1, IMG_SIZE - x)))
+                    h = max(4, int(np.clip(int(v['h']), 1, IMG_SIZE - y)))
+                    label = v.get('label', 'N2')
+                    if label not in ('N1', 'N2', 'N3'):
+                        label = 'N2'
+                    dets.append({
+                        'bbox':      (x, y, w, h),
+                        'centroid':  (float(x + w / 2), float(y + h / 2)),
+                        'area':      w * h,
+                        'vlm_label': label,
+                    })
+                except (KeyError, ValueError, TypeError):
+                    continue
+            return fascia_y, dets
+        except Exception as e:
+            print(f"EchoVLM detect error: {e}")
+            return None, []
+
     def vlm_detect_classify(self, bgr, groq_client, vlm_model_nm):
         """
         Combined fascia detection + vein detection + classification via few-shot VLM.
@@ -445,7 +596,18 @@ class PipelineB:
 
     # ── fascia ────────────────────────────────────────────────────────────────
 
-    def detect_fascia(self, bgr):
+    def _detect_scan_y_limits(self, gray_r, scan_xl_m, scan_xr_m):
+        x_lo = max(0, scan_xl_m)
+        x_hi = min(IMG_SIZE, scan_xr_m)
+        row_mean = gray_r[:, x_lo:x_hi].mean(axis=1).astype(np.float64)
+        grad = np.gradient(row_mean)
+        top_candidates = np.where(grad[:IMG_SIZE // 2] > 3.0)[0]
+        y_top = int(top_candidates[0]) + 3 if len(top_candidates) else int(IMG_SIZE * 0.10)
+        thresh_bot = max(12.0, float(row_mean.max()) * 0.08)
+        y_bot = next((y for y in range(IMG_SIZE-1, IMG_SIZE//2, -1) if row_mean[y] > thresh_bot), IMG_SIZE-1) + 1
+        return y_top, y_bot
+
+    def detect_fascia(self, bgr, scan_xl_m=0, scan_xr_m=IMG_SIZE):
         """
         Fascia detection chain:
           1. GDINO text-prompt → approximate fascia row
@@ -454,10 +616,10 @@ class PipelineB:
         """
         approx_y = self._gdino_fascia(bgr)
         if approx_y is not None:
-            result = self._fascia_from_sam(bgr, approx_y)
+            result = self._fascia_from_sam(bgr, approx_y, scan_xl_m, scan_xr_m)
             if result[0] is not None:
                 return result
-        return self._fascia_from_brightness(bgr)
+        return self._fascia_from_brightness(bgr, scan_xl_m, scan_xr_m)
 
     def _gdino_fascia(self, bgr):
         """Use GDINO to detect the fascia band. Returns approx fascia row in IMG_SIZE coords, or None."""
@@ -511,14 +673,14 @@ class PipelineB:
             print(f"PipelineB GDINO fascia error: {e}")
             return None
 
-    def _fascia_from_sam(self, bgr, approx_y):
+    def _fascia_from_sam(self, bgr, approx_y, scan_xl_m=0, scan_xr_m=IMG_SIZE):
         """
         Run SAM with a wide box prompt around approx_y to segment the fascia band.
         Extracts a per-column curved (top_y, bot_y) from the resulting mask.
         Falls through to brightness refinement if SAM is unavailable or mask is too sparse.
         """
         if self._sam is None:
-            return self._refine_fascia_per_column(bgr, approx_y)
+            return self._refine_fascia_per_column(bgr, approx_y, scan_xl_m=scan_xl_m, scan_xr_m=scan_xr_m)
         try:
             import torch
             from PIL import Image as PILImage
@@ -543,14 +705,16 @@ class PipelineB:
                 inputs["original_sizes"].cpu(),
                 inputs["reshaped_input_sizes"].cpu(),
             )
-            # masks[0]: [num_masks, H, W] boolean
-            iou_scores = outputs.iou_scores[0, 0].cpu().numpy()
-            best_mask  = masks[0][int(np.argmax(iou_scores))].numpy().astype(np.uint8)
+            # masks[0] shape: (num_input_boxes, num_candidates, H, W) = (1, 3, H, W)
+            iou_scores = outputs.iou_scores[0, 0].cpu().numpy()  # shape (3,)
+            best_mask  = masks[0][0, int(np.argmax(iou_scores))].numpy().astype(np.uint8)
             mask_r     = cv2.resize(best_mask, (IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_NEAREST)
 
+            x_lo = max(0, scan_xl_m)
+            x_hi = min(IMG_SIZE, scan_xr_m)
             top_out = np.full(IMG_SIZE, np.nan, np.float32)
             bot_out = np.full(IMG_SIZE, np.nan, np.float32)
-            for x in range(IMG_SIZE):
+            for x in range(x_lo, x_hi):
                 ys = np.where(mask_r[:, x] > 0)[0]
                 if len(ys) == 0:
                     continue
@@ -560,27 +724,27 @@ class PipelineB:
 
             valid = ~np.isnan(top_out)
             if valid.sum() < 20:
-                return self._refine_fascia_per_column(bgr, approx_y)
+                return self._refine_fascia_per_column(bgr, approx_y, scan_xl_m=scan_xl_m, scan_xr_m=scan_xr_m)
 
             xs  = np.arange(IMG_SIZE, dtype=np.float32)
             xv  = xs[valid]
-            top_out = uniform_filter1d(np.interp(xs, xv, top_out[valid]), 15).astype(np.float32)
-            bot_out = uniform_filter1d(np.interp(xs, xv, bot_out[valid]), 15).astype(np.float32)
+            scan_xs = np.arange(x_lo, x_hi, dtype=np.float32)
+            top_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, top_out[valid]), 25).astype(np.float32)
+            bot_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, bot_out[valid]), 25).astype(np.float32)
             return top_out, bot_out
         except Exception as e:
             print(f"PipelineB SAM fascia error: {e}")
-            return self._refine_fascia_per_column(bgr, approx_y)
+            return self._refine_fascia_per_column(bgr, approx_y, scan_xl_m=scan_xl_m, scan_xr_m=scan_xr_m)
 
-    def _refine_fascia_per_column(self, bgr, approx_y, search_half=25):
+    def _refine_fascia_per_column(self, bgr, approx_y, search_half=25, scan_xl_m=0, scan_xr_m=IMG_SIZE):
         """
         Refine a rough fascia row estimate into a curved per-column representation.
 
-        For each column finds the brightest pixel within [approx_y ± search_half]
-        and uses that as the fascia peak.  This follows the actual hyperechoic band
-        contour instead of drawing a flat horizontal line.
+        For each scan column finds the brightest pixel within [approx_y ± search_half]
+        and uses that as the fascia peak.  IQR outlier rejection removes scan-edge
+        artifacts before sigma-25 smoothing.
 
-        Returns (top_y, bot_y) arrays of shape (IMG_SIZE,).
-        Falls back to flat lines centred on approx_y if too few columns have signal.
+        Returns (top_y, bot_y) arrays of shape (IMG_SIZE,), NaN outside scan range.
         """
         gray   = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
         gray_r = cv2.resize(gray.astype(np.float32), (IMG_SIZE, IMG_SIZE))
@@ -589,11 +753,13 @@ class PipelineB:
         y_lo = int(np.clip(approx_y - search_half, 0, IMG_SIZE - 1))
         y_hi = int(np.clip(approx_y + search_half + 1, 1, IMG_SIZE))
         half = 8
+        x_lo = max(0, scan_xl_m)
+        x_hi = min(IMG_SIZE, scan_xr_m)
 
         top_out = np.full(IMG_SIZE, np.nan, np.float32)
         bot_out = np.full(IMG_SIZE, np.nan, np.float32)
 
-        for x in range(IMG_SIZE):
+        for x in range(x_lo, x_hi):   # only scan columns
             col_strip = gray_s[y_lo:y_hi, x]
             if float(col_strip.max()) < 15:   # dark gel/shadow column — skip
                 continue
@@ -603,37 +769,49 @@ class PipelineB:
 
         valid = ~np.isnan(top_out)
         if valid.sum() < 20:
-            # Not enough per-column signal — fall back to flat lines
-            cy   = float(np.clip(approx_y, half, IMG_SIZE - 1 - half))
-            top_out[:] = cy - half
-            bot_out[:] = cy + half
+            # Not enough per-column signal — fall back to flat lines within scan range
+            cy = float(np.clip(approx_y, half, IMG_SIZE - 1 - half))
+            top_out[x_lo:x_hi] = cy - half
+            bot_out[x_lo:x_hi] = cy + half
             return top_out, bot_out
 
-        xs = np.arange(IMG_SIZE, dtype=np.float32)
-        xv = xs[valid]
-        top_out = uniform_filter1d(np.interp(xs, xv, top_out[valid]), 15).astype(np.float32)
-        bot_out = uniform_filter1d(np.interp(xs, xv, bot_out[valid]), 15).astype(np.float32)
+        # IQR outlier rejection: clamp scan-edge spikes before smoothing
+        tops = top_out[valid]
+        q25, q75 = float(np.percentile(tops, 25)), float(np.percentile(tops, 75))
+        iqr = q75 - q25 if q75 > q25 else 8.0
+        lo_fence, hi_fence = q25 - 2.0 * iqr, q75 + 2.0 * iqr
+        tops = np.clip(tops, lo_fence, hi_fence)
+        top_out[valid] = tops
+        bots = bot_out[valid]
+        bot_out[valid] = np.clip(bots, lo_fence + 16, hi_fence + 16)
+
+        xs  = np.arange(IMG_SIZE, dtype=np.float32)
+        xv  = xs[valid]
+        scan_xs = np.arange(x_lo, x_hi, dtype=np.float32)
+        top_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, top_out[valid]), 25).astype(np.float32)
+        bot_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, bot_out[valid]), 25).astype(np.float32)
         return top_out, bot_out
 
-    def _fascia_from_brightness(self, bgr):
+    def _fascia_from_brightness(self, bgr, scan_xl_m=0, scan_xr_m=IMG_SIZE):
         gray   = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
         gray_r = cv2.resize(gray.astype(np.float32), (IMG_SIZE, IMG_SIZE))
-        row_sm = uniform_filter1d(gray_r.mean(axis=1).astype(np.float64), 15)
-
-        # Fascia = steepest dark→bright transition (fat → hyperechoic band).
-        # Use gradient rather than argmax so we find the band edge, not the
-        # brightest artifact.  Search 12–72 % of frame height.
-        y0 = max(1, int(IMG_SIZE * 0.12))
-        y1 = int(IMG_SIZE * 0.72)
+        x_lo, x_hi = max(0, scan_xl_m), min(IMG_SIZE, scan_xr_m)
+        # Average only scan columns — dark side panels bias the gradient otherwise
+        row_sm = uniform_filter1d(gray_r[:, x_lo:x_hi].mean(axis=1).astype(np.float64), 15)
+        # Start search below the scan coupling line (bright echo at scan top)
+        scan_y_top, _ = self._detect_scan_y_limits(gray_r, scan_xl_m, scan_xr_m)
+        y0 = scan_y_top + 15
+        y0 = max(y0, int(IMG_SIZE * 0.18))   # at least 18% from top
+        y1 = int(IMG_SIZE * 0.75)
+        if y0 >= y1:
+            y0 = int(IMG_SIZE * 0.15)
         grad = np.gradient(row_sm)
         fascia_cy = y0 + int(np.argmax(grad[y0:y1]))
-
-        # Refine to per-column curves so the drawn band follows actual anatomy
-        return self._refine_fascia_per_column(bgr, fascia_cy)
+        return self._refine_fascia_per_column(bgr, fascia_cy, scan_xl_m=scan_xl_m, scan_xr_m=scan_xr_m)
 
     # ── veins ─────────────────────────────────────────────────────────────────
 
-    def detect_veins(self, bgr, min_area=80):
+    def detect_veins(self, bgr, min_area=80, scan_xl_m=0, scan_xr_m=IMG_SIZE):
         """
         Vein detection chain:
           1. GDINO text-prompt → rough bounding boxes
@@ -644,7 +822,7 @@ class PipelineB:
             dets = self._gdino_detect(bgr, min_area)
             if dets:
                 return self._sam_refine_dets(bgr, dets)
-        return self._blob_detect(bgr, min_area)
+        return self._blob_detect(bgr, min_area, scan_xl_m, scan_xr_m)
 
     def _sam_refine_dets(self, bgr, gdino_dets):
         """
@@ -682,8 +860,9 @@ class PipelineB:
                     inputs["original_sizes"].cpu(),
                     inputs["reshaped_input_sizes"].cpu(),
                 )
-                iou_scores = outputs.iou_scores[0, 0].cpu().numpy()
-                best_mask  = masks[0][int(np.argmax(iou_scores))].numpy().astype(np.uint8)
+                # masks[0] shape: (num_input_boxes, num_candidates, H, W) = (1, 3, H, W)
+                iou_scores = outputs.iou_scores[0, 0].cpu().numpy()  # shape (3,)
+                best_mask  = masks[0][0, int(np.argmax(iou_scores))].numpy().astype(np.uint8)
                 mask_r     = cv2.resize(best_mask, (IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_NEAREST)
 
                 ys_m, xs_m = np.where(mask_r > 0)
@@ -718,7 +897,7 @@ class PipelineB:
 
             inputs = proc(
                 images=pil,
-                text="vein . blood vessel",
+                text="vein . dark oval blood vessel . anechoic structure",
                 return_tensors="pt",
             ).to(dev)
 
@@ -731,12 +910,12 @@ class PipelineB:
                 results = proc.post_process_grounded_object_detection(
                     outputs, inputs.input_ids, target_sizes=[(h0, w0)]
                 )[0]
-                keep = results['scores'].cpu() >= 0.30
+                keep = results['scores'].cpu() >= 0.20
                 results = {'boxes': results['boxes'][keep]}
             except TypeError:
                 results = proc.post_process_grounded_object_detection(
                     outputs, inputs.input_ids,
-                    box_threshold=0.30, text_threshold=0.25, target_sizes=[(h0, w0)]
+                    box_threshold=0.20, text_threshold=0.15, target_sizes=[(h0, w0)]
                 )[0]
 
             edge_skip = int(IMG_SIZE * 0.08)   # ignore scan-border region at top
@@ -749,6 +928,9 @@ class PipelineB:
                 bh = max(1, int((y2 - y1) * IMG_SIZE / h0))
                 area = bw * bh
                 if area < min_area:
+                    continue
+                # Reject full-scan false positives: boxes covering >40% of image
+                if area > IMG_SIZE * IMG_SIZE * 0.40:
                     continue
                 # Reject scan-border artifacts: too close to top edge
                 if y < edge_skip:
@@ -766,36 +948,41 @@ class PipelineB:
             print(f"PipelineB GDINO detect error: {e}")
             return []
 
-    def _blob_detect(self, bgr, min_area):
+    def _blob_detect(self, bgr, min_area, scan_xl_m=0, scan_xr_m=IMG_SIZE):
         """
         Dark-blob fallback for vein detection.
 
-        Uses a global intensity threshold (pixels must be meaningfully darker
-        than the frame mean) rather than adaptive thresholding — adaptive
-        thresholds find every speckle/texture element, not just true veins.
-        Adds a circularity gate to reject elongated tissue interfaces.
+        Thresholds relative to the scan-area mean (not full-frame mean) to avoid
+        the dark side-panel background dominating the threshold.  Scan masking
+        prevents the machine UI panels from becoming false-positive detections.
         """
         gray   = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
         gray_r = cv2.resize(gray, (IMG_SIZE, IMG_SIZE)).astype(np.float32)
-        # Mild Gaussian to reduce ultrasound speckle before thresholding
-        blurred = cv2.GaussianBlur(gray_r, (9, 9), 0)
+        # 5×5 blur preserves small dark vein interiors; 9×9 was too aggressive
+        blurred = cv2.GaussianBlur(gray_r, (5, 5), 0)
 
-        # Threshold: keep only pixels significantly darker than the image mean.
-        # Veins are typically at least 40 % darker than surrounding tissue.
-        mean_val   = float(blurred.mean())
-        thresh_val = max(25, int(mean_val * 0.52))
+        x_lo, x_hi = max(0, scan_xl_m), min(IMG_SIZE, scan_xr_m)
+        xi_lo, xi_hi = x_lo + 2, x_hi - 2   # 2-px inset to avoid border artifacts
+        scan_y_top, scan_y_bot = self._detect_scan_y_limits(gray_r, scan_xl_m, scan_xr_m)
+
+        # Use scan-area mean so dark side panels don't inflate the threshold
+        scan_mean  = float(blurred[scan_y_top:scan_y_bot, xi_lo:xi_hi].mean())
+        thresh_val = max(20, int(scan_mean * 0.45))
         _, binary  = cv2.threshold(
             blurred.astype(np.uint8), thresh_val, 255, cv2.THRESH_BINARY_INV
         )
 
-        # Close small intra-vein gaps then open to remove isolated noise pixels
         k_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-        k_open  = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+        k_open  = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
         binary  = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, k_close)
         binary  = cv2.morphologyEx(binary, cv2.MORPH_OPEN,  k_open)
-        # Blank top 8 % (scan coupling line)
-        binary[:int(IMG_SIZE * 0.08), :] = 0
+        # Blank everything outside the inset scan area (kills background + UI panels)
+        binary[:, :xi_lo]       = 0
+        binary[:, xi_hi:]       = 0
+        binary[:scan_y_top, :]  = 0
+        binary[scan_y_bot:, :]  = 0
 
+        scan_w = max(1, xi_hi - xi_lo)
         n, labels, stats, centroids = cv2.connectedComponentsWithStats(binary, connectivity=8)
         dets = []
         for i in range(1, n):
@@ -804,10 +991,11 @@ class PipelineB:
             bh = stats[i, cv2.CC_STAT_HEIGHT]
             if a < min_area:
                 continue
-            # Aspect ratio: veins are roughly circular/oval in cross-section
+            # Reject blobs spanning >55% of scan width (deep tissue bands, not veins)
+            if bw > scan_w * 0.55:
+                continue
             if min(bw, bh) == 0 or max(bw, bh) / min(bw, bh) > 3.5:
                 continue
-            # Circularity: 4π·A / P²  (circle = 1.0)
             comp = (labels == i).astype(np.uint8)
             contours, _ = cv2.findContours(comp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             if not contours:
@@ -1002,7 +1190,7 @@ def _dl_vein_fn(frame, s_bot, min_area):
 
 def _foundation_fascia_fn(frame, scan_xl_m, scan_xr_m):
     _pipe_b.ensure_loaded()
-    return _pipe_b.detect_fascia(frame)
+    return _pipe_b.detect_fascia(frame, scan_xl_m, scan_xr_m)
 
 def _foundation_vein_fn(frame, s_bot, min_area):
     _pipe_b.ensure_loaded()
@@ -1165,7 +1353,11 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
     Between VLM calls (or when no Groq key) fascia falls back to the
     brightness-gradient heuristic and veins to GDINO / blob detection.
     """
-    groq_client = _make_groq(groq_key)
+    try:
+        groq_client = _make_groq(groq_key) if (groq_key or DEFAULT_GROQ_KEY) else None
+    except Exception as e:
+        print(f"Groq unavailable for foundation pipeline: {e}")
+        groq_client = None
 
     _pipe_b.ensure_loaded()
     tmp_path = _store[upload_id]['tmp_path']
@@ -1187,6 +1379,8 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
         FASCIA_SMOOTH  = 7
         raw_idx        = 0
         proc_idx       = 0
+        scan_xl_m      = None
+        scan_xr_m      = None
 
         vlm_vein_dets  = []  # most-recent vein detections from VLM (have 'vlm_label')
         vlm_fascia_buf = []  # smoothing buffer fed ONLY from VLM fascia_y results
@@ -1200,16 +1394,30 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
                 break
 
             if raw_idx % skip == 0:
+                w0 = frame.shape[1]
 
-                # ── Combined VLM detection (with few-shot annotated examples) ──
-                if groq_client and (proc_idx % VLM_DETECT_INTERVAL == 0):
-                    print(f"[Foundation VLM] frame {proc_idx}: calling few-shot detect "
-                          f"({len(_pipe_b._few_shot_b64)} ref images)")
-                    fy, vd = _pipe_b.vlm_detect_classify(frame, groq_client, vlm_model_nm)
-                    print(f"[Foundation VLM] → fascia_y={fy}, veins={len(vd)}")
+                if scan_xl_m is None:
+                    xl_px, xr_px = get_scan_x_limits(frame)
+                    scan_xl_m = max(0, round(xl_px * IMG_SIZE / w0))
+                    scan_xr_m = min(IMG_SIZE, round(xr_px * IMG_SIZE / w0))
+
+                # ── Combined VLM detection ────────────────────────────────────────
+                # EchoVLM (ultrasound-specific, local) takes priority over Groq.
+                # Falls back to Groq when EchoVLM is unavailable (no GPU / not installed).
+                vlm_available = _pipe_b._echovlm is not None or groq_client is not None
+                if vlm_available and (proc_idx % VLM_DETECT_INTERVAL == 0):
+                    if _pipe_b._echovlm is not None:
+                        print(f"[EchoVLM] frame {proc_idx}: running ultrasound-specific VLM")
+                        fy, vd = _pipe_b.vlm_detect_classify_echo(frame)
+                    else:
+                        print(f"[Groq VLM] frame {proc_idx}: few-shot detect "
+                              f"({len(_pipe_b._few_shot_b64)} ref images)")
+                        fy, vd = _pipe_b.vlm_detect_classify(frame, groq_client, vlm_model_nm)
+                    print(f"[Foundation VLM] fascia_y={fy}, veins={len(vd)}")
                     if fy is not None:
-                        # Refine VLM's single-row estimate to a curved per-column band
-                        t, b = _pipe_b._refine_fascia_per_column(frame, fy)
+                        t, b = _pipe_b._refine_fascia_per_column(frame, fy,
+                                                                  scan_xl_m=scan_xl_m,
+                                                                  scan_xr_m=scan_xr_m)
                         vlm_fascia_buf.append((t, b))
                         if len(vlm_fascia_buf) > FASCIA_SMOOTH:
                             vlm_fascia_buf.pop(0)
@@ -1223,7 +1431,7 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
                     s_top = np.nanmedian(np.stack([f[0] for f in vlm_fascia_buf]), axis=0).astype(np.float32)
                     s_bot = np.nanmedian(np.stack([f[1] for f in vlm_fascia_buf]), axis=0).astype(np.float32)
                 else:
-                    top_y, bot_y = _pipe_b.detect_fascia(frame)
+                    top_y, bot_y = _pipe_b.detect_fascia(frame, scan_xl_m, scan_xr_m)
                     if top_y is not None:
                         brt_fascia_buf.append((top_y, bot_y))
                         if len(brt_fascia_buf) > FASCIA_SMOOTH:
@@ -1235,11 +1443,11 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
                         s_top = s_bot = None
 
                 # ── Veins: on VLM frames use VLM boxes; on all other frames run
-                # fresh GDINO/blob so the tracker never gets stale positions ──
-                if groq_client and (proc_idx % VLM_DETECT_INTERVAL == 0) and vlm_vein_dets:
+                # fresh GDINO/SAM so the tracker never gets stale positions ──
+                if vlm_available and (proc_idx % VLM_DETECT_INTERVAL == 0) and vlm_vein_dets:
                     dets = vlm_vein_dets
                 else:
-                    dets = _pipe_b.detect_veins(frame, min_area)
+                    dets = _pipe_b.detect_veins(frame, min_area, scan_xl_m, scan_xr_m)
 
                 # Remove any detection whose centroid is below the fascia band —
                 # same anatomical constraint as the DL pipeline.
@@ -1285,6 +1493,8 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
                 last_centroids = {r['track_id']: (r['cx'], r['cy']) for r in track_recs}
 
                 # Standalone VLM classification for any still-unknown tracks
+                # Only falls back to Groq here — EchoVLM classification happens
+                # inside vlm_detect_classify_echo via the vlm_label field.
                 unclassified = [r for r in track_recs
                                 if track_labels.get(r['track_id'], 'unknown') == 'unknown']
                 if use_vlm and groq_client and unclassified:
