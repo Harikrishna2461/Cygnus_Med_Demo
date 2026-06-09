@@ -48,12 +48,21 @@ logger = logging.getLogger(__name__)
 
 # ── Shared task runner ────────────────────────────────────────────────────────
 
-def _run_task(agent, description: str, expected_output: str) -> str:
-    """Run a single-agent single-task Crew and return the raw text output."""
-    task = Task(description=description, expected_output=expected_output, agent=agent)
-    crew = Crew(agents=[agent], tasks=[task], process=Process.sequential, verbose=False)
-    result = crew.kickoff()
-    return result.raw if hasattr(result, "raw") else str(result)
+def _run_task(agent, description: str, expected_output: str, retries: int = 2) -> str:
+    """Run a single-agent single-task Crew and return the raw text output.
+    Retries up to `retries` times on any exception before re-raising."""
+    last_exc: Exception = RuntimeError("No attempts made")
+    for attempt in range(retries + 1):
+        try:
+            task = Task(description=description, expected_output=expected_output, agent=agent)
+            crew = Crew(agents=[agent], tasks=[task], process=Process.sequential, verbose=False)
+            result = crew.kickoff()
+            return result.raw if hasattr(result, "raw") else str(result)
+        except Exception as e:
+            last_exc = e
+            if attempt < retries:
+                logger.warning(f"[CrewAI] Task attempt {attempt + 1} failed ({e}), retrying...")
+    raise last_exc
 
 
 def _extract_json(raw: str) -> str:
@@ -249,7 +258,7 @@ def classify_and_plan_ligation_with_llm(
                     '"reasoning": [...], "needs_elim_test": false, ...}'
                 ),
             )
-            classification = _repair_and_parse(raw)
+            classification = _repair_and_parse(_extract_json(raw))
             if not classification or "shunt_type" not in classification:
                 raise RuntimeError(f"Unparseable classification response for {leg_label}")
         except Exception as e:
@@ -279,7 +288,7 @@ def classify_and_plan_ligation_with_llm(
                         '"clinical_rationale": "...", "chiva_approach": "...", ...}'
                     ),
                 )
-                ligation = _repair_and_parse(raw)
+                ligation = _repair_and_parse(_extract_json(raw))
                 if not ligation or "ligation_steps" not in ligation:
                     raise RuntimeError(f"Unparseable ligation plan for {leg_label}")
                 ligation_usage = ligation.pop("_llm_usage", {})

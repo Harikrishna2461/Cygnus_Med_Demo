@@ -85,7 +85,10 @@ def api_chat():
             )
         except Exception as e:
             logger.error(f"Classification pipeline failed: {e}", exc_info=True)
-            error_msg = f"Classification pipeline error: {e}"
+            error_msg = (
+                "I was unable to classify this case. "
+                "Please try rephrasing your description and submitting again."
+            )
             save_message(session_id, "assistant", error_msg)
             return jsonify({"type": "error", "conversational_response": error_msg}), 500
 
