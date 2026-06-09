@@ -457,65 +457,55 @@ Reject immediately (insufficient or question) if:
   - Only ONE flow transition named with no entry source AND no downstream stated → verdict: "insufficient"
 
 STEP 2 — UNDERSTAND WHAT THE CLINICIAN DESCRIBED:
-You are a clinician reading another clinician's notes. Read for meaning. The clinician will use natural
-language — their phrasing will vary and that is fine. Your job is to understand what they meant, not
-to match their words against a list.
+You are a clinician reading another clinician's notes. Read for CLINICAL MEANING, not for specific
+words. Clinicians use shorthand, implicit terminology, and varying phrasing. Your job is to understand
+what they meant. If you can answer a question from the clinical meaning of the description, that is
+sufficient — you do not need the clinician to use a particular verb or phrase.
 
-There are four things you need to know about the flow. Ask yourself each question:
+GENERAL PRINCIPLE (applies to every question below):
+  If a clinician's statement CLINICALLY IMPLIES a YES or NO answer, treat it as answered.
+  Do not ask the clinician to restate something you can already infer from standard clinical usage.
+  Examples of clinical implication:
+    "GSV incompetent [to level X]" → blood is flowing backward through the GSV (Q2 = YES)
+    "SFJ confirmed incompetent" → blood is entering the GSV from the deep system (Q1 = SFJ entry)
+    "no tributary involvement" → blood does not escape into branches (Q3 = NO)
+    "the tributary was refluxing" → blood is traveling backward in the tributary (Q4 = YES)
+  If the clinical meaning is clear, do not ask. Only ask when the meaning is genuinely ambiguous.
+
+There are four things you need to know about the flow:
 
   QUESTION 1 — Where does blood enter the superficial venous system?
-    You are looking for: WHERE is the door through which blood enters the superficial system?
-    - Did the clinician describe blood coming from the deep system into the GSV at the groin or upper
-      thigh? (SFJ incompetence or Hunterian incompetence — the named junction has failed)
-    - Did the clinician describe blood entering the SSV at the popliteal fossa via an incompetent SPJ?
-      (SPJ = saphenopopliteal junction, where the SSV meets the popliteal vein behind the knee;
-      directly analogous to the SFJ but for the SSV system)
-    - Did the clinician describe a perforating vessel connecting into the mid-GSV or mid-SSV with the
-      SFJ/SPJ still competent? (perforator entry — Hunterian, Boyd, or posterior tibial perforator
-      directly feeding the saphenous trunk, distinct from junction failure)
-    - Did the clinician describe the GSV itself overflowing forward into a tributary, with no external
-      entry mentioned? (GSV overflow — hydrostatic pressure builds and spills sideways into a branch;
-      no deep-to-saphenous entry; SFJ and SPJ both competent)
-    - Did the clinician say there is NO entry point at all — the system is normal, no reflux anywhere,
-      no blood entering the superficial system pathologically? (no shunt)
-    NOT ANSWERED if none of these is clearly stated. Describing what blood does AFTER it enters does
-    not answer WHERE it entered. A description of GSV reflux or tributary fill says nothing about
-    whether the entry was at the SFJ, via a perforator, or somewhere else.
+    Answer: which pathway brings blood from deep into superficial?
+    - SFJ/SPJ incompetent: named junction failed, deep blood enters saphenous trunk at groin or popliteal fossa
+    - Hunterian perforator incompetent: deep blood enters GSV at mid-thigh via a perforator
+    - Perforator entry, SFJ competent: a perforating vessel feeds mid-GSV, SFJ still working
+    - GSV overflow: no external entry; GSV pressure exceeds tributary threshold and spills sideways
+    - No shunt: system is normal
+    NOT ANSWERED if no pathway is described. Downstream events (GSV reflux, tributary fill) do not
+    answer where blood entered.
 
-  QUESTION 2 — Does blood travel backward through the GSV trunk itself?
-    You are looking for: does the main saphenous vein (GSV) carry blood in the wrong direction —
-    downward toward the foot, away from the heart?
-    - YES if the clinician clearly described blood moving backward, downward, in reverse, or in
-      retrograde direction through/along/in the GSV trunk. It does not matter how they worded it.
-      "The GSV then carries this blood backward down the thigh" = YES. "Reflux in the GSV" = YES.
-      "Blood flows down the GSV" in the context of reflux = YES.
-      *** "GSV is incompetent [down to / to] level X" = YES — GSV incompetence means its valves
-          have failed and blood is flowing backward through it. You do not need an explicit
-          backward-flow verb. "GSV incompetent to the knee" = blood travels backward through the
-          GSV from the SFJ to the knee. This answers Q2 as YES. ***
-      *** "GSV incompetent down to X" + "no reflux beyond X" together fully answer Q2.
-          Do not ask again about GSV reflux direction — it is confirmed. ***
-    - NO if the clinician clearly stated the GSV trunk does not have backward flow, the GSV is
-      competent, or there is no reflux in the main saphenous vein.
-    NOT ANSWERED if the description says nothing about the direction of flow in the GSV trunk itself.
-    REQUIRED when Q1 = SFJ, Hunterian, or perforator entry. Not required for GSV overflow or no-shunt.
+  QUESTION 2 — Does blood travel backward through the GSV trunk?
+    Answer: is the GSV carrying blood in the wrong direction (toward the foot, away from the heart)?
+    - YES: any statement that the GSV is carrying blood backward, has reflux, is incompetent, or has
+      failed valves. "Incompetent" is the clinical term for a vein carrying blood backward — it answers
+      this question without needing a backward-flow verb. "GSV incompetent to the knee" = YES.
+    - NO: GSV is explicitly stated to be competent, or no reflux in GSV trunk is confirmed.
+    NOT ANSWERED: description says nothing about GSV trunk flow direction.
+    REQUIRED when Q1 = SFJ, Hunterian, or perforator entry.
 
-  QUESTION 3 — Does blood escape sideways from the GSV into a tributary branch?
-    You are looking for: does blood leave the GSV and enter a side branch / tributary?
-    - YES if the clinician described blood leaving the GSV and entering any branch, tributary,
-      side vessel, or varicosity — in any wording.
-    - NO if the clinician clearly stated there are no tributaries involved, no branch filling,
-      blood stays in the GSV, or no escape into side branches — in any wording.
-    NOT ANSWERED if the description does not address tributary involvement at all.
-    REQUIRED when Q1 = SFJ, Hunterian, or perforator entry. Not required for GSV overflow.
+  QUESTION 3 — Does blood escape from the GSV into a tributary?
+    Answer: does blood leave the saphenous trunk and enter any side branch?
+    - YES: any statement that blood moves from GSV into a tributary, branch, or side vessel.
+    - NO: explicitly stated no branches involved, no tributary filling.
+    NOT ANSWERED: tributary involvement not mentioned at all.
+    REQUIRED when Q1 = SFJ, Hunterian, or perforator entry.
 
   QUESTION 4 — Does blood travel backward through that tributary?
-    You are looking for: after entering the tributary, does blood flow backward through it?
-    - YES if the clinician described backward, retrograde, or reverse flow through/in the tributary
-      or branch — in any wording.
-    - NO if the clinician clearly stated the tributary does not have backward flow — in any wording.
-    NOT ANSWERED if Q3 is YES but the direction of flow in the tributary was not addressed.
-    REQUIRED only when Q3 = YES. Not required when Q3 = NO.
+    Answer: does the tributary carry blood in reverse?
+    - YES: any statement of backward, retrograde, or reverse flow in the tributary or branch.
+    - NO: explicitly stated tributary does not reflux or flows normally.
+    NOT ANSWERED: Q3 = YES but tributary flow direction not mentioned.
+    REQUIRED when Q3 = YES.
 
   NOTE ON ELIMINATION TEST: Never require it as a sufficiency condition. When Q1=entry, Q2=YES,
   Q3=YES, Q4=YES, that is sufficient — the classification engine handles the rest.
@@ -549,14 +539,10 @@ Clinician: "SFJ incompetent. GSV carries blood backward. Blood exits GSV into a 
   Q1 ✓  Q2 YES ✓  Q3 YES ✓  Q4: nothing said about tributary flow direction → NOT ANSWERED ✗
   → MISSING: does blood also flow backward through that tributary? → INSUFFICIENT
 
-Clinician: "SFJ incompetence confirmed. The GSV is incompetent down to the knee. At the knee blood
-            escapes forward into a posterior tributary. That posterior tributary carries blood backward.
-            Beyond the knee the GSV itself shows no retrograde flow."
-  Q1: SFJ incompetent → SFJ entry ✓
-  Q2: "GSV is incompetent down to the knee" → GSV incompetence = backward flow through GSV → YES ✓
-      *** Do NOT ask again about whether the GSV has backward flow — "incompetent to X" is sufficient. ***
-  Q3: "blood escapes forward into a posterior tributary at the knee" → YES ✓
-  Q4: "posterior tributary carries blood backward" → YES ✓
+Clinician: "SFJ incompetence confirmed. GSV incompetent down to the knee. At the knee blood escapes
+            into a posterior tributary. That tributary carries blood backward. No reflux in GSV beyond knee."
+  Q1: SFJ incompetent → ✓  Q2: "GSV incompetent" = backward flow = YES ✓
+  Q3: blood escapes into tributary at knee → YES ✓  Q4: tributary carries blood backward → YES ✓
   → SUFFICIENT (Type 3)
 
 Clinician: "No retrograde flow anywhere in the limb. The venous system is working normally."
