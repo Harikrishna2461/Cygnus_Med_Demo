@@ -358,136 +358,122 @@ _SUFFICIENCY_PROMPT = """A clinician typed this into a CHIVA venous shunt classi
 "{description}"
 
 ═══════════════════════════════════════════════════════════
-THE ONLY TEST THAT MATTERS — APPLY THIS BEFORE ANYTHING ELSE:
-A sufficient description must explicitly cover BOTH of these components:
-
-  (A) ENTRY — WHERE and HOW blood enters the superficial venous system
-      e.g. "SFJ incompetent", "deep blood enters GSV at groin",
-           "perforator feeds mid-GSV", "deep blood enters a tributary directly"
-
-  (B) DOWNSTREAM — what blood DOES in the superficial system AFTER it enters
-      e.g. "GSV refluxes backward full-length", "blood escapes into a tributary",
-           "tributary drains back to deep", "no reflux detected downstream"
-
-If EITHER (A) or (B) is absent or too vague → INSUFFICIENT.
-This applies regardless of how many locations are mentioned, how many times the
-word "reflux" appears, or how many sentences the description has.
-
-INSUFFICIENT EXAMPLES — notice WHY each fails:
-  "There is a reflux from SFJ into GSV"
-      → Has (A) entry at SFJ. Missing (B): what does the GSV do downstream? INSUFFICIENT.
-  "There is SFJ reflux and the blood goes into the GSV"
-      → Has (A). Missing (B): does the GSV reflux backward? escape to a tributary? INSUFFICIENT.
-  "SFJ reflux and reflux in the GSV"
-      → Two findings listed. But (A) vague — is this entry or just a label? (B) vague — how far, which direction? INSUFFICIENT.
-  "The GSV is refluxing backward"
-      → Has (B) GSV reflux. Missing (A): what is driving this reflux? where does blood enter? INSUFFICIENT.
-  "Blood enters at SFJ and there is some reflux"
-      → Has (A). But (B) "some reflux" is too vague — where? which direction? INSUFFICIENT.
-  "Reflux grade 2 at SFJ, GSV incompetent"
-      → Severity grades and labels. Neither (A) nor (B) described as a flow path. INSUFFICIENT.
-  "SFJ incompetent"
-      → Finding label only. No (B) at all. INSUFFICIENT.
-
-SUFFICIENT EXAMPLES — notice what makes each one complete:
-  "SFJ incompetent, blood enters GSV at groin and the GSV refluxes backward full-length"
-      → (A) SFJ entry + (B) GSV trunk reflux. SUFFICIENT.
-  "Blood enters GSV at SFJ and escapes forward into a tributary, the tributary then refluxes back"
-      → (A) SFJ entry + (B) tributary escape and return. SUFFICIENT.
-  "Perforator at mid-thigh feeds the GSV, no reflux detected downstream"
-      → (A) perforator entry + (B) explicit no-reflux confirmation. SUFFICIENT.
-  "SFJ incompetent and the GSV refluxes backward, also a tributary escapes and drains back"
-      → (A) SFJ entry + (B) trunk reflux and tributary return. SUFFICIENT.
+CRITICAL PRINCIPLE — DO NOT ASSUME NEGATIVES:
+If a component is not mentioned, it is UNKNOWN — not absent.
+A description that says nothing about tributaries does NOT confirm "no tributary involvement."
+UNKNOWN = INSUFFICIENT. Every differentiating component must be explicitly confirmed YES or NO.
 ═══════════════════════════════════════════════════════════
 
-CHIVA classification requires knowing the actual blood flow path — not just that reflux exists, but where blood enters the superficial system, where it travels, and in what direction. Reporting findings (grades, labels, diagnoses) is NOT the same as describing a flow path.
+STEP 1 — CHECK FOR BASIC VALIDITY FIRST:
+Reject immediately (insufficient or question) if:
+  - This is a question, greeting, or non-patient input → verdict: "question"
+  - Only severity grades ("Reflux grade 2"), diagnosis labels ("GSV incompetence"), or
+    symptoms ("leg swelling") with no flow path described → verdict: "insufficient"
+  - Only ONE flow transition named with no entry source AND no downstream stated → verdict: "insufficient"
 
-=== CHIVA SHUNT TYPES AND THEIR REQUIRED FLOW INFORMATION ===
+STEP 2 — IDENTIFY WHAT IS EXPLICITLY STATED:
+Scan the description for these four components. Each must be EXPLICIT — inferred or implied does not count.
 
-  TYPE 1   needs: entry point from deep system into GSV (SFJ or Hunterian incompetent)
-                  PLUS GSV trunk refluxing backward toward deep system
-           Missing if: no mention of WHERE blood enters GSV, or no mention of GSV refluxing backward
+  COMPONENT 1 — ENTRY SOURCE (how blood enters the superficial system):
+    Confirmed SFJ/Hunterian entry:  "SFJ incompetent", "deep blood enters GSV", "blood enters GSV at groin",
+                                     "Hunterian perforator incompetent", "deep blood enters GSV at mid-thigh"
+    Confirmed perforator entry:     "perforator enters the GSV", "perforator feeds GSV mid-segment",
+                                     "perforating vessel inserts into the GSV" (SFJ is competent)
+    Confirmed GSV overflow only:    "GSV overflows forward into a tributary" with NO SFJ/perforator entry stated
+                                     (Type 2A pattern — acceptable as confirmed entry-type)
+    Confirmed no entry/no shunt:    "no reflux anywhere", "SFJ competent, no perforator entry"
+    NOT CONFIRMED: if none of the above is explicitly stated → COMPONENT 1 MISSING
 
-  TYPE 2A  needs: GSV overflowing forward into a tributary (no reflux required yet)
-           Missing if: no mention of GSV discharging into a branch/tributary
+  COMPONENT 2 — GSV TRUNK REFLUX STATUS (does RP N2→N1 exist?):
+    Confirmed YES:  "GSV refluxes backward", "full-length GSV reflux", "GSV carries reflux downward",
+                     "reflux in the GSV trunk", "GSV trunk is incompetent and refluxing"
+    Confirmed NO:   "GSV does not reflux", "no reflux in the GSV trunk", "GSV trunk is not refluxing",
+                     "GSV is not carrying blood backward", "no GSV trunk reflux"
+    NOT CONFIRMED: if neither YES nor NO is explicitly stated → COMPONENT 2 MISSING
+    REQUIRED WHEN: COMPONENT 1 is SFJ entry, Hunterian entry, or perforator entry.
+    NOT REQUIRED WHEN: COMPONENT 1 is "GSV overflow only" (Type 2A) with explicit no-reflux-anywhere.
 
-  TYPE 2B  needs: a perforator entering the GSV mid-segment (not the SFJ)
-                  PLUS tributary reflux draining back (without GSV trunk reflux)
-           Missing if: entry point not specified, or reflux direction/destination unclear
+  COMPONENT 3 — TRIBUTARY ESCAPE STATUS (does EP N2→N3 exist?):
+    Confirmed YES:  "blood escapes into a tributary", "GSV discharges into a tributary",
+                     "GSV feeds a tributary", "tributary escape present", "blood exits GSV into a branch"
+    Confirmed NO:   "no tributary involvement", "no escape into tributaries", "no branch filling",
+                     "no tributaries affected", "tributaries not involved"
+    NOT CONFIRMED: if neither YES nor NO is explicitly stated → COMPONENT 3 MISSING
+    REQUIRED WHEN: COMPONENT 1 is SFJ entry, Hunterian entry, or perforator entry.
+    NOT REQUIRED WHEN: COMPONENT 1 is "GSV overflow only" (already implies tributary escape).
 
-  TYPE 2C  needs: perforator entry into GSV mid-segment
-                  PLUS both tributary reflux AND GSV trunk reflux
-           Missing if: entry point unclear, or not stated whether trunk refluxes
+  COMPONENT 4 — TRIBUTARY REFLUX STATUS (does RP N3 exist?):
+    Confirmed YES:  "tributary refluxes backward", "reflux in the tributary", "tributary drains backward",
+                     "tributary carries blood backward", "tributary re-enters the deep system"
+    Confirmed NO:   "tributary does not reflux", "no reflux in the tributary", "no tributary reflux"
+    NOT CONFIRMED: if neither YES nor NO is explicitly stated → COMPONENT 4 MISSING
+    REQUIRED WHEN: COMPONENT 3 is confirmed YES (tributary escape present).
+    NOT REQUIRED WHEN: COMPONENT 3 is confirmed NO.
 
-  TYPE 3   needs: entry from deep system at SFJ into GSV (SFJ incompetent)
-                  PLUS GSV escape into tributary PLUS tributary reflux
-                  PLUS confirmation GSV trunk itself does NOT reflux backward
-           Missing if: any of these three components not described
+NOTE ON ELIMINATION TEST: Do NOT require the elimination test as a sufficiency condition.
+When all four components above are confirmed (including RP N3 = YES and GSV trunk reflux = YES
+alongside SFJ entry and tributary escape), the description is SUFFICIENT — the classification
+engine will correctly return UNDETERMINED and request the elimination test itself.
 
-  TYPE 4   needs: deep blood entering a tributary DIRECTLY (bypassing GSV entirely)
-                  PLUS GSV trunk refluxing backward
-           Missing if: whether GSV trunk is involved not stated
+STEP 3 — DETERMINE VERDICT:
+A description is SUFFICIENT only when every REQUIRED component from Step 2 is explicitly
+confirmed YES or NO. Any REQUIRED component that is NOT CONFIRMED → INSUFFICIENT.
 
-  TYPE 5   needs: deep blood entering a tributary directly (bypassing GSV)
-                  PLUS reflux staying within tributaries (NOT using GSV trunk)
-           Missing if: return path of reflux not described
+═══════════════════════════════════════════════════════════
+WORKED EXAMPLES:
 
-  TYPE 1+2 needs: SFJ entry + tributary escape + tributary reflux + GSV trunk reflux
-                  PLUS the result of an elimination/compression test
-           Missing if: any component absent
+"SFJ incompetent, blood enters GSV, GSV refluxes backward full-length"
+  C1=SFJ entry ✓  C2=GSV reflux YES ✓  C3=tributary escape? NOT STATED ✗
+  → MISSING: whether blood also escapes into any tributary. → INSUFFICIENT
 
-=== SUFFICIENCY RULES ===
+"SFJ incompetent, GSV refluxes backward, no tributary involvement confirmed"
+  C1=SFJ entry ✓  C2=GSV reflux YES ✓  C3=NO tributaries ✓  C4=N/A
+  → All required components addressed. → SUFFICIENT (Type 1)
 
-CORE RULE — A SINGLE FLOW EVENT IS ALWAYS INSUFFICIENT:
-CHIVA classification requires knowing a complete hemodynamic circuit. That means at minimum
-TWO distinct flow events must be described:
-  (1) WHERE blood enters the superficial system
-  (2) What happens DOWNSTREAM — does the GSV reflux backward? does blood escape to a tributary?
-      does a tributary reflux? OR an explicit statement that no reflux occurs anywhere.
+"SFJ incompetent, blood escapes into a tributary, tributary refluxes backward"
+  C1=SFJ entry ✓  C2=GSV trunk reflux? NOT STATED ✗  C3=YES ✓  C4=YES ✓
+  → MISSING: whether the GSV trunk itself also refluxes backward. → INSUFFICIENT
 
-A description that names only ONE transition between two anatomical points — even if it mentions
-direction or the word "reflux" — is INSUFFICIENT. Examples:
-  "There is a reflux from SFJ into GSV"          → ONE event. No downstream GSV behaviour stated. INSUFFICIENT.
-  "Reflux at the SFJ"                            → ONE event label. No circuit. INSUFFICIENT.
-  "Blood enters GSV at SFJ"                      → Entry only. No downstream. INSUFFICIENT.
-  "SFJ reflux into the GSV"                      → One transition. No downstream. INSUFFICIENT.
-  "GSV refluxes"                                 → One event. No entry point or source. INSUFFICIENT.
-  "Blood flows backward in the GSV to the knee"  → One event. No entry point stated. INSUFFICIENT.
-  "Perforator enters the GSV"                    → One event. No downstream reflux/escape. INSUFFICIENT.
+"SFJ incompetent, blood escapes into a tributary, tributary refluxes backward, GSV trunk does NOT reflux"
+  C1=SFJ entry ✓  C2=NO ✓  C3=YES ✓  C4=YES ✓
+  → All required components addressed. → SUFFICIENT (Type 3)
 
-Notice: "There is a reflux from SFJ into GSV" contains the word "reflux" and mentions two
-anatomical locations (SFJ and GSV), but it is still ONE event. The word "from SFJ into GSV"
-describes where this single event happens — it does NOT describe what the blood does IN the GSV
-after it enters. That downstream behaviour is missing.
+"SFJ incompetent, GSV refluxes backward, blood escapes to a tributary"
+  C1=SFJ entry ✓  C2=YES ✓  C3=YES ✓  C4=tributary reflux? NOT STATED ✗
+  → MISSING: whether that tributary also refluxes backward. → INSUFFICIENT
 
-INSUFFICIENT — also reject all of these:
-- Reflux grades: "Reflux grade 2 at SFJ", "GSV reflux grade 3" — grades are severity scores, not flow descriptions
-- Diagnosis labels: "Chronic venous insufficiency", "Varicose veins with GSV incompetence"
-- Structural finding lists: "SFJ incompetent", "SFJ incompetent and GSV reflux" — listing labels ≠ flow path
-- Abbreviations without context: "GSV SFJ N1 N2"
-- Symptoms only: "leg swelling", "varicose veins"
+"SFJ incompetent, GSV refluxes backward, blood escapes to a tributary, tributary also refluxes backward"
+  C1=SFJ entry ✓  C2=YES ✓  C3=YES ✓  C4=YES ✓
+  → All present; elimination test absent but NOT a sufficiency requirement.
+  → Classification engine will return UNDETERMINED. → SUFFICIENT
 
-SUFFICIENT — accept ONLY when the description explicitly covers a complete circuit:
-- Entry: WHERE and HOW blood enters the superficial system
-- Downstream: what happens AFTER entry (GSV refluxes backward / blood escapes to tributary / tributary refluxes / no reflux confirmed)
-Both components must be present. If either is absent, verdict is "insufficient".
+"Perforator enters the GSV at mid-thigh, a tributary refluxes backward"
+  C1=perforator entry ✓  C2=GSV trunk reflux? NOT STATED ✗  C3/C4=tributary reflux ✓
+  → MISSING: does the GSV trunk also reflux backward? → INSUFFICIENT
+
+"Perforator enters the GSV at mid-thigh, tributary refluxes backward, GSV trunk does not reflux"
+  C1=perforator entry ✓  C2=NO ✓  C3/C4=tributary reflux ✓
+  → All required components addressed. → SUFFICIENT (Type 2B)
+
+"GSV overflows forward into a tributary at mid-thigh, no reflux detected anywhere"
+  C1=GSV overflow ✓  C2=no reflux (implied by no-reflux-anywhere) ✓  C3=YES ✓  C4=NO ✓
+  → Sufficient for Type 2A. → SUFFICIENT
+═══════════════════════════════════════════════════════════
 
 Return ONE verdict:
+"sufficient"   — all required components explicitly confirmed YES or NO
+"insufficient" — one or more required components not explicitly addressed
+"question"     — not a patient description (greeting, abstract question, etc.)
 
-"sufficient" — explicit, complete flow path described
-"insufficient" — flow path missing or incomplete
-"question" — question, greeting, or not a patient description
-
-If "insufficient", the "missing" field MUST be a detailed, verbose explanation structured as follows:
-1. State what was provided and exactly why it is insufficient
-2. List specifically what flow path information is missing
-3. Map the partial description to the shunt types it COULD represent, and state what each would additionally require
-4. Give a concrete example of what a sufficient description would look like for the most likely type
+If "insufficient", the "missing" field MUST:
+1. State which specific component(s) are missing
+2. Ask the doctor to explicitly confirm those components (YES or NO)
+3. Give a concrete example of what the complete description would look like
 
 Output ONLY valid JSON — no markdown:
 {{"verdict": "sufficient"}}
 or
-{{"verdict": "insufficient", "missing": "<detailed multi-sentence explanation per structure above>"}}
+{{"verdict": "insufficient", "missing": "<which components are missing and what to add, with example>"}}
 or
 {{"verdict": "question"}}"""
 
