@@ -390,29 +390,40 @@ Use this to understand what flow information makes a complete description.
 
 
 === INSTRUCTIONS ===
-1. Read the description carefully.
-2. Identify each distinct blood flow event EXPLICITLY mentioned.
-3. Generate one virtual clip per flow event.
-4. Use the mappings above to assign EP/RP and N1/N2/N3 notation.
-5. Estimate posYRatio from anatomical location clues.
-6. If left/right leg is explicitly mentioned, assign legSide accordingly. If NOT mentioned, use "Unspecified" — never assume or default to Left or Right.
-7. Apply Critical Rule 1: perforator entering GSV = EP N2→N2, UNLESS the description uses the
-   exact phrase "connects the deep system to the GSV" or calls the Hunterian perforator incompetent.
-   "from the deep system" or "from a deep perforating vessel" = anatomical description → EP N2→N2.
-8. Apply Critical Rule 2: generate RP findings ONLY when backward/retrograde/reflux is explicitly stated.
-   "No reflux in [specific vessel]" is a partial statement — do NOT suppress RP findings in other vessels.
-9. Apply Critical Rule 2B: do NOT add eliminationTest unless the description explicitly describes
-   performing a compression/elimination test and states its result. Use "Reflux" when compression
-   ABOLISHED tributary reflux (confirming GSV is the source). Use "No Reflux" when reflux PERSISTED.
-10. CRITICAL — RP N2→N1 is separate from EP N1→N2: When "GSV refluxes" / "full-length GSV reflux" /
-    "GSV carries blood backward" is EXPLICITLY stated, always generate RP N2→N1 as a separate clip
-    in addition to EP N1→N2. These are two different flow events at two different clip positions.
-11. CRITICAL — Generate a clip for EVERY flow event described, regardless of what clips you have
-    already generated. Finding EP N1→N2 + RP N2→N1 does not mean the description is finished.
-    After your first pass, re-read the description and ask: "Is there also a tributary escape?
-    Is there also backward flow in a tributary?" If yes, those are additional clips.
-    A case with GSV reflux + tributary escape + tributary retrograde = FOUR clips minimum.
-    Missing tributary clips causes the wrong shunt type to be output.
+1. Read the full description carefully.
+2. Apply all Critical Rules (1, 2, 2B, 2C) as you assign clips.
+3. Estimate posYRatio from anatomical location clues.
+4. If left/right leg is explicitly mentioned, assign legSide. If NOT mentioned, use "Unspecified".
+
+MANDATORY SELF-CHECK — run this before producing output:
+Go through each question below. If the answer is YES, verify the corresponding clip exists.
+If the clip is missing, add it now.
+
+  A. Does the description mention blood entering the saphenous trunk from the deep system
+     (SFJ/SPJ/Hunterian incompetent)?
+     → Must have EP N1→N2. If missing, add it.
+
+  B. Does the description mention a perforating vessel inserting into the GSV with SFJ competent?
+     → Must have EP N2→N2. If missing, add it.
+
+  C. Does the description mention the GSV carrying blood backward / GSV reflux / GSV incompetent?
+     → Must have RP N2→N1 — UNLESS Critical Rule 2C applies (GSV conduit to escape point only).
+     If 2C applies, confirm NO RP N2→N1.
+
+  D. Does the description mention blood leaving the GSV and entering a tributary or branch,
+     in ANY phrasing (overflows, escapes, feeds, fills, discharges, spills, enters, etc.)?
+     → Must have EP N2→N3. If missing, add it.
+
+  E. Does the description mention backward or retrograde flow in a tributary or branch?
+     → Must have RP N3→N2 or RP N3→N1. If missing, add it.
+     Use RP N3→N2 if the tributary drains back toward the GSV.
+     Use RP N3→N1 if the tributary drains to the deep system via a perforating vein.
+
+  F. Does the description mention a compression/elimination test with a stated result?
+     → Add eliminationTest to the relevant EP N2→N3 or RP N3 clip. Otherwise omit it.
+
+If you answered YES to D, you must have clips for both D AND E (assuming E is also described).
+The most common error is generating A + C but omitting D and E. Do not do this.
 
 Output ONLY valid JSON — no markdown, no explanation:
 {{
