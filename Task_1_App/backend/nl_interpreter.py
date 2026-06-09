@@ -318,10 +318,6 @@ Use this to understand what flow information makes a complete description.
 
 === CLINICAL DESCRIPTION TO INTERPRET ===
 {description}
-=== CHAT HISTORY ===
-{history}
-=== PRIOR CLINICAL ANALYSIS ===
-{analysis_context}
 
 
 === INSTRUCTIONS ===
