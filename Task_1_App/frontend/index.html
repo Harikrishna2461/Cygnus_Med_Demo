@@ -184,6 +184,17 @@
     .msg-bubble.error { border-color: var(--red-600); background: var(--red-100); }
     .msg-bubble.thinking { color: var(--slate-400); font-style: italic; }
 
+    .msg-num {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      opacity: 0.45;
+      margin-bottom: 4px;
+    }
+    .msg-num-clinical { margin-bottom: 8px; }
+    .msg-row.user .msg-num { color: rgba(255,255,255,0.85); }
+
     /* ── Clinical result cards ──────────────────────────────────────────── */
     .clinical-result { display: flex; flex-direction: column; gap: 10px; }
 
@@ -687,6 +698,7 @@ async function newSession() {
     emptyStateText = 'Describe the patient\'s venous condition in plain language.<br>The assistant will classify the shunt type and plan ligation.';
   }
 
+  _msgCounter = 0;
   document.getElementById('messages-wrap').innerHTML = `
     <div class="empty-state">
       <div>${emptyStateText}</div>
@@ -713,6 +725,7 @@ async function loadSession(sid, title) {
 
   const msgs = await api(`/api/session/${sid}/messages`);
   const wrap = document.getElementById('messages-wrap');
+  _msgCounter = 0;
   wrap.innerHTML = '';
   if (!msgs || msgs.length === 0) {
     wrap.innerHTML = `<div class="empty-state"><div>Start describing the patient's condition.</div></div>`;
@@ -898,14 +911,20 @@ function startSidebarRename(sid, currentTitle, itemEl) {
 }
 
 // ── Render helpers ─────────────────────────────────────────────────────────
+let _msgCounter = 0;
+
 function appendBubble(role, text, _metadata, extraClass = '') {
   const wrap = document.getElementById('messages-wrap');
   const isUser = role === 'user';
+  _msgCounter++;
   const el = document.createElement('div');
   el.className = `msg-row ${isUser ? 'user' : ''}`;
   el.innerHTML = `
     <div class="avatar ${isUser ? 'user' : 'bot'}">${isUser ? 'DR' : 'AI'}</div>
-    <div class="msg-bubble ${extraClass}">${escHtml(text).replace(/\n/g,'<br>')}</div>`;
+    <div class="msg-bubble ${extraClass}">
+      <span class="msg-num">#${_msgCounter}</span>
+      ${escHtml(text).replace(/\n/g,'<br>')}
+    </div>`;
   wrap.appendChild(el);
 }
 
@@ -957,6 +976,7 @@ function sendSupplementalInfo(textareaId) {
 
 function appendClinicalResult(data) {
   const wrap = document.getElementById('messages-wrap');
+  _msgCounter++;
   const el = document.createElement('div');
   el.className = 'msg-row';
 
@@ -966,6 +986,7 @@ function appendClinicalResult(data) {
   el.innerHTML = `
     <div class="avatar bot">AI</div>
     <div class="msg-bubble" style="max-width:92%;padding:0;background:transparent;border:none;">
+      <span class="msg-num msg-num-clinical">#${_msgCounter}</span>
       ${buildClinicalHTML(data, doctorQuestion)}
     </div>`;
 
