@@ -3,10 +3,31 @@ from auth import login_required
 from flask import Blueprint, jsonify, request
 
 from chat_db import save_message, get_messages, update_session_title
-from config import QDRANT_COLLECTION
+from config import QDRANT_COLLECTION, AGENTIC_MODE
 from rag_engine import collection_exists
-from nl_interpreter import parse_nl_to_clips, build_conversational_response
 import services
+
+# ── Pipeline toggle ───────────────────────────────────────────────────────────
+# AGENTIC_MODE=true  → CrewAI agents (crew_pipeline.py)
+# AGENTIC_MODE=false → original functions (nl_interpreter.py)   ← default
+# Falls back to original automatically if crewai is not installed.
+_CREW_AVAILABLE = False
+_crew_classify_fn = None
+
+if AGENTIC_MODE:
+    try:
+        from crew_pipeline import (
+            parse_nl_to_clips,
+            build_conversational_response,
+            classify_and_plan_ligation_with_llm as _crew_classify_fn,
+        )
+        _CREW_AVAILABLE = True
+        logger.info("CrewAI pipeline active for /api/chat.")
+    except ImportError as _e:
+        logger.warning(f"CrewAI not available ({_e}). Falling back to original pipeline.")
+
+if not _CREW_AVAILABLE:
+    from nl_interpreter import parse_nl_to_clips, build_conversational_response
 
 logger = logging.getLogger(__name__)
 bp = Blueprint("clinical", __name__)
@@ -17,8 +38,13 @@ classify_and_plan_ligation_with_llm = None
 
 def set_classification_fn(loaded: bool, fn) -> None:
     global _PARENT_MODULE, classify_and_plan_ligation_with_llm
-    _PARENT_MODULE = loaded
-    classify_and_plan_ligation_with_llm = fn
+    if _CREW_AVAILABLE:
+        # Crew version is self-contained; it doesn't need the parent module.
+        classify_and_plan_ligation_with_llm = _crew_classify_fn
+        _PARENT_MODULE = True
+    else:
+        _PARENT_MODULE = loaded
+        classify_and_plan_ligation_with_llm = fn
 
 
 @bp.route("/api/chat", methods=["POST"])

@@ -3,7 +3,7 @@ from auth import login_required
 from flask import Blueprint, jsonify, request
 
 from chat_db import save_message, get_messages, update_session_title
-from config import GROQ_MODEL, RERANK_TOP_N
+from config import GROQ_MODEL, RERANK_TOP_N, AGENTIC_MODE
 from general_chat_engine import (
     retrieve_general_context,
     collection_exists as general_collection_exists,
@@ -129,20 +129,31 @@ def api_general_chat():
         "Complex question = structured sections. End with SOURCES."
     )
 
-    try:
-        resp = services.groq_client.chat.completions.create(
-            model=GROQ_MODEL,
-            messages=[
-                {"role": "system", "content": system_with_history},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.5,
-            max_tokens=1536,
-        )
-        response_text = resp.choices[0].message.content or ""
-    except Exception as e:
-        logger.error(f"LLM call failed in general-chat: {e}")
-        response_text = f"Error generating response: {e}"
+    if AGENTIC_MODE:
+        try:
+            from crew_pipeline import generate_general_response
+            response_text = generate_general_response(system_with_history, user_prompt)
+        except Exception as e:
+            logger.error(f"[CrewAI] General chat failed ({e}). Falling back to direct Groq call.")
+            response_text = None
+    else:
+        response_text = None
+
+    if response_text is None:
+        try:
+            resp = services.groq_client.chat.completions.create(
+                model=GROQ_MODEL,
+                messages=[
+                    {"role": "system", "content": system_with_history},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.5,
+                max_tokens=1536,
+            )
+            response_text = resp.choices[0].message.content or ""
+        except Exception as e:
+            logger.error(f"LLM call failed in general-chat: {e}")
+            response_text = f"Error generating response: {e}"
 
     gen_title = None
     if not any(m["role"] == "assistant" for m in history):
