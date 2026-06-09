@@ -86,6 +86,25 @@ def api_chat():
             "message_id": user_msg_id,
         })
 
+    if is_clinical and sufficient and not clips:
+        # CHIVA interpretation found no pathological flow events — no shunt present.
+        no_shunt_payload = {
+            "type": "clinical",
+            "interpretation": interp_text or "No pathological shunt identified.",
+            "findings": [],
+            "shunt_type": "No shunt detected",
+            "confidence": 0.97,
+            "summary": "No pathological venous shunting identified. The venous system appears normal. CHIVA treatment is not indicated.",
+            "needs_elim_test": False,
+            "ask_branching": False,
+            "token_usage": {},
+            "conversational_response": None,
+            "message_id": user_msg_id,
+            "session_title": None,
+        }
+        save_message(session_id, "assistant", "[Analysis] No shunt detected.", metadata=no_shunt_payload)
+        return jsonify(no_shunt_payload)
+
     if is_clinical and clips:
         try:
             result = classify_and_plan_ligation_with_llm(
