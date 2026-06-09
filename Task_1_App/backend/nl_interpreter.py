@@ -465,19 +465,19 @@ Return ONE verdict:
 "insufficient" — one or more required components not explicitly addressed
 "question"     — not a patient description (greeting, abstract question, etc.)
 
-If "insufficient", the "missing" field MUST be written in plain, natural clinical language — no component numbers, no technical labels, no bullet points.
+If "insufficient", the "missing" field MUST be written in plain, natural clinical language — no component numbers, no technical labels, no bullet points, NO pleasantries or acknowledgements.
+Start directly with what is still needed. Do not open with "Thanks", "I can see", "Based on what you've provided", or any similar preamble. Get straight to the point.
 Write it as a single flowing paragraph that:
-1. Opens with a warm, direct acknowledgement of what WAS provided
-2. Explains in plain words exactly what additional information is needed and WHY it matters for telling the shunt types apart
-3. Closes with a concrete example sentence showing what the complete, sufficient description would sound like
+1. Immediately states what additional information is needed and WHY it matters for telling the shunt types apart
+2. Closes with a concrete example sentence showing what the complete, sufficient description would sound like
 
-The tone should be like a knowledgeable colleague asking a quick follow-up question — not a form or a checklist.
+The tone is direct and clinical — like a colleague asking a quick follow-up question with no small talk.
 
 GOOD EXAMPLE (do this):
-"Thanks — I can see the SFJ is incompetent with blood entering the GSV at the groin. To work out whether this is a Type 1, Type 3, or a combined pattern I also need to know: does the GSV trunk itself carry blood backward down the leg? And does any blood escape sideways into a tributary branch? If a tributary is involved, does it also reflux? For example, a complete picture might be: 'SFJ incompetent, blood enters the GSV at the groin, GSV refluxes backward full-length, blood escapes into a mid-thigh tributary, and that tributary refluxes backward toward the knee.'"
+"To distinguish between Type 1, Type 3, and combined patterns I still need to know: does the GSV trunk itself carry blood backward down the leg? And does any blood escape sideways into a tributary branch? If a tributary is involved, does it also reflux? For example: 'SFJ incompetent, GSV refluxes backward full-length, blood escapes into a mid-thigh tributary, and that tributary refluxes backward toward the knee.'"
 
 BAD EXAMPLE (never do this):
-"Component 2 (GSV trunk reflux status), Component 3 (tributary escape status), and Component 4 (tributary reflux status) are missing. Please confirm YES or NO."
+"Thanks for providing that information. Based on what you've described, I can see the SFJ is incompetent. Component 2 (GSV trunk reflux status) is missing. Please confirm YES or NO."
 
 Output ONLY valid JSON — no markdown:
 {{"verdict": "sufficient"}}
