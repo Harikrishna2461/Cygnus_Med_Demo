@@ -11,9 +11,13 @@ Each factory creates a fresh Agent instance; do not share instances across reque
 
 import logging
 
+import litellm
 from crewai import Agent, LLM
 
 from config import GROQ_API_KEY, GROQ_MODEL
+
+# Groq does not support litellm's cache_breakpoint property — disable it globally.
+litellm.cache = None
 
 logger = logging.getLogger(__name__)
 
