@@ -381,147 +381,92 @@ Reject immediately (insufficient or question) if:
     symptoms ("leg swelling") with no flow path described → verdict: "insufficient"
   - Only ONE flow transition named with no entry source AND no downstream stated → verdict: "insufficient"
 
-STEP 2 — IDENTIFY WHAT IS EXPLICITLY STATED:
-Read the description for its MEANING, not for exact keywords. A clinician will use natural language.
-"The GSV carries this blood backward down the thigh" means the same as "reflux in the GSV trunk" — both confirm C2=YES.
-"Explicit" means the clinician said it clearly in any natural wording — not that they used a specific phrase from a list.
-What is NOT explicit: vague hints, incomplete sentences with no clear direction, or describing one component
-and merely implying another (e.g. describing downstream events without stating the entry source).
+STEP 2 — UNDERSTAND WHAT THE CLINICIAN DESCRIBED:
+You are a clinician reading another clinician's notes. Read for meaning. The clinician will use natural
+language — their phrasing will vary and that is fine. Your job is to understand what they meant, not
+to match their words against a list.
 
-  COMPONENT 1 — ENTRY SOURCE (how blood enters the superficial system):
-    Confirmed SFJ/Hunterian entry:  "SFJ incompetent", "deep blood enters GSV", "blood enters GSV at groin",
-                                     "Hunterian perforator incompetent", "deep blood enters GSV at mid-thigh"
-    Confirmed perforator entry:     "perforator enters the GSV", "perforator feeds GSV mid-segment",
-                                     "perforating vessel inserts into the GSV" (SFJ is competent)
-    Confirmed GSV overflow only:    "GSV overflows forward into a tributary", "blood overflows from the GSV into a tributary"
-                                     with NO SFJ/perforator entry stated (Type 2A pattern).
-                                     *** "reflux in tributaries" alone does NOT confirm this — the GSV overflow must be explicitly stated. ***
-    Confirmed no entry/no shunt:    ANY statement that explicitly rules out all pathological entry. This includes:
-                                     "no reflux anywhere", "SFJ competent, no perforator entry",
-                                     "no retrograde flow detected anywhere", "no retrograde flow anywhere in the limb",
-                                     "blood does not enter the superficial system",
-                                     "no entry point for blood into the superficial system",
-                                     "there is no entry point", "no blood entering the superficial system",
-                                     "venous system is competent throughout with no reflux",
-                                     "GSV is patent and non-refluxing with no retrograde flow",
-                                     "no pathological shunting", "no shunt present",
-                                     "no reflux in the GSV or tributaries"
-                                     *** If the description confirms NO reflux in GSV trunk AND NO escape into tributaries
-                                         AND explicitly states blood does not enter the superficial system
-                                         — that IS a confirmed "no entry" case. Do NOT ask how blood enters when the
-                                         description has already confirmed it does not enter at all. ***
-    NOT CONFIRMED: if none of the above is explicitly stated → COMPONENT 1 MISSING
+There are four things you need to know about the flow. Ask yourself each question:
 
-  COMPONENT 2 — GSV TRUNK REFLUX STATUS (does RP N2→N1 exist?):
-    *** SEMANTIC RULE: Any phrase that describes blood moving BACKWARD, DOWNWARD against normal flow,
-        or in RETROGRADE direction THROUGH or IN or ALONG the GSV trunk confirms C2 = YES.
-        You are reading for MEANING, not matching keywords. ***
+  QUESTION 1 — Where does blood enter the superficial venous system?
+    You are looking for: WHERE is the door through which blood enters the superficial system?
+    - Did the clinician describe blood coming from the deep system into the GSV at the groin or upper
+      thigh? (SFJ incompetence or Hunterian incompetence — the named junction has failed)
+    - Did the clinician describe a perforating vessel connecting into the mid-GSV with the SFJ still
+      competent? (perforator entry — different from SFJ failure)
+    - Did the clinician describe the GSV itself overflowing forward into a tributary, with no external
+      entry mentioned? (GSV overflow — the pressure builds up and spills sideways, no deep-to-GSV
+      entry involved)
+    - Did the clinician say there is NO entry point at all — the system is normal, no reflux anywhere,
+      no blood entering the superficial system? (no shunt)
+    NOT ANSWERED if none of these is clearly stated. Describing what blood does AFTER it enters does
+    not answer WHERE it entered. A description of GSV reflux or tributary fill says nothing about
+    whether the entry was at the SFJ, via a perforator, or somewhere else.
 
-    Confirmed YES — any of these meanings expressed in any wording:
-      - Blood travels backward / downward / in reverse / in retrograde direction through/along/in the GSV
-      - The GSV carries / conducts / transmits blood backward or downward
-      - Backward flow / retrograde flow exists in the GSV
-      - The GSV is incompetent and blood flows down it
-      Examples: "GSV carries this blood backward down the thigh", "blood flows backward along the GSV",
-                "GSV conducts blood downward", "retrograde flow in the GSV", "reflux in the GSV trunk",
-                "blood moves backward through the GSV", "GSV carries reflux down the leg",
-                "blood travels backward through the GSV trunk", "full-length reflux in the GSV"
+  QUESTION 2 — Does blood travel backward through the GSV trunk itself?
+    You are looking for: does the main saphenous vein (GSV) carry blood in the wrong direction —
+    downward toward the foot, away from the heart?
+    - YES if the clinician clearly described blood moving backward, downward, in reverse, or in
+      retrograde direction through/along/in the GSV trunk. It does not matter how they worded it.
+      "The GSV then carries this blood backward down the thigh" = YES. "Reflux in the GSV" = YES.
+      "Blood flows down the GSV" in the context of reflux = YES.
+    - NO if the clinician clearly stated the GSV trunk does not have backward flow, the GSV is
+      competent, or there is no reflux in the main saphenous vein.
+    NOT ANSWERED if the description says nothing about the direction of flow in the GSV trunk itself.
+    REQUIRED when Q1 = SFJ, Hunterian, or perforator entry. Not required for GSV overflow or no-shunt.
 
-    Confirmed NO — any of these meanings expressed in any wording:
-      - No backward / retrograde flow in the GSV
-      - GSV does not carry blood backward
-      - GSV trunk is competent / normal flow only
-      Examples: "no reflux in the GSV trunk", "GSV does not carry blood backward",
-                "no retrograde flow in the GSV", "GSV trunk is competent", "no GSV trunk reflux"
+  QUESTION 3 — Does blood escape sideways from the GSV into a tributary branch?
+    You are looking for: does blood leave the GSV and enter a side branch / tributary?
+    - YES if the clinician described blood leaving the GSV and entering any branch, tributary,
+      side vessel, or varicosity — in any wording.
+    - NO if the clinician clearly stated there are no tributaries involved, no branch filling,
+      blood stays in the GSV, or no escape into side branches — in any wording.
+    NOT ANSWERED if the description does not address tributary involvement at all.
+    REQUIRED when Q1 = SFJ, Hunterian, or perforator entry. Not required for GSV overflow.
 
-    NOT CONFIRMED: if neither YES nor NO meaning is expressed → COMPONENT 2 MISSING
-    REQUIRED WHEN: COMPONENT 1 is SFJ entry, Hunterian entry, or perforator entry.
-    NOT REQUIRED WHEN: COMPONENT 1 is "GSV overflow only" (Type 2A) with explicit no-reflux-anywhere.
+  QUESTION 4 — Does blood travel backward through that tributary?
+    You are looking for: after entering the tributary, does blood flow backward through it?
+    - YES if the clinician described backward, retrograde, or reverse flow through/in the tributary
+      or branch — in any wording.
+    - NO if the clinician clearly stated the tributary does not have backward flow — in any wording.
+    NOT ANSWERED if Q3 is YES but the direction of flow in the tributary was not addressed.
+    REQUIRED only when Q3 = YES. Not required when Q3 = NO.
 
-  COMPONENT 3 — TRIBUTARY ESCAPE STATUS (does EP N2→N3 exist?):
-    *** SEMANTIC RULE: Any phrase meaning blood leaves the GSV and enters a side branch / tributary
-        confirms C3 = YES. Any phrase meaning there is no branch involvement confirms C3 = NO.
-        Read for MEANING, not keywords. ***
-
-    Confirmed YES — blood leaves the GSV into a tributary/branch, in any wording:
-      "blood escapes into a tributary", "GSV feeds a branch", "blood exits into a tributary",
-      "blood spills into a side branch", "tributary fills from the GSV", "branch fills with blood",
-      "blood enters a tributary branch", "GSV discharges into a branch"
-
-    Confirmed NO — no branch involvement, in any wording:
-      "no tributary involvement", "blood does not escape into any tributary",
-      "blood does not enter any branch", "no branch filling", "tributaries not involved",
-      "blood stays within the GSV", "no escape into tributaries", "no blood escaping into the tributary"
-
-    NOT CONFIRMED: if neither YES nor NO meaning is expressed → COMPONENT 3 MISSING
-    REQUIRED WHEN: COMPONENT 1 is SFJ entry, Hunterian entry, or perforator entry.
-    NOT REQUIRED WHEN: COMPONENT 1 is "GSV overflow only" (already implies tributary escape).
-
-  COMPONENT 4 — TRIBUTARY REFLUX STATUS (does RP N3 exist?):
-    *** SEMANTIC RULE: Any phrase meaning blood flows backward / in retrograde direction
-        through or in a tributary confirms C4 = YES. ***
-
-    Confirmed YES — backward/retrograde flow in the tributary, in any wording:
-      "blood refluxes backward through the tributary", "reflux in the tributary",
-      "blood flows backward through the tributary", "tributary carries blood backward",
-      "blood drains backward through the branch", "retrograde flow in the tributary"
-
-    Confirmed NO — no backward flow in the tributary, in any wording:
-      "no reflux in the tributary", "blood does not flow backward through the tributary",
-      "no tributary reflux", "tributary is competent"
-
-    NOT CONFIRMED: if neither YES nor NO meaning is expressed → COMPONENT 4 MISSING
-    REQUIRED WHEN: COMPONENT 3 is confirmed YES (tributary escape present).
-    NOT REQUIRED WHEN: COMPONENT 3 is confirmed NO.
-
-NOTE ON ELIMINATION TEST: Do NOT require the elimination test as a sufficiency condition.
-When all four components above are confirmed (including RP N3 = YES and GSV trunk reflux = YES
-alongside SFJ entry and tributary escape), the description is SUFFICIENT — the classification
-engine will correctly return UNDETERMINED and request the elimination test itself.
+  NOTE ON ELIMINATION TEST: Never require it as a sufficiency condition. When Q1=entry, Q2=YES,
+  Q3=YES, Q4=YES, that is sufficient — the classification engine handles the rest.
 
 STEP 3 — DETERMINE VERDICT:
-A description is SUFFICIENT only when every REQUIRED component from Step 2 is explicitly
-confirmed YES or NO. Any REQUIRED component that is NOT CONFIRMED → INSUFFICIENT.
+Go through each required question. If ANY required question is not clearly answered → INSUFFICIENT.
+All required questions clearly answered → SUFFICIENT.
+The questions are about MEANING. If a clinician answered a question clearly in their own words,
+that answer counts — even if they didn't use the "standard" phrasing.
 
 ═══════════════════════════════════════════════════════════
-WORKED EXAMPLES:
+WORKED EXAMPLES (showing semantic reading, not keyword matching):
 
-"SFJ incompetent, blood enters GSV, reflux present in GSV trunk full-length"
-  C1=SFJ entry ✓  C2=reflux in GSV trunk YES ✓  C3=tributary escape? NOT STATED ✗
-  → MISSING: whether blood also escapes into any tributary. → INSUFFICIENT
+Clinician: "The SFJ is incompetent — blood enters the GSV from the deep system at the groin.
+            The GSV then carries this blood backward down the thigh."
+  Q1: SFJ incompetent, deep blood enters GSV at groin → SFJ entry ✓
+  Q2: "GSV carries this blood backward down the thigh" → blood moves backward through GSV → YES ✓
+  Q3: Nothing said about tributaries → NOT ANSWERED ✗
+  → MISSING: whether blood escapes into any tributary branch. → INSUFFICIENT
 
-"SFJ incompetent, reflux in GSV trunk, no tributary involvement confirmed"
-  C1=SFJ entry ✓  C2=reflux in GSV trunk YES ✓  C3=NO tributaries ✓  C4=N/A
-  → All required components addressed. → SUFFICIENT (Type 1)
+Clinician: "SFJ incompetent, blood enters GSV at groin, GSV carries blood backward, no tributary involvement."
+  Q1 ✓  Q2 YES ✓  Q3 NO ✓  Q4 N/A
+  → SUFFICIENT (Type 1)
 
-"SFJ incompetent, blood escapes into a tributary, blood refluxes backward through the tributary"
-  C1=SFJ entry ✓  C2=reflux in GSV trunk? NOT STATED ✗  C3=YES ✓  C4=YES ✓
-  → MISSING: whether blood also refluxes backward through the GSV trunk. → INSUFFICIENT
+Clinician: "SFJ incompetent. Blood enters the GSV. It then spills into a mid-thigh branch which drains
+            back toward the deep system. The main GSV trunk itself does not carry blood backward."
+  Q1 ✓  Q2 NO ✓  Q3 YES ✓  Q4 YES (drains back = backward flow in tributary) ✓
+  → SUFFICIENT (Type 3)
 
-"SFJ incompetent, blood escapes into a tributary, blood refluxes backward through the tributary, no reflux in the GSV trunk"
-  C1=SFJ entry ✓  C2=NO ✓  C3=YES ✓  C4=YES ✓
-  → All required components addressed. → SUFFICIENT (Type 3)
+Clinician: "SFJ incompetent. GSV carries blood backward. Blood exits GSV into a tributary branch."
+  Q1 ✓  Q2 YES ✓  Q3 YES ✓  Q4: nothing said about tributary flow direction → NOT ANSWERED ✗
+  → MISSING: does blood also flow backward through that tributary? → INSUFFICIENT
 
-"SFJ incompetent, reflux in GSV trunk, blood escapes to a tributary"
-  C1=SFJ entry ✓  C2=YES ✓  C3=YES ✓  C4=tributary reflux? NOT STATED ✗
-  → MISSING: whether blood also refluxes backward through that tributary. → INSUFFICIENT
-
-"SFJ incompetent, reflux in GSV trunk, blood escapes to a tributary, blood also refluxes backward through the tributary"
-  C1=SFJ entry ✓  C2=YES ✓  C3=YES ✓  C4=YES ✓
-  → All present; elimination test absent but NOT a sufficiency requirement.
-  → Classification engine will return UNDETERMINED. → SUFFICIENT
-
-"Perforator enters the GSV at mid-thigh, blood refluxes backward through the tributary"
-  C1=perforator entry ✓  C2=reflux in GSV trunk? NOT STATED ✗  C3/C4=tributary reflux ✓
-  → MISSING: does blood also reflux backward through the GSV trunk? → INSUFFICIENT
-
-"Perforator enters the GSV at mid-thigh, blood refluxes backward through the tributary, no reflux in the GSV trunk"
-  C1=perforator entry ✓  C2=NO ✓  C3/C4=tributary reflux ✓
-  → All required components addressed. → SUFFICIENT (Type 2B)
-
-"GSV overflows forward into a tributary at mid-thigh, no reflux detected anywhere"
-  C1=GSV overflow ✓  C2=no reflux (implied by no-reflux-anywhere) ✓  C3=YES ✓  C4=NO ✓
-  → Sufficient for Type 2A. → SUFFICIENT
+Clinician: "No retrograde flow anywhere in the limb. The venous system is working normally."
+  Q1: no entry point / no shunt → ✓  Q2/Q3/Q4: N/A
+  → SUFFICIENT (No shunt detected)
 ═══════════════════════════════════════════════════════════
 
 Return ONE verdict:
