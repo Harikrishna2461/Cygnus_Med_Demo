@@ -489,6 +489,12 @@ There are four things you need to know about the flow. Ask yourself each questio
       retrograde direction through/along/in the GSV trunk. It does not matter how they worded it.
       "The GSV then carries this blood backward down the thigh" = YES. "Reflux in the GSV" = YES.
       "Blood flows down the GSV" in the context of reflux = YES.
+      *** "GSV is incompetent [down to / to] level X" = YES — GSV incompetence means its valves
+          have failed and blood is flowing backward through it. You do not need an explicit
+          backward-flow verb. "GSV incompetent to the knee" = blood travels backward through the
+          GSV from the SFJ to the knee. This answers Q2 as YES. ***
+      *** "GSV incompetent down to X" + "no reflux beyond X" together fully answer Q2.
+          Do not ask again about GSV reflux direction — it is confirmed. ***
     - NO if the clinician clearly stated the GSV trunk does not have backward flow, the GSV is
       competent, or there is no reflux in the main saphenous vein.
     NOT ANSWERED if the description says nothing about the direction of flow in the GSV trunk itself.
@@ -542,6 +548,16 @@ Clinician: "SFJ incompetent. Blood enters the GSV. It then spills into a mid-thi
 Clinician: "SFJ incompetent. GSV carries blood backward. Blood exits GSV into a tributary branch."
   Q1 ✓  Q2 YES ✓  Q3 YES ✓  Q4: nothing said about tributary flow direction → NOT ANSWERED ✗
   → MISSING: does blood also flow backward through that tributary? → INSUFFICIENT
+
+Clinician: "SFJ incompetence confirmed. The GSV is incompetent down to the knee. At the knee blood
+            escapes forward into a posterior tributary. That posterior tributary carries blood backward.
+            Beyond the knee the GSV itself shows no retrograde flow."
+  Q1: SFJ incompetent → SFJ entry ✓
+  Q2: "GSV is incompetent down to the knee" → GSV incompetence = backward flow through GSV → YES ✓
+      *** Do NOT ask again about whether the GSV has backward flow — "incompetent to X" is sufficient. ***
+  Q3: "blood escapes forward into a posterior tributary at the knee" → YES ✓
+  Q4: "posterior tributary carries blood backward" → YES ✓
+  → SUFFICIENT (Type 3)
 
 Clinician: "No retrograde flow anywhere in the limb. The venous system is working normally."
   Q1: no entry point / no shunt → ✓  Q2/Q3/Q4: N/A
