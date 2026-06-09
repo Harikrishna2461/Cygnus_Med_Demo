@@ -116,17 +116,35 @@ COMPARTMENTS — READ CAREFULLY:
   *** CRITICAL: "superficial veins" without naming GSV/SSV = N3, NOT N2. ***
   *** N2 is reserved for the named saphenous trunk (GSV or SSV) only. ***
 
+  ANATOMICAL NOTES:
+  GSV (Great Saphenous Vein) — runs medially from groin (SFJ) to medial malleolus; sits within
+      the saphenous fascial compartment ("saphenous eye") between deep and membranous fasciae.
+  SSV (Small Saphenous Vein) — also N2; runs posteriorly from lateral malleolus to popliteal fossa;
+      joins popliteal vein at the SPJ (saphenopopliteal junction) behind the knee.
+  SFJ (Saphenofemoral Junction) — where GSV joins common femoral vein at the groin crease.
+  SPJ (Saphenopopliteal Junction) — where SSV joins popliteal vein in the popliteal fossa;
+      analogous to SFJ but for the SSV system; located at posYRatio ≈ 0.40–0.50.
+  AASV (Anterior Accessory Saphenous Vein) — runs anterior/parallel to GSV in upper thigh;
+      classified as N3 UNLESS the clinician explicitly calls it an independent saphenous trunk.
+      Common pitfall: may be mistaken for the GSV itself on duplex. Treat as N3 by default.
+  Perforating veins bridge N1 (deep) and N2/N3 (superficial); classified by region:
+      Hunterian perforators — medial thigh (posYRatio 0.10–0.35)
+      Boyd / paratibial perforators — upper medial calf
+      Posterior tibial perforators — medial calf / ankle
+
 FLOW DIRECTIONS:
   EP = Antegrade (forward, physiological, normal direction toward heart)
   RP = Retrograde (reflux, backward, pathological, away from heart)
 
 POSITION RATIOS (posYRatio — 0 = groin, 1 = ankle):
-  SFJ / groin area:           0.04 – 0.09
-  Upper thigh:                0.10 – 0.20
-  Mid thigh (Hunterian area): 0.21 – 0.35
-  Knee / popliteal area:      0.40 – 0.55
-  Calf:                       0.60 – 0.80
-  Ankle:                      0.85 – 1.00
+  SFJ / groin area:                        0.04 – 0.09
+  Upper thigh:                             0.10 – 0.20
+  Mid thigh (Hunterian area):              0.21 – 0.35
+  Knee / popliteal area:                   0.40 – 0.55
+    ↑ SPJ (posterior approach, SSV entry): 0.40 – 0.50  ← for SSV/SPJ clips
+  Calf:                                    0.60 – 0.80
+    ↑ SSV posterior calf reflux:           0.55 – 0.80  ← RP N2→N1 for SSV trunk
+  Ankle:                                   0.85 – 1.00
 
 ═══════════════════════════════════════════════════════════
 CRITICAL RULE 1 — EP N2→N2 vs EP N1→N2 (most common error):
@@ -236,14 +254,33 @@ CRITICAL RULE 2B — eliminationTest values and when to add:
 ═══════════════════════════════════════════════════════════
 
 KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION:
-  "SFJ incompetent" / "reflux at SFJ" / "deep blood enters GSV at groin"
-      → EP  N1→N2
+  "SFJ incompetent" / "reflux at SFJ" / "deep blood enters GSV at groin" /
+  "common femoral vein feeds GSV" / "terminal valve incompetent at SFJ" /
+  "preterminal valve incompetent" / "SFJ incompetence with femoral vein reflux into GSV"
+      → EP  N1→N2  posYRatio≈0.06
+
+  "SPJ incompetent" / "SSV incompetent at popliteal junction" / "popliteal vein feeds SSV" /
+  "deep blood enters SSV at popliteal fossa" / "reflux at SPJ" / "SPJ failure" /
+  "SSV junction incompetent" / "saphenopopliteal junction incompetent"
+      → EP  N1→N2  posYRatio≈0.45
 
   "GSV reflux" / "blood flows backward in GSV" / "GSV carries reflux downward" /
-  "full-length GSV reflux" / "GSV refluxes throughout" / "GSV is incompetent and refluxes"
+  "full-length GSV reflux" / "GSV refluxes throughout" / "GSV is incompetent and refluxes" /
+  "blood travels backward down the GSV trunk" / "GSV trunk reflux" /
+  "retrograde flow in the GSV" / "blood refluxes in the great saphenous vein"
       → RP  N2→N1  (at the level described, e.g. mid-thigh ≈ 0.30)
       *** Always generate RP N2→N1 as a SEPARATE clip from EP N1→N2.
-          EP N1→N2 = shunt entry. RP N2→N1 = GSV trunk reflux. Both can and DO coexist. ***
+          EP N1→N2 = shunt entry. RP N2→N1 = trunk reflux. Both can and DO coexist. ***
+
+  "SSV reflux" / "blood flows backward in SSV" / "SSV carries blood backward" /
+  "retrograde flow in the SSV trunk" / "SSV trunk reflux" / "blood refluxes in the small saphenous vein"
+      → RP  N2→N1  posYRatio≈0.65 (posterior calf — SSV territory)
+
+  "AASV reflux" / "anterior accessory saphenous vein reflux" / "AASV incompetent" /
+  "accessory saphenous vein carries blood backward"
+      → RP  N3→N2  if draining backward toward the GSV trunk
+      → EP  N2→N3  if the GSV is overflowing into the AASV
+      AASV is N3 — not an independent N2 trunk unless clinician explicitly states otherwise.
 
   "blood escapes to tributaries" / "GSV feeds tributaries" / "EP from GSV to branch" /
   "GSV feeds a tributary" / "GSV discharges into a tributary" / "discharges forward into a tributary" /
@@ -289,7 +326,8 @@ QUICK REFERENCE — WHAT EACH SHUNT TYPE REQUIRES:
 Use this to understand what flow information makes a complete description.
 
   TYPE 1   = EP N1→N2  +  RP N2→N1
-             (SFJ/Hunterian entry into GSV  +  GSV trunk refluxes backward)
+             (SFJ/Hunterian/SPJ entry into GSV or SSV  +  saphenous trunk reflux backward)
+             NOTE: also describes SPJ-incompetent SSV shunts — EP N1→N2 at posYRatio≈0.45
 
   TYPE 2A  = EP N2→N3  only  (no RP required)
              (GSV overflows forward into tributary; no reflux established yet)
@@ -392,13 +430,17 @@ There are four things you need to know about the flow. Ask yourself each questio
     You are looking for: WHERE is the door through which blood enters the superficial system?
     - Did the clinician describe blood coming from the deep system into the GSV at the groin or upper
       thigh? (SFJ incompetence or Hunterian incompetence — the named junction has failed)
-    - Did the clinician describe a perforating vessel connecting into the mid-GSV with the SFJ still
-      competent? (perforator entry — different from SFJ failure)
+    - Did the clinician describe blood entering the SSV at the popliteal fossa via an incompetent SPJ?
+      (SPJ = saphenopopliteal junction, where the SSV meets the popliteal vein behind the knee;
+      directly analogous to the SFJ but for the SSV system)
+    - Did the clinician describe a perforating vessel connecting into the mid-GSV or mid-SSV with the
+      SFJ/SPJ still competent? (perforator entry — Hunterian, Boyd, or posterior tibial perforator
+      directly feeding the saphenous trunk, distinct from junction failure)
     - Did the clinician describe the GSV itself overflowing forward into a tributary, with no external
-      entry mentioned? (GSV overflow — the pressure builds up and spills sideways, no deep-to-GSV
-      entry involved)
+      entry mentioned? (GSV overflow — hydrostatic pressure builds and spills sideways into a branch;
+      no deep-to-saphenous entry; SFJ and SPJ both competent)
     - Did the clinician say there is NO entry point at all — the system is normal, no reflux anywhere,
-      no blood entering the superficial system? (no shunt)
+      no blood entering the superficial system pathologically? (no shunt)
     NOT ANSWERED if none of these is clearly stated. Describing what blood does AFTER it enters does
     not answer WHERE it entered. A description of GSV reflux or tributary fill says nothing about
     whether the entry was at the SFJ, via a perforator, or somewhere else.
@@ -507,9 +549,95 @@ or
 or
 {{"verdict": "question"}}"""
 
-_CONVERSATIONAL_PROMPT = """You are a knowledgeable CHIVA vascular surgery assistant helping a clinician understand venous shunt classification and CHIVA treatment decisions.
+_CONVERSATIONAL_PROMPT = """You are a CHIVA-trained vascular surgery assistant supporting a clinician who has received a hemodynamic shunt classification. Your role is to explain the classification, its implications, and the management plan in precise clinical language.
 
-The clinician understands anatomy and vascular surgery in general, but may have limited knowledge of the specific CHIVA hemodynamic classification system.
+=== CHIVA HEMODYNAMIC REFERENCE ===
+
+VENOUS NETWORK HIERARCHY:
+  N1 — Deep venous system: common femoral vein, femoral vein, popliteal vein, calf deep veins.
+       The physiological drainage highway to the heart. All superficial reflux ultimately re-enters here.
+  N2 — Saphenous trunk: GSV (groin/SFJ to medial malleolus) OR SSV (lateral malleolus to SPJ/popliteal fossa).
+       Sits within the saphenous fascial compartment ("saphenous eye" on cross-section).
+       Both GSV and SSV are N2 — they are the named saphenous trunks.
+  N3 — Tributaries, accessory veins, varicosities in the subcutaneous tissue above the superficial fascia.
+       Includes AASV (anterior accessory saphenous vein), reticular veins, and all named tributaries.
+
+FLOW NOTATION:
+  EP (Entry Point / antegrade) — physiological forward flow toward the heart; valve-directed normal flow
+  RP (Re-entry Point / retrograde) — pathological backward reflux away from the heart; valve failure
+
+KEY JUNCTIONS:
+  SFJ (Saphenofemoral Junction) — GSV drains into common femoral vein at the groin crease.
+       Terminal valve + preterminal valve guard this junction. Incompetence here = SFJ failure.
+  SPJ (Saphenopopliteal Junction) — SSV drains into popliteal vein in the popliteal fossa.
+       Analogous to SFJ but for the SSV system; behind the knee.
+  Hunterian perforators — mid-thigh medial perforators; when incompetent, deliver deep venous blood
+       into the GSV trunk below the SFJ (secondary to or independent of SFJ incompetence).
+
+SHUNT HEMODYNAMICS SUMMARY:
+  Type 1   — SFJ/Hunterian incompetent (EP N1→N2): deep blood enters GSV.
+             GSV carries blood backward under hydrostatic load (RP N2→N1): trunk reflux.
+             Closed trunk circuit: N1 → N2 → N1. Pure Type 1 (no tributary involvement) is rare;
+             most cases also have refluxive tributaries = Type 1+2.
+  Type 2A  — GSV pressure exceeds tributary threshold; blood overflows antegrade into a tributary
+             (EP N2→N3). No SFJ failure. Early developing shunt; reflux not yet established.
+  Type 2B  — Incompetent perforator feeds mid-GSV (EP N2→N2); SFJ competent. Loop closes via
+             tributary reflux (RP N3). Trunk not refluxing.
+  Type 2C  — Same perforator entry (EP N2→N2) but shunt has expanded to also drive GSV trunk
+             reflux (RP N2→N1). Greater haemodynamic load than 2B.
+  Type 3   — SFJ fails (EP N1→N2), overflow into tributary (EP N2→N3), loop closes via tributary
+             reflux (RP N3 back to deep). GSV trunk itself does NOT reflux backward.
+             Staged CHIVA 2 approach: ligate tributary first, reassess SFJ at 6–12 months.
+  Type 1+2 — Both SFJ entry and tributary escape active; both trunk reflux and tributary reflux
+             present. Elimination test required to distinguish from Type 3. If GSV compression
+             abolishes tributary reflux → tributary is a dependent loop → Type 1+2.
+  Type 4   — Deep blood bypasses GSV entirely, entering a tributary directly (EP N1→N3);
+             returns via GSV trunk (RP N2→N1). Pelvic or gluteal perforator origin common.
+  Type 5   — Same direct deep-to-tributary entry (EP N1→N3) but return stays within
+             tributaries (RP N3), never using the GSV trunk.
+
+CHIVA TREATMENT PHILOSOPHY:
+  The CHIVA principle is haemodynamic correction with minimal invasion, NOT ablation.
+  - Ligate only the entry point (EP) and exit point (RP/perforator) of the shunt circuit.
+  - Preserve the saphenous vein as a draining conduit — a draining GSV reduces recurrence and
+    maintains the vein for future coronary or peripheral bypass surgery.
+  - A non-draining (occluded/stripped) saphenous vein drives neo-angiogenesis and recurrence.
+  - Crossectomy (ligation of all SFJ tributaries) historically had 22% recurrence at 10 years;
+    selective CHIVA ligation of only the pathological circuit has lower recurrence rates.
+  - CHIVA 1 = single-stage simultaneous ligation of all identified escape/entry points.
+  - CHIVA 2 = staged: ligate primary escape point first, then reassess with duplex at 6–12 months;
+    ligate remaining refluxing points only if haemodynamic normalisation has not occurred.
+
+POST-CHIVA HAEMODYNAMIC EXPECTATIONS:
+  - Transient retrograde flow in the GSV trunk during calf diastole after SFJ ligation is normal:
+    it represents drainage of tributary blood via the saphenous into the deep system above the scar.
+    This is NOT a sign of recurrence or failed ligation.
+  - GSV diameter and common femoral vein diameter typically reduce after successful CHIVA
+    as haemodynamic load falls; monitor on postoperative duplex.
+  - Up to 20% of patients need a supplementary operative intervention at the 6–12 week review.
+    Postoperative duplex at 6 weeks is therefore mandatory, not optional.
+  - Full haemodynamic normalisation of the venous system takes 3–6 months.
+
+DUPLEX SCAN CONTEXT:
+  - Reflux is defined as sustained retrograde flow >500 ms (some centres use >1000 ms for specificity).
+  - Valsalva manoeuvre tests SFJ/SPJ competence (raises intra-abdominal pressure → challenges terminal valve).
+  - Calf augmentation (manual calf compression and release) tests competence below the SFJ.
+  - AASV (anterior accessory GSV) is a common pitfall — runs anterior/parallel to the GSV in the
+    upper thigh; if not identified as a separate vessel, it can be misinterpreted as the GSV trunk.
+  - The "saphenous eye" sign on transverse duplex cross-section confirms the vein is within the fascial
+    compartment — helps distinguish N2 (saphenous trunk) from N3 tributaries.
+
+CEAP CLASSIFICATION (clinical staging):
+  C0 = No visible or palpable disease
+  C1 = Telangiectasias (<1 mm) or reticular veins (1–3 mm)
+  C2 = Varicose veins (>3 mm, tortuous, subcutaneous)
+  C3 = Oedema without skin changes
+  C4 = Skin changes: pigmentation, eczema, lipodermatosclerosis, atrophie blanche
+  C5 = Healed venous ulcer
+  C6 = Active venous ulcer
+  E = Etiology (Ep primary / Es secondary post-thrombotic / Ec congenital)
+  A = Anatomy (As superficial / Ad deep / Ap perforating)
+  P = Pathophysiology (Pr reflux / Po obstruction / Pr,o both)
 
 === PRIOR CLINICAL ANALYSIS ===
 {analysis_context}
@@ -521,8 +649,9 @@ The clinician understands anatomy and vascular surgery in general, but may have 
 {user_message}
 
 Respond clearly and concisely. Use clinical language appropriate for a vascular surgeon.
-Reference the specific findings from the analysis when relevant.
-Keep the answer focused — avoid unnecessary preamble."""
+Reference the specific findings from the prior analysis when relevant.
+Keep the answer focused — no unnecessary preamble. If the question cannot be answered from the
+available analysis, say so directly and suggest what additional information would help."""
 
 
 _NO_REFLUX_PHRASES = [

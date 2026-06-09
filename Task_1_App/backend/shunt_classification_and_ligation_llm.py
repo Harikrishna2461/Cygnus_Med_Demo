@@ -24,13 +24,20 @@ CHIVA_RULES = """
 === CHIVA VENOUS SHUNT CLASSIFICATION RULES ===
 
 ANATOMY:
-    N1 = Deep venous system (femoral / popliteal vein)
-    N2 = Great Saphenous Vein (GSV) or Small Saphenous Vein (SSV) trunk
-    N3 = Tributaries / superficial branches
-    EP = Physiological (forward, antegrade) flow — NORMAL clip
-    RP = Retrograde (pathological, reflux) flow — ABNORMAL clip
-    SFJ = Saphenofemoral Junction  →  posYRatio ≤ 0.098
-    Hunterian Perforator            →  0.098 < posYRatio ≤ 0.353
+    N1 = Deep venous system (common femoral vein, femoral vein, popliteal vein, calf deep veins)
+    N2 = Named saphenous trunk ONLY — GSV (Great Saphenous Vein) OR SSV (Small Saphenous Vein)
+         GSV: groin (SFJ) → medial malleolus, within saphenous fascial compartment ("saphenous eye")
+         SSV: lateral malleolus → popliteal fossa (SPJ), posterior leg
+    N3 = Tributaries, accessory veins, varicosities in subcutaneous tissue above superficial fascia
+         Includes AASV (anterior accessory GSV), reticular veins, and all named tributaries
+    EP = Physiological (forward, antegrade) flow — NORMAL; blood moving toward the heart
+    RP = Retrograde (pathological, reflux) flow — ABNORMAL; blood moving away from the heart
+    SFJ = Saphenofemoral Junction (GSV → common femoral vein)  →  posYRatio ≤ 0.098
+    SPJ = Saphenopopliteal Junction (SSV → popliteal vein)     →  posYRatio ≈ 0.40–0.50 (posterior)
+    Hunterian Perforator (mid-thigh, N1→N2 or N2→N2)          →  0.098 < posYRatio ≤ 0.353
+    AASV = Anterior Accessory Saphenous Vein — N3, not N2; common pitfall on duplex
+    NOTE: Pure Type 1 (GSV trunk loop only, zero refluxive tributaries) is rare in clinical practice.
+          Most SFJ-incompetent cases with GSV trunk reflux also have refluxive tributaries → Type 1+2.
 
 ═══════════════════════════════════════════════════════════
 RULE ZERO — CHECK RP COUNT BEFORE ANYTHING ELSE:
@@ -609,11 +616,13 @@ by understanding the hemodynamic circuit — not by matching patterns to a looku
 
 WHAT EACH FINDING TELLS YOU ABOUT THIS PATIENT'S VENOUS PHYSIOLOGY:
 
-  EP N1→N2  — Blood is escaping from the deep venous system into the GSV at the
-               SFJ or Hunterian junction. The valve at that point has failed.
-               This is the hallmark of SFJ or Hunterian incompetence. Without
-               accompanying reflux (RP), this entry alone does not constitute an
-               active shunt — the valve is incompetent but no closed circuit exists yet.
+  EP N1→N2  — Blood is escaping from the deep venous system into the GSV (at SFJ/Hunterian)
+               or into the SSV (at SPJ). The terminal or preterminal valve at that junction
+               has failed. This is the hallmark of SFJ, SPJ, or Hunterian incompetence.
+               Without accompanying reflux (RP), this entry alone does not constitute an
+               active shunt — the valve is open but no closed recirculation circuit exists yet.
+               The deep-to-saphenous pressure gradient drives blood into the superficial system
+               during the hydrostatic phase when the calf pump is at rest.
 
   EP N2→N2  — A perforator is injecting blood laterally into the mid-GSV trunk.
                The SFJ valve is intact and competent. This is fundamentally different
@@ -627,16 +636,21 @@ WHAT EACH FINDING TELLS YOU ABOUT THIS PATIENT'S VENOUS PHYSIOLOGY:
                the shunt architecture as Type 4 or 5 before any other consideration —
                the GSV trunk is not the primary conduit.
 
-  EP N2→N3  — The GSV trunk is overflowing forward into a tributary. This is antegrade
-               overflow, not reflux. Alone with no RP, it indicates an early developing
-               shunt (Type 2A) where pressure has built enough to push blood forward
-               into tributaries but retrograde flow has not yet established. Combined
-               with SFJ entry (EP N1→N2), it means the shunt extends into tributaries.
+  EP N2→N3  — The GSV trunk pressure is high enough to push blood forward (antegrade) into
+               a tributary. This is overflow, not reflux. Alone with no RP, it indicates an
+               early developing shunt (Type 2A) — the hydrostatic load has exceeded the
+               tributary outflow threshold but sustained retrograde flow has not yet established.
+               The oscillatory flow this creates within the tributary drives progressive vein wall
+               dilation over time. Combined with SFJ entry (EP N1→N2), it means the shunt
+               circuit extends into the tributary network.
 
-  RP N2→N1  — The GSV trunk is refluxing retrograde toward the deep system. Blood
-               that entered the GSV is flowing backward under pressure. This is
-               pathological GSV trunk incompetence — the core reflux pathway in
-               Type 1. Without this finding, Type 1 cannot be present.
+  RP N2→N1  — The GSV or SSV trunk is refluxing retrograde toward the deep system. Blood
+               that entered the saphenous trunk is flowing backward under hydrostatic load,
+               away from the heart. Sustained retrograde flow >500 ms is pathological.
+               This is saphenous trunk incompetence — the core reflux pathway in Type 1.
+               Turbulent oscillatory flow in the refluxing trunk drives progressive wall dilation.
+               Without this finding, Type 1 cannot be present. Its absence in the presence of
+               SFJ entry means the entry is haemodynamically incomplete — no active circuit.
 
   RP N3→N2  — A tributary is draining retrograde back into the GSV trunk. The shunt
                loop closes through the saphenous trunk — overflow from the GSV reaches
@@ -769,16 +783,51 @@ LIGATION_QUERIES_OLD = {
 }
 
 LIGATION_QUERIES = {
-    "Type 1": "SFJ incompetent with circular reflux N1->N2->N1.",
-    "Type 2A": "Tributary entry from GSV trunk N2->N3 without SFJ involvement.",
-    "Type 2B": "Perforator-fed shunt via N2->N2 entry into saphenous trunk.",
-    "Type 2C": "Perforator-fed shunt via N2->N2 entry with secondary GSV reflux N2->N1.",
-    "Type 3": "SFJ incompetent with dual entries: EP N1->N2 and EP N2->N3.",
-    "Type 4": "N1->N3 perforator or pelvic-point shunt with N2 return via N2->N1.",
-    "Type 5": "N1->N3 shunt with looping return through N3 and complex re-entry path.",
-    "Type 1+2": "Complex dual entry shunt with SFJ incompetence and tributary involvement.",
-    "No shunt detected": "No significant shunt detected.",
-    "Undetermined": "Unclear shunt classification. Elimination test required to determine type. Defer ligation planning until classification confirmed.",
+    "Type 1": (
+        "Type 1 CHIVA shunt SFJ incompetent closed trunk circuit N1→N2→N1. "
+        "High tie flush ligation at saphenofemoral junction groin. "
+        "Preserve saphenous vein drainage. Ligate below each GSV reflux segment except most distal."
+    ),
+    "Type 2A": (
+        "Type 2A CHIVA shunt GSV antegrade overflow into tributary N2→N3 without SFJ failure. "
+        "Selective tributary flush tie at GSV junction. GSV trunk preserved. "
+        "Multiple branching tributaries calibre distance perforator drainage."
+    ),
+    "Type 2B": (
+        "Type 2B CHIVA shunt incompetent Hunterian perforator N2→N2 entry into saphenous trunk. "
+        "SFJ competent. Tributary reflux N3→N1 open deviating shunt. "
+        "Sub-fascial perforator ligation flush at entry point. GSV trunk preserved."
+    ),
+    "Type 2C": (
+        "Type 2C CHIVA shunt perforator N2→N2 entry secondary GSV trunk reflux N2→N1. "
+        "Combined perforator ligation plus selective GSV segment ligation. "
+        "SFJ competent. Greater haemodynamic load than 2B."
+    ),
+    "Type 3": (
+        "Type 3 CHIVA shunt SFJ incompetent GSV escape into tributary N2→N3 tributary reflux N3 closes loop. "
+        "GSV trunk does not reflux. Staged CHIVA 2 approach: flush tie tributary at N2→N3 junction first. "
+        "SFJ ligation deferred to Stage 2 only if N2 reflux develops at 6-12 month follow-up duplex."
+    ),
+    "Type 4": (
+        "Type 4 CHIVA shunt N1→N3 direct deep venous escape into tributary bypassing GSV. "
+        "Pelvic perforator gluteal perforator pudendal vein origin. "
+        "GSV trunk return via RP N2→N1. Ligate N1→N3 escape entry and GSV reflux segments."
+    ),
+    "Type 5": (
+        "Type 5 CHIVA shunt N1→N3 direct deep escape tributary return N3→N1 N3→N2 looping reflux. "
+        "GSV trunk not involved. Ligate N1→N3 perforator entry and all refluxing N3 re-entry points."
+    ),
+    "Type 1+2": (
+        "Type 1+2 CHIVA shunt dual entry SFJ incompetent N1→N2 plus tributary escape N2→N3. "
+        "Both GSV trunk reflux N2→N1 and tributary reflux N3 present. "
+        "Elimination test confirmed GSV as sole feeder. "
+        "Small calibre RP N2→N1: CHIVA 2 staged. Large calibre RP N2→N1: CHIVA 1 simultaneous."
+    ),
+    "No shunt detected": "No pathological venous shunt identified. No surgical intervention required. Conservative management compression therapy.",
+    "Undetermined": (
+        "Undetermined shunt classification Type 3 versus Type 1+2 cannot be distinguished without elimination test. "
+        "Defer ligation planning. Perform SFJ or GSV compression test on duplex to assess tributary reflux independence."
+    ),
 }
 
 
@@ -815,20 +864,29 @@ CHIVA 2 (two-stage sequential):
 
 === LIGATION TECHNIQUE VOCABULARY ===
 
-Flush ligation: divide the vessel at its junction with no residual stump — mandatory at SFJ to prevent recurrence from saphenofemoral reflux into a stump.
-High tie (Trendelenburg ligation): ligate the GSV at the SFJ level with all tributaries divided, leaving no cribiform stump (standard SFJ incompetence technique).
-Selective tributary ligation: isolate and double-ligate only the refluxing tributary at its junction with the GSV; GSV trunk preserved.
-Perforator ligation: expose and divide the incompetent perforator (EP N2→N2) through a targeted sub-fascial or open mini-incision.
-Flush tie at N2→N3: divide and double-ligate the EP N2→N3 branch at the point it leaves the GSV trunk.
+Flush ligation: divide the vessel at its junction with no residual stump — mandatory at SFJ/SPJ to prevent recurrence from reflux into a residual stump.
+High tie (Trendelenburg ligation): ligate the GSV at the SFJ level with all inguinal tributaries divided flush, leaving no cribriform stump. Standard for SFJ incompetence.
+SPJ ligation (posterior approach): patient prone or lateral; incision in popliteal fossa; expose SSV at its junction with popliteal vein; flush-divide with no stump. Sural nerve at risk — identify and preserve.
+Selective tributary ligation: isolate and double-ligate only the refluxing tributary at its junction with the GSV/SSV; saphenous trunk preserved.
+Perforator ligation: expose and divide the incompetent perforator (EP N2→N2) through a targeted sub-fascial or open mini-incision. For Hunterian perforators: medial thigh approach through a 2 cm incision.
+Flush tie at N2→N3: divide and double-ligate the EP N2→N3 branch at the point it exits the GSV trunk.
+CHIVA rationale: preserve the saphenous trunk as a draining conduit — a draining GSV/SSV reduces recurrence rates and preserves the vein for future cardiac or peripheral bypass use.
 
 === PER-TYPE PLAN REQUIREMENTS ===
 
-TYPE 1:
+TYPE 1 (GSV/SFJ system):
   Procedure: CHIVA 1 (single stage).
   Technique: High tie / flush ligation at the SFJ (groin) or Hunterian perforator (mid-thigh).
-  Steps: (1) Groin or medial thigh incision over entry point. (2) Expose the GSV at the SFJ or Hunterian level, divide all tributaries flush. (3) Flush ligation of the EP N1→N2 entry. (4) If RP N2→N1 segments present along GSV trunk: ligate below each refluxing segment except the most distal (preserve distal outflow).
-  Follow-up: Duplex at 6 weeks, then 6 months.
-  Complications: SFJ recurrence from retained stump, lymphocele (groin), saphenous nerve injury (Hunterian).
+  Steps: (1) Groin incision (SFJ) or medial thigh incision (Hunterian). (2) Expose the GSV at SFJ or Hunterian level. (3) At SFJ: divide all inguinal tributaries (superficial epigastric, superficial circumflex iliac, pudendal) flush — no cribriform stump. (4) Flush ligation of the EP N1→N2 entry point. (5) If RP N2→N1 segments present along GSV trunk: ligate GSV below each refluxing segment except the most distal (preserve distal drainage outflow).
+  Follow-up: Duplex at 6 weeks (check for short-term diastolic retrograde flow — this is normal post-SFJ ligation and not recurrence), then 6 months.
+  Complications: SFJ recurrence from retained cribriform stump, lymphocele (groin dissection), saphenous nerve injury (Hunterian approach), haematoma.
+
+TYPE 1 (SSV/SPJ system):
+  Procedure: CHIVA 1 (single stage).
+  Technique: SPJ flush ligation via posterior popliteal fossa approach.
+  Steps: (1) Patient prone or lateral decubitus. (2) Popliteal fossa incision over SPJ. (3) Identify and preserve the sural nerve (runs adjacent to SSV). (4) Expose SSV at its junction with popliteal vein. (5) Flush ligation of SPJ — no residual stump. (6) If RP N2→N1 segments in SSV trunk: ligate below each except most distal.
+  Follow-up: Duplex at 6 weeks and 6 months.
+  Complications: Sural nerve injury (lateral foot numbness), SPJ stump recurrence, popliteal vein injury, deep vein thrombosis.
 
 TYPE 2A:
   Procedure: CHIVA 1 (single stage).
