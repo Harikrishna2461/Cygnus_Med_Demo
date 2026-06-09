@@ -521,11 +521,30 @@ There are four things you need to know about the flow:
   NOTE ON ELIMINATION TEST: Never require it as a sufficiency condition. When Q1=entry, Q2=YES,
   Q3=YES, Q4=YES, that is sufficient — the classification engine handles the rest.
 
+═══════════════════════════════════════════════════════════
+STRICT SCOPE LIMIT — these are the ONLY four things you may ask about:
+Q1 (entry point), Q2 (GSV trunk reflux yes/no), Q3 (tributary escape yes/no), Q4 (tributary reflux yes/no).
+
+Do NOT ask about ANY of the following — they are for the classifier, not the gatekeeper:
+  ✗ Where exactly the GSV reflux terminates (upper calf, knee, ankle, etc.)
+  ✗ Whether the GSV refluxes beyond / below the tributary escape point
+  ✗ What happens to blood after it exits the tributary
+  ✗ Whether the circuit closes via the GSV or via a deep perforator
+  ✗ Elimination / compression test results
+  ✗ CEAP grade, severity, or symptom details
+  ✗ Whether there are additional tributaries or segments involved
+
+"The main GSV trunk does not reflux below the upper calf junction" is supplementary context
+about WHERE reflux terminates. It is NOT a missing required component. Combined with any
+confirmation of GSV reflux earlier in the description, Q2 is fully answered as YES.
+
+If Q1 through Q4 are each answered YES or NO, return "sufficient" immediately.
+Do not invent additional requirements.
+═══════════════════════════════════════════════════════════
+
 STEP 3 — DETERMINE VERDICT:
-Go through each required question. If ANY required question is not clearly answered → INSUFFICIENT.
-All required questions clearly answered → SUFFICIENT.
-The questions are about MEANING. If a clinician answered a question clearly in their own words,
-that answer counts — even if they didn't use the "standard" phrasing.
+Go through Q1–Q4 only. If ANY required question is unanswered → INSUFFICIENT.
+All required questions answered → SUFFICIENT. Return immediately — do not add conditions.
 
 ═══════════════════════════════════════════════════════════
 WORKED EXAMPLES (showing semantic reading, not keyword matching):
