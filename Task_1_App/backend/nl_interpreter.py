@@ -477,15 +477,18 @@ Return ONE verdict:
 "question"     — not a patient description (greeting, abstract question, etc.)
 
 If "insufficient", the "missing" field MUST be written in plain, natural clinical language — no component numbers, no technical labels, no bullet points, NO pleasantries or acknowledgements.
-Start directly with what is still needed. Do not open with "Thanks", "I can see", "Based on what you've provided", or any similar preamble. Get straight to the point.
-Write it as a single flowing paragraph that:
-1. Immediately states what additional information is needed and WHY it matters for telling the shunt types apart
-2. Closes with a concrete example sentence showing what the complete, sufficient description would sound like
+Write it as two parts in a single flowing response:
 
-The tone is direct and clinical — like a colleague asking a quick follow-up question with no small talk.
+PART 1 — CHIVA INTERPRETATION OF WHAT WAS PROVIDED:
+Open with "Interpreted so far:" followed by a concise CHIVA summary of every flow event that WAS confirmed. Use plain clinical language with CHIVA notation in parentheses. One sentence per confirmed flow event. Do not mention anything that was NOT confirmed.
+Example: "Interpreted so far: Blood enters the GSV at the groin via an incompetent SFJ (EP N1→N2). No blood escapes into any tributary (no EP N2→N3)."
+
+PART 2 — WHAT IS STILL MISSING:
+On a new line, directly state what additional information is still needed and WHY it matters for telling the shunt types apart. Close with a concrete example of what the complete sufficient description would look like.
+Do not open Part 2 with "Thanks", "I can see", "Based on what you've provided", or any preamble. Get straight to the point.
 
 GOOD EXAMPLE (do this):
-"To distinguish between Type 1, Type 3, and combined patterns I still need to know: is there reflux in the GSV trunk — does blood travel backward through it? And does any blood escape sideways into a tributary branch? If a tributary is involved, does blood reflux through it as well? For example: 'SFJ incompetent, blood enters the GSV at the groin, reflux present in the GSV trunk full-length, blood escapes into a mid-thigh tributary, and blood refluxes backward through that tributary toward the knee.'"
+"Interpreted so far: Blood enters the GSV at the groin via an incompetent SFJ (EP N1→N2).\n\nTo distinguish between Type 1, Type 3, and combined patterns I still need to know: is there reflux in the GSV trunk — does blood travel backward through it? And does any blood escape sideways into a tributary branch? If a tributary is involved, does blood reflux through it as well? For example: 'SFJ incompetent, blood enters the GSV at the groin, reflux present in the GSV trunk full-length, blood escapes into a mid-thigh tributary, and blood refluxes backward through that tributary toward the knee.'"
 
 BAD EXAMPLE (never do this):
 "Thanks for providing that information. Based on what you've described, I can see the SFJ is incompetent. Component 2 (GSV trunk reflux status) is missing. Please confirm YES or NO."
