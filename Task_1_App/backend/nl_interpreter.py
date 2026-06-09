@@ -353,7 +353,7 @@ Output ONLY valid JSON — no markdown, no explanation:
     ]
 }}"""
 
-_SUFFICIENCY_PROMPT = """A clinician typed this into a CHIVA venous shunt classification tool:
+_SUFFICIENCY_PROMPT = """Below is the accumulated clinical description from a clinician using a CHIVA venous shunt classification tool. It may span multiple messages — treat it as one combined description:
 
 "{description}"
 
@@ -395,18 +395,28 @@ Scan the description for these four components. Each must be EXPLICIT — inferr
     NOT REQUIRED WHEN: COMPONENT 1 is "GSV overflow only" (Type 2A) with explicit no-reflux-anywhere.
 
   COMPONENT 3 — TRIBUTARY ESCAPE STATUS (does EP N2→N3 exist?):
-    Confirmed YES:  "blood escapes into a tributary", "GSV discharges into a tributary",
-                     "GSV feeds a tributary", "tributary escape present", "blood exits GSV into a branch"
-    Confirmed NO:   "no tributary involvement", "no escape into tributaries", "no branch filling",
-                     "no tributaries affected", "tributaries not involved"
+    Confirmed YES:  "blood escapes into a tributary", "blood exits into a tributary", "blood exits into a branch",
+                     "blood flows into a tributary", "blood enters a tributary", "blood exits the GSV into a tributary",
+                     "blood exits the GSV into a branch", "GSV feeds a tributary", "tributary escape present",
+                     "blood exits into branches", "blood leaks into a tributary"
+    Confirmed NO:   "no tributary involvement", "no escape into tributaries", "blood does not escape into tributaries",
+                     "blood does not escape into any tributary", "blood does not exit into tributaries",
+                     "blood does not exit into any branch", "blood does not enter any tributary",
+                     "blood does not flow into any tributary", "no branch filling", "no tributaries affected",
+                     "tributaries not involved", "blood stays in the GSV", "no branch involvement",
+                     "no escape to tributaries", "blood does not escape into branches"
     NOT CONFIRMED: if neither YES nor NO is explicitly stated → COMPONENT 3 MISSING
     REQUIRED WHEN: COMPONENT 1 is SFJ entry, Hunterian entry, or perforator entry.
     NOT REQUIRED WHEN: COMPONENT 1 is "GSV overflow only" (already implies tributary escape).
 
   COMPONENT 4 — TRIBUTARY REFLUX STATUS (does RP N3 exist?):
-    Confirmed YES:  "tributary refluxes backward", "reflux in the tributary", "tributary drains backward",
-                     "tributary carries blood backward", "tributary re-enters the deep system"
-    Confirmed NO:   "tributary does not reflux", "no reflux in the tributary", "no tributary reflux"
+    Confirmed YES:  "blood refluxes backward through the tributary", "reflux in the tributary",
+                     "blood drains backward through the tributary", "blood flows backward through the tributary",
+                     "blood re-enters the deep system via the tributary", "reflux detected in the tributary",
+                     "blood travels backward through the tributary"
+    Confirmed NO:   "no reflux in the tributary", "blood does not reflux through the tributary",
+                     "no reflux through the tributary", "no tributary reflux",
+                     "blood does not flow backward through the tributary"
     NOT CONFIRMED: if neither YES nor NO is explicitly stated → COMPONENT 4 MISSING
     REQUIRED WHEN: COMPONENT 3 is confirmed YES (tributary escape present).
     NOT REQUIRED WHEN: COMPONENT 3 is confirmed NO.
@@ -552,7 +562,34 @@ def _clean_json(raw: str) -> str:
     return raw.strip()
 
 
-def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
+def _build_accumulated_description(history: list[dict] | None, current_message: str) -> str:
+    """
+    Concatenate user messages from the current classification attempt (since the
+    last successful [Analysis] turn) with the current message.  This lets the
+    clinician add missing details one message at a time without repeating themselves.
+    """
+    if not history:
+        return current_message
+
+    # Collect user messages after the last successful classification
+    prior_user_msgs: list[str] = []
+    for msg in history:
+        role = msg.get("role", "")
+        content = msg.get("content", "") or ""
+        if role == "assistant" and content.startswith("[Analysis]"):
+            # Reset — anything before this is a completed case
+            prior_user_msgs = []
+        elif role == "user":
+            prior_user_msgs.append(content.strip())
+
+    if not prior_user_msgs:
+        return current_message
+
+    parts = prior_user_msgs + [current_message.strip()]
+    return ". ".join(p.rstrip(".").rstrip() for p in parts if p)
+
+
+def parse_nl_to_clips(user_message: str, call_llm_fn: Callable, history: list[dict] | None = None) -> dict:
     """
     Two-stage pipeline:
       1. Focused sufficiency check — a separate call whose only job is to decide
@@ -560,19 +597,15 @@ def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
          so the model can't rationalise sufficiency to justify generating clips.
       2. Full CHIVA interpretation — only reached if stage 1 passes.
 
-    Returns:
-        {
-            "is_clinical": bool,
-            "sufficient_information": bool,
-            "missing_information": str | None,
-            "interpretation": str | None,
-            "clips": list[dict]
-        }
+    history — prior messages in the session (user + assistant), used to accumulate
+    the full clinical description across multiple turns.
     """
+    accumulated = _build_accumulated_description(history, user_message)
+
     # ── Stage 1: sufficiency check ──────────────────────────────────────────
     try:
         check_raw, _ = call_llm_fn(
-            _SUFFICIENCY_PROMPT.format(description=user_message.strip()),
+            _SUFFICIENCY_PROMPT.format(description=accumulated),
             return_usage=True,
             max_tokens=800,
         )
@@ -587,22 +620,22 @@ def parse_nl_to_clips(user_message: str, call_llm_fn: Callable) -> dict:
 
     if verdict == "insufficient":
         missing = check.get("missing") or (
-            "Please describe what the blood is doing — for example, whether the GSV is "
-            "refluxing, where it exits into tributaries, and whether the SFJ or any "
-            "perforators are feeding the system."
+            "Still need to know whether blood refluxes backward through the GSV trunk, "
+            "whether it escapes into any tributary, and if so whether it also refluxes "
+            "backward through that tributary."
         )
         return {"is_clinical": True, "sufficient_information": False, "missing_information": missing, "interpretation": None, "clips": []}
 
     # ── Stage 2: CHIVA interpretation (only if verdict == "sufficient") ─────
     try:
         raw, _ = call_llm_fn(
-            _NL_TO_CHIVA_PROMPT.format(description=user_message.strip()),
+            _NL_TO_CHIVA_PROMPT.format(description=accumulated),
             return_usage=True,
             max_tokens=1024,
         )
         result = json.loads(_clean_json(raw))
         if isinstance(result, dict) and "clips" in result:
-            if _has_no_reflux_statement(user_message) and result.get("clips"):
+            if _has_no_reflux_statement(accumulated) and result.get("clips"):
                 before = len(result["clips"])
                 result["clips"] = [c for c in result["clips"] if c.get("flow") != "RP"]
                 after = len(result["clips"])

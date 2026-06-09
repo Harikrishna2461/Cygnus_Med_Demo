@@ -60,7 +60,7 @@ def api_chat():
 
     history = [m for m in get_messages(session_id) if m["message_id"] != user_msg_id]
 
-    interpretation = parse_nl_to_clips(user_message, services.call_llm)
+    interpretation = parse_nl_to_clips(user_message, services.call_llm, history)
     is_clinical = interpretation.get("is_clinical", False)
     sufficient = interpretation.get("sufficient_information", True)
     missing_info = interpretation.get("missing_information") or ""
