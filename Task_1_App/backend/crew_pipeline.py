@@ -258,8 +258,10 @@ def classify_and_plan_ligation_with_llm(
                     '"reasoning": [...], "needs_elim_test": false, ...}'
                 ),
             )
+            logger.info(f"[CrewAI] Classification raw response ({leg_label}): {raw!r}")
             classification = _repair_and_parse(_extract_json(raw))
             if not classification or "shunt_type" not in classification:
+                logger.error(f"[CrewAI] Parsed classification: {classification!r}")
                 raise RuntimeError(f"Unparseable classification response for {leg_label}")
         except Exception as e:
             logger.error(f"[CrewAI] Shunt classification failed for {leg_label}: {e}")
