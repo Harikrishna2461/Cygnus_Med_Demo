@@ -392,7 +392,20 @@ Scan the description for these four components. Each must be EXPLICIT — inferr
     Confirmed GSV overflow only:    "GSV overflows forward into a tributary", "blood overflows from the GSV into a tributary"
                                      with NO SFJ/perforator entry stated (Type 2A pattern).
                                      *** "reflux in tributaries" alone does NOT confirm this — the GSV overflow must be explicitly stated. ***
-    Confirmed no entry/no shunt:    "no reflux anywhere", "SFJ competent, no perforator entry"
+    Confirmed no entry/no shunt:    ANY statement that explicitly rules out all pathological entry. This includes:
+                                     "no reflux anywhere", "SFJ competent, no perforator entry",
+                                     "no retrograde flow detected anywhere", "no retrograde flow anywhere in the limb",
+                                     "blood does not enter the superficial system",
+                                     "no entry point for blood into the superficial system",
+                                     "there is no entry point", "no blood entering the superficial system",
+                                     "venous system is competent throughout with no reflux",
+                                     "GSV is patent and non-refluxing with no retrograde flow",
+                                     "no pathological shunting", "no shunt present",
+                                     "no reflux in the GSV or tributaries"
+                                     *** If the description confirms NO reflux in GSV trunk AND NO escape into tributaries
+                                         AND explicitly states blood does not enter the superficial system
+                                         — that IS a confirmed "no entry" case. Do NOT ask how blood enters when the
+                                         description has already confirmed it does not enter at all. ***
     NOT CONFIRMED: if none of the above is explicitly stated → COMPONENT 1 MISSING
 
   COMPONENT 2 — GSV TRUNK REFLUX STATUS (does RP N2→N1 exist?):
