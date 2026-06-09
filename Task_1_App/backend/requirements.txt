@@ -27,3 +27,4 @@ gspread>=6.0.0
 # Agentic framework (optional — only needed when AGENTIC_MODE=true in .env)
 # Uses LiteLLM under the hood; Groq is supported natively via groq/ model prefix.
 crewai>=1.0.0
+litellm>=1.0.0
