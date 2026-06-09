@@ -86,38 +86,7 @@ def api_chat():
             "message_id": user_msg_id,
         })
 
-    if is_clinical and sufficient and not clips:
-        # CHIVA interpretation found no pathological flow events — no shunt present.
-        _no_shunt_finding = {
-            "leg": "Assessment",
-            "shunt_type": "No shunt detected",
-            "confidence": 0.97,
-            "summary": "No pathological venous shunting identified. The venous system is competent. CHIVA treatment is not indicated.",
-            "reasoning": ["No retrograde flow present anywhere.", "No entry point into the superficial system confirmed.", "No closed shunt circuit exists."],
-            "chain_of_thought": "No pathological clips generated — the description confirms a competent venous system with no retrograde flow and no entry point into the superficial system. A closed shunt circuit requires at minimum an entry source and retrograde flow. Neither is present.",
-            "ligation_steps": [],
-            "clinical_rationale": "No pathological shunt identified. No surgical intervention required.",
-            "needs_elim_test": False,
-            "ask_branching": False,
-        }
-        no_shunt_payload = {
-            "type": "clinical",
-            "interpretation": interp_text or "No pathological shunt identified. Venous system is competent throughout.",
-            "findings": [_no_shunt_finding],
-            "shunt_type": "No shunt detected",
-            "confidence": 0.97,
-            "summary": _no_shunt_finding["summary"],
-            "needs_elim_test": False,
-            "ask_branching": False,
-            "token_usage": {},
-            "conversational_response": None,
-            "message_id": user_msg_id,
-            "session_title": None,
-        }
-        save_message(session_id, "assistant", "[Analysis] No shunt detected.", metadata=no_shunt_payload)
-        return jsonify(no_shunt_payload)
-
-    if is_clinical and clips:
+    if is_clinical and sufficient:
         try:
             result = classify_and_plan_ligation_with_llm(
                 clip_list=clips,

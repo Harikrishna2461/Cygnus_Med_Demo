@@ -1097,11 +1097,15 @@ def classify_and_plan_ligation_with_llm(
             ...
         }
     """
-    # Group by leg
+    # Group by leg — if no clips provided, run with an empty "Unspecified" group
+    # so the zero-RP override fires and returns "No shunt detected" via the LLM
     groups: dict[str, list[dict]] = {}
-    for c in clip_list:
-        side = (c.get("legSide") or c.get("leg_side") or "Assessment").strip().capitalize()
-        groups.setdefault(side, []).append(c)
+    if not clip_list:
+        groups["Unspecified"] = []
+    else:
+        for c in clip_list:
+            side = (c.get("legSide") or c.get("leg_side") or "Assessment").strip().capitalize()
+            groups.setdefault(side, []).append(c)
 
     _NO_LIGATION_RESULT = {
         "No shunt detected": {
