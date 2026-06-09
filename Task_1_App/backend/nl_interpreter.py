@@ -315,7 +315,11 @@ KEY MAPPINGS AND CLUES FOR EP/RP IDENTIFICATION:
 
   "blood escapes to tributaries" / "GSV feeds tributaries" / "EP from GSV to branch" /
   "GSV feeds a tributary" / "GSV discharges into a tributary" / "discharges forward into a tributary" /
-  "GSV discharges blood into" / "blood exits the GSV into a tributary" / "GSV empties into a tributary"
+  "GSV discharges blood into" / "blood exits the GSV into a tributary" / "GSV empties into a tributary" /
+  "GSV overflows into a tributary" / "GSV overflows forward into a tributary" /
+  "GSV overflows forward into a branch" / "overflows into a tributary branch" /
+  "GSV spills into a tributary" / "blood spills from the GSV into" / "GSV fills a tributary" /
+  "tributary fills from the GSV" / "tributary is fed by the GSV" / "GSV drains into a tributary"
       → EP  N2→N3  (at the level described)
 
   "blood refluxes back in the tributary" / "tributary drains backward" / "tributary shows retrograde flow"
@@ -409,6 +413,16 @@ Use this to understand what flow information makes a complete description.
 10. CRITICAL — RP N2→N1 is separate from EP N1→N2: When "GSV refluxes" / "full-length GSV reflux" /
     "GSV carries blood backward" is EXPLICITLY stated, always generate RP N2→N1 as a separate clip
     in addition to EP N1→N2. These are two different flow events at two different clip positions.
+11. CRITICAL — DO NOT STOP AFTER FINDING EP N1→N2 + RP N2→N1. Generating those two clips does NOT
+    mean the description is complete. After generating every RP/EP clip you have identified so far,
+    scan the description AGAIN for tributary escape events. Specifically:
+      - Does the description mention blood leaving the GSV into a branch/tributary at any level?
+        → Generate EP N2→N3 for each such event, even if RP N2→N1 was already generated.
+      - Does the description mention backward/retrograde flow in a tributary?
+        → Generate RP N3→N2 or RP N3→N1 for each such event.
+    A description that mentions GSV reflux + tributary overflow + tributary retrograde flow requires
+    FOUR clips (EP N1→N2 + RP N2→N1 + EP N2→N3 + RP N3), NOT two. Missing the tributary clips will
+    cause the classifier to output the wrong shunt type. Generate ALL described flow events.
 
 Output ONLY valid JSON — no markdown, no explanation:
 {{
