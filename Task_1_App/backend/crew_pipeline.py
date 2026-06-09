@@ -66,16 +66,66 @@ def _run_task(agent, description: str, expected_output: str, retries: int = 2) -
 
 
 def _extract_json(raw: str) -> str:
-    """
-    More robust than _clean_json: strips markdown fences then extracts the
-    first JSON object even if the agent prepended a sentence of explanation.
-    """
+    """Strip markdown fences and extract the first JSON object."""
     cleaned = _clean_json(raw)
     start = cleaned.find("{")
     end = cleaned.rfind("}") + 1
     if start != -1 and end > start:
         return cleaned[start:end]
     return cleaned
+
+
+def _escape_string_newlines(text: str) -> str:
+    """
+    Escape literal newline/carriage-return characters that appear inside JSON
+    string values.  Agents sometimes embed raw newlines in long fields like
+    chain_of_thought, which breaks json.loads even though the rest is valid JSON.
+    """
+    result: list[str] = []
+    in_string = False
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if ch == "\\" and in_string:        # escaped character — copy both chars
+            result.append(ch)
+            i += 1
+            if i < len(text):
+                result.append(text[i])
+                i += 1
+            continue
+        if ch == '"':
+            in_string = not in_string
+        elif ch == "\n" and in_string:
+            result.append("\\n")
+            i += 1
+            continue
+        elif ch == "\r" and in_string:
+            result.append("\\r")
+            i += 1
+            continue
+        result.append(ch)
+        i += 1
+    return "".join(result)
+
+
+def _parse_agent_json(raw: str) -> dict | None:
+    """
+    Robustly parse JSON from an agent response:
+      1. Strip fences / extract JSON object
+      2. Direct json.loads
+      3. Escape literal newlines inside strings, then json.loads
+      4. Fall back to _repair_and_parse
+    """
+    cleaned = _extract_json(raw)
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        pass
+    try:
+        return json.loads(_escape_string_newlines(cleaned))
+    except json.JSONDecodeError:
+        pass
+    return _repair_and_parse(cleaned)
 
 
 # ── Clinical Interpreter ──────────────────────────────────────────────────────
@@ -136,7 +186,7 @@ def parse_nl_to_clips(
             description=_NL_TO_CHIVA_PROMPT.format(description=accumulated),
             expected_output='Valid JSON only: {"interpretation": "...", "clips": [...]}',
         )
-        result = json.loads(_extract_json(raw))
+        result = _parse_agent_json(raw)
         if isinstance(result, dict) and "clips" in result:
             if _has_no_reflux_statement(accumulated) and result.get("clips"):
                 before = len(result["clips"])
@@ -258,10 +308,8 @@ def classify_and_plan_ligation_with_llm(
                     '"reasoning": [...], "needs_elim_test": false, ...}'
                 ),
             )
-            logger.info(f"[CrewAI] Classification raw response ({leg_label}): {raw!r}")
-            classification = _repair_and_parse(_extract_json(raw))
+            classification = _parse_agent_json(raw)
             if not classification or "shunt_type" not in classification:
-                logger.error(f"[CrewAI] Parsed classification: {classification!r}")
                 raise RuntimeError(f"Unparseable classification response for {leg_label}")
         except Exception as e:
             logger.error(f"[CrewAI] Shunt classification failed for {leg_label}: {e}")
@@ -290,7 +338,7 @@ def classify_and_plan_ligation_with_llm(
                         '"clinical_rationale": "...", "chiva_approach": "...", ...}'
                     ),
                 )
-                ligation = _repair_and_parse(_extract_json(raw))
+                ligation = _parse_agent_json(raw)
                 if not ligation or "ligation_steps" not in ligation:
                     raise RuntimeError(f"Unparseable ligation plan for {leg_label}")
                 ligation_usage = ligation.pop("_llm_usage", {})
