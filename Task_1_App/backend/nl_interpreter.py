@@ -232,6 +232,37 @@ CRITICAL RULE 2 — DO NOT HALLUCINATE RP CLIPS:
   *** Negative reflux statements (global scope) = zero RP. SFJ entry alone ≠ GSV reflux. ***
   *** Never fabricate reflux to make the pattern fit a known shunt type. ***
 
+═══════════════════════════════════════════════════════════
+CRITICAL RULE 2C — GSV AS CONDUIT: DO NOT generate RP N2→N1 for the Type 3 conduit scenario:
+═══════════════════════════════════════════════════════════
+
+  When ALL FOUR of the following are true simultaneously, DO NOT generate RP N2→N1:
+    1. SFJ/Hunterian is incompetent (EP N1→N2 will be generated)
+    2. The GSV carries blood from SFJ down to a specific anatomical level
+       ("GSV carries reflux to X" / "GSV refluxes to X" / "GSV carries blood to X")
+    3. At that level, blood escapes into a tributary (EP N2→N3 will be generated)
+    4. No further reflux in the GSV BELOW that escape point
+       ("no reflux in the main GSV beyond the branch" / "GSV does not reflux beyond X" /
+       "no further GSV reflux below the junction" / similar phrasing)
+
+  WHY: RP N2→N1 means blood returning FROM the GSV INTO the deep system (N1) at a distal
+  perforating point. In the Type 3 conduit scenario, the blood from the SFJ travels DOWN
+  the GSV to the escape point, then exits the GSV via N3 (the tributary). It does NOT
+  return to N1 via the GSV below the escape point — so RP N2→N1 must NOT be generated.
+  The phrase "GSV carries reflux to X" describes the CONDUIT path only, not a re-entry to N1.
+
+  EXAMPLE (correct — Type 3 conduit, no RP N2→N1):
+    "SFJ incompetent. GSV carries reflux to mid-thigh. At mid-thigh GSV feeds a branch.
+     That branch refluxes backward. No reflux in main GSV beyond the branch."
+    → EP N1→N2 (SFJ) + EP N2→N3 (mid-thigh escape) + RP N3→N2 (branch retrograde)
+    → NO RP N2→N1 — blood exits via N3, not back to N1 via GSV below escape point.
+
+  COUNTER-EXAMPLE (RP N2→N1 IS correct — GSV reflux continues beyond escape):
+    "SFJ incompetent. GSV refluxes full-length. At knee it feeds a tributary. The tributary
+     refluxes backward. The GSV continues to reflux below the knee to the ankle."
+    → EP N1→N2 + RP N2→N1 (at knee AND ankle) + EP N2→N3 + RP N3→N2
+    → RP N2→N1 IS generated because GSV reflux continues BELOW the escape point.
+
 CRITICAL RULE 2B — eliminationTest values and when to add:
   Only add "eliminationTest" to a finding if the description EXPLICITLY describes performing
   a compression or elimination test AND states its result (e.g. "reflux persists", "reflux
@@ -339,7 +370,9 @@ Use this to understand what flow information makes a complete description.
              (perforator entry + tributary reflux + GSV trunk also refluxes backward)
 
   TYPE 3   = EP N1→N2  +  EP N2→N3  +  RP N3  (no RP N2→N1)
-             (SFJ entry + GSV escapes to tributary + tributary refluxes; trunk does NOT reflux)
+             (SFJ entry; GSV acts as CONDUIT from SFJ to the escape point — "GSV carries reflux
+             to X" does NOT generate RP N2→N1 when blood exits at X into a tributary and there
+             is NO further GSV reflux below X. See Critical Rule 2C.)
 
   TYPE 4   = EP N1→N3  +  RP N2→N1
              (deep blood enters tributary directly, bypassing GSV + GSV trunk refluxes back)

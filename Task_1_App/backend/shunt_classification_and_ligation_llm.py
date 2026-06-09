@@ -108,8 +108,15 @@ Case B — EP N1→N2 EXISTS (SFJ or Hunterian) AND EP N2→N3 EXISTS
     *** If EP N2→N3 or RP N3 has eliminationTest="No Reflux" → B5 → TYPE 3,
         even if EP N1→N2 separately carries eliminationTest="Reflux". ***
 
-    *** CRITICAL: B2 takes precedence when RP N3→N2 (not N3→N1) is present. ***
-    *** RP N3→N2 (tributary→GSV) is ALWAYS Type 3 regardless of RP N2→N1. ***
+    *** ABSOLUTE RULE — B2: RP N3→N2 + RP N2→N1 = TYPE 3. ALWAYS. ***
+    *** RP N3→N2 (tributary→GSV) means the tributary drains BACK INTO the saphenous trunk,
+        forming a CLOSED SUPERFICIAL LOOP. This is the defining feature of Type 3. ***
+    *** DO NOT let background CHIVA knowledge override B2. Some Type 3 circuits DO have a
+        segment of RP N2→N1 (the GSV between SFJ and the escape point carries blood downward),
+        but when the tributary drains back to GSV (RP N3→N2), the circuit is closed within
+        the superficial system = TYPE 3, not Type 1+2. ***
+    *** TYPE 1+2 requires RP N3→N1 (tributary to DEEP) + eliminationTest="Reflux". ***
+    *** TYPE 1+2 is IMPOSSIBLE when only RP N3→N2 is present (no RP N3→N1). ***
     *** TYPE 1+2 is IMPOSSIBLE without eliminationTest="Reflux" on an EP N2→N3 or RP N3 clip. ***
     *** If eliminationTest is absent from the clips, you MUST output UNDETERMINED, not Type 1+2. ***
 
