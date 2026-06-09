@@ -356,7 +356,11 @@ Output ONLY valid JSON — no markdown, no explanation:
 
 _SUFFICIENCY_PROMPT = """You are a strict clinical gatekeeper for a CHIVA venous shunt classification tool. Your ONLY job is to decide whether the accumulated description below contains enough explicitly confirmed information to classify the shunt — nothing more.
 
-The description below may span multiple clinician messages. Treat it as one combined description. Do NOT ask about information already clearly provided — only flag what is genuinely missing. If a detail seems contradictory rather than missing, say so.
+The messages below are numbered chronologically — [Message 1] is the earliest, the highest-numbered message is the most recent.
+
+PRECEDENCE RULE: When later messages contradict earlier ones about the same component, the LATER message is the authoritative answer. Do NOT keep re-asking about something the clinician already answered, even if an earlier message said the opposite.
+
+CONTRADICTION RULE: If two messages genuinely contradict each other about the same component AND the contradiction has not yet been flagged, return verdict "insufficient" and explain the specific contradiction clearly — quote both statements and ask the clinician to resolve it. Do this ONCE. Do not ask about it again across turns.
 
 "{description}"
 
@@ -490,15 +494,24 @@ PART 1 — CHIVA INTERPRETATION OF WHAT WAS PROVIDED:
 Open with "Interpreted so far:" followed by a concise CHIVA summary of every flow event that WAS confirmed. Use plain clinical language with CHIVA notation in parentheses. One sentence per confirmed flow event. Do not mention anything that was NOT confirmed.
 Example: "Interpreted so far: Blood enters the GSV at the groin via an incompetent SFJ (EP N1→N2). No blood escapes into any tributary (no EP N2→N3)."
 
-PART 2 — WHAT IS STILL MISSING:
-On a new line, directly state what additional information is still needed and WHY it matters for telling the shunt types apart. Close with a concrete example of what the complete sufficient description would look like.
+PART 2 — WHAT IS STILL MISSING OR CONTRADICTORY:
+On a new line, either:
+  (a) State what additional information is still needed and WHY it matters, then give a concrete example of a complete description. OR
+  (b) If there is a contradiction between two messages about the same thing, quote BOTH statements explicitly and ask the clinician to resolve it. Do this ONCE — never repeat the same contradiction question.
+
 Do not open Part 2 with "Thanks", "I can see", "Based on what you've provided", or any preamble. Get straight to the point.
 
-GOOD EXAMPLE (do this):
+GOOD EXAMPLE — missing info:
 "Interpreted so far: Blood enters the GSV at the groin via an incompetent SFJ (EP N1→N2).\n\nTo distinguish between Type 1, Type 3, and combined patterns I still need to know: is there reflux in the GSV trunk — does blood travel backward through it? And does any blood escape sideways into a tributary branch? If a tributary is involved, does blood reflux through it as well? For example: 'SFJ incompetent, blood enters the GSV at the groin, reflux present in the GSV trunk full-length, blood escapes into a mid-thigh tributary, and blood refluxes backward through that tributary toward the knee.'"
 
-BAD EXAMPLE (never do this):
-"Thanks for providing that information. Based on what you've described, I can see the SFJ is incompetent. Component 2 (GSV trunk reflux status) is missing. Please confirm YES or NO."
+GOOD EXAMPLE — contradiction:
+"Interpreted so far: A perforator at the groin inserts into the GSV (EP N2→N2). Reflux present in the GSV trunk (RP N2→N1).\n\nThere's a contradiction to resolve: in your first message you said 'a tributary at mid-thigh refluxes backward toward the GSV', but later you said 'no blood escapes into the tributary'. If blood is refluxing through the tributary it must have entered it first — can you clarify: is there actually a tributary involved, or was that initial mention a mistake?"
+
+BAD EXAMPLE — repeating the same question multiple turns in a row:
+Turn 3: "Does blood reflux through the tributary?"
+Turn 4: "Does blood reflux through the tributary?"
+Turn 5: "Does blood reflux through the tributary?"
+← NEVER do this. Ask once; if answered, accept the answer.
 
 Output ONLY valid JSON — no markdown:
 {{"verdict": "sufficient"}}
@@ -574,29 +587,30 @@ def _clean_json(raw: str) -> str:
 
 def _build_accumulated_description(history: list[dict] | None, current_message: str) -> str:
     """
-    Concatenate user messages from the current classification attempt (since the
-    last successful [Analysis] turn) with the current message.  This lets the
-    clinician add missing details one message at a time without repeating themselves.
+    Collect user messages from the current classification attempt (since the last
+    successful [Analysis] turn) and format them as numbered sequential messages so
+    the LLM can resolve contradictions by trusting the most recent statement.
     """
     if not history:
         return current_message
 
-    # Collect user messages after the last successful classification
     prior_user_msgs: list[str] = []
     for msg in history:
         role = msg.get("role", "")
         content = msg.get("content", "") or ""
         if role == "assistant" and content.startswith("[Analysis]"):
-            # Reset — anything before this is a completed case
             prior_user_msgs = []
         elif role == "user":
             prior_user_msgs.append(content.strip())
 
-    if not prior_user_msgs:
-        return current_message
+    all_msgs = prior_user_msgs + [current_message.strip()]
+    all_msgs = [m for m in all_msgs if m]
 
-    parts = prior_user_msgs + [current_message.strip()]
-    return ". ".join(p.rstrip(".").rstrip() for p in parts if p)
+    if len(all_msgs) == 1:
+        return all_msgs[0]
+
+    # Number each message so the LLM sees chronological order clearly
+    return "\n".join(f"[Message {i+1}]: {m}" for i, m in enumerate(all_msgs))
 
 
 def parse_nl_to_clips(user_message: str, call_llm_fn: Callable, history: list[dict] | None = None) -> dict:
