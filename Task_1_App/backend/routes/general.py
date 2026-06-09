@@ -3,20 +3,19 @@ from auth import login_required
 from flask import Blueprint, jsonify, request
 
 from chat_db import save_message, get_messages, update_session_title
-from config import GROQ_MODEL, RERANK_TOP_N, AGENTIC_MODE
+from config import RERANK_TOP_N
 from general_chat_engine import (
     retrieve_general_context,
     collection_exists as general_collection_exists,
     is_domain_relevant,
 )
-import services
+from crew_pipeline import generate_general_response
 
 logger = logging.getLogger(__name__)
 bp = Blueprint("general", __name__)
 
 
 def _clean_text(text: str) -> str:
-    """Normalise Unicode dashes, quotes, and invisible characters to ASCII."""
     if not text:
         return text
     replacements = {
@@ -129,31 +128,7 @@ def api_general_chat():
         "Complex question = structured sections. End with SOURCES."
     )
 
-    if AGENTIC_MODE:
-        try:
-            from crew_pipeline import generate_general_response
-            response_text = generate_general_response(system_with_history, user_prompt)
-        except Exception as e:
-            logger.error(f"[CrewAI] General chat failed ({e}). Falling back to direct Groq call.")
-            response_text = None
-    else:
-        response_text = None
-
-    if response_text is None:
-        try:
-            resp = services.groq_client.chat.completions.create(
-                model=GROQ_MODEL,
-                messages=[
-                    {"role": "system", "content": system_with_history},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=0.5,
-                max_tokens=1536,
-            )
-            response_text = resp.choices[0].message.content or ""
-        except Exception as e:
-            logger.error(f"LLM call failed in general-chat: {e}")
-            response_text = f"Error generating response: {e}"
+    response_text = generate_general_response(system_with_history, user_prompt)
 
     gen_title = None
     if not any(m["role"] == "assistant" for m in history):

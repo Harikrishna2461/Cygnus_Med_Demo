@@ -3,48 +3,22 @@ from auth import login_required
 from flask import Blueprint, jsonify, request
 
 from chat_db import save_message, get_messages, update_session_title
-from config import QDRANT_COLLECTION, AGENTIC_MODE
+from config import QDRANT_COLLECTION
 from rag_engine import collection_exists
+from crew_pipeline import (
+    parse_nl_to_clips,
+    build_conversational_response,
+    classify_and_plan_ligation_with_llm,
+)
 import services
-
-# ── Pipeline toggle ───────────────────────────────────────────────────────────
-# AGENTIC_MODE=true  → CrewAI agents (crew_pipeline.py)
-# AGENTIC_MODE=false → original functions (nl_interpreter.py)   ← default
-# Falls back to original automatically if crewai is not installed.
-_CREW_AVAILABLE = False
-_crew_classify_fn = None
-
-if AGENTIC_MODE:
-    try:
-        from crew_pipeline import (
-            parse_nl_to_clips,
-            build_conversational_response,
-            classify_and_plan_ligation_with_llm as _crew_classify_fn,
-        )
-        _CREW_AVAILABLE = True
-        logger.info("CrewAI pipeline active for /api/chat.")
-    except ImportError as _e:
-        logger.warning(f"CrewAI not available ({_e}). Falling back to original pipeline.")
-
-if not _CREW_AVAILABLE:
-    from nl_interpreter import parse_nl_to_clips, build_conversational_response
 
 logger = logging.getLogger(__name__)
 bp = Blueprint("clinical", __name__)
 
-_PARENT_MODULE = False
-classify_and_plan_ligation_with_llm = None
-
 
 def set_classification_fn(loaded: bool, fn) -> None:
-    global _PARENT_MODULE, classify_and_plan_ligation_with_llm
-    if _CREW_AVAILABLE:
-        # Crew version is self-contained; it doesn't need the parent module.
-        classify_and_plan_ligation_with_llm = _crew_classify_fn
-        _PARENT_MODULE = True
-    else:
-        _PARENT_MODULE = loaded
-        classify_and_plan_ligation_with_llm = fn
+    """No-op — CrewAI pipeline is self-contained and needs no external injection."""
+    pass
 
 
 @bp.route("/api/chat", methods=["POST"])
@@ -75,18 +49,9 @@ def api_chat():
         save_message(session_id, "assistant", msg)
         return jsonify({"type": "error", "conversational_response": msg, "message_id": user_msg_id})
 
-    if not _PARENT_MODULE:
-        msg = (
-            "Core classification module not found. "
-            "Copy shunt_classification_and_ligation_llm.py from backend/ into "
-            "cmed_demo/backend/ and restart."
-        )
-        save_message(session_id, "assistant", msg)
-        return jsonify({"type": "error", "conversational_response": msg, "message_id": user_msg_id})
-
     history = [m for m in get_messages(session_id) if m["message_id"] != user_msg_id]
 
-    interpretation = parse_nl_to_clips(user_message, services.call_llm, history)
+    interpretation = parse_nl_to_clips(user_message, history=history)
     is_clinical = interpretation.get("is_clinical", False)
     sufficient = interpretation.get("sufficient_information", True)
     missing_info = interpretation.get("missing_information") or ""
@@ -116,7 +81,6 @@ def api_chat():
         try:
             result = classify_and_plan_ligation_with_llm(
                 clip_list=clips,
-                call_llm_fn=services.call_llm,
                 retrieve_ligation_context_fn=services.retrieve_ligation_context,
             )
         except Exception as e:
@@ -162,7 +126,6 @@ def api_chat():
             user_message=user_message,
             analysis_context=analysis_ctx,
             history=history,
-            call_llm_fn=services.call_llm,
         )
         save_message(session_id, "assistant", response_text)
         return jsonify({

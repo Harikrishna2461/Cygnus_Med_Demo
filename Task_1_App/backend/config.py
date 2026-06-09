@@ -58,11 +58,6 @@ GOOGLE_SHEETS_ID = os.getenv("GOOGLE_SHEETS_ID", "")
 # CORS — set to specific origin(s) to restrict, or "*" to allow all (production default)
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
 
-# Agentic mode — set AGENTIC_MODE=true in .env to route all LLM calls through CrewAI agents.
-# Original pipeline (nl_interpreter.py, shunt_classification_and_ligation_llm.py) stays intact
-# and is used automatically when this is false or when crewai is not installed.
-AGENTIC_MODE = os.getenv("AGENTIC_MODE", "false").lower() == "true"
-
 # Auth
 SECRET_KEY = os.getenv("SECRET_KEY", "change-this-in-production-use-a-long-random-string")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
