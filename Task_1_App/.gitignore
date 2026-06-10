@@ -6,6 +6,7 @@ backend/.env
 
 # Database and logs
 *.db
+!backend/chat_history.db
 *.log
 backend/cmed_chat.log
 
