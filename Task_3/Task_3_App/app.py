@@ -100,7 +100,7 @@ FOUNDATION_FEW_SHOT_PROMPT = (
 
 # ── Hardcoded API keys ────────────────────────────────────────────────────────
 DEFAULT_GROQ_KEY = ""
-HF_TOKEN         = ""
+HF_TOKEN         = "REPLACE_WITH_ENV_HF_TOKEN"
 
 def _make_groq(user_key: str = ''):
     from groq import Groq
@@ -214,10 +214,16 @@ def get_fascia_boundary(mask):
     #    move in parallel — no more asymmetric slopes.
     half = max(2.0, float(np.nanmedian(half_w)))
 
+    # 4. IQR outlier rejection before interpolation — clamps column spikes
+    cy_vals = center_y[valid]
+    q25, q75 = float(np.percentile(cy_vals, 25)), float(np.percentile(cy_vals, 75))
+    iqr = q75 - q25 if q75 > q25 else 6.0
+    center_y[valid] = np.clip(cy_vals, q25 - 2.0 * iqr, q75 + 2.0 * iqr)
+
     xs_v  = np.where(valid)[0].astype(np.float32)
     x_min, x_max = int(xs_v.min()), int(xs_v.max())
     rng   = np.arange(x_min, x_max + 1, dtype=np.float32)
-    ctr   = uniform_filter1d(np.interp(rng, xs_v, center_y[valid]), 40)
+    ctr   = uniform_filter1d(np.interp(rng, xs_v, center_y[valid]), 60)
 
     top_out = np.full(IMG_SIZE, np.nan, np.float32)
     bot_out = np.full(IMG_SIZE, np.nan, np.float32)
@@ -608,18 +614,11 @@ class PipelineB:
         return y_top, y_bot
 
     def detect_fascia(self, bgr, scan_xl_m=0, scan_xr_m=IMG_SIZE):
-        """
-        Fascia detection chain:
-          1. GDINO text-prompt → approximate fascia row
-          2. SAM box-prompt around that row → per-column segmentation mask → curved band
-          3. Brightness-gradient fallback if GDINO or SAM fails
-        """
+        """GDINO -> SAM fascia detection. Returns (None, None) if either model unavailable."""
         approx_y = self._gdino_fascia(bgr)
         if approx_y is not None:
-            result = self._fascia_from_sam(bgr, approx_y, scan_xl_m, scan_xr_m)
-            if result[0] is not None:
-                return result
-        return self._fascia_from_brightness(bgr, scan_xl_m, scan_xr_m)
+            return self._fascia_from_sam(bgr, approx_y, scan_xl_m, scan_xr_m)
+        return None, None
 
     def _gdino_fascia(self, bgr):
         """Use GDINO to detect the fascia band. Returns approx fascia row in IMG_SIZE coords, or None."""
@@ -680,7 +679,7 @@ class PipelineB:
         Falls through to brightness refinement if SAM is unavailable or mask is too sparse.
         """
         if self._sam is None:
-            return self._refine_fascia_per_column(bgr, approx_y, scan_xl_m=scan_xl_m, scan_xr_m=scan_xr_m)
+            return None, None
         try:
             import torch
             from PIL import Image as PILImage
@@ -688,8 +687,8 @@ class PipelineB:
             h0, w0 = bgr.shape[:2]
             pil = PILImage.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB))
 
-            # Wide box spanning full width, ±30 px around approx_y (in original coords)
-            search = 30
+            # Wide box spanning full width, ±50 px around approx_y (in original coords)
+            search = 50
             y1_box = max(0,  int((approx_y - search) * h0 / IMG_SIZE))
             y2_box = min(h0, int((approx_y + search) * h0 / IMG_SIZE))
             inputs = proc(
@@ -724,17 +723,24 @@ class PipelineB:
 
             valid = ~np.isnan(top_out)
             if valid.sum() < 20:
-                return self._refine_fascia_per_column(bgr, approx_y, scan_xl_m=scan_xl_m, scan_xr_m=scan_xr_m)
+                return None, None
+
+            # IQR outlier rejection before smoothing
+            tv = top_out[valid]
+            q25, q75 = float(np.percentile(tv, 25)), float(np.percentile(tv, 75))
+            iqr = q75 - q25 if q75 > q25 else 6.0
+            top_out[valid] = np.clip(tv, q25 - 2.0 * iqr, q75 + 2.0 * iqr)
+            bot_out[valid] = np.clip(bot_out[valid], q25 - 2.0 * iqr + 16, q75 + 2.0 * iqr + 16)
 
             xs  = np.arange(IMG_SIZE, dtype=np.float32)
             xv  = xs[valid]
             scan_xs = np.arange(x_lo, x_hi, dtype=np.float32)
-            top_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, top_out[valid]), 25).astype(np.float32)
-            bot_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, bot_out[valid]), 25).astype(np.float32)
+            top_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, top_out[valid]), 60).astype(np.float32)
+            bot_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, bot_out[valid]), 60).astype(np.float32)
             return top_out, bot_out
         except Exception as e:
             print(f"PipelineB SAM fascia error: {e}")
-            return self._refine_fascia_per_column(bgr, approx_y, scan_xl_m=scan_xl_m, scan_xr_m=scan_xr_m)
+            return None, None
 
     def _refine_fascia_per_column(self, bgr, approx_y, search_half=25, scan_xl_m=0, scan_xr_m=IMG_SIZE):
         """
@@ -788,8 +794,8 @@ class PipelineB:
         xs  = np.arange(IMG_SIZE, dtype=np.float32)
         xv  = xs[valid]
         scan_xs = np.arange(x_lo, x_hi, dtype=np.float32)
-        top_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, top_out[valid]), 25).astype(np.float32)
-        bot_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, bot_out[valid]), 25).astype(np.float32)
+        top_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, top_out[valid]), 60).astype(np.float32)
+        bot_out[x_lo:x_hi] = uniform_filter1d(np.interp(scan_xs, xv, bot_out[valid]), 60).astype(np.float32)
         return top_out, bot_out
 
     def _fascia_from_brightness(self, bgr, scan_xl_m=0, scan_xr_m=IMG_SIZE):
@@ -811,18 +817,13 @@ class PipelineB:
 
     # ── veins ─────────────────────────────────────────────────────────────────
 
-    def detect_veins(self, bgr, min_area=80, scan_xl_m=0, scan_xr_m=IMG_SIZE):
-        """
-        Vein detection chain:
-          1. GDINO text-prompt → rough bounding boxes
-          2. SAM box-prompt for each GDINO box → precise segmentation → tight bbox
-          3. Blob fallback if GDINO finds nothing
-        """
+    def detect_veins(self, bgr, min_area=80):
+        """GDINO -> SAM vein detection. Returns [] if GDINO unavailable or finds nothing."""
         if self._gdino is not None:
             dets = self._gdino_detect(bgr, min_area)
             if dets:
                 return self._sam_refine_dets(bgr, dets)
-        return self._blob_detect(bgr, min_area, scan_xl_m, scan_xr_m)
+        return []
 
     def _sam_refine_dets(self, bgr, gdino_dets):
         """
@@ -1337,21 +1338,19 @@ def process_dl(upload_id):
     return _process_view(upload_id, _dl_fascia_fn, _dl_vein_fn)
 
 
-VLM_DETECT_INTERVAL = 5   # run combined VLM detection every N processed frames
+VLM_DETECT_INTERVAL = 1   # run VLM on every processed frame — best recall
 
 
 def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key, vlm_model_nm):
     """
     Foundation Pipeline generate loop.
 
-    When a Groq key is provided every VLM_DETECT_INTERVAL processed frames the
-    VLM receives 2 annotated reference frames (few-shot examples from
-    3-Simple_Annotated_Videos) plus the current unannotated frame and returns:
+    Every processed frame the VLM (EchoVLM or Groq) receives the current frame
+    alongside few-shot reference images and returns:
       • fascia_y  — row of fascia centre in 256-px space
       • veins     — bounding boxes + N1/N2/N3 labels
-
-    Between VLM calls (or when no Groq key) fascia falls back to the
-    brightness-gradient heuristic and veins to GDINO / blob detection.
+    SAM refines the VLM fascia_y into a smooth per-column curved band.
+    When VLM finds nothing, GDINO+SAM runs as fallback.
     """
     try:
         groq_client = _make_groq(groq_key) if (groq_key or DEFAULT_GROQ_KEY) else None
@@ -1383,8 +1382,8 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
         scan_xr_m      = None
 
         vlm_vein_dets  = []  # most-recent vein detections from VLM (have 'vlm_label')
-        vlm_fascia_buf = []  # smoothing buffer fed ONLY from VLM fascia_y results
-        brt_fascia_buf = []  # smoothing buffer fed ONLY from brightness-gradient fallback
+        vlm_fascia_buf = []  # smoothing buffer: VLM fascia_y refined through SAM
+        gdino_fascia_buf = []  # smoothing buffer: GDINO+SAM fascia (fallback when VLM misses)
 
         yield f"data: {json.dumps({'type':'meta','total':n_proc,'src_fps':src_fps,'skip':skip})}\n\n"
 
@@ -1415,9 +1414,20 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
                         fy, vd = _pipe_b.vlm_detect_classify(frame, groq_client, vlm_model_nm)
                     print(f"[Foundation VLM] fascia_y={fy}, veins={len(vd)}")
                     if fy is not None:
-                        t, b = _pipe_b._refine_fascia_per_column(frame, fy,
-                                                                  scan_xl_m=scan_xl_m,
-                                                                  scan_xr_m=scan_xr_m)
+                        t, b = _pipe_b._fascia_from_sam(frame, fy,
+                                                        scan_xl_m=scan_xl_m,
+                                                        scan_xr_m=scan_xr_m)
+                        if t is None:
+                            # SAM unavailable or mask too sparse — draw flat line at VLM's y
+                            half = 8
+                            x_lo_f = max(0, scan_xl_m)
+                            x_hi_f = min(IMG_SIZE, scan_xr_m)
+                            fy_c = int(np.clip(fy, half, IMG_SIZE - 1 - half))
+                            t = np.full(IMG_SIZE, np.nan, np.float32)
+                            b = np.full(IMG_SIZE, np.nan, np.float32)
+                            t[x_lo_f:x_hi_f] = float(fy_c - half)
+                            b[x_lo_f:x_hi_f] = float(fy_c + half)
+                            print(f"[Foundation] SAM unavailable — flat fascia line at y={fy_c}")
                         vlm_fascia_buf.append((t, b))
                         if len(vlm_fascia_buf) > FASCIA_SMOOTH:
                             vlm_fascia_buf.pop(0)
@@ -1428,17 +1438,21 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
                 # Keeping VLM and brightness results in separate buffers prevents them
                 # from polluting each other's median when they disagree on fascia position.
                 if vlm_fascia_buf:
-                    s_top = np.nanmedian(np.stack([f[0] for f in vlm_fascia_buf]), axis=0).astype(np.float32)
-                    s_bot = np.nanmedian(np.stack([f[1] for f in vlm_fascia_buf]), axis=0).astype(np.float32)
+                    import warnings
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", RuntimeWarning)
+                        s_top = np.nanmedian(np.stack([f[0] for f in vlm_fascia_buf]), axis=0).astype(np.float32)
+                        s_bot = np.nanmedian(np.stack([f[1] for f in vlm_fascia_buf]), axis=0).astype(np.float32)
+                    # Columns that are all-NaN (outside scan area) stay NaN — draw_frame skips them
                 else:
                     top_y, bot_y = _pipe_b.detect_fascia(frame, scan_xl_m, scan_xr_m)
                     if top_y is not None:
-                        brt_fascia_buf.append((top_y, bot_y))
-                        if len(brt_fascia_buf) > FASCIA_SMOOTH:
-                            brt_fascia_buf.pop(0)
-                    if brt_fascia_buf:
-                        s_top = np.nanmedian(np.stack([f[0] for f in brt_fascia_buf]), axis=0).astype(np.float32)
-                        s_bot = np.nanmedian(np.stack([f[1] for f in brt_fascia_buf]), axis=0).astype(np.float32)
+                        gdino_fascia_buf.append((top_y, bot_y))
+                        if len(gdino_fascia_buf) > FASCIA_SMOOTH:
+                            gdino_fascia_buf.pop(0)
+                    if gdino_fascia_buf:
+                        s_top = np.nanmedian(np.stack([f[0] for f in gdino_fascia_buf]), axis=0).astype(np.float32)
+                        s_bot = np.nanmedian(np.stack([f[1] for f in gdino_fascia_buf]), axis=0).astype(np.float32)
                     else:
                         s_top = s_bot = None
 
@@ -1447,7 +1461,7 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
                 if vlm_available and (proc_idx % VLM_DETECT_INTERVAL == 0) and vlm_vein_dets:
                     dets = vlm_vein_dets
                 else:
-                    dets = _pipe_b.detect_veins(frame, min_area, scan_xl_m, scan_xr_m)
+                    dets = _pipe_b.detect_veins(frame, min_area)
 
                 # Remove any detection whose centroid is below the fascia band —
                 # same anatomical constraint as the DL pipeline.
@@ -1568,7 +1582,6 @@ def download_report(upload_id):
     return send_file(buf, mimetype='text/csv',
                      as_attachment=True,
                      download_name=f'vein_report_{upload_id[:8]}.csv')
-
 
 if __name__ == '__main__':
     print(f"==> App running at http://localhost:5000")
