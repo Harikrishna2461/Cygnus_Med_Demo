@@ -96,6 +96,7 @@ def api_general_chat():
             "type": "guardrail",
             "conversational_response": guardrail_msg,
             "message_id": user_msg_id,
+            "session_title": gen_title,
         })
 
     if not general_collection_exists():
@@ -114,6 +115,13 @@ def api_general_chat():
 
     history = [m for m in get_messages(session_id) if m["message_id"] != user_msg_id]
 
+    # Always name the session on the first message
+    gen_title = None
+    if not history:
+        short_input = user_message[:45].rstrip() + ("…" if len(user_message) > 45 else "")
+        gen_title = f"Medical Q&A — {short_input}"
+        update_session_title(session_id, gen_title)
+
     system_with_history = _SYSTEM_PROMPT
     if history:
         system_with_history += "\n\nPrevious conversation context:"
@@ -129,17 +137,6 @@ def api_general_chat():
     )
 
     response_text = generate_general_response(system_with_history, user_prompt)
-
-    gen_title = None
-    prior_real_response = any(
-        m["role"] == "assistant"
-        and not m["content"].startswith("I'm a medical assistant specialised")
-        for m in history
-    )
-    if not prior_real_response:
-        short_input = user_message[:45].rstrip() + ("…" if len(user_message) > 45 else "")
-        gen_title = f"Medical Q&A — {short_input}"
-        update_session_title(session_id, gen_title)
 
     save_message(session_id, "assistant", response_text)
 

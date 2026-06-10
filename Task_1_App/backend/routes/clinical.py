@@ -51,6 +51,13 @@ def api_chat():
 
     history = [m for m in get_messages(session_id) if m["message_id"] != user_msg_id]
 
+    # Always name the session on the first message, regardless of response type
+    new_title = None
+    if not history:
+        short_input = user_message[:45].rstrip() + ("…" if len(user_message) > 45 else "")
+        new_title = short_input
+        update_session_title(session_id, new_title)
+
     interpretation = parse_nl_to_clips(user_message, history=history)
     is_clinical = interpretation.get("is_clinical", False)
     sufficient = interpretation.get("sufficient_information", True)
@@ -75,6 +82,7 @@ def api_chat():
             "missing_info": decline_msg,
             "conversational_response": decline_msg,
             "message_id": user_msg_id,
+            "session_title": new_title,
         })
 
     if is_clinical and sufficient:
@@ -90,11 +98,11 @@ def api_chat():
                 "Please try rephrasing your description and submitting again."
             )
             save_message(session_id, "assistant", error_msg)
-            return jsonify({"type": "error", "conversational_response": error_msg}), 500
+            return jsonify({"type": "error", "conversational_response": error_msg, "session_title": new_title}), 500
 
         services.analysis_cache[session_id] = services.format_analysis_for_context(result)
 
-        new_title = None
+        # Refine title with shunt type on first classification
         prior_classification = any(
             m["role"] == "assistant"
             and isinstance(m.get("metadata"), dict)
@@ -141,4 +149,5 @@ def api_chat():
             "type": "conversational",
             "conversational_response": response_text,
             "message_id": user_msg_id,
+            "session_title": new_title,
         })
