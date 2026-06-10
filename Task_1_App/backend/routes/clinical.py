@@ -95,7 +95,13 @@ def api_chat():
         services.analysis_cache[session_id] = services.format_analysis_for_context(result)
 
         new_title = None
-        if not any(m["role"] == "assistant" for m in history):
+        prior_classification = any(
+            m["role"] == "assistant"
+            and isinstance(m.get("metadata"), dict)
+            and m["metadata"].get("type") == "clinical"
+            for m in history
+        )
+        if not prior_classification:
             primary_type = result.get("shunt_type") or "Unknown"
             short_input = user_message[:45].rstrip() + ("…" if len(user_message) > 45 else "")
             new_title = f"{primary_type} — {short_input}"

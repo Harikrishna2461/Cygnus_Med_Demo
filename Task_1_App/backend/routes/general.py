@@ -131,7 +131,12 @@ def api_general_chat():
     response_text = generate_general_response(system_with_history, user_prompt)
 
     gen_title = None
-    if not any(m["role"] == "assistant" for m in history):
+    prior_real_response = any(
+        m["role"] == "assistant"
+        and not m["content"].startswith("I'm a medical assistant specialised")
+        for m in history
+    )
+    if not prior_real_response:
         short_input = user_message[:45].rstrip() + ("…" if len(user_message) > 45 else "")
         gen_title = f"Medical Q&A — {short_input}"
         update_session_title(session_id, gen_title)
