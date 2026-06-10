@@ -1,7 +1,9 @@
+import json
 import logging
-from flask import Blueprint, jsonify, request
+from datetime import datetime
+from flask import Blueprint, jsonify, request, Response
 from auth import admin_required
-from chat_db import get_all_users, create_user, deactivate_user
+from chat_db import get_all_users, create_user, deactivate_user, get_db_export
 
 logger = logging.getLogger(__name__)
 bp = Blueprint("admin", __name__)
@@ -35,3 +37,15 @@ def add_user():
 def remove_user(user_id):
     deactivate_user(user_id)
     return jsonify({"status": "deactivated"})
+
+
+@bp.route("/api/admin/export-db", methods=["GET"])
+@admin_required
+def export_db():
+    data = get_db_export()
+    filename = f"cmed_db_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    return Response(
+        json.dumps(data, indent=2, ensure_ascii=False),
+        mimetype="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

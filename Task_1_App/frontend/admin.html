@@ -22,6 +22,9 @@
     .spacer { flex: 1; }
     .logout-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
     .logout-btn:hover { border-color: #475569; color: var(--text); }
+    .export-btn { background: var(--green); border: none; color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+    .export-btn:hover:not(:disabled) { background: #15803d; }
+    .export-btn:disabled { background: var(--border); color: var(--dim); cursor: not-allowed; }
     .page { max-width: 860px; margin: 32px auto; padding: 0 20px; }
     .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 28px; overflow: hidden; }
     .section-header { padding: 16px 20px; border-bottom: 1px solid var(--border); }
@@ -63,6 +66,7 @@
   <a href="/">&#8592; Home</a>
   <h1>Admin Panel</h1>
   <div class="spacer"></div>
+  <button class="export-btn" id="export-btn" onclick="downloadDB(this)">Download DB</button>
   <button class="logout-btn" onclick="logout()">Log out</button>
 </div>
 
@@ -153,6 +157,23 @@ function showToast(el, msg, type) {
   el.textContent = msg; el.className = `toast ${type}`;
   setTimeout(() => { el.className = 'toast'; }, 3500);
 }
+async function downloadDB(btn) {
+  btn.disabled = true; btn.textContent = 'Exporting...';
+  try {
+    const r = await fetch('/api/admin/export-db', { credentials: 'include' });
+    if (!r.ok) { alert('Export failed.'); return; }
+    const blob = await r.blob();
+    const cd = r.headers.get('Content-Disposition') || '';
+    const match = cd.match(/filename="([^"]+)"/);
+    const filename = match ? match[1] : 'cmed_db_export.json';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  } catch { alert('Export failed.'); }
+  finally { btn.disabled = false; btn.textContent = 'Download DB'; }
+}
+
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function fmtDate(iso) { try { return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); } catch { return iso||''; } }
 </script>

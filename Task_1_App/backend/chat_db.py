@@ -300,3 +300,32 @@ def get_all_feedback() -> list[dict]:
             "SELECT * FROM feedback ORDER BY created_at DESC LIMIT 500"
         ).fetchall()
     return [dict(r) for r in rows]
+
+
+def get_db_export() -> dict:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        users = [dict(r) for r in conn.execute(
+            "SELECT user_id, username, is_admin, is_active, created_at FROM users ORDER BY created_at ASC"
+        ).fetchall()]
+        sessions = [dict(r) for r in conn.execute(
+            "SELECT * FROM sessions ORDER BY created_at ASC"
+        ).fetchall()]
+        messages = []
+        for r in conn.execute("SELECT * FROM messages ORDER BY created_at ASC").fetchall():
+            d = dict(r)
+            try:
+                d["metadata"] = json.loads(d.get("metadata") or "{}")
+            except Exception:
+                d["metadata"] = {}
+            messages.append(d)
+        feedback = [dict(r) for r in conn.execute(
+            "SELECT * FROM feedback ORDER BY created_at ASC"
+        ).fetchall()]
+    return {
+        "export_timestamp": _now(),
+        "users": users,
+        "sessions": sessions,
+        "messages": messages,
+        "feedback": feedback,
+    }
