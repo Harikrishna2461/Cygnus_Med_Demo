@@ -968,7 +968,14 @@ function sendSupplementalInfo(textareaId) {
   if (!ta) return;
   const text = ta.value.trim();
   if (!text) { ta.focus(); return; }
-  ta.closest('.msg-row').remove();
+
+  // Preserve the AI's insufficient message as a plain bubble (matches DB-stored content)
+  const msgRow = ta.closest('.msg-row');
+  const bodyEl = msgRow.querySelector('.insufficient-body');
+  const missingInfoText = bodyEl ? bodyEl.textContent.trim() : '';
+  msgRow.remove();
+  if (missingInfoText) appendBubble('bot', missingInfoText, null);
+
   const input = document.getElementById('msg-input');
   input.value = text;
   sendMessage();
