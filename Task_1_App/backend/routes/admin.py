@@ -1,6 +1,8 @@
+import io
 import json
 import logging
 from datetime import datetime
+import openpyxl
 from flask import Blueprint, jsonify, request, Response
 from auth import admin_required
 from chat_db import get_all_users, create_user, deactivate_user, get_db_export
@@ -43,9 +45,35 @@ def remove_user(user_id):
 @admin_required
 def export_db():
     data = get_db_export()
-    filename = f"cmed_db_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+
+    tables = [
+        ("Users", data["users"]),
+        ("Sessions", data["sessions"]),
+        ("Messages", data["messages"]),
+        ("Feedback", data["feedback"]),
+    ]
+
+    for sheet_name, rows in tables:
+        ws = wb.create_sheet(sheet_name)
+        if not rows:
+            continue
+        ws.append(list(rows[0].keys()))
+        for row in rows:
+            ws.append([
+                json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else v
+                for v in row.values()
+            ])
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+
+    filename = f"cmed_db_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
     return Response(
-        json.dumps(data, indent=2, ensure_ascii=False),
-        mimetype="application/json",
+        buf.getvalue(),
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

@@ -24,6 +24,9 @@ python-docx>=1.1.0
 # Google Sheets logging (optional)
 gspread>=6.0.0
 
+# Excel export
+openpyxl>=3.1.0
+
 # Agentic framework (optional — only needed when AGENTIC_MODE=true in .env)
 # Uses LiteLLM under the hood; Groq is supported natively via groq/ model prefix.
 crewai>=1.0.0
