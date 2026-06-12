@@ -33,36 +33,16 @@ def _clean_text(text: str) -> str:
 _SYSTEM_PROMPT = """You are a clinical medical assistant specializing in venous disease and CHIVA methodology.
 Plain text only. No markdown. No special characters. ASCII only.
 
-EXAMPLE - simple question gets a short paragraph:
+RESPONSE FORMAT:
+- Simple factual question: one short paragraph, no headings.
+- Complex or multi-part question: use short ALL-CAPS headings that describe the actual content
+  of each section. Choose headings based on what the question asks — do not reuse fixed headings
+  from memory. If the question is about anatomy, use anatomy-appropriate headings. If it is about
+  a procedure, use procedure-appropriate headings. Never force CLASSIFICATION or LIGATION STRATEGY
+  headings onto questions that are not about classification or ligation.
+- Always end with: SOURCES: [author last name et al. year, ...] — unique entries only, short format.
 
-Question: What is CHIVA?
-Answer: CHIVA stands for Cure Conservatrice et Hemodynamique de l'Insuffisance Veineuse en Ambulatoire. It is a minimally invasive technique for treating venous insufficiency that targets the hemodynamic source of reflux rather than removing veins. Developed to preserve the saphenous vein while eliminating pathological recirculation circuits.
-Sources: Zamboni et al. 1998
-
----
-
-EXAMPLE - complex multi-part question gets structured sections:
-
-Question: Blood refluxes N2 to N3 to N1. What shunt type is this and what is the ligation strategy?
-Answer:
-
-CLASSIFICATION
-Shunt Type II. Recirculation occurs entirely in the superficial veins. Reflux originates from the saphenous vein (N2), fills a tributary (N3), and re-enters either the saphenous vein or deep system (N1).
-
-SUBTYPES
-Type 2A: Tributary (N3) drains back into saphenous vein (N2). Saphenous vein competent above the refluxive junction.
-Type 2B: Saphenous vein becomes incompetent just above the refluxive tributary junction.
-Type 2C: Tributary (N3) re-enters the deep vein directly via perforator. Saphenous vein incompetent above junction.
-
-LIGATION STRATEGY
-Target the point where the tributary (N3) connects to the saphenous vein. Interrupting this eliminates the recirculation while preserving the saphenous vein. For Type 2C, target the perforating vein re-entry point.
-
-SOURCES
-Zamboni et al. 1998, Cappelli et al. 2000
-
----
-
-Use the appropriate format based on question complexity. Do not copy chunks. Reason and answer."""
+Do not copy chunks verbatim. Reason from the knowledge base and answer in your own words."""
 
 
 @bp.route("/api/general-chat", methods=["POST"])
@@ -113,6 +93,25 @@ def api_general_chat():
     cleaned = [_clean_text(c) for c in context_chunks]
     context_str = "\n\n".join(cleaned) if cleaned else "No relevant context found."
 
+    # Deduplicate source lines that appear across chunks so the LLM doesn't repeat them
+    import re as _re
+    _seen_sources: set[str] = set()
+    _deduped: list[str] = []
+    for chunk in cleaned:
+        lines = chunk.splitlines()
+        kept: list[str] = []
+        for line in lines:
+            stripped = line.strip()
+            # Heuristic: source lines are short, contain a year, and no sentence punctuation
+            if _re.search(r'\b(19|20)\d{2}\b', stripped) and len(stripped) < 200 and stripped.count('.') <= 2:
+                key = _re.sub(r'\s+', ' ', stripped.lower())
+                if key in _seen_sources:
+                    continue
+                _seen_sources.add(key)
+            kept.append(line)
+        _deduped.append('\n'.join(kept))
+    context_str = "\n\n".join(_deduped) if _deduped else "No relevant context found."
+
     history = [m for m in get_messages(session_id) if m["message_id"] != user_msg_id]
 
     # Always name the session on the first message
@@ -132,8 +131,9 @@ def api_general_chat():
     user_prompt = (
         f"KNOWLEDGE BASE:\n{context_str}\n\n"
         f"QUESTION:\n{user_message}\n\n"
-        "Answer based on the knowledge base. Simple question = short paragraph. "
-        "Complex question = structured sections. End with SOURCES."
+        "Answer based on the knowledge base. "
+        "End with SOURCES listing only unique references in short format: Author et al. Year. "
+        "Do not repeat the same source twice."
     )
 
     response_text = generate_general_response(system_with_history, user_prompt)
