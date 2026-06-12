@@ -18,11 +18,16 @@ def _require_login():
     return None
 
 
+_ADMIN_WHITELIST = {"krish", "jeffry"}
+
+
 def _require_admin():
     """Returns a redirect/403 if not admin, else None."""
     if "user_id" not in session:
         return redirect("/login")
     if not session.get("is_admin"):
+        return "Forbidden", 403
+    if session.get("username", "").lower() not in _ADMIN_WHITELIST:
         return "Forbidden", 403
     return None
 

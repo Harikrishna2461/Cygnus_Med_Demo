@@ -1,4 +1,5 @@
 import logging
+import re as _re
 from auth import login_required
 from flask import Blueprint, jsonify, request
 
@@ -30,6 +31,27 @@ def _clean_text(text: str) -> str:
     return text
 
 
+def _strip_bibliography_lines(text: str) -> str:
+    """Remove reference/bibliography lines from RAG chunks — they are noise that gets output verbatim."""
+    lines = text.splitlines()
+    kept = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            kept.append(line)
+            continue
+        has_year = bool(_re.search(r'\b(19|20)\d{2}\b', stripped))
+        author_tokens = len(_re.findall(r'\b[A-Z][a-z]+\s+[A-Z]{1,3}[,.]', stripped))
+        # Drop lines that read like bibliography entries (multiple author names + year)
+        if has_year and author_tokens >= 2:
+            continue
+        # Drop numbered reference lines: "1. Smith J, Jones K... (2010)"
+        if _re.match(r'^\s*\d+\.\s+[A-Z][a-z]+\s+[A-Z]', stripped) and has_year:
+            continue
+        kept.append(line)
+    return '\n'.join(kept)
+
+
 _SYSTEM_PROMPT = """You are a clinical medical assistant specializing in venous disease and CHIVA methodology.
 Plain text only. No markdown. No special characters. ASCII only.
 
@@ -40,7 +62,8 @@ RESPONSE FORMAT:
   from memory. If the question is about anatomy, use anatomy-appropriate headings. If it is about
   a procedure, use procedure-appropriate headings. Never force CLASSIFICATION or LIGATION STRATEGY
   headings onto questions that are not about classification or ligation.
-- Always end with: SOURCES: [author last name et al. year, ...] — unique entries only, short format.
+- Always end with: SOURCES: list only the publication or book title — no author names, no years,
+  no page numbers. Maximum 3 titles. Example: SOURCES: CHIVA Consensus Document, European Guidelines on Chronic Venous Disease.
 
 Do not copy chunks verbatim. Reason from the knowledge base and answer in your own words."""
 
@@ -76,7 +99,7 @@ def api_general_chat():
             "type": "guardrail",
             "conversational_response": guardrail_msg,
             "message_id": user_msg_id,
-            "session_title": gen_title,
+            "session_title": None,
         })
 
     if not general_collection_exists():
@@ -90,11 +113,9 @@ def api_general_chat():
         logger.error(f"Context retrieval failed: {e}")
         context_chunks = []
 
-    cleaned = [_clean_text(c) for c in context_chunks]
-    context_str = "\n\n".join(cleaned) if cleaned else "No relevant context found."
+    # Clean unicode, strip bibliography lines, then deduplicate any remaining source lines
+    cleaned = [_strip_bibliography_lines(_clean_text(c)) for c in context_chunks]
 
-    # Deduplicate source lines that appear across chunks so the LLM doesn't repeat them
-    import re as _re
     _seen_sources: set[str] = set()
     _deduped: list[str] = []
     for chunk in cleaned:
@@ -102,7 +123,6 @@ def api_general_chat():
         kept: list[str] = []
         for line in lines:
             stripped = line.strip()
-            # Heuristic: source lines are short, contain a year, and no sentence punctuation
             if _re.search(r'\b(19|20)\d{2}\b', stripped) and len(stripped) < 200 and stripped.count('.') <= 2:
                 key = _re.sub(r'\s+', ' ', stripped.lower())
                 if key in _seen_sources:
@@ -132,8 +152,8 @@ def api_general_chat():
         f"KNOWLEDGE BASE:\n{context_str}\n\n"
         f"QUESTION:\n{user_message}\n\n"
         "Answer based on the knowledge base. "
-        "End with SOURCES listing only unique references in short format: Author et al. Year. "
-        "Do not repeat the same source twice."
+        "End with SOURCES listing only the publication or book title — no author names, no years, "
+        "no page numbers. Maximum 3 titles. Do not repeat the same source twice."
     )
 
     response_text = generate_general_response(system_with_history, user_prompt)
