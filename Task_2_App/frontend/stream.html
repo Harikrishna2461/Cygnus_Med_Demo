@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Task 2 — Scenario Stream</title>
+<style>
+  :root {
+    --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a;
+    --accent:#4f8ef7; --accent2:#34d399; --warn:#f59e0b; --danger:#ef4444;
+    --text:#e2e8f0; --muted:#64748b; --border:#2d3348;
+    --radius:8px; --font:'Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh;}
+
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:12px;}
+  header h1{font-size:15px;font-weight:600;color:var(--accent);}
+  header span{color:var(--muted);font-size:12px;}
+  .nav-links{margin-left:auto;display:flex;gap:16px;}
+  .nav-links a{font-size:12px;color:var(--muted);text-decoration:none;}
+  .nav-links a:hover{color:var(--accent);}
+
+  .layout{display:grid;grid-template-columns:320px 1fr 360px;height:calc(100vh - 49px);}
+
+  .col{overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+  .col-left{background:var(--surface);border-right:1px solid var(--border);}
+  .col-right{background:var(--surface);border-left:1px solid var(--border);}
+
+  .card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;}
+  .card.on-panel{background:var(--bg);}
+  .card h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:10px;}
+
+  select,input[type=range]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:7px 10px;font-size:13px;}
+  select:focus{outline:none;border-color:var(--accent);}
+
+  .btn{width:100%;padding:10px;border-radius:var(--radius);border:none;cursor:pointer;font-size:13px;font-weight:700;transition:opacity .15s;}
+  .btn:hover{opacity:.85;}
+  .btn:disabled{opacity:.35;cursor:not-allowed;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-stop{background:#374151;color:var(--text);}
+  .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* Event timeline */
+  .timeline{display:flex;flex-direction:column;gap:4px;max-height:420px;overflow-y:auto;}
+  .ev-item{padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);font-size:12px;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:8px;}
+  .ev-item:hover{border-color:var(--accent);}
+  .ev-item.active{border-color:var(--accent);background:rgba(79,142,247,.1);}
+  .ev-item.done{opacity:.5;}
+  .ev-item.ep-rp{border-color:var(--warn);}
+  .ev-item.ep-rp.active{background:rgba(245,158,11,.1);}
+  .ev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+  .ev-dot.scan{background:var(--accent);}
+  .ev-dot.ep_rp_mark{background:var(--warn);}
+  .ev-dot.region_transition{background:var(--accent2);}
+  .ev-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+
+  /* Frame display */
+  .frame-wrap{border-radius:var(--radius);overflow:hidden;background:#000;border:1px solid var(--border);position:relative;min-height:240px;display:flex;align-items:center;justify-content:center;}
+  .frame-wrap img{width:100%;display:block;max-height:420px;object-fit:contain;}
+  .frame-empty{color:var(--muted);font-size:13px;text-align:center;padding:40px 20px;}
+  .frame-overlay{position:absolute;bottom:0;left:0;right:0;padding:8px 12px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-size:11px;color:#ddd;}
+
+  /* Scanner data pill row */
+  .scanner-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .spill{font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:2px 9px;color:var(--muted);}
+  .spill.hi{color:var(--accent2);border-color:var(--accent2);}
+  .spill.warn{color:var(--warn);border-color:var(--warn);}
+
+  /* Region badge */
+  .region-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;background:var(--surface2);border:1px solid var(--border);}
+  .region-badge.sfj{border-color:#818cf8;color:#818cf8;}
+  .region-badge.gsv-thi{border-color:#34d399;color:#34d399;}
+  .region-badge.gsv-cal{border-color:#6ee7b7;color:#6ee7b7;}
+  .region-badge.spj{border-color:#f59e0b;color:#f59e0b;}
+  .region-badge.ssv{border-color:#fb923c;color:#fb923c;}
+  .region-badge.unknown{border-color:var(--muted);color:var(--muted);}
+
+  .conf-bar{height:4px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:5px;}
+  .conf-bar-fill{height:100%;background:var(--accent);transition:width .4s;}
+
+  .alert{padding:10px 12px;border-radius:var(--radius);font-size:13px;line-height:1.5;}
+  .alert-warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:var(--warn);}
+  .alert-ok{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);color:var(--accent2);}
+  .alert-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--danger);}
+
+  .guidance-block{padding:10px 12px;border-radius:var(--radius);background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.18);line-height:1.6;font-size:13px;}
+  .guidance-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px;}
+  .guidance-label.next{color:var(--accent2);}
+  .guidance-label.note{color:var(--warn);}
+
+  .clip-list{display:flex;flex-direction:column;gap:4px;}
+  .clip-item{padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);font-size:12px;}
+  .clip-item.suggested{border-color:var(--accent);background:rgba(79,142,247,.07);}
+
+  .vlm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .vlm-cell{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 9px;}
+  .vlm-cell .lbl{font-size:10px;text-transform:uppercase;color:var(--muted);}
+  .vlm-cell .val{font-size:12px;font-weight:500;margin-top:2px;}
+
+  .progress-bar-wrap{background:var(--border);border-radius:4px;height:5px;overflow:hidden;}
+  .progress-bar{height:100%;background:var(--accent);transition:width .3s;}
+
+  /* EP/RP clip box */
+  .ep-box{padding:10px;border-radius:var(--radius);background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);font-size:12px;line-height:1.6;}
+
+  /* Speed labels */
+  .speed-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px;}
+
+  ::-webkit-scrollbar{width:5px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Scenario Stream</h1>
+  <span>Replay examination scenarios with real video frames</span>
+  <div class="nav-links">
+    <a href="/">Full Demo</a>
+    <a href="/test">Image Test</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: controls + timeline -->
+  <div class="col col-left">
+
+    <div class="card on-panel">
+      <h3>Scenario</h3>
+      <select id="scenarioSel">
+        <option value="S1">S1 — Normal Right Leg</option>
+        <option value="S2" selected>S2 — Type 1 Shunt (Right)</option>
+        <option value="S3">S3 — Type 2A Shunt (Left)</option>
+        <option value="S4">S4 — Type 3 Shunt (Right)</option>
+        <option value="S5">S5 — Wrong Region + Correction</option>
+      </select>
+      <div style="margin-top:10px">
+        <label style="font-size:11px;color:var(--muted)">Playback speed</label>
+        <input type="range" id="speedRange" min="0" max="3" step="1" value="1" style="margin-top:4px;padding:0"/>
+        <div class="speed-labels"><span>0.5x</span><span>1x</span><span>2x</span><span>Instant</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-primary" id="btnPlay" onclick="startStream()">Play</button>
+        <button class="btn btn-stop" id="btnStop" onclick="stopStream()" disabled>Stop</button>
+      </div>
+    </div>
+
+    <!-- Scenario info -->
+    <div class="card on-panel" id="scenarioInfo" style="display:none">
+      <h3>Scenario Info</h3>
+      <div id="scenarioDesc" style="font-size:12px;line-height:1.6;color:var(--muted)"></div>
+      <div style="margin-top:8px">
+        <div class="progress-bar-wrap"><div class="progress-bar" id="progBar" style="width:0%"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px" id="progLabel">0 / 0 events</div>
+      </div>
+    </div>
+
+    <!-- Event timeline -->
+    <div class="card on-panel" id="timelineCard" style="display:none">
+      <h3>Event Timeline</h3>
+      <div class="timeline" id="timeline"></div>
+    </div>
+
+  </div>
+
+  <!-- CENTRE: frame + scanner data -->
+  <div class="col">
+
+    <div class="frame-wrap" id="frameWrap">
+      <div class="frame-empty">Select a scenario and press Play</div>
+      <img id="frameImg" style="display:none"/>
+      <div class="frame-overlay" id="frameOverlay" style="display:none"></div>
+    </div>
+
+    <div class="card" id="epRpCard" style="display:none">
+      <h3>EP / RP Mark</h3>
+      <div class="ep-box" id="epRpContent"></div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: guidance output -->
+  <div class="col col-right">
+
+    <div class="card on-panel" id="guidanceCard" style="display:none">
+      <h3>Guidance <span id="guideSpinner" style="display:none"><span class="spinner"></span></span></h3>
+      <div id="guidanceText" style="line-height:1.7;font-size:14px"></div>
+    </div>
+
+    <div class="card on-panel" id="vlmCard" style="display:none">
+      <h3>VLM Frame Analysis</h3>
+      <div class="vlm-grid" id="vlmGrid"></div>
+      <div id="vlmFindings" style="display:none;margin-top:8px;padding:8px;border-radius:6px;background:var(--bg);border:1px solid var(--border);font-size:12px;line-height:1.6;color:var(--muted)"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = '';
+const DELAYS = [2000, 1000, 400, 0];  // 0.5x, 1x, 2x, instant
+
+let scenario = null;
+let playing  = false;
+let stopFlag = false;
+let currentIdx = -1;
+
+// ── load scenario ──────────────────────────────────────────────────────────
+async function loadScenario(id) {
+  scenario = null;
+  const r = await fetch(`${API}/api/scenario/${id}`);
+  if (!r.ok) { alert('Failed to load scenario'); return false; }
+  scenario = await r.json();
+
+  document.getElementById('scenarioInfo').style.display = 'block';
+  document.getElementById('timelineCard').style.display = 'block';
+  document.getElementById('scenarioDesc').innerHTML =
+    `<strong>${scenario.name}</strong><br>${scenario.description}<br>` +
+    `<span style="color:var(--accent)">Leg: ${scenario.leg}</span>` +
+    (scenario.shunt_type ? `  |  <span style="color:var(--warn)">Shunt: ${scenario.shunt_type}</span>` : '');
+
+  buildTimeline();
+  document.getElementById('progBar').style.width = '0%';
+  document.getElementById('progLabel').textContent = `0 / ${scenario.events.length} events`;
+  return true;
+}
+
+function buildTimeline() {
+  const el = document.getElementById('timeline');
+  el.innerHTML = '';
+  scenario.events.forEach((ev, i) => {
+    const div = document.createElement('div');
+    div.className = `ev-item${ev.type === 'ep_rp_mark' ? ' ep-rp' : ''}`;
+    div.id = `ev-${i}`;
+    div.innerHTML =
+      `<div class="ev-dot ${ev.type}"></div>` +
+      `<div><div>${escHtml(ev.description)}</div>` +
+      `<div class="ev-meta">t=${ev.timestamp}s  reg=${ev.image_meta?.region||'?'}  dist=${ev.scanner?.segment_dist?.toFixed(3)||'?'}</div></div>`;
+    div.onclick = () => jumpTo(i);
+    el.appendChild(div);
+  });
+}
+
+// ── streaming playback ────────────────────────────────────────────────────
+async function startStream() {
+  const id = document.getElementById('scenarioSel').value;
+  if (!await loadScenario(id)) return;
+
+  playing  = true;
+  stopFlag = false;
+  document.getElementById('btnPlay').disabled  = true;
+  document.getElementById('btnStop').disabled  = false;
+
+  const delay = DELAYS[parseInt(document.getElementById('speedRange').value)];
+
+  for (let i = 0; i < scenario.events.length; i++) {
+    if (stopFlag) break;
+    await playEvent(i, delay);
+  }
+
+  playing = false;
+  document.getElementById('btnPlay').disabled  = false;
+  document.getElementById('btnStop').disabled  = true;
+}
+
+function stopStream() {
+  stopFlag = true;
+}
+
+async function jumpTo(idx) {
+  if (!scenario) return;
+  await playEvent(idx, 0);
+}
+
+async function playEvent(i, delay) {
+  currentIdx = i;
+  const ev = scenario.events[i];
+
+  // Mark timeline
+  document.querySelectorAll('.ev-item').forEach((el, j) => {
+    el.classList.remove('active');
+    if (j < i) el.classList.add('done'); else el.classList.remove('done');
+  });
+  const evEl = document.getElementById(`ev-${i}`);
+  if (evEl) { evEl.classList.add('active'); evEl.scrollIntoView({block:'nearest'}); }
+
+  // Progress
+  const pct = Math.round((i + 1) / scenario.events.length * 100);
+  document.getElementById('progBar').style.width = pct + '%';
+  document.getElementById('progLabel').textContent = `${i+1} / ${scenario.events.length} events`;
+
+  // Show frame
+  if (ev.image_b64) {
+    const img = document.getElementById('frameImg');
+    img.src = `data:image/jpeg;base64,${ev.image_b64}`;
+    img.style.display = 'block';
+    document.querySelector('.frame-empty') && (document.querySelector('.frame-empty').style.display = 'none');
+    document.getElementById('frameOverlay').style.display = 'block';
+    document.getElementById('frameOverlay').textContent =
+      `${ev.image_meta?.region || '?'}  |  t=${ev.timestamp}s  |  ${ev.description}`;
+  }
+
+  // EP/RP
+  if (ev.new_clip) {
+    const c = ev.new_clip;
+    document.getElementById('epRpCard').style.display = 'block';
+    document.getElementById('epRpContent').innerHTML =
+      `<strong>${c.flow}</strong>  ${c.fromType} → ${c.toType}` +
+      `<br>posY=${c.posYRatio}  leg=${c.legSide}  step=${c.step}`;
+  } else {
+    document.getElementById('epRpCard').style.display = 'none';
+  }
+
+  // Spinner on guidance card
+  document.getElementById('guidanceCard').style.display = 'block';
+  document.getElementById('guideSpinner').style.display = 'inline';
+
+  // Call API
+  const body = {
+    session_id: `stream_${scenario.id}`,
+    segment_id: sc.segment_id,
+    segment_dist: sc.segment_dist,
+    is_front: sc.is_front,
+    x: sc.x, y: sc.y,
+    expected_region: ev.expected_region || null,
+    current_clip_index: 0,
+  };
+  if (ev.image_b64) {
+    body.ultrasound_image  = ev.image_b64;
+    body.image_media_type  = 'image/jpeg';
+  }
+  if (ev.ep_rp_findings?.clips?.length) {
+    body.ep_rp_findings = ev.ep_rp_findings;
+  }
+
+  try {
+    const resp = await fetch(`${API}/api/guidance`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await resp.json();
+    renderGuidance(data);
+  } catch(e) {
+    document.getElementById('guidanceCard').innerHTML += `<div class="alert alert-err">API error: ${e.message}</div>`;
+  }
+
+  document.getElementById('guideSpinner').style.display = 'none';
+
+  if (delay > 0) await sleep(delay);
+}
+
+// ── render guidance response ───────────────────────────────────────────────
+function renderGuidance(data) {
+  const gc = document.getElementById('guidanceCard');
+  const gt = document.getElementById('guidanceText');
+  gc.style.display = 'block';
+
+  if (data.error) {
+    gt.innerHTML = `<span style="color:var(--danger)">${escHtml(data.error)}</span>`;
+  } else if (data.guidance) {
+    gt.textContent = data.guidance;
+  } else {
+    gt.textContent = '—';
+  }
+
+  const us = data.ultrasound_assessment;
+  const vc = document.getElementById('vlmCard');
+  if (us && !us.error) {
+    vc.style.display = 'block';
+    const grid = document.getElementById('vlmGrid');
+    grid.innerHTML = '';
+    [
+      ['Quality',    us.image_quality],
+      ['Mode',       us.imaging_mode],
+      ['Target',     us.target_vessel_visible ? 'Visible' : 'Not visible'],
+      ['Caliber',    us.vessel_caliber || '—'],
+      ['Flow',       us.colour_flow_present ? 'Present' : 'None'],
+      ['Direction',  us.flow_direction || '—'],
+    ].forEach(([l,v]) => {
+      const d = document.createElement('div');
+      d.className = 'vlm-cell';
+      d.innerHTML = `<div class="lbl">${l}</div><div class="val">${escHtml(String(v||'—'))}</div>`;
+      grid.appendChild(d);
+    });
+    const fd = document.getElementById('vlmFindings');
+    if (us.frame_note) { fd.style.display='block'; fd.textContent=us.frame_note; }
+    else fd.style.display='none';
+  } else if (us?.error) {
+    vc.style.display = 'block';
+    document.getElementById('vlmGrid').innerHTML =
+      `<div class="alert alert-err" style="grid-column:1/-1">${escHtml(us.error)}</div>`;
+  } else {
+    vc.style.display = 'none';
+  }
+}
+
+// ── utils ──────────────────────────────────────────────────────────────────
+function pill(text, cls='') {
+  return `<span class="spill ${cls}">${escHtml(String(text))}</span>`;
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Load first scenario info on page load
+loadScenario(document.getElementById('scenarioSel').value);
+document.getElementById('scenarioSel').addEventListener('change', e => {
+  if (!playing) loadScenario(e.target.value);
+});
+</script>
+</body>
+</html>

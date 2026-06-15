@@ -70,6 +70,10 @@ Task_3/vein_detection_task_3_training/
 
 # PyInstaller build output
 Task_1_App/_internal/
+Task_1_App_Pyside/_internal/
 *.pyd
 *.dll
 *.exe
+
+# Private keys
+*.pem

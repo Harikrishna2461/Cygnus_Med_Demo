@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(python backend/app.py)",
+      "Bash(curl -s -X POST http://localhost:5000/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test\",\"message\":\"What is CHIVA shunt type 1?\",\"mode\":\"general\"}')",
+      "Read(//tmp/**)",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test-chiva\",\"message\":\"What is CHIVA shunt type 1?\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test-chiva-2\",\"message\":\"What is CHIVA shunt type 1?\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test-chiva-3\",\"message\":\"What is CHIVA shunt type 1?\",\"mode\":\"general\"}')",
+      "Bash(curl -s http://localhost:11434/api/tags)",
+      "Bash(curl -s -X POST http://localhost:11434/api/pull -d '{\"name\":\"nomic-embed-text\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test-rag\",\"message\":\"What is CHIVA shunt type 1?\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test-rag-final\",\"message\":\"What is CHIVA shunt type 1?\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test-rag-final\",\"message\":\"Tell me about CHIVA classification\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test-hybrid\",\"message\":\"What is CHIVA shunt type 1?\",\"mode\":\"general\"}')",
+      "PowerShell(Get-Process ollama -ErrorAction SilentlyContinue)",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test\",\"message\":\"What is CHIVA?\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test\",\"message\":\"What is CHIVA shunt type 1?\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test\",\"message\":\"__TRACKED_VAR__\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test\",\"message\":\"What is CHIVA Shunt Type 1?\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test\",\"message\":\"CHIVA shunt type 2\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test\",\"message\":\"What is CHIVA shunt type 2 and its subtypes?\",\"mode\":\"general\"}')",
+      "Bash(curl -s -X POST http://localhost:7860/api/general-chat -H 'Content-Type: application/json' -d '{\"session_id\":\"test\",\"message\":\"CHIVA shunt classification\",\"mode\":\"general\"}')",
+      "PowerShell(Stop-Process -Force)",
+      "Bash(pip show *)",
+      "PowerShell(python -c \"import qdrant_client; print\\(qdrant_client.__version__\\)\")",
+      "PowerShell(python -c \"from qdrant_client import QdrantClient; c = QdrantClient\\(path='c:/Users/Krish/Downloads/Cygnus_Med_Demo/Task_1_App/backend/qdrant_storage'\\); cols = [x.name for x in c.get_collections\\(\\).collections]; print\\(cols\\)\")",
+      "Bash(Remove-Item -Recurse -Force \"c:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_1_App\\\\backend\\\\backend\")",
+      "Bash(curl -s http://127.0.0.1:7860/api/status)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://127.0.0.1:7860/api/status\" -TimeoutSec 5; $r.StatusCode } catch { \"NOT RUNNING: $_\" })",
+      "Bash(python app.py)",
+      "PowerShell(Start-Sleep -Seconds 8; try { $r = Invoke-WebRequest -Uri \"http://127.0.0.1:7860/api/status\" -TimeoutSec 5; \"RUNNING: \" + $r.StatusCode } catch { \"NOT READY: $_\" })"
+    ],
+    "additionalDirectories": [
+      "\\tmp",
+      "C:\\Users\\Krish\\.claude\\projects\\c--Users-Krish-Downloads-Cygnus-Med-Demo\\Task_1_App\\memory"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+Every fact in _CHIVA_SYSTEM_PROMPT and where it comes from:
+
+Fact	Source
+N1/N2/N3 definitions	nl_interpreter.py:704–711 — _CONVERSATIONAL_PROMPT, VENOUS NETWORK HIERARCHY
+EP/RP notation	nl_interpreter.py:713–715 — _CONVERSATIONAL_PROMPT, FLOW NOTATION
+SFJ definition + terminal valve	nl_interpreter.py:718–719
+SPJ definition	nl_interpreter.py:720–721
+Hunterian perforators	nl_interpreter.py:722–723
+posYRatio level ranges (0.04–0.09 etc.)	nl_interpreter.py:139–148 — _NL_TO_CHIVA_PROMPT, POSITION RATIOS
+Clip meanings (EP N1→N2 = SFJ incompetent, etc.)	nl_interpreter.py:291–338 — _NL_TO_CHIVA_PROMPT, CLIP TYPE REFERENCE
+Shunt types 1/2A/2B/2C/3/1+2	nl_interpreter.py:725–745 — _CONVERSATIONAL_PROMPT, SHUNT HEMODYNAMICS and nl_interpreter.py:352–385
+Valsalva manoeuvre	nl_interpreter.py:771 — _CONVERSATIONAL_PROMPT, DUPLEX SCAN CONTEXT
+Calf augmentation	nl_interpreter.py:772
+Saphenous eye sign	nl_interpreter.py:775–776
+AASV pitfall	nl_interpreter.py:773–774
+"Colour Doppler: red = toward probe, blue = away"	NOT IN TASK-1. I added it. Not from any source file.
+Valsalva is nl_interpreter.py:771 verbatim: "Valsalva manoeuvre tests SFJ/SPJ competence (raises intra-abdominal pressure → challenges terminal valve)." I didn't invent it.
+

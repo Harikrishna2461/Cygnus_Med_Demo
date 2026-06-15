@@ -1,0 +1,137 @@
+Type 4 Baseline (clean, unambiguous)
+Test 1 — Perforating subtype
+
+
+There is an incompetent perforator at the mid-calf that delivers deep blood 
+directly into a superficial tributary. The SFJ is competent — no reflux at the 
+junction. The GSV trunk carries blood backward from the calf up toward the knee.
+Expected: EP N1→N3 (calf) + RP N2→N1 (knee–calf) → Type 4 perforating
+
+Test 2 — Pelvic subtype
+
+
+A pudendal vein feeds a groin tributary. That tributary drains into the GSV just 
+below the groin. The SFJ itself is competent — no reflux at the SFJ junction. 
+The GSV then carries blood backward down the thigh.
+Expected: EP N1→N3 (groin) + RP N3→N2 (tributary→GSV) + RP N2→N1 (thigh) → Type 4 pelvic
+
+Type 4 vs Type 1 — the primary confusion (both have RP N2→N1)
+Test 3 — Should be Type 1, NOT Type 4
+
+
+The SFJ is incompetent. Deep blood from the femoral vein enters the GSV at the 
+groin. The GSV then refluxes backward down the full length of the thigh.
+Expected: EP N1→N2 (SFJ) + RP N2→N1 → Type 1
+Trap: the system must NOT produce EP N1→N3 here
+
+Test 4 — Should be Type 4, NOT Type 1 (phrasing designed to look like Type 1)
+
+
+Blood enters the GSV at the upper groin level and the GSV refluxes backward down 
+the thigh. However, the SFJ itself is competent — the blood source is a pelvic 
+vein that connects via a groin tributary into the GSV, not from the femoral vein 
+at the SFJ.
+Expected: EP N1→N3 (groin tributary) + RP N3→N2 + RP N2→N1 → Type 4 pelvic
+Trap: "blood enters the GSV at the upper groin" should NOT generate EP N1→N2
+
+Type 4 vs Type 5 — same entry, different return
+Test 5 — Should be Type 5, NOT Type 4 (no GSV trunk return)
+
+
+A calf perforator delivers deep blood directly into a superficial varicosity. 
+That varicosity refluxes backward and drains into the deep system via a second 
+perforator below it. The GSV itself is not involved anywhere in this circuit.
+Expected: EP N1→N3 (calf) + RP N3→N1 → Type 5
+Trap: the system must NOT add RP N2→N1 because the GSV was explicitly excluded
+
+Test 6 — Should be Type 4, NOT Type 5 (RP N3→N2 intermediate present)
+
+
+A gluteal perforator feeds a posterior thigh tributary. That tributary connects 
+into the GSV at mid-thigh. The GSV then carries blood backward from mid-thigh 
+down toward the knee.
+Expected: EP N1→N3 (posterior thigh) + RP N3→N2 (tributary→GSV) + RP N2→N1 (mid-thigh→knee) → Type 4
+Trap: the RP N3→N2 intermediate must NOT reclassify this to Type 5
+
+Type 4 pelvic vs Type 2C
+Test 7 — Should be Type 2C, NOT Type 4
+
+
+A perforating vessel enters the GSV trunk at the mid-thigh level. The SFJ is 
+competent. A tributary refluxes backward from mid-thigh. The GSV trunk also 
+carries blood backward from mid-thigh to the knee.
+Expected: EP N2→N2 (perforator→GSV trunk) + RP N3→N1/N2 + RP N2→N1 → Type 2C
+Trap: "perforating vessel enters the GSV" must generate EP N2→N2 (not EP N1→N3), because blood goes directly into the trunk, not via a tributary
+
+Test examples for Type 5 and Type 6
+Type 5 — clean baseline
+
+A perforator at the posterior thigh delivers deep blood into a superficial tributary.
+That tributary drains into the GSV at mid-thigh level. The GSV then discharges
+forward into a second tributary at the knee. That second tributary carries blood
+backward and re-enters the deep system via a perforator below the knee. The GSV
+trunk itself does not reflux back to the deep system.
+Expected: EP N1→N3 + RP N3→N2 + EP N2→N3 + RP N3→N1 → Type 5
+
+Type 6 — clean baseline
+
+There is an incompetent perforator at the mid-calf that delivers deep blood
+directly into a superficial varicosity. That varicosity carries blood backward
+and re-enters the deep system via a second calf perforator. The GSV is not
+involved anywhere — no blood enters or leaves the saphenous trunk.
+Expected: EP N1→N3 + RP N3→N1 → Type 6
+
+Confusion test cases
+Type 5 vs Type 4 — same RP N3→N2 intermediate but different end-point
+
+
+A calf perforator enters a tributary. That tributary drains into the GSV at the
+knee. The GSV then carries blood backward down the calf and re-enters the deep
+system at the ankle.
+Expected: Type 4 (RP N2→N1 — GSV returns to deep)
+Trap: must NOT classify as Type 5 — there's no second EP N2→N3 escape
+
+Type 6 vs Type 5 — GSV explicitly absent
+
+
+A perforator at the upper calf delivers deep blood into a branch varicosity.
+That varicosity carries blood backward and drains back into the deep veins
+via a perforator just below. The saphenous trunk is completely uninvolved.
+No blood enters or exits the GSV.
+Expected: Type 6 (no N2 anywhere)
+Trap: must NOT generate RP N3→N2 just because a tributary is looping
+
+Type 6 vs Type 4 — both have RP N3→N1 but Type 4 also has RP N2→N1
+
+
+A calf perforator enters a superficial tributary. The GSV also refluxes backward
+full-length and re-enters the deep system at the ankle.
+Expected: Type 4 if EP N1→N3 and RP N2→N1 both present
+Trap: the RP N3→N1 might distract — RP N2→N1 is the deciding finding for Type 4
+
+Type 5 vs Type 3 — both have EP N2→N3 + RP N3→N1, different entry
+
+
+The SFJ is incompetent. Blood enters the GSV at the groin. The GSV carries
+reflux to mid-thigh where it escapes into a tributary. That tributary drains
+backward into the deep system. The GSV does not reflux below mid-thigh.
+Expected: Type 3 (EP N1→N2 present — SFJ entry, not perforator)
+Trap: Type 5 is excluded because EP N1→N2 is present — the entry is SFJ, not a perforator
+
+TYPE 5 vs TYPE 6 — confusion trap
+
+
+A perforator at the upper calf pushes blood from the deep system into a superficial tributary. That tributary carries blood backward. The saphenous trunk in this region appears enlarged on duplex but the examiner notes no direct reflux from the groin — the SFJ is competent. Blood eventually re-enters the deep system via a lower perforator.
+(Trap: "saphenous trunk enlarged but no groin reflux" — model may call Type 6 because SFJ is competent. Correct answer is Type 5 if blood is actually entering and exiting the GSV as an intermediate conduit. The key question the model must ask: does blood enter the GSV trunk at any point, or does the tributary drain straight back into deep?)
+
+TYPE 4 vs TYPE 6 — confusion trap
+
+
+A perforator at the mid-thigh level feeds blood from the deep veins into a superficial tributary. That tributary shows retrograde flow running downward. No reflux is detected at the saphenofemoral junction and the SFJ is fully competent. The tributary eventually disappears below the knee.
+(Trap: description doesn't say where the tributary terminates. If it drains into the GSV → Type 4. If it drains straight back into deep via another perforator with no GSV involvement → Type 6. Model should ask: does the tributary connect to the GSV trunk at any level?)
+
+TYPE 4 vs TYPE 6 — second trap (GSV mentioned but passive)
+
+
+A perforator feeds a tributary at the thigh. The tributary runs alongside the GSV. The GSV itself shows no reflux and the SFJ is competent. Blood in the tributary eventually drains back into the deep system without entering the GSV lumen.
+(Trap: "runs alongside the GSV" may make model assume N2 involvement. Correct answer is Type 6 — blood never enters GSV, purely N1→N3→N1.)
