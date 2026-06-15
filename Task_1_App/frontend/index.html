@@ -1263,7 +1263,9 @@ const _SHUNT_DIAGRAMS = {
   'Type 4':   { img: '/shunt-diagram/type_4.png',
     desc: 'Reflux source is NOT the SFJ — blood enters a tributary (N3) directly from a pelvic vein or an incompetent perforator, bypassing the saphenous trunk entirely. The GSV trunk (N2) then carries blood backward and re-enters the deep system (N1). Two subtypes: Pelvic (P→N3→N2→N1) and Perforating (N1→N3→N2→N1). SFJ is COMPETENT — do not ligate it. Ligation targets: the N1→N3 perforator/pelvic entry and the tributary-to-GSV junction if present.' },
   'Type 5':   { img: '/shunt-diagram/type_5.png',
-    desc: 'Same direct deep-to-tributary entry as Type 4 (EP N1→N3) but reflux stays entirely within tributaries — no GSV trunk involvement. Circuit: N1→N3→N1 or N1→N3→N2 (without trunk reflux). SFJ is COMPETENT. Ligation targets: the N1→N3 perforator entry and all refluxing tributary re-entry points.' },
+    desc: 'Biphasic perforator circuit where the GSV acts as an intermediate conduit. Blood enters a tributary via a perforator (EP N1→N3), that tributary drains into the GSV (RP N3→N2), the GSV then delivers blood to a second tributary (EP N2→N3), and that tributary re-enters the deep system (RP N3→N1). Circuit: N1→N3→N2→N3→N1. No RP N2→N1. Staged CHIVA 2: Stage 1 ligate the N1→N3 perforator; Stage 2 ligate the EP N2→N3 junction if it persists at 4–6 week duplex.' },
+  'Type 6':   { img: '/shunt-diagram/type_6.png',
+    desc: 'Pure perforator-to-perforator circuit with no GSV involvement. Blood enters a tributary via an incompetent perforator (EP N1→N3) and re-enters the deep system directly via a second incompetent perforator (RP N3→N1). Circuit: N1→N3→N1. No RP N3→N2, no EP N2→N3, no RP N2→N1. Common in post-stripping recurrences and venous malformations. CHIVA 1: ligate N1→N3 entry perforator only — the RP N3→N1 re-entry resolves spontaneously.' },
 };
 
 function getShuntDiagram(shuntType) {
