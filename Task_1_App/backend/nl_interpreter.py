@@ -381,11 +381,12 @@ Ask: "What is this blood doing, and between which compartments?"
               "pelvic vein bypasses the SFJ and fills a tributary",
               "gluteal perforator feeds a superficial tributary",
               "vulvar varicosities drain into a thigh tributary".
-    PELVIC/PERFORATING NOTE: When pelvic or pudendal veins feed a groin tributary (N3) that
-             then drains into the GSV (RP N3→N2), and the GSV refluxes back to deep (RP N2→N1),
-             generate: EP N1→N3 + RP N3→N2 + RP N2→N1 → TYPE 4 (pelvic subtype).
-             The RP N3→N2 is the tributary-to-GSV intermediate step — generate it when the
-             description states the tributary connects into or drains into the GSV.
+    CIRCUIT ROUTING NOTE — determines whether Type 4, 5, or 6:
+             After EP N1→N3, look for what happens NEXT:
+             • N3 drains into GSV (RP N3→N2) AND GSV returns to deep (RP N2→N1) → TYPE 4
+             • N3 drains into GSV (RP N3→N2) AND GSV drains to 2nd tributary (EP N2→N3)
+               AND that tributary re-enters deep (RP N3→N1) → TYPE 5
+             • N3 re-enters deep DIRECTLY via perforator (RP N3→N1), NO N2 step → TYPE 6
 
   ── AASV note ── Anterior Accessory Saphenous Vein is N3 (not N2) unless explicitly called a trunk.
     If the GSV is overflowing INTO the AASV → EP N2→N3.
@@ -438,8 +439,21 @@ Use this to understand what flow information makes a complete description.
                Type 1 has EP N1→N2 (direct trunk entry, SFJ FAILED). Both have RP N2→N1.
                See Critical Rule 3.
 
-  TYPE 5   = EP N1→N3  +  RP N3→N1 or RP N3→N2
-             (deep blood enters tributary directly + reflux stays within tributaries)
+  TYPE 5   = EP N1→N3  +  RP N3→N2  +  EP N2→N3  +  RP N3→N1
+             Biphasic perforator circuit — N2 (GSV) is an INTERMEDIATE conduit, not the return limb:
+             Perforator enters N3 (EP N1→N3) → N3 drains into GSV (RP N3→N2) → GSV drains to a
+             2nd tributary (EP N2→N3) → 2nd tributary re-enters deep (RP N3→N1). NO RP N2→N1.
+             ⚠ DISTINGUISH FROM TYPE 4: Type 4 has RP N2→N1 (GSV returns to deep); Type 5 has
+               EP N2→N3 instead (GSV drains to a 2nd tributary). Both have RP N3→N2 as intermediate.
+             ⚠ DISTINGUISH FROM TYPE 6: Type 5 routes THROUGH the GSV (N2 present); Type 6 has NO N2.
+
+  TYPE 6   = EP N1→N3  +  RP N3→N1  (NO N2 involvement)
+             Pure perforator-to-perforator circuit — GSV trunk is NOT involved at all:
+             Incompetent perforator enters tributary (EP N1→N3) → tributary re-enters deep directly
+             via a 2nd perforator (RP N3→N1). No RP N3→N2, no EP N2→N3, no RP N2→N1.
+             Common in: varicose recurrences after GSV stripping (neo-perforators), venous malformations.
+             ⚠ DISTINGUISH FROM TYPE 5: Type 6 has NO N2/GSV step at all; Type 5 routes through N2.
+             ⚠ DISTINGUISH FROM TYPE 4: Type 4 has RP N2→N1; Type 6 has NO N2 involvement whatsoever.
 
   TYPE 1+2 = EP N1→N2  +  EP N2→N3  +  RP N3  +  RP N2→N1  +  eliminationTest result
              (dual entry at SFJ and tributary + both trunk and tributary reflux + test)

@@ -253,7 +253,8 @@ QUICK DECISION TABLE:
     No EP N1→N2  + EP N2→N3 (no EP N2→N2)                  → TYPE 2A
     EP N1→N3 + RP N2→N1                                    → TYPE 4
     EP N1→N3 + RP N3→N2 + RP N2→N1                        → TYPE 4 (pelvic/perforator via tributary — RP N3→N2 is intermediate step)
-    EP N1→N3 + RP N3→N2 or RP N3→N1 (NO RP N2→N1)         → TYPE 5
+    EP N1→N3 + RP N3→N2 + EP N2→N3 + RP N3→N1              → TYPE 5 (biphasic loop: perforator→N3→N2→N3→N1)
+    EP N1→N3 + RP N3→N1 (NO RP N3→N2, NO EP N2→N3)        → TYPE 6 (direct perforator circuit: N1→N3→N1)
     No EP N1→N2  + EP N2→N3 + NO RP                        → TYPE 2A (early, no reflux yet)
     No RP at all + no EP N2→N3                             → NO SHUNT
 
@@ -276,8 +277,8 @@ The single distinguishing clip is the ENTRY finding:
            Circuit: N1/P → N3 → (N2) → N1.
            ↳ No EP N1→N2 will be present in a pure Type 4.
 
-RULE: EP N1→N2 present → Type 4 is EXCLUDED. Must be Type 1, 3, or 1+2.
-      EP N1→N3 present (no EP N1→N2) → Type 1 is EXCLUDED. Must be Type 4 or 5.
+RULE: EP N1→N2 present → Type 4/5/6 are EXCLUDED. Must be Type 1, 3, or 1+2.
+      EP N1→N3 present (no EP N1→N2) → Type 1 is EXCLUDED. Must be Type 4, 5, or 6.
 ─────────────────────────────────────────────────────────
 
 CONCRETE EXAMPLES:
@@ -296,8 +297,13 @@ CONCRETE EXAMPLES:
         Type 4 (pelvic/tributary subtype):  [EP N1→N3 y=0.05, RP N3→N2 y=0.08, RP N2→N1 y=0.25]
             → EP N1→N3 (pelvic/pudendal vein enters N3 at groin) + RP N3→N2 (N3 drains into GSV)
               + RP N2→N1 (GSV returns to deep) → TYPE 4 (RP N3→N2 is intermediate, not return limb)
-        Type 5:  [EP N1→N3 y=0.65, RP N3→N2 y=0.50, RP N3→N1 y=0.75]
-            → EP N1→N3 with looping N3 return, NO RP N2→N1 → TYPE 5
+        Type 5:  [EP N1→N3 y=0.25, RP N3→N2 y=0.30, EP N2→N3 y=0.35, RP N3→N1 y=0.50]
+            → EP N1→N3 (perforator enters N3) + RP N3→N2 (N3 drains to GSV) + EP N2→N3
+              (GSV drains to 2nd tributary) + RP N3→N1 (2nd tributary re-enters deep)
+              → biphasic circuit through N2, NO RP N2→N1 → TYPE 5
+        Type 6:  [EP N1→N3 y=0.60, RP N3→N1 y=0.75]
+            → EP N1→N3 (perforator enters N3) + RP N3→N1 (N3 re-enters deep directly)
+              → pure perforator circuit, NO N2/GSV involvement → TYPE 6
     Type 3 variant 2 (no elim test):
             [EP N1→N2, EP N2→N3, RP N3→N1, RP N2→N1, no eliminationTest] → UNDETERMINED
     Type 1+2:[EP N1→N2, EP N2→N3 eliminationTest="Reflux", RP N3→N1, RP N2→N1] → TYPE 1+2
@@ -466,7 +472,15 @@ def _compute_primary_step(shunt_type: str, clips: list[dict]) -> str:
         )
         if ep:
             loc = _loc(ep)
-            return f"Ligate the EP at N1->N3" + (f" at {loc}" if loc else "")
+            return f"Ligate N1→N3 perforator entry (Stage 1)" + (f" at {loc}" if loc else "")
+
+    elif shunt_type == "Type 6":
+        ep = _pick_ligation_clip(
+            [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"]
+        )
+        if ep:
+            loc = _loc(ep)
+            return f"Ligate N1→N3 perforator entry" + (f" at {loc}" if loc else "")
 
     return ""
 
@@ -579,7 +593,29 @@ def _compute_ligation_hints(shunt_type: str, clips: list[dict]) -> str:
         c = _pick_ligation_clip(ep_n1n3)
         if c:
             loc = _loc_label(c)
-            hints.append(f"LIGATION POINT 1 — N1→N3 perforator entry at [{loc}]: divide flush at this level")
+            hints.append(
+                f"LIGATION POINT 1 (Stage 1) — N1→N3 perforator entry at [{loc}]: "
+                f"divide flush at deep-to-superficial entry. Stage 1 only."
+            )
+        # EP N2→N3 = GSV-to-tributary junction (the exit from GSV into the 2nd tributary)
+        ep_n2n3 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3"]
+        c2 = _pick_ligation_clip(ep_n2n3)
+        if c2:
+            loc = _loc_label(c2)
+            hints.append(
+                f"LIGATION POINT 2 (Stage 2 if EP N2→N3 persists at follow-up) — "
+                f"GSV-to-tributary junction at [{loc}]: flush tie to eliminate residual Type 2 shunt."
+            )
+
+    elif shunt_type == "Type 6":
+        ep_n1n3 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"]
+        c = _pick_ligation_clip(ep_n1n3)
+        if c:
+            loc = _loc_label(c)
+            hints.append(
+                f"LIGATION POINT 1 — N1→N3 perforator entry at [{loc}]: "
+                f"divide flush at deep-to-superficial entry. RP N3→N1 re-entry will resolve spontaneously."
+            )
 
     if not hints:
         return ""
@@ -781,10 +817,27 @@ THE HEMODYNAMIC CIRCUIT EACH SHUNT TYPE REPRESENTS:
               and does not reclassify to Type 5. Presence of RP N2→N1 always confirms
               Type 4 over Type 5 when EP N1→N3 is also present.
 
-  Type 5   — Direct deep-to-tributary escape, tributary-only return: same direct
-              escape anatomy as Type 4 (EP N1→N3) but the reflux stays entirely
-              within tributaries (RP N3→N1 or RP N3→N2) and never uses the GSV
-              trunk as a return pathway.
+  Type 5   — Biphasic perforator escape with N2 as intermediate, tributary return:
+              blood enters a tributary via a perforator (EP N1→N3), that tributary
+              drains into the GSV (RP N3→N2), the GSV then delivers blood to a SECOND
+              tributary (EP N2→N3), and that second tributary re-enters the deep system
+              (RP N3→N1). Circuit: N1 → N3 → N2 → N3 → N1. The GSV is an intermediate
+              conduit — not the return limb. NO RP N2→N1.
+              Differentiator from Type 4: both have RP N3→N2 as an intermediate, but
+              Type 4 then has RP N2→N1 (GSV to deep), while Type 5 has EP N2→N3 (GSV
+              to a second tributary) followed by RP N3→N1.
+              Differentiator from Type 6: Type 5 routes through N2 (GSV present as
+              intermediate); Type 6 returns to deep WITHOUT any N2 involvement.
+
+  Type 6   — Pure perforator-to-perforator circuit, no saphenous trunk involvement:
+              blood enters a tributary directly via an incompetent perforator (EP N1→N3)
+              and re-enters the deep system via a second incompetent perforator from the
+              same or an adjacent tributary (RP N3→N1). Circuit: N1 → N3 → N1.
+              The GSV trunk (N2) is NOT involved — no RP N3→N2, no EP N2→N3, no RP N2→N1.
+              Occurs most commonly in varicose recurrences after stripping (neo-perforators)
+              and in venous malformations. Hemodynamic load is contained within tributaries.
+              Differentiator from Type 5: no N2 intermediate step.
+              Differentiator from Type 4: no RP N2→N1 and no N2 involvement at all.
 
   Type 1+2 — Two concurrent entry points: SFJ incompetence (EP N1→N2) AND tributary
               escape (EP N2→N3), with BOTH trunk reflux (RP N2→N1) AND tributary
@@ -803,15 +856,18 @@ PHYSIOLOGICAL TRUTHS THAT MUST HOLD IN YOUR REASONING:
   • EP N2→N2 and EP N1→N2 are anatomically distinct events. Confusing them
     means confusing perforator pathology with SFJ failure — entirely different
     clinical significance and treatment implications.
-  • EP N1→N3, when present, defines a Type 4/5 architecture. The return path
-    (trunk vs tributaries) then determines which of the two it is.
-  • Type 4 vs Type 5: both share EP N1→N3. The differentiating finding is
-    HOW the blood returns — via GSV trunk (Type 4, RP N2→N1 present) or via
-    tributaries only (Type 5, RP N3 only, NO RP N2→N1).
+  • EP N1→N3, when present, defines a Type 4/5/6 architecture. The return path
+    determines which of the three it is.
+  • TYPE 4 vs TYPE 5 vs TYPE 6 — all share EP N1→N3; differentiate by return path:
+    - Type 4: RP N2→N1 present (blood returns via GSV trunk to deep). N2 is RETURN LIMB.
+    - Type 5: RP N3→N2 + EP N2→N3 + RP N3→N1 (N2 is INTERMEDIATE only; blood exits N2
+              via EP N2→N3 into a second tributary, then returns to deep via RP N3→N1).
+              NO RP N2→N1. The biphasic N2 loop (N3→N2→N3) is the signature of Type 5.
+    - Type 6: RP N3→N1 only — N2 is ABSENT entirely. Pure perforator-to-perforator.
+              No RP N3→N2, no EP N2→N3, no RP N2→N1.
   • In Type 4, RP N3→N2 may appear as an intermediate step (tributary draining
-    into GSV before GSV returns to deep). This does NOT reclassify the case to
-    Type 5. If RP N2→N1 is present alongside EP N1→N3, the type is always Type 4
-    regardless of whether RP N3→N2 also exists.
+    into GSV before GSV returns to deep). This does NOT reclassify to Type 5.
+    If RP N2→N1 is present alongside EP N1→N3, it is always Type 4.
   • Type 4 SFJ rule: The SFJ is COMPETENT in Type 4. EP N1→N2 (SFJ/Hunterian
     incompetence) must NOT be present for a pure Type 4 diagnosis. If EP N1→N2
     is also present, classify using the Type 1, 3, or 1+2 rules instead.
@@ -858,7 +914,7 @@ Output ONLY the JSON below — no other text, no markdown.
 
 {{
     "chain_of_thought": "<what entry finding(s) mean physiologically>\\n<what reflux finding(s) mean physiologically>\\n<the overall hemodynamic circuit these form>\\n<why this matches the chosen type>\\n<why it does not match the closest alternative type(s)>",
-    "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 4 / Type 5 / Type 1+2 / No shunt detected / Undetermined>",
+    "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 4 / Type 5 / Type 6 / Type 1+2 / No shunt detected / Undetermined>",
     "confidence": <0.0-1.0>,
     "reasoning": ["<decision step 1>", "<decision step 2>", "..."],
     "ask_branching": <true/false>,
@@ -920,8 +976,21 @@ LIGATION_QUERIES = {
         "Pelvic origin: groin incision for pudendal or labial vein ligation; consider coil embolisation if residual reflux."
     ),
     "Type 5": (
-        "Type 5 CHIVA shunt N1→N3 direct deep escape tributary return N3→N1 N3→N2 looping reflux. "
-        "GSV trunk not involved. Ligate N1→N3 perforator entry and all refluxing N3 re-entry points."
+        "Type 5 CHIVA shunt biphasic perforator circuit N1→N3→N2→N3→N1. "
+        "Blood enters tributary via perforator N1→N3, tributary drains into GSV RP N3→N2, "
+        "GSV delivers to second tributary EP N2→N3, second tributary re-enters deep RP N3→N1. "
+        "GSV is intermediate conduit not return limb. No RP N2→N1. "
+        "Staged CHIVA 2: Stage 1 ligate N1→N3 perforator entry. "
+        "Stage 2 at 4-6 weeks: if EP N2→N3 GSV-to-tributary junction persists, ligate it to prevent residual Type 2 shunt. "
+        "SEPS approach or subfascial mini-open. Compression 10 weeks."
+    ),
+    "Type 6": (
+        "Type 6 CHIVA shunt pure perforator-to-perforator circuit N1→N3→N1. "
+        "Blood enters tributary via incompetent perforator N1→N3, re-enters deep system directly via RP N3→N1. "
+        "No GSV involvement whatsoever — no RP N3→N2, no EP N2→N3, no RP N2→N1. "
+        "Occurs in varicose recurrences post-stripping and venous malformations. "
+        "CHIVA 1 single-stage: ligate N1→N3 perforator entry only. RP N3→N1 re-entry resolves spontaneously. "
+        "Subfascial perforator ligation or SEPS. Compression 8 weeks."
     ),
     "Type 1+2": (
         "Type 1+2 CHIVA shunt dual entry SFJ incompetent N1→N2 plus tributary escape N2→N3. "
@@ -1056,10 +1125,21 @@ TYPE 4:
   Follow-up (both subtypes): Duplex at 6 weeks post-op. Full reassessment at 6 months — if pelvic origin confirmed and reflux persists, refer for pelvic venous imaging (MR venography or catheter venography) and consider ovarian/iliac vein coil embolisation.
 
 TYPE 5:
-  Procedure: CHIVA 1.
-  Technique: Ligation of N1→N3 perforator + all refluxing N3 return segments.
-  Steps: (1) Divide N1→N3 perforator flush at deep-to-superficial entry. (2) Ligate all RP N3 return segments where they re-enter the deep system.
-  Follow-up: Duplex at 6 weeks and 6 months.
+  Procedure: CHIVA 2 (staged). Circuit: N1→N3→N2→N3→N1. The GSV acts as an intermediate conduit between two tributary segments.
+  Technique: Stage 1 — ligate N1→N3 perforator entry. Stage 2 — ligate EP N2→N3 GSV-to-tributary junction if it persists.
+  Stage 1 Steps: (1) Mark the N1→N3 perforator entry on pre-op duplex (standing, Valsalva). (2) Sub-fascial or endoscopic (SEPS) approach; divide flush at deep-to-superficial entry. (3) Do NOT ligate the GSV or SFJ at this stage. (4) Post-op compression 10 weeks at 20–30 mmHg.
+  Stage 2 (triggered if EP N2→N3 persists at 4–6 week duplex): (1) Identify the GSV-to-tributary junction (EP N2→N3). (2) Flush tie at this junction to eliminate the residual tributary escape and prevent a secondary Type 2 shunt developing. (3) Do NOT ligate the SFJ.
+  Rationale: Cutting only the N1→N3 perforator removes the driving pressure from the circuit. If the GSV-to-tributary escape persists after the perforator is ligated, the shunt has converted to a Type 2 pattern and requires the EP N2→N3 ligation as Stage 2.
+  Follow-up: Duplex at 4–6 weeks (Stage 2 trigger assessment), then 6 months.
+  Complications: Residual Type 2 shunt if EP N2→N3 junction not ligated at Stage 2; sural or superficial peroneal nerve injury (SEPS approach); DVT risk post-subfascial dissection; wound infection.
+
+TYPE 6:
+  Procedure: CHIVA 1 (single stage). Circuit: N1→N3→N1. Pure perforator-to-perforator circuit — the GSV trunk (N2) is not involved.
+  Technique: Ligation of N1→N3 incompetent perforator entry point only. The RP N3→N1 re-entry perforator resolves spontaneously once inflow is eliminated.
+  Steps: (1) Mark N1→N3 entry perforator on pre-op duplex. (2) Sub-fascial mini-open incision or SEPS at the perforator entry level. (3) Divide flush at the deep-to-superficial entry point. (4) Do NOT ligate the GSV, SFJ, or tributaries — the circuit is entirely contained within the perforator-tributary loop. (5) Post-op compression 8 weeks at 20–30 mmHg.
+  Rationale: Eliminating the inflow perforator (N1→N3) collapses the entire circuit. The RP N3→N1 re-entry is passive and will normalise without direct ligation.
+  Follow-up: Duplex at 6 weeks and 3 months to confirm RP N3→N1 has resolved. If it persists, consider additional perforator ligation.
+  Complications: Incomplete ligation if multiple entry perforators not mapped; neo-angiogenesis in recurrent post-stripping cases; sural or peroneal nerve proximity; DVT risk; residual RP N3→N1 if secondary perforators missed.
 
 === OUTPUT REQUIREMENTS ===
 - ligation_steps: REQUIRED. Short, direct surgical statements — one action per step.
