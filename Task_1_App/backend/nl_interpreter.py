@@ -546,6 +546,16 @@ GENERAL PRINCIPLE (applies to every question below):
     "the tributary was refluxing" → blood is traveling backward in the tributary (Q4 = YES)
   If the clinical meaning is clear, do not ask. Only ask when the meaning is genuinely ambiguous.
 
+QUESTION MARK RULE — CRITICAL:
+  A negative statement ending with a question mark IS still a negative statement.
+  The clinician is CONFIRMING the absence, not asking a question back at you.
+  These all answer Q3 = NO:
+    "blood does not escape sideways into a tributary branch?"
+    "blood does not escape sideways into a tributary branch and blood does not reflux through the tributary as well?"
+    "no tributary involvement?"
+    "the GSV does not feed any branch, correct?"
+  *** Do NOT treat a trailing "?" as meaning the question is unanswered. Read the CONTENT, not the punctuation. ***
+
 There are four things you need to know about the flow:
 
   QUESTION 1 — Where does blood enter the superficial venous system?
@@ -580,6 +590,8 @@ There are four things you need to know about the flow:
     - NO: explicitly stated tributary does not reflux or flows normally.
     NOT ANSWERED: Q3 = YES but tributary flow direction not mentioned.
     REQUIRED when Q3 = YES.
+    *** HARD RULE: If Q3 = NO — Q4 is automatically N/A. Do NOT ask about tributary
+        reflux. If Q1 and Q2 are answered, return "sufficient" immediately. ***
 
   NOTE ON ELIMINATION TEST: Never require it as a sufficiency condition. When Q1=entry, Q2=YES,
   Q3=YES, Q4=YES, that is sufficient — the classification engine handles the rest.
@@ -667,6 +679,15 @@ GOOD EXAMPLE — missing info:
 
 GOOD EXAMPLE — contradiction:
 "Interpreted so far: A perforator at the groin inserts into the GSV (EP N2→N2). Reflux present in the GSV trunk (RP N2→N1).\n\nThere's a contradiction to resolve: in your first message you said 'a tributary at mid-thigh refluxes backward toward the GSV', but later you said 'no blood escapes into the tributary'. If blood is refluxing through the tributary it must have entered it first — can you clarify: is there actually a tributary involved, or was that initial mention a mistake?"
+
+Multi-turn example — negative answer phrased as a question (question mark does NOT mean unanswered):
+  [Message 1]: "SFJ incompetent. Blood enters GSV at groin. GSV refluxes backward full-length down the thigh."
+  [Message 2]: "blood does not escape sideways into a tributary branch and blood does not reflux through the tributary as well?"
+  Q1: SFJ incompetent → ✓
+  Q2: "GSV refluxes backward full-length" → YES ✓
+  Q3: "blood does not escape sideways into a tributary branch" → NO ✓ (question mark is confirmation, not a query)
+  Q4: N/A — Q3 = NO, so tributary reflux is irrelevant
+  → SUFFICIENT (Type 1) — do NOT ask about tributaries again.
 
 BAD EXAMPLE — repeating the same question multiple turns in a row:
 Turn 3: "Does blood reflux through the tributary?"
