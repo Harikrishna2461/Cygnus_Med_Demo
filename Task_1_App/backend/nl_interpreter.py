@@ -283,6 +283,45 @@ CRITICAL RULE 2B — eliminationTest values and when to add:
       → eliminationTest="No Reflux"  (Type 3 pattern — tributary has independent source)
 
 ═══════════════════════════════════════════════════════════
+CRITICAL RULE 3 — TYPE 1 vs TYPE 4 (both have GSV reflux RP N2→N1):
+═══════════════════════════════════════════════════════════
+
+Both Type 1 and Type 4 produce GSV trunk reflux (RP N2→N1). They are superficially
+similar because the GSV carries blood backward in both. The ONLY distinguishing finding
+is the ENTRY clip you generate:
+
+  TYPE 1 ENTRY = EP N1→N2
+    The deep venous system delivers blood DIRECTLY INTO THE SAPHENOUS TRUNK (GSV/SSV)
+    at a named junction — the SFJ (groin), the SPJ (popliteal fossa), or the Hunterian
+    perforator (mid-thigh). The trunk valve has FAILED.
+    Circuit: N1 → N2 → N1 (closed trunk loop — no tributary involvement in the entry).
+    → Generate: EP N1→N2  +  RP N2→N1
+
+  TYPE 4 ENTRY = EP N1→N3
+    Blood enters a TRIBUTARY (N3), NOT the saphenous trunk. The SFJ is COMPETENT.
+    Source is a perforator or pelvic/pudendal/gluteal vein that bypasses the SFJ entirely.
+    Circuit: N1/P → N3 → (N2) → N1 (tributary-routed entry before reaching the trunk).
+    → Generate: EP N1→N3  +  RP N2→N1  [+ RP N3→N2 if description says N3 drains into GSV]
+
+DECISION RULE — when a description mentions BOTH GSV reflux AND a deep-to-superficial entry:
+  Ask: "Where exactly does blood FIRST enter the superficial system?"
+    Into the GSV/SSV trunk at the SFJ, SPJ, or Hunterian → EP N1→N2 → Type 1 family
+    Into a tributary, branch, or varicosity (not the trunk itself) → EP N1→N3 → Type 4/5
+
+  KEY PHRASES that mean EP N1→N2 (Type 1, NOT Type 4):
+    "SFJ incompetent", "deep blood enters the GSV at the groin", "SFJ junction reflux",
+    "femoral vein feeds the saphenous", "Hunterian perforator delivers deep blood into GSV"
+
+  KEY PHRASES that mean EP N1→N3 (Type 4, NOT Type 1):
+    "perforator feeds a tributary", "pelvic vein enters a branch", "deep blood enters a
+    varicosity directly", "pudendal vein feeds a groin tributary", "blood bypasses the
+    GSV and enters a branch", "perforator not at SFJ but feeds a superficial branch"
+
+  *** NEVER generate EP N1→N2 AND EP N1→N3 together for a pure Type 1 or Type 4 case. ***
+  *** If both are explicitly described, that may indicate a complex Type 1+2/4 overlap
+      — note the ambiguity and generate both clips, flagging the unusual pattern. ***
+
+═══════════════════════════════════════════════════════════
 
 CLIP TYPE REFERENCE — understand each clip by its hemodynamic concept, not by trigger phrases.
 Match by MEANING. Clinicians phrase the same event in countless ways; do not look for specific words.
@@ -331,10 +370,22 @@ Ask: "What is this blood doing, and between which compartments?"
     Examples: "tributary drains backward into the deep vein via a perforator",
               "branch re-enters the deep system", "tributary connects back to the deep vein".
 
-  ── EP N1→N3 ── Deep system delivers blood DIRECTLY into a tributary, bypassing the saphenous trunk
-    Concept: A pelvic, gluteal, or perforating vessel delivers blood straight to a varicosity/tributary
-             without going through the GSV. The GSV is not involved in the entry.
-    Examples: "deep blood enters a superficial branch directly", "pelvic vein feeds a varicosity".
+  ── EP N1→N3 ── Deep system or pelvic vein delivers blood DIRECTLY into a tributary, bypassing the saphenous trunk
+    Concept: A pelvic, pudendal, labial, gluteal, or perforating vessel delivers blood straight to a
+             varicosity/tributary WITHOUT going through the GSV or the SFJ. The SFJ is NOT incompetent.
+             This is the entry finding for both Type 4 (GSV trunk return RP N2→N1 present) and
+             Type 5 (tributary-only return, no RP N2→N1).
+    Examples: "deep blood enters a superficial branch directly",
+              "pelvic vein feeds a varicosity",
+              "pudendal vein enters a groin tributary",
+              "pelvic vein bypasses the SFJ and fills a tributary",
+              "gluteal perforator feeds a superficial tributary",
+              "vulvar varicosities drain into a thigh tributary".
+    PELVIC/PERFORATING NOTE: When pelvic or pudendal veins feed a groin tributary (N3) that
+             then drains into the GSV (RP N3→N2), and the GSV refluxes back to deep (RP N2→N1),
+             generate: EP N1→N3 + RP N3→N2 + RP N2→N1 → TYPE 4 (pelvic subtype).
+             The RP N3→N2 is the tributary-to-GSV intermediate step — generate it when the
+             description states the tributary connects into or drains into the GSV.
 
   ── AASV note ── Anterior Accessory Saphenous Vein is N3 (not N2) unless explicitly called a trunk.
     If the GSV is overflowing INTO the AASV → EP N2→N3.
@@ -355,8 +406,11 @@ QUICK REFERENCE — WHAT EACH SHUNT TYPE REQUIRES:
 Use this to understand what flow information makes a complete description.
 
   TYPE 1   = EP N1→N2  +  RP N2→N1
-             (SFJ/Hunterian/SPJ entry into GSV or SSV  +  saphenous trunk reflux backward)
+             (SFJ/Hunterian/SPJ entry INTO the saphenous trunk directly + trunk reflux backward)
              NOTE: also describes SPJ-incompetent SSV shunts — EP N1→N2 at posYRatio≈0.45
+             ⚠ DISTINGUISH FROM TYPE 4: Type 1 has EP N1→N2 (trunk entry, SFJ FAILED).
+               Type 4 has EP N1→N3 (tributary entry, SFJ COMPETENT). Both have RP N2→N1.
+               See Critical Rule 3.
 
   TYPE 2A  = EP N2→N3  only  (no RP required)
              (GSV overflows forward into tributary; no reflux established yet)
@@ -372,8 +426,17 @@ Use this to understand what flow information makes a complete description.
              to X" does NOT generate RP N2→N1 when blood exits at X into a tributary and there
              is NO further GSV reflux below X. See Critical Rule 2C.)
 
-  TYPE 4   = EP N1→N3  +  RP N2→N1
-             (deep blood enters tributary directly, bypassing GSV + GSV trunk refluxes back)
+  TYPE 4   = EP N1→N3  +  RP N2→N1  [+  RP N3→N2 as optional intermediate step]
+             Two subtypes — both require EP N1→N3 + RP N2→N1; SFJ is COMPETENT in both:
+             • Perforating subtype: EP N1→N3 (perforator → N3) + RP N2→N1 (GSV trunk return)
+               May also have RP N3→N2 (tributary draining into GSV) as intermediate.
+             • Pelvic subtype: EP N1→N3 (pelvic/pudendal/gluteal vein → groin tributary N3)
+               + RP N3→N2 (N3 drains into GSV) + RP N2→N1 (GSV returns to deep).
+             NOTE: RP N3→N2 in Type 4 is an INTERMEDIATE circuit step, not the return limb.
+             RP N2→N1 distinguishes Type 4 (GSV return) from Type 5 (tributary-only return).
+             ⚠ DISTINGUISH FROM TYPE 1: Type 4 has EP N1→N3 (tributary entry, SFJ COMPETENT).
+               Type 1 has EP N1→N2 (direct trunk entry, SFJ FAILED). Both have RP N2→N1.
+               See Critical Rule 3.
 
   TYPE 5   = EP N1→N3  +  RP N3→N1 or RP N3→N2
              (deep blood enters tributary directly + reflux stays within tributaries)

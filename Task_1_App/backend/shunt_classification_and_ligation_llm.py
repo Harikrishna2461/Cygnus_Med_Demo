@@ -252,9 +252,33 @@ QUICK DECISION TABLE:
     No EP N1→N2  + EP N2→N2 + NO RP                        → NO SHUNT
     No EP N1→N2  + EP N2→N3 (no EP N2→N2)                  → TYPE 2A
     EP N1→N3 + RP N2→N1                                    → TYPE 4
-    EP N1→N3 + RP N3→N2 or RP N3→N1                         → TYPE 5
+    EP N1→N3 + RP N3→N2 + RP N2→N1                        → TYPE 4 (pelvic/perforator via tributary — RP N3→N2 is intermediate step)
+    EP N1→N3 + RP N3→N2 or RP N3→N1 (NO RP N2→N1)         → TYPE 5
     No EP N1→N2  + EP N2→N3 + NO RP                        → TYPE 2A (early, no reflux yet)
     No RP at all + no EP N2→N3                             → NO SHUNT
+
+─────────────────────────────────────────────────────────
+CRITICAL CONFUSION RISK — TYPE 1 vs TYPE 4:
+─────────────────────────────────────────────────────────
+Both Type 1 and Type 4 present with RP N2→N1 (GSV trunk reflux).
+They are EASILY CONFUSED because the GSV behaves identically in both.
+The single distinguishing clip is the ENTRY finding:
+
+  TYPE 1:  EP N1→N2 is PRESENT  — SFJ or Hunterian INCOMPETENT.
+           Blood enters the saphenous TRUNK directly (N2) from the deep
+           system (N1). The circuit is N1 → N2 → N1 (no N3 involved in entry).
+           ↳ No EP N1→N3 will be present in a pure Type 1.
+
+  TYPE 4:  EP N1→N3 is PRESENT  — SFJ is COMPETENT. No SFJ/Hunterian failure.
+           Blood enters a TRIBUTARY (N3) from the deep/pelvic system (N1),
+           then drains into the GSV (RP N3→N2 may appear as intermediate step).
+           The GSV trunk carries it back to deep (RP N2→N1).
+           Circuit: N1/P → N3 → (N2) → N1.
+           ↳ No EP N1→N2 will be present in a pure Type 4.
+
+RULE: EP N1→N2 present → Type 4 is EXCLUDED. Must be Type 1, 3, or 1+2.
+      EP N1→N3 present (no EP N1→N2) → Type 1 is EXCLUDED. Must be Type 4 or 5.
+─────────────────────────────────────────────────────────
 
 CONCRETE EXAMPLES:
     Type 1:  [EP N1→N2 y=0.06 SFJ-ENTRY, RP N2→N1 y=0.25]
@@ -267,10 +291,13 @@ CONCRETE EXAMPLES:
             → No EP N1→N2, EP N2→N2 = perforator, RP N3 + RP N2→N1 → TYPE 2C
     Type 3:  [EP N1→N2 y=0.05 SFJ-ENTRY, EP N2→N3 y=0.132 ligation-point-marker, RP N3→N1 y=0.212]
             → EP N1→N2 + EP N2→N3 + RP N3→N1, no RP N2→N1 → TYPE 3
-        Type 4:  [EP N1→N3 y=0.60, RP N2→N1 y=0.40]
-            → EP N1→N3 with N2 return → TYPE 4
+        Type 4 (perforating subtype):  [EP N1→N3 y=0.60, RP N2→N1 y=0.40]
+            → EP N1→N3 (perforator enters N3 directly) + RP N2→N1 (GSV trunk return) → TYPE 4
+        Type 4 (pelvic/tributary subtype):  [EP N1→N3 y=0.05, RP N3→N2 y=0.08, RP N2→N1 y=0.25]
+            → EP N1→N3 (pelvic/pudendal vein enters N3 at groin) + RP N3→N2 (N3 drains into GSV)
+              + RP N2→N1 (GSV returns to deep) → TYPE 4 (RP N3→N2 is intermediate, not return limb)
         Type 5:  [EP N1→N3 y=0.65, RP N3→N2 y=0.50, RP N3→N1 y=0.75]
-            → EP N1→N3 with looping N3 return → TYPE 5
+            → EP N1→N3 with looping N3 return, NO RP N2→N1 → TYPE 5
     Type 3 variant 2 (no elim test):
             [EP N1→N2, EP N2→N3, RP N3→N1, RP N2→N1, no eliminationTest] → UNDETERMINED
     Type 1+2:[EP N1→N2, EP N2→N3 eliminationTest="Reflux", RP N3→N1, RP N2→N1] → TYPE 1+2
@@ -310,7 +337,8 @@ CONFIDENCE GUIDE:
 # ─────────────────────────────────────────────────────────────────────────────
 
 _CLIP_LABELS: dict[tuple, str] = {
-    ("EP", "N1", "N2"): None,
+    ("EP", "N1", "N2"): None,   # label applied dynamically by _clip_label() based on posY
+    ("EP", "N1", "N3"): " [PERFORATOR/PELVIC-TO-TRIBUTARY: N1→N3, SFJ=COMPETENT — TYPE 4/5 ENTRY]",
     ("EP", "N2", "N2"): " [PERFORATOR-ENTRY: N2→N2, SFJ=COMPETENT]",
     ("EP", "N2", "N3"): " [GSV-to-TRIBUTARY-ENTRY: N2→N3]",
     ("RP", "N2", "N1"): " [GSV-TRUNK-REFLUX: N2→N1]",
@@ -424,7 +452,15 @@ def _compute_primary_step(shunt_type: str, clips: list[dict]) -> str:
         if parts:
             return " + ".join(parts)
 
-    elif shunt_type in ("Type 4", "Type 5"):
+    elif shunt_type == "Type 4":
+        ep = _pick_ligation_clip(
+            [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"]
+        )
+        if ep:
+            loc = _loc(ep)
+            return f"Ligate N1→N3 perforator/pelvic entry" + (f" at {loc}" if loc else "")
+
+    elif shunt_type == "Type 5":
         ep = _pick_ligation_clip(
             [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"]
         )
@@ -511,7 +547,34 @@ def _compute_ligation_hints(shunt_type: str, clips: list[dict]) -> str:
             loc = _loc_label(c2)
             hints.append(f"LIGATION POINT 2 — GSV-to-tributary junction at [{loc}]: flush tie at this level")
 
-    elif shunt_type in ("Type 4", "Type 5"):
+    elif shunt_type == "Type 4":
+        ep_n1n3 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"]
+        c = _pick_ligation_clip(ep_n1n3)
+        if c:
+            loc = _loc_label(c)
+            hints.append(f"LIGATION POINT 1 — N1→N3 perforator/pelvic entry at [{loc}]: divide flush at this level")
+        # RP N3→N2 = tributary-to-GSV junction (intermediate step in pelvic and perforating subtypes)
+        rp_n3n2 = sorted(
+            [c for c in clips if c.get("flow") == "RP" and c.get("fromType") == "N3" and c.get("toType") == "N2"],
+            key=lambda c: c.get("posYRatio") or 0.0,
+        )
+        for i, rc in enumerate(rp_n3n2, start=2):
+            loc = _loc_label(rc)
+            hints.append(
+                f"LIGATION POINT {i} — Tributary-to-GSV junction (RP N3→N2) at [{loc}]: "
+                f"flush tie at this tributary-GSV connection (intermediate escape point)"
+            )
+        # RP N2→N1 = GSV trunk return segments — ligate all except most distal
+        rp_n2n1 = sorted(
+            [c for c in clips if c.get("flow") == "RP" and c.get("fromType") == "N2" and c.get("toType") == "N1"],
+            key=lambda c: c.get("posYRatio") or 0.0,
+        )
+        base_i = 2 + len(rp_n3n2)
+        for i, rc in enumerate(rp_n2n1[:-1], start=base_i):
+            loc = _loc_label(rc)
+            hints.append(f"LIGATION POINT {i} — GSV trunk RP N2→N1 segment at [{loc}]: ligate below this reflux point")
+
+    elif shunt_type == "Type 5":
         ep_n1n3 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"]
         c = _pick_ligation_clip(ep_n1n3)
         if c:
@@ -701,10 +764,22 @@ THE HEMODYNAMIC CIRCUIT EACH SHUNT TYPE REPRESENTS:
               to deep). Critically, the GSV trunk does NOT reflux backward — the
               shunt circuit routes through tributaries rather than the trunk.
 
-  Type 4   — Direct deep-to-tributary escape, GSV trunk return: blood bypasses the
-              SFJ entirely via a direct connection from deep to tributary (EP N1→N3),
-              then refluxes back via the GSV trunk (RP N2→N1). The trunk is the
-              return limb but not the entry conduit.
+  Type 4   — Direct deep/pelvic-to-tributary escape, GSV trunk return: blood bypasses
+              the SFJ entirely WITHOUT SFJ incompetence. Two anatomical subtypes share
+              the same hemodynamic circuit (entry → N3 → N2 → N1 re-entry):
+              • Perforating subtype: an incompetent perforator delivers deep blood
+                directly into a tributary (EP N1→N3). That tributary may connect into
+                the GSV (RP N3→N2), and the GSV returns blood to deep (RP N2→N1).
+                Circuit: N1 → N3 → (N2) → N1.
+              • Pelvic subtype: a pelvic, pudendal, gluteal, or labial vein delivers
+                blood into a groin tributary (EP N1→N3), which drains into the GSV
+                (RP N3→N2), and the GSV trunk refluxes back to deep (RP N2→N1).
+                Circuit: P → N3 → N2 → N1.
+              In both subtypes, RP N2→N1 is the return limb (same anatomical site as
+              Type 1) but the SFJ is COMPETENT — the entry is NOT at the SFJ.
+              RP N3→N2 may appear as an intermediate step (tributary draining into GSV)
+              and does not reclassify to Type 5. Presence of RP N2→N1 always confirms
+              Type 4 over Type 5 when EP N1→N3 is also present.
 
   Type 5   — Direct deep-to-tributary escape, tributary-only return: same direct
               escape anatomy as Type 4 (EP N1→N3) but the reflux stays entirely
@@ -731,7 +806,26 @@ PHYSIOLOGICAL TRUTHS THAT MUST HOLD IN YOUR REASONING:
   • EP N1→N3, when present, defines a Type 4/5 architecture. The return path
     (trunk vs tributaries) then determines which of the two it is.
   • Type 4 vs Type 5: both share EP N1→N3. The differentiating finding is
-    HOW the blood returns — via GSV trunk (Type 4) or via tributaries (Type 5).
+    HOW the blood returns — via GSV trunk (Type 4, RP N2→N1 present) or via
+    tributaries only (Type 5, RP N3 only, NO RP N2→N1).
+  • In Type 4, RP N3→N2 may appear as an intermediate step (tributary draining
+    into GSV before GSV returns to deep). This does NOT reclassify the case to
+    Type 5. If RP N2→N1 is present alongside EP N1→N3, the type is always Type 4
+    regardless of whether RP N3→N2 also exists.
+  • Type 4 SFJ rule: The SFJ is COMPETENT in Type 4. EP N1→N2 (SFJ/Hunterian
+    incompetence) must NOT be present for a pure Type 4 diagnosis. If EP N1→N2
+    is also present, classify using the Type 1, 3, or 1+2 rules instead.
+  • TYPE 1 vs TYPE 4 — CRITICAL DISTINCTION (both have RP N2→N1):
+    Both types produce GSV trunk reflux (RP N2→N1), making them similar on duplex.
+    The ONLY definitive distinguishing finding is the ENTRY clip:
+      - Type 1 has EP N1→N2 (SFJ or Hunterian INCOMPETENT). No EP N1→N3 in pure Type 1.
+        Circuit is a direct trunk loop: N1 → N2 → N1.
+      - Type 4 has EP N1→N3 (perforator or pelvic vein enters TRIBUTARY). No EP N1→N2.
+        SFJ is COMPETENT. Circuit routes through a tributary before reaching the trunk:
+        N1/P → N3 → (N2) → N1.
+    If EP N1→N2 is in the findings → Type 4 is EXCLUDED. Choose Type 1, 3, or 1+2.
+    If EP N1→N3 is in the findings and EP N1→N2 is ABSENT → Type 1 is EXCLUDED. Choose Type 4 or 5.
+    Never assign both EP N1→N2 and EP N1→N3 to a pure Type 4 or pure Type 1 case.
   • Type 3 vs Type 1+2: both share EP N1→N2 + EP N2→N3 + RP N3. The difference
     is whether RP N2→N1 is also present AND what the elimination test shows.
     Without both, the case is Undetermined.
@@ -816,9 +910,14 @@ LIGATION_QUERIES = {
         "SFJ ligation deferred to Stage 2 only if N2 reflux develops at 6-12 month follow-up duplex."
     ),
     "Type 4": (
-        "Type 4 CHIVA shunt N1→N3 direct deep venous escape into tributary bypassing GSV. "
-        "Pelvic perforator gluteal perforator pudendal vein origin. "
-        "GSV trunk return via RP N2→N1. Ligate N1→N3 escape entry and GSV reflux segments."
+        "Type 4 CHIVA shunt two subtypes pelvic and perforating. SFJ competent in both. "
+        "Perforating subtype: incompetent perforator N1→N3 deep blood directly into tributary. "
+        "Pelvic subtype: pelvic pudendal gluteal labial vein enters groin tributary N3 bypassing SFJ. "
+        "Both subtypes: tributary may drain into GSV via RP N3→N2 junction, then GSV returns to deep via RP N2→N1. "
+        "Circuit N1/P → N3 → N2 → N1. SFJ NOT ligated. "
+        "Ligation targets: N1→N3 entry flush divide, N3→N2 tributary-GSV junction flush tie if present, "
+        "GSV trunk segments below each RP N2→N1 except most distal. "
+        "Pelvic origin: groin incision for pudendal or labial vein ligation; consider coil embolisation if residual reflux."
     ),
     "Type 5": (
         "Type 5 CHIVA shunt N1→N3 direct deep escape tributary return N3→N1 N3→N2 looping reflux. "
@@ -939,10 +1038,22 @@ TYPE 1+2 (large-calibre RP N2→N1):
   Complications: Lymphocele, groin wound, saphenous nerve, recurrence if any stump left.
 
 TYPE 4:
-  Procedure: CHIVA 1.
-  Technique: Ligation of N1→N3 perforator entry + selective ligation at each RP N2→N1 site.
-  Steps: (1) Identify N1→N3 perforator (pelvic-point or direct escape). (2) Divide flush at entry. (3) For RP N2→N1 return segments: ligate below each except most distal.
-  Follow-up: Duplex at 6 weeks and 6 months.
+  Procedure: CHIVA 1 (single stage). Two anatomical subtypes — identify which applies from the clinical history and duplex findings.
+  NOTE: SFJ is COMPETENT in both Type 4 subtypes. Do NOT ligate the SFJ.
+
+  TYPE 4 — Perforating subtype (N1 → N3 → [N2] → N1):
+  Source: Incompetent perforator (Hunterian, calf, or posterior tibial perforator) delivers deep blood directly into a tributary.
+  Technique: Sub-fascial perforator ligation at N1→N3 entry + flush tie at RP N3→N2 tributary-GSV junction if present + selective GSV ligation at RP N2→N1 sites.
+  Steps: (1) Mark the N1→N3 perforator on pre-op duplex (standing, with Valsalva). (2) Sub-fascial or mini-open incision over the perforator; expose and divide flush at the deep-to-superficial entry point. (3) If RP N3→N2 is present (tributary draining into GSV): expose and flush-tie at the tributary-to-GSV junction. (4) For each RP N2→N1 reflux segment along the GSV: ligate the GSV below that segment; preserve the most distal RP N2→N1 for distal venous drainage. (5) Do NOT ligate the SFJ — it is competent.
+  Complications: Perforator not identifiable without pre-op duplex marking; deep vein thrombosis risk from sub-fascial dissection; incomplete decompression if RP N3→N2 tributary-GSV junction is missed; GSV trunk injury.
+
+  TYPE 4 — Pelvic subtype (P → N3 → N2 → N1  or  P → N2 → N1):
+  Source: Pelvic vein, pudendal vein, labial vein, or gluteal vein delivers blood into a groin tributary (N3) that connects to the GSV (N2), or directly into the GSV at groin level — bypassing the SFJ.
+  Technique: Ligation of pelvic/pudendal vein at groin tributary-GSV entry + selective GSV ligation at RP N2→N1 sites.
+  Steps: (1) Confirm pelvic origin on duplex in standing position with Valsalva: flow reversal from pelvis into a groin tributary or directly into the GSV proximal segment. (2) Groin incision over the entry tributary at the inguinal level. (3) Identify and flush-ligate the pelvic/pudendal/labial vein as it connects to the groin tributary (EP N1→N3 entry) — this is the primary ligation target. (4) If RP N3→N2 is present: flush tie at the tributary-to-GSV junction. (5) Ligate GSV below each RP N2→N1 segment except the most distal. (6) SFJ NOT ligated — SFJ is competent; ligating it would be an error. (7) If reflux persists at 6-month follow-up duplex: consider coil embolisation or laparoscopic ligation of the pelvic vein source (ovarian, internal iliac, or pudendal vein).
+  Complications: Pelvic vein not visible on standard supine duplex — must scan standing; multiple pelvic tributaries may be present requiring bilateral assessment; residual reflux if pelvic source not fully ablated; pudendal nerve proximity in groin dissection; lymphocele; second-look procedure (laparoscopy or embolisation) required in refractory cases.
+
+  Follow-up (both subtypes): Duplex at 6 weeks post-op. Full reassessment at 6 months — if pelvic origin confirmed and reflux persists, refer for pelvic venous imaging (MR venography or catheter venography) and consider ovarian/iliac vein coil embolisation.
 
 TYPE 5:
   Procedure: CHIVA 1.
