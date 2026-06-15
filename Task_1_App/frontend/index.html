@@ -1260,6 +1260,10 @@ const _SHUNT_DIAGRAMS = {
     desc: 'Combined Type I and II. Deep vein (N1) fills saphenous (N2) via SFJ (N1→N2→N1) while an additional tributary (N3) runs in parallel and also re-enters the deep system (N3→N1). Circuit: N1→N2→N1 with N3→N1 branch. Both the re-entry perforating vein and the tributary must be ligated.' },
   'Type 3':   { img: '/shunt-diagram/type_3.png',
     desc: 'Deep vein (N1) fills the saphenous (N2) via SFJ or perforator, but the entire reflux volume exits through a tributary (N3) rather than directly back from the saphenous vein. Circuit: N1→N2→N3→N1. Key sign: digital compression of the tributary abolishes the saphenous reflux (unlike Type 1). Ligation target: the refluxive tributary, not the SFJ.' },
+  'Type 4':   { img: '/shunt-diagram/type_4.png',
+    desc: 'Reflux source is NOT the SFJ — blood enters a tributary (N3) directly from a pelvic vein or an incompetent perforator, bypassing the saphenous trunk entirely. The GSV trunk (N2) then carries blood backward and re-enters the deep system (N1). Two subtypes: Pelvic (P→N3→N2→N1) and Perforating (N1→N3→N2→N1). SFJ is COMPETENT — do not ligate it. Ligation targets: the N1→N3 perforator/pelvic entry and the tributary-to-GSV junction if present.' },
+  'Type 5':   { img: '/shunt-diagram/type_5.png',
+    desc: 'Same direct deep-to-tributary entry as Type 4 (EP N1→N3) but reflux stays entirely within tributaries — no GSV trunk involvement. Circuit: N1→N3→N1 or N1→N3→N2 (without trunk reflux). SFJ is COMPETENT. Ligation targets: the N1→N3 perforator entry and all refluxing tributary re-entry points.' },
 };
 
 function getShuntDiagram(shuntType) {
