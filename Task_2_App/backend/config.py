@@ -26,3 +26,18 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "task2_state.db")
 
 # CORS origins allowed
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
+
+# Streaming mode — annotated video for probe-position-synced playback
+STREAM_VIDEO_PATH = os.getenv(
+    "STREAM_VIDEO_PATH",
+    r"c:\Users\Krish\Downloads\Cygnus_Med_Demo\Task_3\Data\2 - Annotated videos\202207191643_00-Moving.mp4",
+)
+
+# How many (user, assistant) exchange pairs to keep in LLM conversation history
+STREAM_HISTORY_WINDOW = 8
+
+# Minimum posYRatio change before triggering a new VLM analysis
+STREAM_VLM_THRESHOLD = 0.05
+
+# Minimum posYRatio change before triggering a new LLM guidance call
+STREAM_LLM_THRESHOLD = 0.03
