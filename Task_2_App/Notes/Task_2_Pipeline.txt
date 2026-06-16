@@ -96,8 +96,9 @@ Three things here:
 Where the probe is now — region, surface, leg, posY number
 What the surgeon has confirmed so far — all the EP/RP clips marked in this session
 What the annotated video frame shows — from the VLM, purely anatomical, no flow
+
 6. Stage 3 — LLM guidance with conversation history
-call_with_history() (streaming_guidance_engine.py:166-209) builds the full message array sent to Groq llama-3.3-70b-versatile:
+call_with_history() (streaming_guidance_engine.py) builds the full message array sent to Groq llama-3.3-70b-versatile:
 
 
 [system]  ← _STREAM_SYSTEM_PROMPT (full CHIVA knowledge, never changes)
@@ -107,7 +108,7 @@ call_with_history() (streaming_guidance_engine.py:166-209) builds the full messa
 [assistant] ← guidance from click #2
 ...        (rolling window, last 8 pairs = 16 messages)
 [user]    ← current state message   ← NEW
-The system prompt is the LLM's entire medical knowledge base (streaming_guidance_engine.py:28-96). It contains:
+The system prompt is the LLM's entire medical knowledge base (streaming_guidance_engine.py). It contains:
 
 Compartments: N1 = deep veins, N2 = saphenous trunk, N3 = tributaries/varicosities
 Flow notation: EP = antegrade (entering superficial), RP = retrograde (reflux)
@@ -137,7 +138,8 @@ The guidance_update WebSocket event contains:
     "raw": "{\"guidance\": \"Scan distal thigh...\"}"
   }
 }
-The frontend renders:
+
+The frontend renders :
 
 d.guidance → the big blue text in the Active Guidance box
 d.vlm → the VLM Frame Analysis grid
@@ -150,3 +152,82 @@ You mark EP N1→N2. LLM now sees that clip in every subsequent state message.
 Turn 2: You're at mid-thigh. LLM knows Q1 is answered (SFJ incompetent, EP N1→N2 confirmed). It now works Q2: does the trunk reflux? It tells you to scan distally along the GSV.
 Turn 5: You mark RP N2→N1. LLM now knows Type 1 circuit is complete (EP N1→N2 + RP N2→N1). It moves to Q3.
 The surgeon never has to think about which question to answer next — the LLM infers it from what's already been confirmed and where in the leg you are.
+
+
+
+How the LLM decides which region to scan next :
+This is the most important question to ask about the system, and the answer is :  the LLM decides based on CHIVA protocol logic, but it produces a verbal instruction, not a coordinate and the surgeon closes the loop by clicking.
+
+Let me walk through exactly what happens inside the LLM's reasoning.
+
+What the LLM Actually Does --> When the LLM receives a state message, it implicitly runs this decision logic:
+
+Look at CONFIRMED FINDINGS in the state message
+           │
+           ▼
+    Which Q is still open?
+           │
+     ┌─────┌─────┼────┼
+     Q1               Q2                Q3                Q4
+     │                 │                  │             │
+  Find         Check      Find             Follow
+  entry      trunk     escape         tributary
+  point     reflux    point           distally
+
+Q1 — "Where does blood enter?"
+If no clips at all → the LLM knows to start at SFJ (groin, posY 0.04–0.09). Its system prompt tells it that's where EP N1→N2 would show if the junction is incompetent. Instruction: "Position probe at groin crease, anterior surface"
+
+If SFJ looks competent → check Hunterian perforators (medial thigh, posY 0.21–0.35), then SPJ (posterior knee, posY 0.40–0.50). The posY ranges for each landmark are explicitly in the system prompt (streaming_guidance_engine.py:47–58).
+
+Q2 — "Does the trunk reflux?"
+If EP N1→N2 is confirmed (in the clips list) → Q1 is answered. The LLM knows Q2 requires checking whether the GSV trunk itself flows backward (RP N2→N1), which is a separate finding from the junction being open. It tells the surgeon to follow the GSV trunk distally from the SFJ.
+
+Q3 — "Is there an escape point?"
+If EP N1→N2 + RP N2→N1 confirmed → Type 1 loop found, but Q3 asks where blood exits the trunk into a tributary (EP N2→N3). LLM directs to scan along the trunk looking for a branch connection.
+
+Q4 — "Does the tributary reflux?"
+If an escape point is marked → follow that tributary downward looking for RP N3.
+
+The Critical Gap
+The LLM outputs something like:
+
+"Scan mid-thigh medial surface, anterior to GSV"
+
+It does not output posY: 0.28 or emit a socket event. The translation chain is:
+
+
+LLM text instruction
+      │
+      ▼  (surgeon reads it)
+Surgeon clicks the leg diagram
+      │
+      ▼
+coordToState() → posY + region
+      │
+      ▼
+probe_move WebSocket event
+      │
+      ▼
+LLM gets new state → new instruction
+The surgeon is the position controller. The LLM only says where in plain English, the surgeon interprets it and clicks. This is intentional — the probe in real surgery is a physical device in someone's hand.
+
+What's in the system prompt that makes this work
+Three things give the LLM enough to reason about location:
+
+1. The posY scale (streaming_guidance_engine.py) — the LLM knows SFJ is posY 0.04–0.09, Hunterian area are 0.21–0.35, SPJ is 0.40–0.50. When the current state says posY: 0.28, it knows the probe is in the Hunterian zone.
+
+2. The conversation history — the LLM remembers every position you've already been to (via the rolling 8-pair window). It won't send you back to the SFJ if you've already confirmed it.
+
+3. The confirmed clips in every state message — every new state message includes the full list of EP/RP clips marked so far. The LLM doesn't need to remember them — they're always there.
+
+The actual limitation
+The LLM reasons which anatomical landmark to check next, but it has no map of your specific patient's varicose vein pattern. It can't say "there's a perforator at exactly posY 0.31" — that has to be discovered by the surgeon scanning through the Hunterian zone. The guidance narrows the search to the right region and surface; the VLM then confirms what the frame shows when you get there.
+
+So the precision hierarchy is:
+	                          	                           
+Layer	Precision	Who decides
+Which Q to answer next	Protocol-exact	LLM (CHIVA rules)
+Which anatomical zone to examine	   	 	Region-level (SFJ / GSV-THI / SPJetc.)	LLM (posY knowledge)
+Exact spot within that zone	Millimetre-level	Surgeon scanning
+What the frame shows at that spot	Frame-level	VLM
+	  	                 	  	                         
