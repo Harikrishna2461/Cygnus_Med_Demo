@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 
 const API = ''
 
@@ -97,7 +97,7 @@ function Landing({ onSelect }) {
           <p>Both pipelines share the same LSTM tracker and VLM classifier. They differ in how fascia and veins are detected.</p>
         </div>
 
-        <div style={{ textAlign: 'center', marginBottom: 16, display: 'flex', gap: 12, justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', marginBottom: 16, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="btn" onClick={() => onSelect('fascia-test')}
                   style={{ background: '#00aa77', padding: '10px 28px', fontSize: 14 }}>
             📐 Fascia Detection Tester
@@ -105,6 +105,10 @@ function Landing({ onSelect }) {
           <button className="btn" onClick={() => onSelect('vein-test')}
                   style={{ background: '#aa5500', padding: '10px 28px', fontSize: 14 }}>
             🔵 Vein Detection Tester
+          </button>
+          <button className="btn" onClick={() => onSelect('combined-test')}
+                  style={{ background: '#7744cc', padding: '10px 28px', fontSize: 14 }}>
+            🔬 Fascia + Vein Tester
           </button>
         </div>
 
@@ -566,17 +570,36 @@ function FasciaTestPage({ onBack }) {
 // ── Vein Detection Test Page ──────────────────────────────────────────────────
 
 function VeinTestPage({ onBack }) {
-  const [phase, setPhase]               = useState('idle')
-  const [videoFile, setVideoFile]       = useState(null)
-  const [currentFrame, setCurrentFrame] = useState(null)
-  const [frameIdx, setFrameIdx]         = useState(0)
-  const [totalFrames, setTotalFrames]   = useState(0)
-  const [veins, setVeins]               = useState([])
-  const [fasciaY, setFasciaY]           = useState(null)
-  const [fps, setFps]                   = useState(5)
-  const [error, setError]               = useState('')
-  const [dragging, setDragging]         = useState(false)
-  const esRef = useRef(null)
+  const [phase, setPhase]             = useState('idle')
+  const [videoFile, setVideoFile]     = useState(null)
+  const [frameIdx, setFrameIdx]       = useState(0)
+  const [totalFrames, setTotalFrames] = useState(0)
+  const [fps, setFps]                 = useState(5)
+  const [error, setError]             = useState('')
+  const [dragging, setDragging]       = useState(false)
+
+  // All collected frames for playback
+  const [allFrames, setAllFrames]     = useState([])   // { image, veins }
+  const [playIdx, setPlayIdx]         = useState(0)
+  const [isPlaying, setIsPlaying]     = useState(false)
+  const [playSpeed, setPlaySpeed]     = useState(5)
+
+  const esRef   = useRef(null)
+  const timerRef = useRef(null)
+
+  // Playback interval
+  useEffect(() => {
+    clearInterval(timerRef.current)
+    if (isPlaying && allFrames.length > 0) {
+      timerRef.current = setInterval(() => {
+        setPlayIdx(i => {
+          if (i >= allFrames.length - 1) { setIsPlaying(false); return i }
+          return i + 1
+        })
+      }, 1000 / playSpeed)
+    }
+    return () => clearInterval(timerRef.current)
+  }, [isPlaying, playSpeed, allFrames.length])
 
   const handleFile = (file) => {
     if (!file) return
@@ -587,7 +610,7 @@ function VeinTestPage({ onBack }) {
 
   const start = async () => {
     if (!videoFile) return
-    setPhase('uploading'); setError('')
+    setPhase('uploading'); setError(''); setAllFrames([]); setPlayIdx(0)
     const fd = new FormData(); fd.append('video', videoFile)
     const up = await fetch(`${API}/api/upload`, { method: 'POST', body: fd })
     if (!up.ok) { setError('Upload failed'); setPhase('idle'); return }
@@ -598,31 +621,48 @@ function VeinTestPage({ onBack }) {
     esRef.current = es
     es.onmessage = (e) => {
       const d = JSON.parse(e.data)
-      if (d.type === 'meta')  { setTotalFrames(d.total) }
-      if (d.type === 'frame') { setCurrentFrame(d.image); setFrameIdx(d.frame_idx); setVeins(d.veins || []); setFasciaY(d.fascia_y ?? null) }
+      if (d.type === 'status') { setError(d.message) }
+      if (d.type === 'meta')   { setTotalFrames(d.total); setError('') }
+      if (d.type === 'frame')  {
+        const f = { image: d.image, veins: d.veins || [] }
+        setAllFrames(prev => { const n = [...prev, f]; setPlayIdx(n.length - 1); return n })
+        setFrameIdx(d.frame_idx)
+        setError('')
+      }
       if (d.type === 'error') { setError(`Server error: ${d.message}`) }
-      if (d.type === 'done')  { setPhase('done'); es.close() }
+      if (d.type === 'done')  {
+        setPhase('done'); es.close()
+        setPlayIdx(0)   // rewind to start for playback
+      }
     }
-    es.onerror = () => { setError('Stream error — Flask may not be running or needs restart'); setPhase('done'); es.close() }
+    es.onerror = () => {
+      setError('Stream error — Flask may not be running or needs restart')
+      setPhase('done'); es.close()
+    }
   }
 
   const reset = () => {
+    clearInterval(timerRef.current)
     if (esRef.current) esRef.current.close()
-    setPhase('idle'); setVideoFile(null); setCurrentFrame(null)
-    setFrameIdx(0); setVeins([]); setFasciaY(null); setError('')
+    setPhase('idle'); setVideoFile(null); setAllFrames([])
+    setFrameIdx(0); setTotalFrames(0); setPlayIdx(0)
+    setIsPlaying(false); setError('')
   }
 
-  const pct = totalFrames ? Math.round((frameIdx / totalFrames) * 100) : 0
+  const pct = totalFrames > 0 ? Math.round((frameIdx / totalFrames) * 100) : 0
+  const cur  = allFrames[playIdx] || null
 
   return (
     <div className="app">
       <header className="header">
         <button onClick={onBack} className="btn" style={{ marginRight: 16, background: '#333' }}>← Back</button>
         <span className="header-icon">🔵</span>
-        <div><h1>Vein Detection Test</h1><p>Pipeline B — VLM detection, no trained DL model</p></div>
+        <div><h1>Vein Detection Test</h1><p>Pipeline B — Grounding DINO detection</p></div>
       </header>
 
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '24px 16px' }}>
+
+        {/* ── Upload ── */}
         {phase === 'idle' && (
           <div>
             <div
@@ -640,7 +680,7 @@ function VeinTestPage({ onBack }) {
             <input id="vt-input" type="file" accept=".mp4,.avi,.mov" style={{ display: 'none' }}
                    onChange={e => handleFile(e.target.files[0])} />
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
-              <label style={{ color: '#888' }}>FPS:</label>
+              <label style={{ color: '#888' }}>Sample FPS:</label>
               <input type="number" value={fps} min={1} max={30}
                      onChange={e => setFps(Number(e.target.value))}
                      className="input" style={{ width: 80 }} />
@@ -653,56 +693,334 @@ function VeinTestPage({ onBack }) {
           </div>
         )}
 
+        {/* ── Processing / Playback ── */}
         {(phase === 'processing' || phase === 'done') && (
           <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+
+            {/* Frame display */}
             <div style={{ flex: 1 }}>
               {error && <p style={{ color: '#f55', marginBottom: 8 }}>{error}</p>}
-              {!currentFrame && phase === 'done' && !error && (
-                <p style={{ color: '#f88', marginBottom: 8 }}>No frames received — check Flask console for errors</p>
+              {!cur && phase === 'done' && !error && (
+                <p style={{ color: '#f88', marginBottom: 8 }}>No frames received — check Flask console</p>
               )}
-              {currentFrame && (
-                <img src={`data:image/jpeg;base64,${currentFrame}`}
+
+              {cur && (
+                <img src={`data:image/jpeg;base64,${cur.image}`}
                      style={{ width: '100%', borderRadius: 8, border: '1px solid #333' }} alt="veins" />
               )}
+
+              {/* Live progress bar */}
               {phase === 'processing' && (
                 <div style={{ marginTop: 8 }}>
                   <div style={{ background: '#222', borderRadius: 4, height: 6 }}>
-                    <div style={{ background: '#aa5500', width: `${pct}%`, height: '100%', borderRadius: 4, transition: 'width 0.3s' }} />
+                    <div style={{ background: '#aa5500', width: `${pct}%`, height: '100%',
+                                  borderRadius: 4, transition: 'width 0.3s' }} />
                   </div>
-                  <p style={{ color: '#666', fontSize: 12, marginTop: 4 }}>Frame {frameIdx} / {totalFrames}</p>
+                  <p style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
+                    Processing — frame {frameIdx} / {totalFrames} ({allFrames.length} buffered)
+                  </p>
+                </div>
+              )}
+
+              {/* Playback controls (shown when done) */}
+              {phase === 'done' && allFrames.length > 0 && (
+                <div style={{ marginTop: 12, background: '#111', borderRadius: 8, padding: 12 }}>
+                  {/* Scrubber */}
+                  <input
+                    type="range" min={0} max={allFrames.length - 1} value={playIdx}
+                    onChange={e => { setIsPlaying(false); setPlayIdx(+e.target.value) }}
+                    style={{ width: '100%', accentColor: '#00ffff', marginBottom: 10 }}
+                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {/* Rewind */}
+                    <button onClick={() => { setIsPlaying(false); setPlayIdx(0) }}
+                            style={{ background: '#222', border: '1px solid #444', borderRadius: 6,
+                                     color: '#aaa', padding: '5px 10px', cursor: 'pointer', fontSize: 14 }}>
+                      ⏮
+                    </button>
+                    {/* Play / Pause */}
+                    <button onClick={() => setIsPlaying(p => !p)}
+                            style={{ background: isPlaying ? '#aa5500' : '#00ffff22',
+                                     border: `1px solid ${isPlaying ? '#aa5500' : '#00ffff'}`,
+                                     borderRadius: 6, color: isPlaying ? '#fff' : '#00ffff',
+                                     padding: '5px 16px', cursor: 'pointer', fontSize: 15, fontWeight: 700 }}>
+                      {isPlaying ? '⏸ Pause' : '▶ Play'}
+                    </button>
+                    {/* Frame counter */}
+                    <span style={{ color: '#666', fontSize: 12, marginLeft: 4 }}>
+                      {playIdx + 1} / {allFrames.length}
+                    </span>
+                    {/* Speed selector */}
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ color: '#666', fontSize: 12 }}>Speed:</span>
+                      {[1, 3, 5, 10].map(s => (
+                        <button key={s} onClick={() => setPlaySpeed(s)}
+                                style={{ background: playSpeed === s ? '#00ffff33' : '#1a1a2e',
+                                         border: `1px solid ${playSpeed === s ? '#00ffff' : '#333'}`,
+                                         borderRadius: 4, color: playSpeed === s ? '#00ffff' : '#555',
+                                         padding: '3px 8px', cursor: 'pointer', fontSize: 11 }}>
+                          {s}fps
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div style={{ width: 200, background: '#111', borderRadius: 8, padding: 16, flexShrink: 0 }}>
+            {/* Side panel */}
+            <div style={{ width: 180, background: '#111', borderRadius: 8, padding: 16, flexShrink: 0 }}>
               <h4 style={{ color: '#888', marginBottom: 12 }}>Detected Veins</h4>
-              <div style={{ background: '#aa550020', border: '1px solid #aa5500', borderRadius: 8,
+              <div style={{ background: '#00ffff18', border: '1px solid #00ffff', borderRadius: 8,
                             padding: '10px 14px', textAlign: 'center', marginBottom: 12 }}>
                 <div style={{ color: '#888', fontSize: 12 }}>this frame</div>
-                <div style={{ color: '#aa5500', fontSize: 32, fontWeight: 700 }}>{veins.length}</div>
+                <div style={{ color: '#00ffff', fontSize: 36, fontWeight: 700 }}>
+                  {cur ? cur.veins.length : 0}
+                </div>
                 <div style={{ color: '#555', fontSize: 11 }}>veins</div>
               </div>
 
-              {fasciaY !== null && (
-                <div style={{ background: '#00aa7720', border: '1px solid #00aa77', borderRadius: 6,
-                              padding: '6px 10px', marginBottom: 10, display: 'flex',
-                              justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: '#888', fontSize: 12 }}>fascia_y</span>
-                  <span style={{ color: '#00aa77', fontSize: 16, fontWeight: 700 }}>{fasciaY}</span>
+              {(cur?.veins || []).map((v, i) => (
+                <div key={i} style={{ background: '#00ffff12', border: '1px solid #00ffff55',
+                                      borderRadius: 4, padding: '5px 8px', marginBottom: 4,
+                                      fontSize: 11, color: '#aaa' }}>
+                  <span style={{ color: '#00ffff', fontWeight: 700 }}>V{i + 1}</span>
+                  <span style={{ marginLeft: 6 }}>{v.x},{v.y} {v.w}×{v.h}</span>
+                </div>
+              ))}
+
+              {phase === 'done' && (
+                <button className="btn" style={{ marginTop: 16, width: '100%', background: '#333' }}
+                        onClick={reset}>Test Another</button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Combined Fascia + Vein Test Page ─────────────────────────────────────────
+
+function CombinedTestPage({ onBack }) {
+  const [phase, setPhase]             = useState('idle')
+  const [videoFile, setVideoFile]     = useState(null)
+  const [frameIdx, setFrameIdx]       = useState(0)
+  const [totalFrames, setTotalFrames] = useState(0)
+  const [fps, setFps]                 = useState(3)
+  const [error, setError]             = useState('')
+  const [dragging, setDragging]       = useState(false)
+
+  const [allFrames, setAllFrames]     = useState([])   // { image, veins, fascia_y }
+  const [playIdx, setPlayIdx]         = useState(0)
+  const [isPlaying, setIsPlaying]     = useState(false)
+  const [playSpeed, setPlaySpeed]     = useState(3)
+
+  const esRef    = useRef(null)
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    clearInterval(timerRef.current)
+    if (isPlaying && allFrames.length > 0) {
+      timerRef.current = setInterval(() => {
+        setPlayIdx(i => {
+          if (i >= allFrames.length - 1) { setIsPlaying(false); return i }
+          return i + 1
+        })
+      }, 1000 / playSpeed)
+    }
+    return () => clearInterval(timerRef.current)
+  }, [isPlaying, playSpeed, allFrames.length])
+
+  const handleFile = (file) => {
+    if (!file) return
+    const ext = file.name.split('.').pop().toLowerCase()
+    if (!['mp4','avi','mov'].includes(ext)) { setError('mp4/avi/mov only'); return }
+    setVideoFile(file); setError('')
+  }
+
+  const start = async () => {
+    if (!videoFile) return
+    setPhase('uploading'); setError(''); setAllFrames([]); setPlayIdx(0)
+    const fd = new FormData(); fd.append('video', videoFile)
+    const up = await fetch(`${API}/api/upload`, { method: 'POST', body: fd })
+    if (!up.ok) { setError('Upload failed'); setPhase('idle'); return }
+    const { upload_id } = await up.json()
+    setPhase('processing')
+
+    const es = new EventSource(`${API}/api/test/combined/${upload_id}?fps=${fps}`)
+    esRef.current = es
+    es.onmessage = (e) => {
+      const d = JSON.parse(e.data)
+      if (d.type === 'meta')  { setTotalFrames(d.total); setError('') }
+      if (d.type === 'frame') {
+        const f = { image: d.image, veins: d.veins || [], fascia_y: d.fascia_y ?? null }
+        setAllFrames(prev => { const n = [...prev, f]; setPlayIdx(n.length - 1); return n })
+        setFrameIdx(d.frame_idx)
+        setError('')
+      }
+      if (d.type === 'error') { setError(`Server error: ${d.message}`) }
+      if (d.type === 'done')  { setPhase('done'); es.close(); setPlayIdx(0) }
+    }
+    es.onerror = () => {
+      setError('Stream error — Flask may not be running or needs restart')
+      setPhase('done'); es.close()
+    }
+  }
+
+  const reset = () => {
+    clearInterval(timerRef.current)
+    if (esRef.current) esRef.current.close()
+    setPhase('idle'); setVideoFile(null); setAllFrames([])
+    setFrameIdx(0); setTotalFrames(0); setPlayIdx(0)
+    setIsPlaying(false); setError('')
+  }
+
+  const pct = totalFrames > 0 ? Math.round((frameIdx / totalFrames) * 100) : 0
+  const cur  = allFrames[playIdx] || null
+  const ACCENT = '#7744cc'
+
+  return (
+    <div className="app">
+      <header className="header">
+        <button onClick={onBack} className="btn" style={{ marginRight: 16, background: '#333' }}>← Back</button>
+        <span className="header-icon">🔬</span>
+        <div><h1>Fascia + Vein Detection</h1><p>Pipeline B — VLM fascia · Grounding DINO veins</p></div>
+      </header>
+      <div style={{ height: 3, background: `linear-gradient(90deg, ${ACCENT}, transparent)` }} />
+
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '24px 16px' }}>
+
+        {phase === 'idle' && (
+          <div>
+            <div
+              className={`drop-zone${dragging ? ' dragging' : ''}`}
+              onDragOver={e => { e.preventDefault(); setDragging(true) }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={e => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files[0]) }}
+              onClick={() => document.getElementById('cb-input').click()}
+              style={{ cursor: 'pointer', border: `2px dashed ${ACCENT}66`, borderRadius: 12,
+                       padding: 48, textAlign: 'center', color: '#888', marginBottom: 16 }}
+            >
+              {videoFile ? <span style={{ color: '#0af' }}>{videoFile.name}</span>
+                         : <span>Drop a video here or click to browse</span>}
+            </div>
+            <input id="cb-input" type="file" accept=".mp4,.avi,.mov" style={{ display: 'none' }}
+                   onChange={e => handleFile(e.target.files[0])} />
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
+              <label style={{ color: '#888' }}>Sample FPS:</label>
+              <input type="number" value={fps} min={1} max={10}
+                     onChange={e => setFps(Number(e.target.value))}
+                     className="input" style={{ width: 80 }} />
+              <span style={{ color: '#555', fontSize: 12 }}>
+                (lower = more accurate fascia, 2-3 recommended)
+              </span>
+            </div>
+            {error && <p style={{ color: '#f55' }}>{error}</p>}
+            <button className="btn" style={{ background: ACCENT }}
+                    onClick={start} disabled={!videoFile}>
+              Run Combined Detection →
+            </button>
+          </div>
+        )}
+
+        {(phase === 'processing' || phase === 'done') && (
+          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+
+            <div style={{ flex: 1 }}>
+              {error && <p style={{ color: '#f55', marginBottom: 8 }}>{error}</p>}
+              {!cur && phase === 'done' && !error && (
+                <p style={{ color: '#f88', marginBottom: 8 }}>No frames received — check Flask console</p>
+              )}
+              {cur && (
+                <img src={`data:image/jpeg;base64,${cur.image}`}
+                     style={{ width: '100%', borderRadius: 8, border: '1px solid #333' }} alt="combined" />
+              )}
+
+              {phase === 'processing' && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ background: '#222', borderRadius: 4, height: 6 }}>
+                    <div style={{ background: ACCENT, width: `${pct}%`, height: '100%',
+                                  borderRadius: 4, transition: 'width 0.3s' }} />
+                  </div>
+                  <p style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
+                    Processing — frame {frameIdx} / {totalFrames} ({allFrames.length} buffered)
+                  </p>
                 </div>
               )}
 
-              {veins.map((v, i) => {
-                const m = LABEL_META[v.label] || LABEL_META.unknown
-                return (
-                  <div key={i} style={{ background: m.bg, border: `1px solid ${m.color}`,
-                                        borderRadius: 4, padding: '5px 8px', marginBottom: 4,
-                                        fontSize: 11 }}>
-                    <span style={{ color: m.color, fontWeight: 700 }}>{v.label}</span>
-                    <span style={{ color: '#666', marginLeft: 6 }}>{v.x},{v.y} {v.w}×{v.h}</span>
+              {phase === 'done' && allFrames.length > 0 && (
+                <div style={{ marginTop: 12, background: '#111', borderRadius: 8, padding: 12 }}>
+                  <input
+                    type="range" min={0} max={allFrames.length - 1} value={playIdx}
+                    onChange={e => { setIsPlaying(false); setPlayIdx(+e.target.value) }}
+                    style={{ width: '100%', accentColor: ACCENT, marginBottom: 10 }}
+                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <button onClick={() => { setIsPlaying(false); setPlayIdx(0) }}
+                            style={{ background: '#222', border: '1px solid #444', borderRadius: 6,
+                                     color: '#aaa', padding: '5px 10px', cursor: 'pointer', fontSize: 14 }}>
+                      ⏮
+                    </button>
+                    <button onClick={() => setIsPlaying(p => !p)}
+                            style={{ background: isPlaying ? ACCENT : ACCENT + '22',
+                                     border: `1px solid ${ACCENT}`,
+                                     borderRadius: 6, color: isPlaying ? '#fff' : ACCENT,
+                                     padding: '5px 16px', cursor: 'pointer', fontSize: 15, fontWeight: 700 }}>
+                      {isPlaying ? '⏸ Pause' : '▶ Play'}
+                    </button>
+                    <span style={{ color: '#666', fontSize: 12 }}>
+                      {playIdx + 1} / {allFrames.length}
+                    </span>
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ color: '#666', fontSize: 12 }}>Speed:</span>
+                      {[1, 3, 5, 10].map(s => (
+                        <button key={s} onClick={() => setPlaySpeed(s)}
+                                style={{ background: playSpeed === s ? ACCENT + '33' : '#1a1a2e',
+                                         border: `1px solid ${playSpeed === s ? ACCENT : '#333'}`,
+                                         borderRadius: 4, color: playSpeed === s ? ACCENT : '#555',
+                                         padding: '3px 8px', cursor: 'pointer', fontSize: 11 }}>
+                          {s}fps
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                )
-              })}
+                </div>
+              )}
+            </div>
+
+            {/* Side panel */}
+            <div style={{ width: 190, background: '#111', borderRadius: 8, padding: 16, flexShrink: 0 }}>
+
+              {/* Fascia */}
+              <h4 style={{ color: '#888', marginBottom: 8, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Fascia</h4>
+              <div style={{ background: '#00ffff18', border: '1px solid #00ffff', borderRadius: 8,
+                            padding: '10px 14px', textAlign: 'center', marginBottom: 16 }}>
+                <div style={{ color: '#888', fontSize: 11 }}>depth (px)</div>
+                <div style={{ color: '#00ffff', fontSize: 28, fontWeight: 700 }}>
+                  {cur?.fascia_y !== null && cur?.fascia_y !== undefined ? cur.fascia_y : '—'}
+                </div>
+              </div>
+
+              {/* Veins */}
+              <h4 style={{ color: '#888', marginBottom: 8, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Veins</h4>
+              <div style={{ background: '#ffff0018', border: '1px solid #ffff00', borderRadius: 8,
+                            padding: '10px 14px', textAlign: 'center', marginBottom: 12 }}>
+                <div style={{ color: '#888', fontSize: 11 }}>this frame</div>
+                <div style={{ color: '#ffff00', fontSize: 28, fontWeight: 700 }}>
+                  {cur ? cur.veins.length : 0}
+                </div>
+              </div>
+
+              {(cur?.veins || []).map((v, i) => (
+                <div key={i} style={{ background: '#ffff0012', border: '1px solid #ffff0055',
+                                      borderRadius: 4, padding: '4px 8px', marginBottom: 4,
+                                      fontSize: 11, color: '#aaa' }}>
+                  <span style={{ color: '#ffff00', fontWeight: 700 }}>V{i + 1}</span>
+                  <span style={{ marginLeft: 6 }}>{v.x},{v.y} {v.w}×{v.h}</span>
+                </div>
+              ))}
 
               {phase === 'done' && (
                 <button className="btn" style={{ marginTop: 16, width: '100%', background: '#333' }}
@@ -719,10 +1037,11 @@ function VeinTestPage({ onBack }) {
 // ── Root ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [page, setPage] = useState(null)  // null=landing, 'fascia-test', 'vein-test', or pipeline key
+  const [page, setPage] = useState(null)
 
-  if (page === 'fascia-test') return <FasciaTestPage onBack={() => setPage(null)} />
-  if (page === 'vein-test')   return <VeinTestPage onBack={() => setPage(null)} />
-  if (page)                   return <ProcessingPage pipelineKey={page} onBack={() => setPage(null)} />
+  if (page === 'fascia-test')   return <FasciaTestPage    onBack={() => setPage(null)} />
+  if (page === 'vein-test')     return <VeinTestPage      onBack={() => setPage(null)} />
+  if (page === 'combined-test') return <CombinedTestPage  onBack={() => setPage(null)} />
+  if (page)                     return <ProcessingPage pipelineKey={page} onBack={() => setPage(null)} />
   return <Landing onSelect={setPage} />
 }

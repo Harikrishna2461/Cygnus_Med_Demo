@@ -93,23 +93,46 @@ ECHOVLM_PROMPT = (
 )
 
 FOUNDATION_FEW_SHOT_PROMPT = (
-    "Analyse this new unannotated B-mode ultrasound frame using the same anatomy as the reference images.\n\n"
-    "Step 1 — Fascia: find the first prominent bright (hyperechoic) near-horizontal line scanning "
-    "from the top of the image downward. It marks the boundary between fat (above, speckled) and "
-    "muscle (below, darker striated). "
-    "CRITICAL: fascia_y can be very small (even < 20) when the probe is over a knee or ankle. "
-    "Do NOT require a visible fat layer above. If striated muscle fills most of the image with a "
-    "bright line near the top, set fascia_y to that line's row. "
-    "Return null ONLY if there is no identifiable bright boundary line anywhere in the image.\n\n"
-    "Step 2 — Veins: find dark anechoic/hypoechoic oval structures. For each vein output a bounding "
-    "box and label:\n"
-    "  N1 = vein centre is BELOW fascia_y (deep, inside muscle)\n"
-    "  N2 = vein centre is AT fascia_y ±15 px (GSV, right on the fascia)\n"
-    "  N3 = vein centre is ABOVE fascia_y (superficial, in fat layer)\n\n"
-    "Reply ONLY with valid JSON, no extra text, no markdown:\n"
-    "{\"fascia_y\":<int 0-255 or null only if truly no boundary visible>,"
-    "\"veins\":[{\"x\":<int>,\"y\":<int>,\"w\":<int>,\"h\":<int>,\"label\":\"N1|N2|N3\"}]}\n"
-    "Pixel coordinates are 256x256 space, origin top-left."
+    "Analyse this new B-mode ultrasound frame (256x256 px, origin top-left).\n\n"
+    "STEP 1 — FASCIA: Locate the first prominent BRIGHT (hyperechoic) near-horizontal line scanning "
+    "from the top downward. It separates speckled fat above from darker striated muscle below. "
+    "fascia_y can be very small (even < 20) for knee/ankle scans — do NOT require a fat layer above. "
+    "Return null ONLY if no bright boundary line exists anywhere.\n\n"
+    "STEP 2 — VEINS: Veins in B-mode ultrasound appear as NEARLY BLACK (anechoic), ROUND or OVAL "
+    "cross-sections with a thin bright echogenic wall/border. They are the most visually prominent "
+    "DARK CIRCULAR spots in the image, clearly darker than the surrounding grey muscle tissue. "
+    "Key identification rules:\n"
+    "  • Interior is almost black — much darker than any surrounding tissue\n"
+    "  • Shape is round or oval (not irregular or speckled)\n"
+    "  • Thin bright rim/border visible at the edge\n"
+    "  • Minimum size ~15px wide — ignore tiny speckle noise\n"
+    "  • Found below or at the fascia line (rarely above)\n\n"
+    "Label each vein by where its centre falls relative to fascia_y:\n"
+    "  N1 = centre BELOW fascia_y (deep vein, inside muscle)\n"
+    "  N2 = centre WITHIN ±15 px of fascia_y (GSV, at the fascia)\n"
+    "  N3 = centre ABOVE fascia_y (superficial vein, in fat)\n\n"
+    "IMPORTANT: Draw bounding boxes tightly around the ENTIRE dark oval, including the bright wall. "
+    "Only report clearly visible round/oval black structures — do NOT report artifacts or noise.\n\n"
+    "Reply ONLY with valid JSON, no markdown, no extra text:\n"
+    "{\"fascia_y\":<int 0-255 or null>,\"veins\":[{\"x\":<int>,\"y\":<int>,\"w\":<int>,\"h\":<int>,\"label\":\"N1|N2|N3\"}]}"
+)
+
+VEIN_ONLY_PROMPT = (
+    "This is a B-mode ultrasound image (256×256 pixels, origin top-left).\n\n"
+    "Your ONLY task: find and localize every BLOOD VESSEL / VEIN visible in this image.\n\n"
+    "Veins appear in two ways depending on scan orientation:\n"
+    "  TRANSVERSE (cross-section): round or circular dark spots — like a black circle\n"
+    "  LONGITUDINAL (along the vessel): elongated dark oval or tube shape — wider than tall\n\n"
+    "In BOTH cases the key feature is:\n"
+    "  • DARK (nearly black, anechoic) interior — clearly much darker than surrounding grey tissue\n"
+    "  • Thin BRIGHT (hyperechoic) echogenic wall/border around the dark interior\n"
+    "  • Smooth well-defined edges\n"
+    "  • Size: 10–150 pixels in this 256px image\n\n"
+    "Draw a tight bounding box around each dark vessel (include the bright wall).\n"
+    "Ignore: speckle noise, bright fascia lines, muscle striations.\n\n"
+    "Reply ONLY with valid JSON — no markdown:\n"
+    "{\"veins\":[{\"x\":<left edge>,\"y\":<top edge>,\"w\":<width>,\"h\":<height>}]}\n"
+    "If no vessels visible: {\"veins\":[]}"
 )
 
 # Retry prompt when VLM returns fascia_y=null — asks it to look specifically at the top rows
@@ -254,13 +277,26 @@ def get_fascia_boundary(mask):
     bot_out[x_min:x_max+1] = ctr + half
     return top_out, bot_out
 
-def nms(dets, iou_thresh=0.3):
+def nms(dets, iou_thresh=0.3, contain_thresh=0.7):
     if len(dets) <= 1:
         return dets
     dets_sorted = sorted(dets, key=lambda d: d['area'], reverse=True)
     kept = []
     for d in dets_sorted:
-        if all(bbox_iou(d['bbox'], k['bbox']) < iou_thresh for k in kept):
+        x1, y1, w1, h1 = d['bbox']
+        suppress = False
+        for k in kept:
+            xk, yk, wk, hk = k['bbox']
+            ix = max(0, min(x1+w1, xk+wk) - max(x1, xk))
+            iy = max(0, min(y1+h1, yk+hk) - max(y1, yk))
+            inter = ix * iy
+            iou = inter / (w1*h1 + wk*hk - inter + 1e-6)
+            # Also suppress if this box is mostly contained within a kept (larger) box
+            containment = inter / (w1*h1 + 1e-6)
+            if iou >= iou_thresh or containment >= contain_thresh:
+                suppress = True
+                break
+        if not suppress:
             kept.append(d)
     return kept
 
@@ -304,7 +340,127 @@ class PipelineB:
         self._echovlm_lock     = threading.Lock()
         self._few_shot_b64     = []
         self._vlm_context_msgs = []
+        self._vein_ctx_b64     = []
+        self._vein_ctx_msgs    = []
         self._tried            = False
+        self._load_vein_few_shot()
+
+    def _load_vein_few_shot(self):
+        """Build vein-only annotated reference images for the vein test endpoint."""
+        self._vein_ctx_b64  = []
+        self._vein_ctx_msgs = []
+
+        output_dir = DATA_ROOT / 'output'
+        frames_dir = output_dir / 'fascia' / 'frames'
+        vein_csv   = output_dir / 'classification' / 'vein_classified_vlm.csv'
+
+        if not vein_csv.exists() or not frames_dir.exists():
+            print("PipelineB: vein few-shot data not found, skipping.")
+            return
+
+        try:
+            import csv as _csv
+
+            # Group vein annotations by (video, frame_idx)
+            vein_rows = {}
+            with open(vein_csv, newline='') as f:
+                for row in _csv.DictReader(f):
+                    key = (row['video'], int(row['frame_idx']))
+                    vein_rows.setdefault(key, []).append(row)
+
+            # Bucket frames by max single-vein area → small / medium / large
+            def _max_area(rows):
+                return max(float(r.get('w', 1)) * float(r.get('h', 1)) for r in rows)
+
+            buckets = {'small': [], 'medium': [], 'large': []}
+            for key, rows in vein_rows.items():
+                a = _max_area(rows)
+                if a < 500:
+                    buckets['small'].append((key, rows, a))
+                elif a < 2500:
+                    buckets['medium'].append((key, rows, a))
+                else:
+                    buckets['large'].append((key, rows, a))
+
+            # From each bucket pick up to 4-5 frames, favouring different videos
+            def _diverse(bucket, n):
+                bucket.sort(key=lambda t: t[2], reverse=True)
+                seen, out = set(), []
+                for key, rows, _ in bucket:
+                    if key[0] not in seen or len(out) < n // 2:
+                        if (frames_dir / key[0] / f'{key[1]:05d}.png').exists():
+                            out.append((key, rows))
+                            seen.add(key[0])
+                    if len(out) >= n:
+                        break
+                return out
+
+            # llama-4-scout supports max 5 images total → 4 reference + 1 query
+            # Pick 2 large, 1 medium, 1 small for maximum diversity within the limit
+            selected = (_diverse(buckets['large'],  2) +
+                        _diverse(buckets['medium'], 1) +
+                        _diverse(buckets['small'],  1))
+
+            # Fallback: if buckets are sparse just take the top-area frames overall
+            if len(selected) < 2:
+                all_sorted = sorted(vein_rows.items(),
+                                    key=lambda kv: _max_area(kv[1]), reverse=True)
+                selected = [(k, r) for k, r in all_sorted
+                            if (frames_dir / k[0] / f'{k[1]:05d}.png').exists()][:4]
+
+            for (video, fidx), rows in selected:
+                frame_path = frames_dir / video / f'{fidx:05d}.png'
+                frm = cv2.imread(str(frame_path))
+                if frm is None:
+                    continue
+                frm = cv2.resize(frm, (IMG_SIZE, IMG_SIZE))
+                for r in rows:
+                    x = int(float(r['x'])); y = int(float(r['y']))
+                    w = max(4, int(float(r['w']))); h = max(4, int(float(r['h'])))
+                    cv2.rectangle(frm, (x, y), (x + w, y + h), (0, 255, 255), 2)
+                    sz = f"{w}x{h}"
+                    cv2.putText(frm, sz, (x, max(0, y - 3)),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 255), 1, cv2.LINE_AA)
+                _, buf = cv2.imencode('.jpg', frm, [cv2.IMWRITE_JPEG_QUALITY, 88])
+                self._vein_ctx_b64.append(base64.b64encode(buf.tobytes()).decode())
+                if len(self._vein_ctx_b64) >= 4:   # hard cap: 4 ref + 1 query = 5 total
+                    break
+
+        except Exception as e:
+            print(f"PipelineB: vein few-shot build failed ({e})")
+
+        if not self._vein_ctx_b64:
+            print("PipelineB: no vein reference frames built.")
+            return
+
+        ref_content = [{"type": "text", "text": (
+            "These are REAL B-mode ultrasound frames from the same scanner with GROUND-TRUTH annotations.\n"
+            "CYAN boxes = confirmed blood vessel cross-sections. The size label (e.g. '14x10') shows "
+            "the actual pixel dimensions of each vein box.\n\n"
+            "Key visual features of veins in these scans:\n"
+            "  • Nearly BLACK interior (anechoic — much darker than surrounding grey tissue)\n"
+            "  • Round or oval cross-section with a thin bright echogenic wall/border\n"
+            "  • Sizes range from ~10px to ~100px in diameter\n"
+            "  • Small veins look like tiny dark dots; large ones like clear black circles\n"
+            "  • Found anywhere from just below the skin surface to deep in muscle\n\n"
+            "Study all annotated examples carefully — note the wide range of sizes and positions."
+        )}]
+        for b64 in self._vein_ctx_b64:
+            ref_content.append({"type": "image_url",
+                                 "image_url": {"url": f"data:image/jpeg;base64,{b64}"}})
+
+        self._vein_ctx_msgs = [
+            {"role": "user", "content": ref_content},
+            {"role": "assistant", "content": (
+                "I have studied all the annotated reference frames carefully. I can see vessels of "
+                "various sizes — from small dark dots (~10-20px) to large black circles (~60-100px) "
+                "— all marked with cyan boxes. I will now detect every similar dark anechoic oval "
+                "in new frames, including small ones, and output tight bounding boxes."
+            )},
+        ]
+        print(f"PipelineB: vein few-shot context built — {len(self._vein_ctx_b64)} frames "
+              f"({len(buckets['large'])} large / {len(buckets['medium'])} medium / "
+              f"{len(buckets['small'])} small available).")
 
     def ensure_loaded(self):
         if self._tried:
@@ -934,6 +1090,73 @@ class PipelineB:
                 return self._sam_refine_dets(bgr, dets)
         return []
 
+    def detect_veins_cv(self, bgr, max_area=4000):
+        """
+        Strict dark-blob detector. Two threshold passes (very dark only) to minimise
+        false positives from speckle noise and muscle striation.
+        """
+        vis = cv2.resize(bgr, (IMG_SIZE, IMG_SIZE))
+        gray = cv2.cvtColor(vis, cv2.COLOR_BGR2GRAY)
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(4, 4))
+        gray_enh = clahe.apply(gray)
+        blurred = cv2.GaussianBlur(gray_enh, (7, 7), 0)
+
+        dets = []
+        seen_centers = []
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+
+        # Only two passes at dark thresholds — the old pass at 80 captured muscle
+        # striations and generated most of the false positives
+        for thresh_val in (42, 60):
+            _, thresh = cv2.threshold(blurred, thresh_val, 255, cv2.THRESH_BINARY_INV)
+            thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN,  kernel)
+            thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+            thresh[:int(IMG_SIZE * 0.10), :] = 0   # skip probe coupling line
+
+            contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            for cnt in contours:
+                area = cv2.contourArea(cnt)
+                if area < 150 or area > max_area:   # was 55 — raised to reject speckle
+                    continue
+                x, y, w, h = cv2.boundingRect(cnt)
+
+                # Minimum dimensions: raise to 12 to eliminate tiny noise blobs
+                if w < 12 or h < 12:   # was 8
+                    continue
+
+                # Allow up to 5:1 for longitudinal veins
+                aspect = max(w, h) / max(min(w, h), 1)
+                if aspect > 5.0:
+                    continue
+
+                # Circularity — relaxed to handle longitudinal oval shapes
+                perimeter = cv2.arcLength(cnt, True)
+                if perimeter == 0:
+                    continue
+                if 4 * np.pi * area / (perimeter * perimeter) < 0.28:
+                    continue
+
+                # Strict interior darkness — real vein lumens are near-black (~20-50).
+                # Raising from 75 to 60 rejects muscle striation (mid-grey ~80-120).
+                mask_cnt = np.zeros(gray_enh.shape, np.uint8)
+                cv2.drawContours(mask_cnt, [cnt], -1, 255, cv2.FILLED)
+                mean_inside = float(cv2.mean(gray_enh, mask=mask_cnt)[0])
+                if mean_inside > 60:   # was 75 — fascia ~200, muscle ~100, vein ~20-55
+                    continue
+
+                cx_c, cy_c = x + w // 2, y + h // 2
+                if any(abs(cx_c - sc[0]) < 16 and abs(cy_c - sc[1]) < 16
+                       for sc in seen_centers):
+                    continue
+                seen_centers.append((cx_c, cy_c))
+
+                dets.append({
+                    'bbox':     (x, y, w, h),
+                    'centroid': (float(cx_c), float(cy_c)),
+                    'area':     int(area),
+                })
+        return nms(dets)
+
     def _sam_refine_dets(self, bgr, gdino_dets):
         """
         Refine GDINO bounding boxes with SAM segmentation.
@@ -997,7 +1220,8 @@ class PipelineB:
             print(f"PipelineB SAM refine error: {e}")
             return gdino_dets
 
-    def _gdino_detect(self, bgr, min_area):
+    def _gdino_detect(self, bgr, min_area, box_threshold=0.20, max_dim=None,
+                      text=None, max_aspect=4, edge_skip_frac=0.08):
         try:
             import torch
             from PIL import Image as PILImage
@@ -1007,7 +1231,7 @@ class PipelineB:
 
             inputs = proc(
                 images=pil,
-                text="vein . dark oval blood vessel . anechoic structure",
+                text=text or "vein . dark oval blood vessel . anechoic structure",
                 return_tensors="pt",
             ).to(dev)
 
@@ -1020,15 +1244,16 @@ class PipelineB:
                 results = proc.post_process_grounded_object_detection(
                     outputs, inputs.input_ids, target_sizes=[(h0, w0)]
                 )[0]
-                keep = results['scores'].cpu() >= 0.20
+                keep = results['scores'].cpu() >= box_threshold
                 results = {'boxes': results['boxes'][keep]}
             except TypeError:
                 results = proc.post_process_grounded_object_detection(
                     outputs, inputs.input_ids,
-                    box_threshold=0.20, text_threshold=0.15, target_sizes=[(h0, w0)]
+                    box_threshold=box_threshold, text_threshold=box_threshold * 0.75,
+                    target_sizes=[(h0, w0)],
                 )[0]
 
-            edge_skip = int(IMG_SIZE * 0.08)   # ignore scan-border region at top
+            edge_skip = int(IMG_SIZE * edge_skip_frac)
             dets = []
             for box in results['boxes'].cpu().numpy():
                 x1, y1, x2, y2 = box
@@ -1039,14 +1264,17 @@ class PipelineB:
                 area = bw * bh
                 if area < min_area:
                     continue
-                # Reject full-scan false positives: boxes covering >40% of image
+                # Reject full-scan false positives
                 if area > IMG_SIZE * IMG_SIZE * 0.40:
                     continue
-                # Reject scan-border artifacts: too close to top edge
+                # Reject scan-border artifacts
                 if y < edge_skip:
                     continue
-                # Veins are roughly oval — reject very wide flat bars (bw > 4×bh)
-                if bh > 0 and bw > bh * 4:
+                # Reject extremely elongated shapes (caller sets max_aspect)
+                if bh > 0 and bw > bh * max_aspect:
+                    continue
+                # Optional per-call max dimension filter
+                if max_dim is not None and (bw > max_dim or bh > max_dim):
                     continue
                 dets.append({
                     'bbox':     (x, y, bw, bh),
@@ -1268,6 +1496,10 @@ def frame_to_b64(bgr):
     return base64.b64encode(buf.tobytes()).decode()
 
 # ── API Routes ────────────────────────────────────────────────────────────────
+@app.route('/api/ping')
+def ping():
+    return jsonify({'ok': True, 'store_keys': list(_store.keys())})
+
 @app.route('/api/upload', methods=['POST'])
 def upload():
     f = request.files.get('video')
@@ -1448,28 +1680,25 @@ def process_dl(upload_id):
     return _process_view(upload_id, _dl_fascia_fn, _dl_vein_fn)
 
 
-VLM_DETECT_INTERVAL = 5   # run VLM every 5 processed frames (~1s at 5fps)
-
-
-def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key, vlm_model_nm):
+def _make_generate_foundation(upload_id, target_fps):
     """
-    Foundation Pipeline generate loop.
-
-    Every processed frame the VLM (EchoVLM or Groq) receives the current frame
-    alongside few-shot reference images and returns:
-      • fascia_y  — row of fascia centre in 256-px space
-      • veins     — bounding boxes + N1/N2/N3 labels
-    SAM refines the VLM fascia_y into a smooth per-column curved band.
-    When VLM finds nothing, GDINO+SAM runs as fallback.
+    Foundation Pipeline: GDINO+SAM for fascia (curved per-column boundary),
+    GDINO with brightness filter for veins. N1/N2/N3 classification is purely
+    geometric (position relative to fascia band). No VLM calls.
     """
-    try:
-        groq_client = _make_groq(groq_key) if (groq_key or DEFAULT_GROQ_KEY) else None
-    except Exception as e:
-        print(f"Groq unavailable for foundation pipeline: {e}")
-        groq_client = None
+    if _pipe_b._gdino is None:
+        _pipe_b._load_gdino()
+    if _pipe_b._sam is None:
+        _pipe_b._load_sam()
 
-    _pipe_b.ensure_loaded()
     tmp_path = _store[upload_id]['tmp_path']
+
+    GDINO_VEIN_TEXT = (
+        "blood vessel . vein . dark anechoic oval . dark hypoechoic tube . "
+        "dark elongated vessel . dark circular vessel . "
+        "dark horizontal band . dark anechoic region . dark tube"
+    )
+    MAX_VEIN_AREA = IMG_SIZE * IMG_SIZE * 0.15
 
     def generate():
         cap     = cv2.VideoCapture(tmp_path)
@@ -1490,10 +1719,10 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
         proc_idx       = 0
         scan_xl_m      = None
         scan_xr_m      = None
-
-        vlm_vein_dets  = []  # most-recent vein detections from VLM (have 'vlm_label')
-        vlm_fascia_buf = []  # smoothing buffer: VLM fascia_y refined through SAM
-        gdino_fascia_buf = []  # smoothing buffer: GDINO+SAM fascia (fallback when VLM misses)
+        fascia_buf     = []   # (top_y_arr, bot_y_arr) per processed frame
+        last_vein_dets = []
+        vein_prop_cnt  = 0
+        MAX_PROP       = 4
 
         yield f"data: {json.dumps({'type':'meta','total':n_proc,'src_fps':src_fps,'skip':skip})}\n\n"
 
@@ -1503,93 +1732,71 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
                 break
 
             if raw_idx % skip == 0:
-                w0 = frame.shape[1]
+                w0  = frame.shape[1]
+                vis = cv2.resize(frame, (IMG_SIZE, IMG_SIZE))
 
                 if scan_xl_m is None:
                     xl_px, xr_px = get_scan_x_limits(frame)
                     scan_xl_m = max(0, round(xl_px * IMG_SIZE / w0))
                     scan_xr_m = min(IMG_SIZE, round(xr_px * IMG_SIZE / w0))
 
-                # ── Combined VLM detection ────────────────────────────────────────
-                # EchoVLM (ultrasound-specific, local) takes priority over Groq.
-                # Falls back to Groq when EchoVLM is unavailable (no GPU / not installed).
-                vlm_available = _pipe_b._echovlm is not None or groq_client is not None
-                if vlm_available and (proc_idx % VLM_DETECT_INTERVAL == 0):
-                    if _pipe_b._echovlm is not None:
-                        # Submit frame to background thread (drop if already busy)
-                        try:
-                            _pipe_b._echovlm_queue.put_nowait(frame.copy())
-                        except queue.Full:
-                            pass
-                        # Read last cached result (non-blocking)
-                        with _pipe_b._echovlm_lock:
-                            fy, vd = _pipe_b._echovlm_cache
-                        # Cache is empty (EchoVLM still warming up) — use Groq for this frame
-                        if fy is None and not vd and groq_client is not None:
-                            print(f"[Groq VLM] frame {proc_idx}: EchoVLM warming up, Groq fallback")
-                            fy, vd = _pipe_b.vlm_detect_classify(frame, groq_client, vlm_model_nm)
-                        else:
-                            print(f"[EchoVLM] frame {proc_idx}: using cached result")
-                    else:
-                        print(f"[Groq VLM] frame {proc_idx}: few-shot detect "
-                              f"({len(_pipe_b._few_shot_b64)} ref images)")
-                        fy, vd = _pipe_b.vlm_detect_classify(frame, groq_client, vlm_model_nm)
-                    print(f"[Foundation VLM] fascia_y={fy}, veins={len(vd)}")
-                    if fy is not None:
-                        t, b = _pipe_b._fascia_from_sam(frame, fy,
-                                                        scan_xl_m=scan_xl_m,
-                                                        scan_xr_m=scan_xr_m)
-                        if t is None:
-                            # SAM unavailable or mask too sparse — draw flat line at VLM's y
-                            half = 8
-                            x_lo_f = max(0, scan_xl_m)
-                            x_hi_f = min(IMG_SIZE, scan_xr_m)
-                            fy_c = int(np.clip(fy, half, IMG_SIZE - 1 - half))
-                            t = np.full(IMG_SIZE, np.nan, np.float32)
-                            b = np.full(IMG_SIZE, np.nan, np.float32)
-                            t[x_lo_f:x_hi_f] = float(fy_c - half)
-                            b[x_lo_f:x_hi_f] = float(fy_c + half)
-                            print(f"[Foundation] SAM unavailable — flat fascia line at y={fy_c}")
-                        vlm_fascia_buf.append((t, b))
-                        if len(vlm_fascia_buf) > FASCIA_SMOOTH:
-                            vlm_fascia_buf.pop(0)
-                    if vd:
-                        vlm_vein_dets = vd
+                # ── Fascia: GDINO → SAM ───────────────────────────────────────
+                top_y_raw, bot_y_raw = _pipe_b.detect_fascia(vis, scan_xl_m, scan_xr_m)
+                if top_y_raw is not None:
+                    fascia_buf.append((top_y_raw, bot_y_raw))
+                    if len(fascia_buf) > FASCIA_SMOOTH:
+                        fascia_buf.pop(0)
 
-                # ── Fascia: VLM buffer takes priority; brightness is independent fallback ──
-                # Keeping VLM and brightness results in separate buffers prevents them
-                # from polluting each other's median when they disagree on fascia position.
-                if vlm_fascia_buf:
+                if fascia_buf:
                     import warnings
                     with warnings.catch_warnings():
                         warnings.simplefilter("ignore", RuntimeWarning)
-                        s_top = np.nanmedian(np.stack([f[0] for f in vlm_fascia_buf]), axis=0).astype(np.float32)
-                        s_bot = np.nanmedian(np.stack([f[1] for f in vlm_fascia_buf]), axis=0).astype(np.float32)
-                    # Columns that are all-NaN (outside scan area) stay NaN — draw_frame skips them
+                        s_top = np.nanmedian(np.stack([f[0] for f in fascia_buf]), axis=0).astype(np.float32)
+                        s_bot = np.nanmedian(np.stack([f[1] for f in fascia_buf]), axis=0).astype(np.float32)
+                    # Extra smoothing to remove SAM per-column noise
+                    valid = ~np.isnan(s_top)
+                    if valid.sum() > 10:
+                        xs_s = np.where(valid)[0].astype(np.float32)
+                        x_lo_s, x_hi_s = int(xs_s.min()), int(xs_s.max())
+                        rng_s = np.arange(x_lo_s, x_hi_s + 1, dtype=np.float32)
+                        s_top[x_lo_s:x_hi_s+1] = uniform_filter1d(
+                            np.interp(rng_s, xs_s, s_top[valid]), 100).astype(np.float32)
+                        s_bot[x_lo_s:x_hi_s+1] = uniform_filter1d(
+                            np.interp(rng_s, xs_s, s_bot[valid]), 100).astype(np.float32)
                 else:
-                    top_y, bot_y = _pipe_b.detect_fascia(frame, scan_xl_m, scan_xr_m)
-                    if top_y is not None:
-                        gdino_fascia_buf.append((top_y, bot_y))
-                        if len(gdino_fascia_buf) > FASCIA_SMOOTH:
-                            gdino_fascia_buf.pop(0)
-                    if gdino_fascia_buf:
-                        import warnings
-                        with warnings.catch_warnings():
-                            warnings.simplefilter("ignore", RuntimeWarning)
-                            s_top = np.nanmedian(np.stack([f[0] for f in gdino_fascia_buf]), axis=0).astype(np.float32)
-                            s_bot = np.nanmedian(np.stack([f[1] for f in gdino_fascia_buf]), axis=0).astype(np.float32)
-                    else:
-                        s_top = s_bot = None
+                    s_top = s_bot = None
 
-                # ── Veins: on VLM frames use VLM boxes; on all other frames run
-                # fresh GDINO/SAM so the tracker never gets stale positions ──
-                if vlm_available and (proc_idx % VLM_DETECT_INTERVAL == 0) and vlm_vein_dets:
-                    dets = vlm_vein_dets
+                # ── Veins: GDINO with CLAHE + brightness filter ───────────────
+                lab = cv2.cvtColor(vis, cv2.COLOR_BGR2LAB)
+                lab[:, :, 0] = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8)).apply(lab[:, :, 0])
+                vis_enh  = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+                gray_vis = cv2.cvtColor(vis_enh, cv2.COLOR_BGR2GRAY)
+
+                dets_raw = _pipe_b._gdino_detect(
+                    vis, min_area=60, box_threshold=0.06,
+                    text=GDINO_VEIN_TEXT, max_aspect=15, edge_skip_frac=0.03,
+                )
+                dets = []
+                for d in dets_raw:
+                    x, y, w, h = [int(v) for v in d['bbox']]
+                    if w * h > MAX_VEIN_AREA or y + h > IMG_SIZE - 6:
+                        continue
+                    margin = max(2, min(w, h) // 6)
+                    roi = gray_vis[y+margin:y+h-margin, x+margin:x+w-margin]
+                    if roi.size > 0 and 10 < float(roi.mean()) < 90:
+                        cx_d = float(x + w / 2)
+                        cy_d = float(y + h / 2)
+                        dets.append({'bbox': (x, y, w, h), 'centroid': (cx_d, cy_d), 'area': w * h})
+                dets = nms(dets)
+
+                if dets:
+                    last_vein_dets = dets;  vein_prop_cnt = 0
+                elif last_vein_dets and vein_prop_cnt < MAX_PROP:
+                    dets = last_vein_dets;  vein_prop_cnt += 1
                 else:
-                    dets = _pipe_b.detect_veins(frame, min_area)
+                    vein_prop_cnt += 1
 
-                # Remove any detection whose centroid is below the fascia band —
-                # same anatomical constraint as the DL pipeline.
+                # Drop detections below the fascia band
                 if s_bot is not None:
                     dets = [d for d in dets
                             if np.isnan(s_bot[int(np.clip(d['centroid'][0], 0, IMG_SIZE - 1))])
@@ -1606,41 +1813,19 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
                 if len(ghost_labels) > 40:
                     ghost_labels = ghost_labels[-40:]
 
-                # Classify: geometric > VLM-embedded label > ghost label
+                # Classify geometrically (N1/N2/N3) once track is 2 frames old
                 for r in track_recs:
                     if s_top is not None and r['age'] >= 2:
                         geo = geometric_classify(r['cx'], r['cy'], s_top, s_bot)
                         if geo != 'unknown':
                             track_labels[r['track_id']] = geo
                     elif r['track_id'] not in track_labels:
-                        # Use the VLM label that arrived with the detection
-                        matched = next(
-                            (d for d in dets
-                             if 'vlm_label' in d
-                             and abs(d['centroid'][0] - r['cx']) < 20
-                             and abs(d['centroid'][1] - r['cy']) < 20),
-                            None
-                        )
-                        if matched:
-                            track_labels[r['track_id']] = matched['vlm_label']
-                        else:
-                            for gcx, gcy, glbl in reversed(ghost_labels):
-                                if abs(r['cx'] - gcx) < 60 and abs(r['cy'] - gcy) < 60:
-                                    track_labels[r['track_id']] = glbl; break
+                        for gcx, gcy, glbl in reversed(ghost_labels):
+                            if abs(r['cx'] - gcx) < 60 and abs(r['cy'] - gcy) < 60:
+                                track_labels[r['track_id']] = glbl; break
 
                 known_tids     = current_tids
                 last_centroids = {r['track_id']: (r['cx'], r['cy']) for r in track_recs}
-
-                # Standalone VLM classification for any still-unknown tracks
-                # Only falls back to Groq here — EchoVLM classification happens
-                # inside vlm_detect_classify_echo via the vlm_label field.
-                unclassified = [r for r in track_recs
-                                if track_labels.get(r['track_id'], 'unknown') == 'unknown']
-                if use_vlm and groq_client and unclassified:
-                    raw_vlm = vlm_classify(frame, unclassified, s_top, s_bot, groq_client, vlm_model_nm)
-                    for idx, label in raw_vlm.items():
-                        if 1 <= idx <= len(unclassified):
-                            track_labels[unclassified[idx - 1]['track_id']] = label
 
                 for r in track_recs:
                     r['label']     = track_labels.get(r['track_id'], 'unknown')
@@ -1675,12 +1860,8 @@ def _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key
 def process_foundation(upload_id):
     if upload_id not in _store:
         return jsonify({'error': 'Unknown upload_id'}), 404
-    target_fps   = float(request.args.get('fps', 5))
-    min_area     = int(request.args.get('min_area', 150))
-    use_vlm      = request.args.get('use_vlm', 'true').lower() == 'true'
-    groq_key     = request.args.get('groq_key', '')
-    vlm_model_nm = request.args.get('vlm_model', 'meta-llama/llama-4-scout-17b-16e-instruct')
-    generate = _make_generate_foundation(upload_id, target_fps, min_area, use_vlm, groq_key, vlm_model_nm)
+    target_fps = float(request.args.get('fps', 5))
+    generate   = _make_generate_foundation(upload_id, target_fps)
     return Response(generate(),
                     mimetype='text/event-stream',
                     headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
@@ -1791,19 +1972,14 @@ def test_fascia(upload_id):
 def test_veins(upload_id):
     if upload_id not in _store:
         return jsonify({'error': 'Not found'}), 404
-    target_fps    = float(request.args.get('fps', 5))
-    groq_key_arg  = request.args.get('groq_key', DEFAULT_GROQ_KEY)
-    vlm_model_arg = request.args.get('vlm_model', 'meta-llama/llama-4-scout-17b-16e-instruct')
+    target_fps = float(request.args.get('fps', 5))
 
     def generate():
         cap = None
         try:
-            try:
-                from groq import Groq as _Groq
-                gc = _Groq(api_key=groq_key_arg)
-            except Exception as e:
-                print(f"[vein test] Groq init failed: {e}", flush=True)
-                gc = None
+            # Ensure Grounding DINO is loaded (only DINO — not the full pipeline)
+            if _pipe_b._gdino is None:
+                _pipe_b._load_gdino()
 
             tmp_path = _store[upload_id]['tmp_path']
             cap      = cv2.VideoCapture(tmp_path)
@@ -1812,60 +1988,132 @@ def test_veins(upload_id):
             skip     = max(1, round(src_fps / target_fps))
             n_proc   = max(1, total // skip)
 
-            print(f"[vein test] start: total={total} skip={skip} n_proc={n_proc}", flush=True)
+            print(f"[vein test] start: total={total} skip={skip} n_proc={n_proc} "
+                  f"gdino={'yes' if _pipe_b._gdino else 'NO'}", flush=True)
             yield f"data: {json.dumps({'type':'meta','total':n_proc,'src_fps':src_fps})}\n\n"
 
-            raw_idx    = 0
-            proc_idx   = 0
-            scan_xl_m  = None
-            scan_xr_m  = None
-            fascia_buf = []
-            SMOOTH     = 5
+            raw_idx  = 0
+            proc_idx = 0
+
+            GDINO_VEIN_TEXT = (
+                "blood vessel . vein . dark anechoic oval . dark hypoechoic tube . "
+                "dark elongated vessel . dark circular vessel . "
+                "dark horizontal band . dark anechoic region . dark tube"
+            )
+
+            # Temporal propagation state — carry forward last detection for up
+            # to MAX_PROP frames when DINO finds nothing in the current frame.
+            # Handles the common case where DINO confidence dips just below
+            # threshold on a few frames of a steady vein.
+            MAX_PROP    = 4
+            last_dets   = []
+            prop_count  = 0
 
             while True:
                 ret, frame = cap.read()
                 if not ret:
                     break
                 if raw_idx % skip == 0:
-                    w0 = frame.shape[1]
-                    if scan_xl_m is None:
-                        xl_px, xr_px = get_scan_x_limits(frame)
-                        scan_xl_m = max(0, round(xl_px * IMG_SIZE / w0))
-                        scan_xr_m = min(IMG_SIZE, round(xr_px * IMG_SIZE / w0))
+                    vis = cv2.resize(frame, (IMG_SIZE, IMG_SIZE))
 
-                    fy, vd = _pipe_b.vlm_detect_classify(frame, gc, vlm_model_arg)
-                    print(f"[vein test] frame {proc_idx}: fy={fy} veins={len(vd)}", flush=True)
+                    # CLAHE enhance for darkness filter
+                    lab = cv2.cvtColor(vis, cv2.COLOR_BGR2LAB)
+                    lab[:, :, 0] = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8)).apply(lab[:, :, 0])
+                    vis_enh = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+                    gray_vis = cv2.cvtColor(vis_enh, cv2.COLOR_BGR2GRAY)
 
-                    if fy is not None:
-                        fascia_buf.append(fy)
-                        if len(fascia_buf) > SMOOTH:
-                            fascia_buf.pop(0)
-                    fy_smooth = int(round(float(np.median(fascia_buf)))) if fascia_buf else fy
+                    # ── Primary: Grounding DINO ───────────────────────────────
+                    dets_raw = []
+                    if _pipe_b._gdino is not None:
+                        dets_raw = _pipe_b._gdino_detect(
+                            vis, min_area=60, box_threshold=0.06,
+                            text=GDINO_VEIN_TEXT,
+                            max_aspect=15,
+                            edge_skip_frac=0.03,
+                        )
 
-                    top_y = bot_y = None
-                    if fy_smooth is not None:
-                        half  = 8
-                        x_lo  = max(0, scan_xl_m)
-                        x_hi  = min(IMG_SIZE, scan_xr_m)
-                        fy_c  = int(np.clip(fy_smooth, half, IMG_SIZE - 1 - half))
-                        top_y = np.full(IMG_SIZE, np.nan, np.float32)
-                        bot_y = np.full(IMG_SIZE, np.nan, np.float32)
-                        top_y[x_lo:x_hi] = float(fy_c - half)
-                        bot_y[x_lo:x_hi] = float(fy_c + half)
+                    # ── Darkness + size/edge filter ───────────────────────────
+                    MAX_VEIN_AREA = IMG_SIZE * IMG_SIZE * 0.15  # 9830 px²
+                    dets = []
+                    for d in dets_raw:
+                        x, y, w, h = [int(v) for v in d['bbox']]
+                        # Reject huge boxes — scan-border artifacts, not veins
+                        if w * h > MAX_VEIN_AREA:
+                            continue
+                        # Reject boxes that kiss the bottom edge (machine UI panel)
+                        if y + h > IMG_SIZE - 6:
+                            continue
+                        margin = max(2, min(w, h) // 6)
+                        roi = gray_vis[y+margin:y+h-margin, x+margin:x+w-margin]
+                        if roi.size > 0:
+                            m = float(roi.mean())
+                            if 10 < m < 90:
+                                dets.append(d)
+                    dets = nms(dets)
 
-                    records = [
-                        {'track_id': i + 1,
-                         'x': int(d['bbox'][0]), 'y': int(d['bbox'][1]),
-                         'w': int(d['bbox'][2]), 'h': int(d['bbox'][3]),
-                         'label': d.get('vlm_label', 'N2')}
-                        for i, d in enumerate(vd)
-                    ]
+                    # ── Temporal propagation ──────────────────────────────────
+                    # If DINO found nothing but we had a detection recently,
+                    # carry the last known boxes forward (vein didn't disappear,
+                    # DINO just lost confidence for a frame or two).
+                    if dets:
+                        last_dets  = dets
+                        prop_count = 0
+                        src = 'DINO'
+                    elif last_dets and prop_count < MAX_PROP:
+                        dets       = last_dets
+                        prop_count += 1
+                        src = f'prop({prop_count})'
+                    else:
+                        prop_count += 1
+                        src = 'none'
 
-                    annotated = draw_frame(frame, records, top_y, bot_y)
-                    b64       = frame_to_b64(annotated)
-                    vein_summary = [{'x': r['x'], 'y': r['y'], 'w': r['w'], 'h': r['h'],
-                                      'label': r['label']} for r in records]
-                    yield f"data: {json.dumps({'type':'frame','frame_idx':proc_idx,'total':n_proc,'image':b64,'fascia_y':fy_smooth,'veins':vein_summary})}\n\n"
+                    print(f"[vein test] frame {proc_idx}: {len(dets_raw)} DINO raw → "
+                          f"{len(dets)} [{src}]", flush=True)
+
+                    # Draw clean cyan boxes
+                    annotated = vis.copy()
+                    vein_summary = []
+                    for d in dets:
+                        x, y, w, h = [int(v) for v in d['bbox']]
+
+                        # Find the actual vein contour within the DINO box.
+                        # Find the dark region within the DINO box and fit
+                        # an ellipse to it — veins are oval/circular structures.
+                        roi = gray_vis[y:y+h, x:x+w]
+                        roi_mean = float(roi.mean())
+                        thresh_val = max(20, min(int(roi_mean * 0.75), 90))
+                        _, roi_bin = cv2.threshold(roi, thresh_val, 255, cv2.THRESH_BINARY_INV)
+                        roi_bin = cv2.GaussianBlur(roi_bin, (7, 7), 0)
+                        _, roi_bin = cv2.threshold(roi_bin, 127, 255, cv2.THRESH_BINARY)
+                        cnts, _ = cv2.findContours(roi_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                        drew_contour = False
+                        if cnts:
+                            cnt = max(cnts, key=cv2.contourArea)
+                            if cv2.contourArea(cnt) > 30:
+                                cnt_global = cnt + np.array([[[x, y]]])
+                                if len(cnt_global) >= 5:
+                                    # Fit a smooth ellipse — perfect for circular/oval veins
+                                    ellipse = cv2.fitEllipse(cnt_global)
+                                    cv2.ellipse(annotated, ellipse, (0, 255, 255), 2)
+                                    # Derive summary bbox from ellipse params
+                                    (ex, ey), (ea, eb), angle = ellipse
+                                    ew, eh = int(max(ea, eb)), int(min(ea, eb))
+                                    vein_summary.append({
+                                        'x': max(0, int(ex - ew/2)),
+                                        'y': max(0, int(ey - eh/2)),
+                                        'w': ew, 'h': eh,
+                                    })
+                                else:
+                                    cv2.drawContours(annotated, [cnt_global], -1, (0, 255, 255), 2)
+                                    rx, ry, rw, rh = cv2.boundingRect(cnt)
+                                    vein_summary.append({'x': x+rx, 'y': y+ry, 'w': rw, 'h': rh})
+                                drew_contour = True
+                        if not drew_contour:
+                            cv2.rectangle(annotated, (x, y), (x + w, y + h), (0, 255, 255), 2)
+                            vein_summary.append({'x': x, 'y': y, 'w': w, 'h': h})
+
+                    b64 = frame_to_b64(annotated)
+                    yield f"data: {json.dumps({'type':'frame','frame_idx':proc_idx,'total':n_proc,'image':b64,'veins':vein_summary})}\n\n"
                     proc_idx += 1
                 raw_idx += 1
 
@@ -1876,6 +2124,184 @@ def test_veins(upload_id):
             import traceback
             msg = traceback.format_exc()
             print(f"[vein test] EXCEPTION: {msg}", flush=True)
+            yield f"data: {json.dumps({'type':'error','message':str(e)})}\n\n"
+            yield f"data: {json.dumps({'type':'done','total_processed':0})}\n\n"
+        finally:
+            if cap is not None:
+                cap.release()
+
+    return Response(generate(), mimetype='text/event-stream',
+                    headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+
+
+@app.route('/api/test/combined/<upload_id>', methods=['GET'])
+def test_combined(upload_id):
+    if upload_id not in _store:
+        return jsonify({'error': 'Not found'}), 404
+    target_fps = float(request.args.get('fps', 5))
+
+    def generate():
+        cap = None
+        try:
+            # GDINO for veins; GDINO + SAM for fascia curved boundary
+            if _pipe_b._gdino is None:
+                _pipe_b._load_gdino()
+            if _pipe_b._sam is None:
+                _pipe_b._load_sam()
+
+            tmp_path = _store[upload_id]['tmp_path']
+            cap      = cv2.VideoCapture(tmp_path)
+            src_fps  = cap.get(cv2.CAP_PROP_FPS) or 25
+            total    = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            skip     = max(1, round(src_fps / target_fps))
+            n_proc   = max(1, total // skip)
+
+            print(f"[combined test] start: n_proc={n_proc}", flush=True)
+            yield f"data: {json.dumps({'type':'meta','total':n_proc,'src_fps':src_fps})}\n\n"
+
+            GDINO_VEIN_TEXT = (
+                "blood vessel . vein . dark anechoic oval . dark hypoechoic tube . "
+                "dark elongated vessel . dark circular vessel . "
+                "dark horizontal band . dark anechoic region . dark tube"
+            )
+            MAX_VEIN_AREA = IMG_SIZE * IMG_SIZE * 0.15
+            MAX_PROP      = 4
+            last_dets     = []
+            prop_count    = 0
+            fascia_buf    = []   # list of (top_y_arr, bot_y_arr)
+            SMOOTH        = 5
+            FASCIA_COLOR  = (255, 255, 0)
+            VEIN_COLOR    = (0,   255, 255)
+            scan_xl_m     = None
+            scan_xr_m     = None
+
+            raw_idx  = 0
+            proc_idx = 0
+
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                if raw_idx % skip == 0:
+                    vis = cv2.resize(frame, (IMG_SIZE, IMG_SIZE))
+                    w0  = frame.shape[1]
+
+                    if scan_xl_m is None:
+                        xl_px, xr_px = get_scan_x_limits(frame)
+                        scan_xl_m = max(0, round(xl_px * IMG_SIZE / w0))
+                        scan_xr_m = min(IMG_SIZE, round(xr_px * IMG_SIZE / w0))
+
+                    # ── Fascia: GDINO → SAM (curved per-column boundary) ──────
+                    top_y_raw, bot_y_raw = _pipe_b.detect_fascia(vis, scan_xl_m, scan_xr_m)
+                    if top_y_raw is not None:
+                        fascia_buf.append((top_y_raw, bot_y_raw))
+                        if len(fascia_buf) > SMOOTH:
+                            fascia_buf.pop(0)
+
+                    if fascia_buf:
+                        top_y = np.nanmedian(np.stack([f[0] for f in fascia_buf]), axis=0).astype(np.float32)
+                        bot_y = np.nanmedian(np.stack([f[1] for f in fascia_buf]), axis=0).astype(np.float32)
+                        # Extra smoothing pass — SAM per-column output is noisy even after temporal median
+                        valid = ~np.isnan(top_y)
+                        if valid.sum() > 10:
+                            xs_s = np.where(valid)[0].astype(np.float32)
+                            x_lo_s, x_hi_s = int(xs_s.min()), int(xs_s.max())
+                            rng_s = np.arange(x_lo_s, x_hi_s + 1, dtype=np.float32)
+                            top_y[x_lo_s:x_hi_s+1] = uniform_filter1d(
+                                np.interp(rng_s, xs_s, top_y[valid]), 100).astype(np.float32)
+                            bot_y[x_lo_s:x_hi_s+1] = uniform_filter1d(
+                                np.interp(rng_s, xs_s, bot_y[valid]), 100).astype(np.float32)
+                        valid_top = top_y[~np.isnan(top_y)]
+                        fy_mid = int(np.mean(valid_top) + (np.nanmean(bot_y - top_y)) / 2) if len(valid_top) else None
+                    else:
+                        top_y = bot_y = None
+                        fy_mid = None
+
+                    # ── Vein: GDINO ───────────────────────────────────────────
+                    lab = cv2.cvtColor(vis, cv2.COLOR_BGR2LAB)
+                    lab[:, :, 0] = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8)).apply(lab[:, :, 0])
+                    vis_enh  = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+                    gray_vis = cv2.cvtColor(vis_enh, cv2.COLOR_BGR2GRAY)
+
+                    dets_raw = _pipe_b._gdino_detect(
+                        vis, min_area=60, box_threshold=0.06,
+                        text=GDINO_VEIN_TEXT, max_aspect=15, edge_skip_frac=0.03,
+                    )
+
+                    dets = []
+                    for d in dets_raw:
+                        x, y, w, h = [int(v) for v in d['bbox']]
+                        if w * h > MAX_VEIN_AREA or y + h > IMG_SIZE - 6:
+                            continue
+                        margin = max(2, min(w, h) // 6)
+                        roi = gray_vis[y+margin:y+h-margin, x+margin:x+w-margin]
+                        if roi.size > 0:
+                            m = float(roi.mean())
+                            if 10 < m < 90:
+                                dets.append(d)
+                    dets = nms(dets)
+
+                    if dets:
+                        last_dets = dets;  prop_count = 0
+                    elif last_dets and prop_count < MAX_PROP:
+                        dets = last_dets;  prop_count += 1
+                    else:
+                        prop_count += 1
+
+                    # ── Draw ─────────────────────────────────────────────────
+                    annotated = vis.copy()
+
+                    # Fascia: curved polylines from SAM per-column boundary
+                    if top_y is not None:
+                        xs_v = [x for x in range(IMG_SIZE) if not np.isnan(top_y[x])]
+                        if len(xs_v) > 1:
+                            pts_top = np.array([[x, int(top_y[x])] for x in xs_v], np.int32)
+                            pts_bot = np.array([[x, int(bot_y[x])] for x in xs_v], np.int32)
+                            cv2.polylines(annotated, [pts_top], False, FASCIA_COLOR, 2)
+                            cv2.polylines(annotated, [pts_bot], False, FASCIA_COLOR, 2)
+
+                    # Veins: yellow ellipses
+                    vein_summary = []
+                    for d in dets:
+                        x, y, w, h = [int(v) for v in d['bbox']]
+                        roi        = gray_vis[y:y+h, x:x+w]
+                        roi_mean   = float(roi.mean())
+                        thresh_val = max(20, min(int(roi_mean * 0.75), 90))
+                        _, roi_bin = cv2.threshold(roi, thresh_val, 255, cv2.THRESH_BINARY_INV)
+                        roi_bin    = cv2.GaussianBlur(roi_bin, (7, 7), 0)
+                        _, roi_bin = cv2.threshold(roi_bin, 127, 255, cv2.THRESH_BINARY)
+                        cnts, _    = cv2.findContours(roi_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                        drew = False
+                        if cnts:
+                            cnt = max(cnts, key=cv2.contourArea)
+                            if cv2.contourArea(cnt) > 30:
+                                cnt_g = cnt + np.array([[[x, y]]])
+                                if len(cnt_g) >= 5:
+                                    ellipse = cv2.fitEllipse(cnt_g)
+                                    cv2.ellipse(annotated, ellipse, VEIN_COLOR, 2)
+                                    (ex, ey), (ea, eb), _ = ellipse
+                                    ew, eh = int(max(ea, eb)), int(min(ea, eb))
+                                    vein_summary.append({'x': max(0, int(ex-ew/2)), 'y': max(0, int(ey-eh/2)), 'w': ew, 'h': eh})
+                                else:
+                                    cv2.drawContours(annotated, [cnt_g], -1, VEIN_COLOR, 2)
+                                    rx, ry, rw, rh = cv2.boundingRect(cnt)
+                                    vein_summary.append({'x': x+rx, 'y': y+ry, 'w': rw, 'h': rh})
+                                drew = True
+                        if not drew:
+                            cv2.rectangle(annotated, (x, y), (x+w, y+h), VEIN_COLOR, 2)
+                            vein_summary.append({'x': x, 'y': y, 'w': w, 'h': h})
+
+                    b64 = frame_to_b64(annotated)
+                    yield f"data: {json.dumps({'type':'frame','frame_idx':proc_idx,'total':n_proc,'image':b64,'fascia_y':fy_mid,'veins':vein_summary})}\n\n"
+                    proc_idx += 1
+                raw_idx += 1
+
+            print(f"[combined test] done: {proc_idx} frames", flush=True)
+            yield f"data: {json.dumps({'type':'done','total_processed':proc_idx})}\n\n"
+
+        except Exception as e:
+            import traceback
+            print(f"[combined test] EXCEPTION: {traceback.format_exc()}", flush=True)
             yield f"data: {json.dumps({'type':'error','message':str(e)})}\n\n"
             yield f"data: {json.dumps({'type':'done','total_processed':0})}\n\n"
         finally:

@@ -87,8 +87,8 @@ def register_stream_events(socketio) -> None:
 
             # Only skip if a significantly newer request has arrived AND it's
             # already been processed.  Use a looser check: discard only if
-            # generation advanced by more than 3 (prevents last-result starvation).
-            if sess.generation > req_gen + 3:
+            # generation advanced by more than 6 (prevents last-result starvation).
+            if sess.generation > req_gen + 6:
                 return
 
             # Nothing new computed — don't spam the client

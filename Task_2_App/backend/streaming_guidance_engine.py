@@ -82,6 +82,28 @@ At each turn, consider:
   — VLM: does the current frame show something actionable right here, or should I reposition?
 The guidance is the intersection of all five. If they agree → confidence is high. If they conflict → favour the signal with the most specific anatomical evidence (a visible structure on VLM or a confirmed clip at a specific posY).
 
+━━━ STEP ZERO — CHECK CURRENT POSITION FIRST (MANDATORY, before any other reasoning) ━━━
+
+Before choosing action or direction, ask: "Is the probe ALREADY at an unassessed location?"
+
+SFJ ZONE CHECK: If posY is 0.04–0.09 AND CONFIRMED FINDINGS contains no EP clips at all:
+  → The probe is already at the saphenofemoral junction — the primary Q1 candidate.
+  → Stay here. Output a transverse-scan instruction for the groin crease.
+  → {"guidance": "Scan transversely at groin crease to assess femoral junction", "action": "move"}
+  → FORBIDDEN: any guidance containing "distally", "mid-thigh", "thigh", or moving away from posY 0.04–0.09.
+
+TYPE 4 CHECK: If CONFIRMED FINDINGS contains EP N1→N3 AND RP N2→N1:
+  → Type 4 circuit is closed. No remaining open question.
+  → {"guidance": "Circuit mapped — sufficient findings for classification", "action": "complete"}
+  → FORBIDDEN: any "move" output when both EP N1→N3 and RP N2→N1 are confirmed.
+
+MANEUVER CHECK: If CONFIRMED FINDINGS contains EP N2→N3 AND RP N3→N1 AND RP N2→N1,
+  AND no EP N2→N3 clip has an elimTest value:
+  → Compression test is required. Output maneuver.
+  → {"guidance": "Compress tributary — record whether GSV Doppler changes", "action": "maneuver"}
+  → FORBIDDEN: any "complete" output when these three clips are present without elimTest.
+  → (complete for Type 3/1+2 requires elimTest on EP N2→N3 — that is the ONLY valid path to complete)
+
 ━━━ SPECIAL ACTIONS (override normal probe-move output) ━━━
 
 ELIMINATION TEST — action "maneuver"
@@ -93,14 +115,15 @@ Clinical purpose: if GSV reflux disappears on compression → "No Reflux" (Type 
 CIRCUIT COMPLETE — action "complete"
 Trigger: the clip set unambiguously closes a full shunt circuit with no remaining open Q.
 Minimum clip sets that close each circuit:
-  Type 1   → EP N1→N2 + RP N2→N1                                     (no EP N2→N3 present)
-  Type 3   → EP N1→N2 + EP N2→N3 + RP N3→N2                          OR EP N2→N3 + elimTest="No Reflux"
-  Type 1+2 → EP N1→N2 + EP N2→N3 + RP N3→N1 + RP N2→N1 + elimTest="Reflux"
-  Type 4   → EP N1→N3 + RP N2→N1
+  Type 1   → EP N1→N2 + RP N2→N1  [ONLY if NO EP N2→N3 clip exists in CONFIRMED FINDINGS]
+  Type 3   → EP N2→N3 clip where elimTest="No Reflux" is present in CONFIRMED FINDINGS
+  Type 1+2 → EP N2→N3 clip where elimTest="Reflux" is present in CONFIRMED FINDINGS
+  Type 4   → EP N1→N3 + RP N2→N1  [see STEP ZERO TYPE 4 CHECK above]
   Type 5   → EP N1→N3 + RP N3→N2 + EP N2→N3 + RP N3→N1
-  Type 6   → EP N1→N3 + RP N3→N1                                      (no RP N2→N1, no RP N3→N2)
-  Type 2B  → EP N2→N2 + RP N3→N1                                      (no RP N2→N1)
+  Type 6   → EP N1→N3 + RP N3→N1  [ONLY if NO RP N2→N1 and NO RP N3→N2 exist]
+  Type 2B  → EP N2→N2 + RP N3→N1  [ONLY if NO RP N2→N1]
   Type 2C  → EP N2→N2 + RP N3→N1 + RP N2→N1
+IMPORTANT: Type 3 and Type 1+2 are NEVER complete from clips alone — they require an elimTest on EP N2→N3.
 When triggered: {"guidance": "Circuit mapped — sufficient findings for classification", "action": "complete"}
 Only trigger "complete" when the circuit is definitively closed. Partial or ambiguous → continue "move".
 
@@ -126,14 +149,16 @@ Giacomini vein: posterior thigh, connects SSV to GSV. Assess separately from SPJ
 ━━━ CLIP TYPE → ANATOMICAL CONSEQUENCE ━━━
 EP N1→N2 at SFJ (posY 0.04–0.09)      → Entry at groin confirmed. Trace GSV distally along medial thigh.
 EP N1→N2 at Hunterian (posY 0.21–0.35)→ Entry via mid-thigh perforator; SFJ competent. Follow GSV distal.
-EP N1→N3 (any posY)                   → Deep-to-tributary direct escape; no trunk entry. Trace N3 distally
-                                          toward RP N3→N2 (intermediate, feeds trunk) or RP N3→N1 (direct re-entry).
+EP N1→N3 (any posY)                   → Deep-to-tributary direct escape; no trunk entry. SFJ is competent.
+                                          If RP N2→N1 also confirmed → TYPE 4 COMPLETE (see STEP ZERO).
+                                          Otherwise trace N3 distally toward RP N3→N2 or RP N3→N1.
 EP N2→N2 (any posY)                   → Perforator-fed trunk entry; SFJ competent. Check calf/thigh for
                                           tributary reflux (RP N3→N1) to distinguish Type 2B vs 2C.
                                           Also check for RP N2→N1 — if present, leans toward Type 2C.
 EP N2→N3 (any posY)                   → Trunk-to-tributary escape. Follow tributary distally to re-entry.
                                           When RP N3→N1 AND RP N2→N1 are also confirmed → perform elimination test.
-RP N2→N1 confirmed                    → Trunk reflux below EP confirmed. Now search for EP N2→N3 escape points.
+RP N2→N1 confirmed                    → FIRST: check if EP N1→N3 is also confirmed → if yes, TYPE 4 COMPLETE.
+                                          Otherwise: trunk reflux below EP confirmed; search distally for EP N2→N3.
 RP N3→N2 confirmed                    → Tributary drains into trunk at this level. Trace trunk further distal
                                           for EP N2→N3 or RP N2→N1. Circuit via trunk still open.
 RP N3→N1 confirmed                    → Tributary re-enters deep at this posY. Assess SSV side if unvisited.
@@ -175,14 +200,42 @@ IN CALF (posY 0.60–0.80):
   Re-entry perforators show inward flow during diastole (Paranà/squeeze release).
   Pathological perforator: outward flow ≥500 ms AND diameter ≥3.5 mm.
 
-━━━ OUTPUT RULES ━━━
-First determine action type from the special action rules above, then write guidance.
+━━━ CRITICAL PRIORITY RULES (evaluate BEFORE choosing action) ━━━
 
-action "maneuver" — ONLY when elimination test trigger condition is met (EP N2→N3 + RP N3→N1 + RP N2→N1 + no elimTest).
-action "complete" — ONLY when a minimum complete circuit set is confirmed and unambiguous.
+RULE 1 — SFJ ANCHORING:
+When current posY is 0.04–0.09 (SFJ zone) AND no EP clips appear in CONFIRMED FINDINGS:
+  → Q1 is open AND the probe is ALREADY at the primary Q1 candidate.
+  → Output action "move" instructing a TRANSVERSE scan of the femoral junction right here.
+  → DO NOT output any direction that moves away from the SFJ (no "distally", "mid-thigh", "thigh").
+  → Correct: {"guidance": "Scan transversely at groin crease to assess femoral junction", "action": "move"}
+  → Wrong:   {"guidance": "Move distally along medial thigh toward mid-thigh", "action": "move"}
+
+RULE 2 — DIRECTION AFTER RP N2→N1 CONFIRMED:
+When RP N2→N1 is present in CONFIRMED FINDINGS AND EP N2→N3 is NOT yet confirmed:
+  → Q3 is open. The surgeon must move DISTALLY to search for trunk-to-tributary escape.
+  → NEVER output "proximally", "toward groin", or any direction back toward the entry point.
+  → Always instruct distal movement from the RP confirmation site.
+
+RULE 3 — TYPE 4 CIRCUIT COMPLETE:
+When EP N1→N3 is confirmed AND RP N2→N1 is confirmed in CONFIRMED FINDINGS:
+  → Type 4 circuit is closed. Output action "complete" IMMEDIATELY.
+  → EP N1→N3 means entry is a perforator — the SFJ is competent by definition. Do NOT navigate to SFJ.
+  → {"guidance": "Circuit mapped — sufficient findings for classification", "action": "complete"}
+
+RULE 4 — MANEUVER TAKES ABSOLUTE PRIORITY OVER COMPLETE:
+When EP N2→N3 clip + RP N3→N1 clip + RP N2→N1 clip are ALL confirmed AND no elimTest on any EP N2→N3 clip:
+  → Output action "maneuver". This is non-negotiable.
+  → NEVER output "complete" under these exact conditions. The circuit is ambiguous (Type 3 vs Type 1+2) until
+    the elimination test is recorded. "complete" requires elimTest on the EP N2→N3 clip to resolve ambiguity.
+
+━━━ OUTPUT RULES ━━━
+First apply CRITICAL PRIORITY RULES above, then determine action type, then write guidance.
+
+action "maneuver" — ONLY when elimination test trigger condition is met (RULE 4).
+action "complete" — ONLY when a minimum complete circuit set is confirmed and unambiguous (RULE 3 or elimTest present).
 action "move"     — all other cases; one probe-movement instruction ≤12 words.
 
-For action "move": ALWAYS include a direction word: proximally / distally / medially / laterally / posteriorly / anteriorly / deeper / superficially. Name the specific target structure or region. Never mention EP, RP, reflux, Valsalva, shunt type, or any clinical finding.
+For action "move": include a position/direction word (proximally / distally / medially / laterally / posteriorly / anteriorly / transversely / deeper / superficially). Name the specific target structure or region. Never mention EP, RP, reflux, Valsalva, shunt type, or any clinical finding.
 
 JSON only — always include both fields:
 {"guidance": "<text>", "action": "move"}
@@ -190,10 +243,10 @@ JSON only — always include both fields:
 {"guidance": "Circuit mapped — sufficient findings for classification", "action": "complete"}
 
 Examples:
+{"guidance": "Scan transversely at groin crease to assess femoral junction", "action": "move"}
 {"guidance": "Move distally along medial thigh toward mid-thigh", "action": "move"}
 {"guidance": "Scan posteriorly at knee level for popliteal junction", "action": "move"}
 {"guidance": "Track medial calf distally following saphenous trunk", "action": "move"}
-{"guidance": "Move proximally to groin — scan femoral junction transversely", "action": "move"}
 {"guidance": "Rotate probe posteriorly at mid-calf to locate perforator", "action": "move"}
 {"guidance": "Follow N3 tributary distally on medial lower calf", "action": "move"}
 {"guidance": "Compress tributary at mid-thigh — record whether GSV Doppler changes", "action": "maneuver"}
@@ -230,6 +283,71 @@ def extract_frame_at(pos_y_ratio: float) -> Optional[str]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# RULE-BASED ACTION DETERMINATION (deterministic, before LLM call)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _rule_based_action(clips: list[dict]) -> tuple[str | None, str | None]:
+    """
+    Evaluate deterministic circuit-state rules against the confirmed clip set.
+    Returns (action, guidance) if a rule fires, (None, None) to fall through to LLM.
+
+    Rules are evaluated in priority order — maneuver before complete.
+    """
+    def has(flow, ft, tt):
+        return any(
+            c.get("flow") == flow and c.get("from_type") == ft and c.get("to_type") == tt
+            for c in clips
+        )
+
+    ep_n1_n2 = has("EP", "N1", "N2")
+    ep_n1_n3 = has("EP", "N1", "N3")
+    ep_n2_n3 = has("EP", "N2", "N3")
+    rp_n2_n1 = has("RP", "N2", "N1")
+    rp_n3_n1 = has("RP", "N3", "N1")
+    rp_n3_n2 = has("RP", "N3", "N2")
+
+    # Search for the first EP N2→N3 clip that HAS an elimTest value.
+    # (Surgeon may add a second EP N2→N3 clip with the elim result, leaving
+    # the original clip without one — so we skip empty ones.)
+    ep_n2_n3_elim = next(
+        (c.get("elimination_test", "") for c in clips
+         if c.get("flow") == "EP" and c.get("from_type") == "N2" and c.get("to_type") == "N3"
+         and c.get("elimination_test", "")),
+        ""
+    )
+    # True if NO EP N2→N3 clip has an elimTest (maneuver trigger condition)
+    ep_n2_n3_no_elim = ep_n2_n3 and not ep_n2_n3_elim
+
+    COMPLETE_MSG = "Circuit mapped — sufficient findings for classification"
+
+    # 1. Maneuver: all three trigger clips present, no elimTest yet on any EP N2→N3
+    if ep_n2_n3_no_elim and rp_n3_n1 and rp_n2_n1:
+        return "maneuver", "Compress tributary — record whether GSV Doppler changes"
+
+    # 2. Type 3 complete: elimination test recorded as No Reflux
+    if ep_n2_n3_elim == "No Reflux":
+        return "complete", COMPLETE_MSG
+
+    # 3. Type 1+2 complete: elimination test recorded as Reflux
+    if ep_n2_n3_elim == "Reflux":
+        return "complete", COMPLETE_MSG
+
+    # 4. Type 4 complete: direct perforator entry + trunk reflux
+    if ep_n1_n3 and rp_n2_n1:
+        return "complete", COMPLETE_MSG
+
+    # 5. Type 6 complete: perforator-to-perforator, no trunk
+    if ep_n1_n3 and rp_n3_n1 and not rp_n2_n1 and not rp_n3_n2:
+        return "complete", COMPLETE_MSG
+
+    # 6. Type 1 complete: SFJ/Hunterian entry + trunk reflux, no escape
+    if ep_n1_n2 and rp_n2_n1 and not ep_n2_n3:
+        return "complete", COMPLETE_MSG
+
+    return None, None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # STATE MESSAGE BUILDER
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -257,11 +375,23 @@ def build_state_message(
     else:
         clips_text = "  None confirmed yet."
 
+    # Position context hint — tells the model when it is already at a key site
+    if 0.04 <= pos_y <= 0.09 and not clips:
+        position_hint = (
+            "\n>>> POSITION ALERT: Probe is IN the SFJ zone right now (posY "
+            f"{pos_y:.2f}). This IS the primary Q1 candidate. "
+            "Output a transverse-scan instruction for the groin crease — "
+            "do NOT navigate away from this position. <<<"
+        )
+    else:
+        position_hint = ""
+
     return (
         f"PROBE STATE\n"
         f"Region: {region} | Surface: {surface} | Leg: {leg} | posY: {pos_y:.2f}\n\n"
         f"CONFIRMED FINDINGS\n{clips_text}\n\n"
         f"VLM FRAME ANNOTATION\n{vlm_summary}"
+        f"{position_hint}"
     )
 
 
@@ -367,15 +497,33 @@ def process_probe_state(
     run_llm = force_llm or abs(pos_y - session.last_llm_pos_y) >= STREAM_LLM_THRESHOLD
     if run_llm:
         state_msg = build_state_message(region, pos_y, surface, leg, session.clips, vlm_summary)
-        try:
-            guidance, raw, action = call_with_history(session, state_msg, GROQ_API_KEY, GROQ_TEXT_MODEL)
+
+        # --- Rule-based pre-check: deterministic circuit-state decisions ---
+        rule_action, rule_guidance = _rule_based_action(session.clips)
+
+        if rule_action:
+            # Skip LLM entirely for maneuver/complete — rules are authoritative
+            guidance = rule_guidance
+            raw      = f"[rule-based] action={rule_action}"
+            action   = rule_action
             session.last_llm_pos_y = pos_y
+            if action in ("complete", "maneuver"):
+                session.last_llm_pos_y = -1.0
             session.push_thinking(pos_y, region, state_msg, raw, guidance)
-        except Exception as exc:
-            logger.error("LLM error: %s", exc)
-            guidance = "Unable to generate guidance."
-            raw      = str(exc)
-            action   = "move"
+        else:
+            try:
+                guidance, raw, action = call_with_history(session, state_msg, GROQ_API_KEY, GROQ_TEXT_MODEL)
+                session.last_llm_pos_y = pos_y
+                # Reset position cache after terminal actions so the next probe_move
+                # always triggers a fresh LLM call (prevents timeout on final confirmation step)
+                if action in ("complete", "maneuver"):
+                    session.last_llm_pos_y = -1.0
+                session.push_thinking(pos_y, region, state_msg, raw, guidance)
+            except Exception as exc:
+                logger.error("LLM error: %s", exc)
+                guidance = "Unable to generate guidance."
+                raw      = str(exc)
+                action   = "move"
 
     return {
         "guidance":    guidance,
