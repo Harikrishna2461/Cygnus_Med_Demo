@@ -32,6 +32,11 @@ class StreamSession:
     last_vlm_summary: str = "No frame analyzed yet."
     last_llm_pos_y: float = -1.0
 
+    # Furthest distal posY the probe has reached this session.
+    # Used to gate Type 1/2A complete: the circuit is only declared closed
+    # after the surgeon has scanned at least to the popliteal zone.
+    max_visited_pos_y: float = 0.0
+
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
     # ── generation counter ────────────────────────────────────────────────────

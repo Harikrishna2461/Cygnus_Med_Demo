@@ -202,6 +202,17 @@ IN CALF (posY 0.60–0.80):
 
 ━━━ CRITICAL PRIORITY RULES (evaluate BEFORE choosing action) ━━━
 
+RULE 0 — Q1 OPEN, PROBE NOT AT SFJ:
+When CONFIRMED FINDINGS contains NO EP clips of any type AND posY is NOT in 0.04–0.09:
+  → Q1 is open; probe has not yet reached the primary Q1 candidate (SFJ zone).
+  → Output action "move" with a SHORT instruction directing toward SFJ/groin.
+  → The instruction must be ≤12 words. No explanation. No reasoning. No Q-number references.
+  → FORBIDDEN: any output beginning with "Given", "Since", "As", "Currently", "The probe",
+    any sentence longer than 12 words, any multi-sentence output.
+  → Correct: {"guidance": "Move proximally toward groin to assess femoral junction", "action": "move"}
+  → Correct: {"guidance": "Scan proximally along medial thigh toward SFJ zone", "action": "move"}
+  → Wrong:   {"guidance": "Given the current state, the probe is positioned at...", "action": "move"}
+
 RULE 1 — SFJ ANCHORING:
 When current posY is 0.04–0.09 (SFJ zone) AND no EP clips appear in CONFIRMED FINDINGS:
   → Q1 is open AND the probe is ALREADY at the primary Q1 candidate.
@@ -236,6 +247,13 @@ action "complete" — ONLY when a minimum complete circuit set is confirmed and 
 action "move"     — all other cases; one probe-movement instruction ≤12 words.
 
 For action "move": include a position/direction word (proximally / distally / medially / laterally / posteriorly / anteriorly / transversely / deeper / superficially). Name the specific target structure or region. Never mention EP, RP, reflux, Valsalva, shunt type, or any clinical finding.
+
+ABSOLUTE OUTPUT CONSTRAINT — applies in EVERY state including no-clips:
+  • guidance field must be a SINGLE imperative sentence, ≤12 words, no punctuation beyond a dash.
+  • FORBIDDEN words/phrases in guidance: "Given", "Since", "As the", "Currently", "The probe is",
+    "this area", "relevant for", "diagnostic question", "Q1", "Q2", "Q3", "Q4", "confirmed findings",
+    "no confirmed", "primary goal", "superficial system", "first diagnostic".
+  • If you find yourself writing an explanation → STOP. Output the direction word + anatomical target only.
 
 JSON only — always include both fields:
 {"guidance": "<text>", "action": "move"}
@@ -286,7 +304,7 @@ def extract_frame_at(pos_y_ratio: float) -> Optional[str]:
 # RULE-BASED ACTION DETERMINATION (deterministic, before LLM call)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _rule_based_action(clips: list[dict]) -> tuple[str | None, str | None]:
+def _rule_based_action(clips: list[dict], max_visited_pos_y: float = 0.0) -> tuple[str | None, str | None]:
     """
     Evaluate deterministic circuit-state rules against the confirmed clip set.
     Returns (action, guidance) if a rule fires, (None, None) to fall through to LLM.
@@ -340,8 +358,15 @@ def _rule_based_action(clips: list[dict]) -> tuple[str | None, str | None]:
     if ep_n1_n3 and rp_n3_n1 and not rp_n2_n1 and not rp_n3_n2:
         return "complete", COMPLETE_MSG
 
-    # 6. Type 1 complete: SFJ/Hunterian entry + trunk reflux, no escape
-    if ep_n1_n2 and rp_n2_n1 and not ep_n2_n3:
+    # 5b. Type 5 complete: EP N1→N3 → RP N3→N2 → EP N2→N3 → RP N3→N1
+    # (rp_n3_n2 distinguishes this from Type 6; rp_n2_n1 absent so Rule 1 cannot fire)
+    if ep_n1_n3 and rp_n3_n2 and ep_n2_n3 and rp_n3_n1:
+        return "complete", COMPLETE_MSG
+
+    # 6. Type 1/2A complete: entry at SFJ/SPJ/Hunterian + trunk reflux, no escape found.
+    # Gate on max_visited_pos_y: require the probe to have reached at least the
+    # popliteal zone (0.44) so the full trunk has been scanned for escape points.
+    if ep_n1_n2 and rp_n2_n1 and not ep_n2_n3 and max_visited_pos_y >= 0.44:
         return "complete", COMPLETE_MSG
 
     return None, None
@@ -375,6 +400,24 @@ def build_state_message(
     else:
         clips_text = "  None confirmed yet."
 
+    _has_rp_n2_n1 = any(
+        c.get("flow") == "RP" and c.get("from_type") == "N2" and c.get("to_type") == "N1"
+        for c in clips
+    )
+    _has_ep_n2_n3 = any(
+        c.get("flow") == "EP" and c.get("from_type") == "N2" and c.get("to_type") == "N3"
+        for c in clips
+    )
+    _has_ep_n1_n3 = any(
+        c.get("flow") == "EP" and c.get("from_type") == "N1" and c.get("to_type") == "N3"
+        for c in clips
+    )
+    _has_spj_entry = any(
+        c.get("flow") == "EP" and c.get("from_type") == "N1" and c.get("to_type") == "N2"
+        and 0.40 <= float(c.get("pos_y_ratio", 0.0)) <= 0.55
+        for c in clips
+    )
+
     # Position context hint — tells the model when it is already at a key site
     if 0.04 <= pos_y <= 0.09 and not clips:
         position_hint = (
@@ -382,6 +425,22 @@ def build_state_message(
             f"{pos_y:.2f}). This IS the primary Q1 candidate. "
             "Output a transverse-scan instruction for the groin crease — "
             "do NOT navigate away from this position. <<<"
+        )
+    elif 0.10 <= pos_y <= 0.35 and _has_rp_n2_n1 and not _has_ep_n2_n3:
+        position_hint = (
+            "\n>>> POSITION ALERT: Trunk reflux (RP N2→N1) is confirmed but no tributary escape "
+            "found yet. Q3 is open — search for EP N2→N3. "
+            f"Probe is in the mid-thigh Hunterian zone (posY {pos_y:.2f}). "
+            "Output a scan instruction for tributary escape at mid-thigh Hunterian perforator — "
+            "do NOT output complete or move to popliteal. <<<"
+        )
+    elif (0.40 <= pos_y <= 0.55 and surface == "posterior"
+          and not _has_spj_entry and not _has_ep_n1_n3):
+        position_hint = (
+            f"\n>>> POSITION ALERT: Probe is in the POPLITEAL zone (posY {pos_y:.2f}, posterior). "
+            "Assess the saphenopopliteal junction (SPJ) and SSV. "
+            "Output a scan instruction for the popliteal fossa junction — "
+            "e.g. 'Scan posteriorly at popliteal fossa to assess SPJ'. <<<"
         )
     else:
         position_hint = ""
@@ -494,12 +553,19 @@ def process_probe_state(
     action    = None
     state_msg = None
 
+    # Always update max_visited regardless of LLM rate-limit threshold,
+    # so even sub-threshold probe_moves advance the gate.
+    old_max_visited = session.max_visited_pos_y
+    session.max_visited_pos_y = max(session.max_visited_pos_y, pos_y)
+
     run_llm = force_llm or abs(pos_y - session.last_llm_pos_y) >= STREAM_LLM_THRESHOLD
     if run_llm:
         state_msg = build_state_message(region, pos_y, surface, leg, session.clips, vlm_summary)
 
         # --- Rule-based pre-check: deterministic circuit-state decisions ---
-        rule_action, rule_guidance = _rule_based_action(session.clips)
+        # old_max_visited (before this probe_move) is used, so visiting popliteal
+        # at P4 enables Type 1 complete from P5 onwards (not at P4 itself).
+        rule_action, rule_guidance = _rule_based_action(session.clips, old_max_visited)
 
         if rule_action:
             # Skip LLM entirely for maneuver/complete — rules are authoritative
@@ -513,11 +579,32 @@ def process_probe_state(
         else:
             try:
                 guidance, raw, action = call_with_history(session, state_msg, GROQ_API_KEY, GROQ_TEXT_MODEL)
-                session.last_llm_pos_y = pos_y
-                # Reset position cache after terminal actions so the next probe_move
-                # always triggers a fresh LLM call (prevents timeout on final confirmation step)
+                # Safety guard: LLM may output "complete" prematurely (e.g. Type 1 before
+                # full trunk scan). Only allow "complete"/"maneuver" when a rule authorized it.
                 if action in ("complete", "maneuver"):
-                    session.last_llm_pos_y = -1.0
+                    action = "move"
+                    # Replace LLM guidance (which likely says "Circuit mapped...") with a
+                    # contextual move instruction so the guidance text stays useful.
+                    _ep_esc = any(
+                        c.get("flow") == "EP" and c.get("from_type") == "N2" and c.get("to_type") == "N3"
+                        for c in session.clips
+                    )
+                    _rp_tn = any(
+                        c.get("flow") == "RP" and c.get("from_type") == "N2" and c.get("to_type") == "N1"
+                        for c in session.clips
+                    )
+                    _ep_n1_n3 = any(
+                        c.get("flow") == "EP" and c.get("from_type") == "N1" and c.get("to_type") == "N3"
+                        for c in session.clips
+                    )
+                    if _rp_tn and not _ep_esc:
+                        guidance = ("Scan distally at mid-thigh Hunterian zone for "
+                                    "tributary escape perforator")
+                    elif _ep_n1_n3 and not _rp_tn:
+                        guidance = "Trace N3 tributary distally toward re-entry perforator"
+                    else:
+                        guidance = "Continue scanning distally to locate anatomical junction"
+                session.last_llm_pos_y = pos_y
                 session.push_thinking(pos_y, region, state_msg, raw, guidance)
             except Exception as exc:
                 logger.error("LLM error: %s", exc)

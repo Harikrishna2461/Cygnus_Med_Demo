@@ -42,9 +42,10 @@ def register_stream_events(socketio) -> None:
         sess.thinking_log.clear()
         sess.generation   = 0
         sess.active       = True
-        sess.last_vlm_pos_y   = -1.0
-        sess.last_vlm_summary = "No frame analyzed yet."
-        sess.last_llm_pos_y   = -1.0
+        sess.last_vlm_pos_y    = -1.0
+        sess.last_vlm_summary  = "No frame analyzed yet."
+        sess.last_llm_pos_y    = -1.0
+        sess.max_visited_pos_y = 0.0
         logger.info("Stream session started: %s", session_id)
         emit("session_ready", {"session_id": session_id})
 

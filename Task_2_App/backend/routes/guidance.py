@@ -122,6 +122,7 @@ def guidance():
             ep_rp_findings=ep_rp_findings,
             vlm_assessment=vlm_result,
             current_clip_index=current_clip_index,
+            session_id=session_id,
         )
     except Exception as exc:
         logger.exception("Guidance generation error")

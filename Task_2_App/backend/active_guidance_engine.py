@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -22,6 +23,35 @@ from probe_localizer import ProbeLocation, WrongRegionResult, check_wrong_region
 from vlm_analyzer import UltrasoundAssessment
 
 logger = logging.getLogger(__name__)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PER-SESSION CONVERSATION HISTORY
+# Stores (user_prompt, assistant_raw) pairs so each LLM call sees prior steps.
+# ─────────────────────────────────────────────────────────────────────────────
+
+_ACTIVE_HISTORY_WINDOW = 6   # pairs of (user, assistant) kept per session
+_history_store: dict[str, list[dict]] = {}
+_history_lock = threading.Lock()
+
+
+def _get_history(session_id: str) -> list[dict]:
+    with _history_lock:
+        return _history_store.setdefault(session_id, [])
+
+
+def _push_history(session_id: str, user_prompt: str, assistant_raw: str) -> None:
+    with _history_lock:
+        hist = _history_store.setdefault(session_id, [])
+        hist.append({"role": "user",      "content": user_prompt})
+        hist.append({"role": "assistant", "content": assistant_raw})
+        cap = _ACTIVE_HISTORY_WINDOW * 2
+        if len(hist) > cap:
+            _history_store[session_id] = hist[-cap:]
+
+
+def clear_history(session_id: str) -> None:
+    with _history_lock:
+        _history_store.pop(session_id, None)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CHIVA SYSTEM PROMPT
@@ -411,17 +441,25 @@ def _build_prompt(
     return "\n".join(lines)
 
 
-def _call_groq(system: str, prompt: str, api_key: str, model: str) -> tuple[dict, str]:
+def _call_groq(
+    system: str,
+    prompt: str,
+    api_key: str,
+    model: str,
+    history: list[dict] | None = None,
+) -> tuple[dict, str]:
     from groq import Groq
     client = Groq(api_key=api_key)
+    messages = [
+        {"role": "system", "content": system},
+        *(history or []),
+        {"role": "user",   "content": prompt},
+    ]
     resp = client.chat.completions.create(
         model=model,
         max_tokens=40,
         temperature=0.0,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user",   "content": prompt},
-        ],
+        messages=messages,
     )
     raw = (resp.choices[0].message.content or "").strip()
     raw_original = raw
@@ -439,6 +477,7 @@ def generate_guidance(
     ep_rp_findings: Optional[dict] = None,
     vlm_assessment: Optional[UltrasoundAssessment] = None,
     current_clip_index: int = 0,
+    session_id: str = "default",
 ) -> ActiveGuidanceResponse:
     from config import GROQ_API_KEY, GROQ_TEXT_MODEL
 
@@ -451,6 +490,8 @@ def generate_guidance(
         vlm_assessment.summary() if vlm_assessment else "No frame provided.",
     )
 
+    history = _get_history(session_id)
+
     resp = ActiveGuidanceResponse(
         location=probe.to_dict(),
         expected_region=expected_region,
@@ -459,7 +500,10 @@ def generate_guidance(
     )
 
     try:
-        result, raw = _call_groq(_CHIVA_SYSTEM_PROMPT, prompt, GROQ_API_KEY, GROQ_TEXT_MODEL)
+        result, raw = _call_groq(
+            _CHIVA_SYSTEM_PROMPT, prompt, GROQ_API_KEY, GROQ_TEXT_MODEL,
+            history=history,
+        )
     except Exception as exc:
         logger.error("LLM error: %s", exc)
         resp.error = str(exc)
@@ -470,4 +514,6 @@ def generate_guidance(
     resp.guidance = result.get("guidance", "")
     resp.llm_raw = raw
     resp.ultrasound_assessment = vlm_assessment.to_dict() if vlm_assessment else None
+
+    _push_history(session_id, prompt, raw)
     return resp

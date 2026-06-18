@@ -879,11 +879,8 @@ class PipelineB:
         return y_top, y_bot
 
     def detect_fascia(self, bgr, scan_xl_m=0, scan_xr_m=IMG_SIZE):
-        """GDINO -> SAM fascia detection. Returns (None, None) if either model unavailable."""
-        approx_y = self._gdino_fascia(bgr)
-        if approx_y is not None:
-            return self._fascia_from_sam(bgr, approx_y, scan_xl_m, scan_xr_m)
-        return None, None
+        """Brightness gradient locates the fascia zone; per-column peak gives the exact curved band."""
+        return self._fascia_from_brightness(bgr, scan_xl_m=scan_xl_m, scan_xr_m=scan_xr_m)
 
     def _gdino_fascia(self, bgr):
         """Use GDINO to detect the fascia band. Returns approx fascia row in IMG_SIZE coords, or None."""
@@ -920,15 +917,17 @@ class PipelineB:
             if len(boxes) == 0:
                 return None
 
-            # Pick the widest, flattest box in the expected fascia zone (12–75 % depth)
+            # Pick the widest, flattest, shallowest box in the expected fascia zone (10–55% depth).
+            # Penalise depth strongly so the deep fascia / muscle interface scores below the
+            # superficial fascia even when it produces a slightly wider GDINO box.
             best_y, best_score = None, -1.0
             for x1, y1, x2, y2 in boxes:
                 cy = (y1 + y2) / 2
                 cy_norm = cy / h0
-                if cy_norm < 0.12 or cy_norm > 0.75:
+                if cy_norm < 0.10 or cy_norm > 0.55:
                     continue
                 bw, bh = x2 - x1, max(y2 - y1, 1)
-                score = (bw / w0) * (bw / bh)   # favour wide + flat
+                score = (bw / w0) * (bw / bh) * (1.0 - cy_norm)  # prefer wide + flat + shallow
                 if score > best_score:
                     best_score = score
                     best_y = int(cy * IMG_SIZE / h0)
