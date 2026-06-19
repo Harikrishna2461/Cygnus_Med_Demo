@@ -40,8 +40,9 @@ def register_stream_events(socketio) -> None:
         sess.clips.clear()
         sess.history.clear()
         sess.thinking_log.clear()
-        sess.generation   = 0
-        sess.active       = True
+        sess.scan_log.clear()
+        sess.generation        = 0
+        sess.active            = True
         sess.last_vlm_pos_y    = -1.0
         sess.last_vlm_summary  = "No frame analyzed yet."
         sess.last_llm_pos_y    = -1.0
@@ -61,10 +62,12 @@ def register_stream_events(socketio) -> None:
 
         client_sid = request.sid
         # Snapshot probe position for this request
-        region  = data.get("region", "UNKNOWN")
-        pos_y   = float(data.get("pos_y_ratio", 0.0))
-        surface = data.get("surface", "anterior-medial")
-        leg     = data.get("leg", "right")
+        region   = data.get("region", "UNKNOWN")
+        pos_y    = float(data.get("pos_y_ratio", 0.0))
+        pos_x    = float(data["pos_x_ratio"]) if data.get("pos_x_ratio") is not None else None
+        surface  = data.get("surface", "anterior-medial")
+        leg      = data.get("leg", "right")
+        is_front = bool(data["is_front"]) if data.get("is_front") is not None else None
 
         # Record this request's generation BEFORE spawning thread
         req_gen = sess.bump()
@@ -77,6 +80,8 @@ def register_stream_events(socketio) -> None:
                     pos_y=pos_y,
                     surface=surface,
                     leg=leg,
+                    pos_x=pos_x,
+                    is_front=is_front,
                 )
             except Exception as exc:
                 logger.error("process_probe_state error: %s", exc, exc_info=True)

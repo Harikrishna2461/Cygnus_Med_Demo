@@ -54,6 +54,7 @@ button:disabled{opacity:.35;cursor:not-allowed;}
 #legSvg{cursor:crosshair;display:block;}
 .leg-fill{fill:rgba(200,155,135,.07);stroke:#3d4456;stroke-width:1.5;transition:fill .15s;}
 .leg-fill.hot{fill:rgba(79,142,247,.14);stroke:#4f8ef7;}
+.leg-fill-post{fill:rgba(245,158,11,.07);stroke:#f59e0b;stroke-width:1;stroke-opacity:.45;stroke-dasharray:4,3;transition:fill .15s;}
 
 /* ── MARK FORM ───────────────────────────────────────────────────────────── */
 .flow-row{display:flex;gap:6px;margin-bottom:8px;}
@@ -163,27 +164,50 @@ select:focus{outline:none;border-color:var(--accent);}
       <div id="legWrap">
         <svg id="legSvg" viewBox="0 0 280 540" width="268" height="516">
           <rect width="280" height="540" fill="none"/>
-          <text x="70"  y="11" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif">R</text>
-          <text x="210" y="11" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif">L</text>
+          <text x="80"  y="11" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif">R</text>
+          <text x="197" y="11" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif">L</text>
 
-          <!-- RIGHT LEG (patient R, viewer left) -->
-          <path id="rThigh" class="leg-fill" d="M 22,16 Q 30,13 70,13 Q 110,13 118,16 L 108,272 Q 70,278 32,272 Z"/>
-          <path id="rCalf"  class="leg-fill" d="M 32,298 Q 70,292 108,298 L 100,525 Q 70,530 40,525 Z"/>
-          <ellipse cx="70" cy="285" rx="22" ry="10" fill="#1a1d27" stroke="#2d3348" stroke-width="1.5"/>
-          <line x1="50" y1="16" x2="50" y2="525" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.3"/>
-          <text x="70" y="289" text-anchor="middle" fill="#475569" font-size="7" font-family="Segoe UI,sans-serif">KNEE</text>
+          <!-- RIGHT LEG — shapes match bounding boxes:
+               Thigh X 26-133 (0.0931-0.475), Calf-medial X 29-83 (0.105-0.2947) -->
+          <path id="rThigh" class="leg-fill" d="M 26,16 Q 36,12 80,12 Q 124,12 133,16 L 120,272 Q 80,278 40,272 Z"/>
+          <path id="rCalf"  class="leg-fill" d="M 29,298 Q 56,293 83,298 L 79,525 Q 56,530 33,525 Z"/>
+          <ellipse cx="80" cy="285" rx="28" ry="10" fill="#1a1d27" stroke="#2d3348" stroke-width="1.5"/>
+          <!-- GSV scan line (center of medial calf X 29-83) -->
+          <line x1="56" y1="16" x2="56" y2="525" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.3"/>
+          <!-- Thigh front/posterior split at center X=80 -->
+          <line x1="80" y1="16" x2="80" y2="272" stroke="#4f8ef7" stroke-width="0.7" stroke-dasharray="4,4" opacity="0.22"/>
+          <text x="80" y="289" text-anchor="middle" fill="#475569" font-size="7" font-family="Segoe UI,sans-serif">KNEE</text>
 
-          <!-- LEFT LEG (patient L, viewer right) -->
-          <path id="lThigh" class="leg-fill" d="M 162,16 Q 170,13 210,13 Q 250,13 258,16 L 248,272 Q 210,278 172,272 Z"/>
-          <path id="lCalf"  class="leg-fill" d="M 172,298 Q 210,292 248,298 L 240,525 Q 210,530 180,525 Z"/>
-          <ellipse cx="210" cy="285" rx="22" ry="10" fill="#1a1d27" stroke="#2d3348" stroke-width="1.5"/>
-          <line x1="230" y1="16" x2="230" y2="525" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.3"/>
-          <text x="210" y="289" text-anchor="middle" fill="#475569" font-size="7" font-family="Segoe UI,sans-serif">KNEE</text>
+          <!-- LEFT LEG — shapes match bounding boxes:
+               Thigh X 140-254 (0.4985-0.909), Calf-medial X 198-255 (0.7081-0.91) -->
+          <path id="lThigh" class="leg-fill" d="M 140,16 Q 150,12 197,12 Q 244,12 254,16 L 243,272 Q 197,278 152,272 Z"/>
+          <path id="lCalf"  class="leg-fill" d="M 198,298 Q 226,293 255,298 L 251,525 Q 226,530 203,525 Z"/>
+          <ellipse cx="197" cy="285" rx="28" ry="10" fill="#1a1d27" stroke="#2d3348" stroke-width="1.5"/>
+          <!-- GSV scan line (center of medial calf X 198-255) -->
+          <line x1="226" y1="16" x2="226" y2="525" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.3"/>
+          <!-- Thigh front/posterior split at center X=197 -->
+          <line x1="197" y1="16" x2="197" y2="272" stroke="#4f8ef7" stroke-width="0.7" stroke-dasharray="4,4" opacity="0.22"/>
+          <text x="197" y="289" text-anchor="middle" fill="#475569" font-size="7" font-family="Segoe UI,sans-serif">KNEE</text>
 
-          <!-- Zone labels -->
+          <!-- Posterior-calf SPJ columns
+               Right: X 79-123 (0.2827-0.4386 normalised)
+               Left:  X 165-200 (0.588-0.714 normalised)
+               Both extend Y 297-525 (below knee to ankle) -->
+          <path id="rCalfPost" class="leg-fill-post" d="M 79,297 L 123,297 L 123,525 L 79,525 Z"/>
+          <path id="lCalfPost" class="leg-fill-post" d="M 156,297 L 200,297 L 200,525 L 156,525 Z"/>
+          <!-- Column separator between medial and posterior zones below knee -->
+          <line x1="81" y1="297" x2="81" y2="525" stroke="#475569" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.55"/>
+          <line x1="199" y1="297" x2="199" y2="525" stroke="#475569" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.55"/>
+          <!-- Posterior column labels: SPJ near knee, Post-Calf below -->
+          <text x="103" y="309" text-anchor="middle" fill="#f59e0b" font-size="6.5" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".75">SPJ</text>
+          <text x="178" y="309" text-anchor="middle" fill="#f59e0b" font-size="6.5" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".75">SPJ</text>
+          <text x="103" y="420" text-anchor="middle" fill="#fb923c" font-size="6.5" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">SSV</text>
+          <text x="178" y="420" text-anchor="middle" fill="#fb923c" font-size="6.5" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">SSV</text>
+
+          <!-- Zone labels (left edge, vertical) -->
           <text transform="rotate(-90) translate(-44, 10)"  fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">SFJ</text>
-          <text transform="rotate(-90) translate(-166, 10)" fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">GSV-THI</text>
-          <text transform="rotate(-90) translate(-416, 10)" fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">GSV-CAL</text>
+          <text transform="rotate(-90) translate(-166, 10)" fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">Thigh</text>
+          <text transform="rotate(-90) translate(-416, 10)" fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">Calf</text>
 
           <!-- Probe indicator (updated by JS) -->
           <g id="probeGroup" display="none">
@@ -269,6 +293,7 @@ select:focus{outline:none;border-color:var(--accent);}
       <div class="probe-pill">posY <span class="hi" id="infoPosY">—</span></div>
       <div class="probe-pill">Surface <span class="hi" id="infoSurface">—</span></div>
       <div class="probe-pill">Leg <span class="hi" id="infoLeg">—</span></div>
+      <div class="probe-pill">Front <span class="hi" id="infoFront">—</span></div>
     </div>
 
     <!-- Guidance -->
@@ -307,11 +332,25 @@ let clips         = [];
 let selectedFlow  = 'EP';
 let lastGuidance  = '';
 
-// ── SVG coord constants (viewBox 0 0 280 540) ─────────────────────────────
-const THIGH_TOP=16, THIGH_BOT=272, CALF_TOP=298, CALF_BOT=525;
-const R_L=22,  R_R=118, R_CX=70;
-const L_L=162, L_R=258, L_CX=210;
-const REGION_COLORS={SFJ:'#818cf8','GSV-THI':'#34d399','GSV-CAL':'#6ee7b7',SPJ:'#f59e0b',SSV:'#fb923c',UNKNOWN:'#64748b'};
+// ── Leg diagram hit-boxes (normalized 0-1, top-left=0,0  bottom-right=1,1) ─
+const VB_W=280, VB_H=540;
+const KNEE_N=0.5497;   // knee as fraction of image height
+
+// Right leg hit regions
+const R_THI     = {xl:0.0931, xr:0.475,  yt:0.0,    yb:KNEE_N};  // thigh
+const R_CAL_MED = {xl:0.105,  xr:0.2947, yt:KNEE_N, yb:1.0};     // calf medial / GSV
+const R_CAL_SPJ = {xl:0.2827, xr:0.4386, yt:KNEE_N, yb:1.0};     // calf posterior / SPJ-SSV
+
+// Left leg hit regions
+const L_THI     = {xl:0.4985, xr:0.909,  yt:0.0,    yb:KNEE_N};  // thigh
+const L_CAL_MED = {xl:0.7081, xr:0.91,   yt:KNEE_N, yb:1.0};     // calf medial / GSV
+const L_CAL_SPJ = {xl:0.558,  xr:0.714,  yt:KNEE_N, yb:1.0};     // calf posterior / SPJ-SSV
+
+// SVG-pixel leg centers — for probe-indicator line and clip-marker X position
+const R_CX = (R_THI.xl + R_THI.xr) / 2 * VB_W;  // ~79.5
+const L_CX = (L_THI.xl + L_THI.xr) / 2 * VB_W;  // ~197.1
+
+const REGION_COLORS={SFJ:'#818cf8','Upper Thigh':'#34d399',Dodd:'#22d3ee',Hunterian:'#60a5fa',Giacomini:'#94a3b8',SPJ:'#f59e0b',Calf:'#6ee7b7',SSV:'#fb923c'};
 
 // ── Coord transform ────────────────────────────────────────────────────────
 function svgXY(e) {
@@ -320,34 +359,56 @@ function svgXY(e) {
 }
 const legSvg=document.getElementById('legSvg');
 
+function inBox(nx,ny,b){return nx>=b.xl&&nx<=b.xr&&ny>=b.yt&&ny<=b.yb;}
+
 function coordToState(sx,sy) {
-  let leg,lL,lR,lCX;
-  if(sx>=R_L&&sx<=R_R)      {leg='right';lL=R_L;lR=R_R;lCX=R_CX;}
-  else if(sx>=L_L&&sx<=L_R) {leg='left'; lL=L_L;lR=L_R;lCX=L_CX;}
-  else return null;
+  const nx=sx/VB_W, ny=sy/VB_H;
+  const posY=ny;   // posY IS normalized Y: 0=groin, 1=ankle
 
-  const is_front=sx<lCX;
-  const surface=is_front?'anterior-medial':'posterior';
-  let seg_id,seg_dist,posY;
+  if(ny<KNEE_N) {
+    // ── THIGH ────────────────────────────────────────────────────────
+    let leg,box,cxN;
+    if(inBox(nx,ny,R_THI)){leg='right';box=R_THI;cxN=(R_THI.xl+R_THI.xr)/2;}
+    else if(inBox(nx,ny,L_THI)){leg='left';box=L_THI;cxN=(L_THI.xl+L_THI.xr)/2;}
+    else return null;
+    const seg_id=leg==='right'?2:0;
+    const seg_dist=(ny-box.yt)/(box.yb-box.yt);
+    // Right: lower-X = medial/anterior.  Left: higher-X = medial/anterior (legs mirrored).
+    const is_front=leg==='right'?nx<cxN:nx>=cxN;
+    const surface=is_front?'anterior-medial':'posterior';
+    const lL=box.xl*VB_W, lR=box.xr*VB_W, lCX=cxN*VB_W;
+    const region=mapReg(seg_id,seg_dist,is_front,posY);
+    return {leg,seg_id,seg_dist,is_front,surface,posY,region,sx,sy,lL,lR,lCX};
 
-  if(sy>=THIGH_TOP&&sy<=THIGH_BOT) {
-    seg_dist=(sy-THIGH_TOP)/(THIGH_BOT-THIGH_TOP);
-    seg_id=(leg==='right')?2:0;
-    posY=0.04+seg_dist*0.51;
-  } else if(sy>=CALF_TOP&&sy<=CALF_BOT) {
-    seg_dist=(sy-CALF_TOP)/(CALF_BOT-CALF_TOP);
-    seg_id=(leg==='right')?3:1;
-    posY=0.55+seg_dist*0.45;
-  } else return null;
-
-  const region=mapReg(seg_id,seg_dist,is_front);
-  return {leg,seg_id,seg_dist,is_front,surface,posY,region,sx,sy,lL,lR,lCX};
+  } else {
+    // ── CALF — when boxes overlap pick nearest zone center ───────────
+    const cands=[];
+    if(inBox(nx,ny,R_CAL_MED))cands.push({leg:'right',seg_id:3,is_front:true, surface:'anterior-medial',z:R_CAL_MED});
+    if(inBox(nx,ny,R_CAL_SPJ))cands.push({leg:'right',seg_id:3,is_front:false,surface:'posterior',       z:R_CAL_SPJ});
+    if(inBox(nx,ny,L_CAL_MED))cands.push({leg:'left', seg_id:1,is_front:true, surface:'anterior-medial',z:L_CAL_MED});
+    if(inBox(nx,ny,L_CAL_SPJ))cands.push({leg:'left', seg_id:1,is_front:false,surface:'posterior',       z:L_CAL_SPJ});
+    if(!cands.length)return null;
+    const m=cands.reduce((b,c)=>Math.abs(nx-(c.z.xl+c.z.xr)/2)<Math.abs(nx-(b.z.xl+b.z.xr)/2)?c:b);
+    const seg_dist=(ny-KNEE_N)/(1-KNEE_N);
+    const lL=m.z.xl*VB_W, lR=m.z.xr*VB_W, lCX=(m.z.xl+m.z.xr)/2*VB_W;
+    const region=mapReg(m.seg_id,seg_dist,m.is_front,posY);
+    return {leg:m.leg,seg_id:m.seg_id,seg_dist,is_front:m.is_front,surface:m.surface,posY,region,sx,sy,lL,lR,lCX};
+  }
 }
 
-function mapReg(id,dist,front) {
+function mapReg(id,dist,front,posY) {
   const th=(id===0||id===2);
-  if(th){return front?(dist<=0.12?'SFJ':'GSV-THI'):(dist>=0.78?'SPJ':'UNKNOWN');}
-  return front?'GSV-CAL':(dist<=0.12?'SPJ':'SSV');
+  if(th){
+    if(front){
+      if(posY<=0.07) return 'SFJ';
+      if(posY<=0.20) return 'Upper Thigh';
+      if(posY<=0.33) return 'Dodd';
+      return 'Hunterian';
+    }
+    return posY>=0.44?'SPJ':'Giacomini';
+  }
+  if(front) return 'Calf';
+  return posY<=0.57?'SPJ':'SSV';
 }
 
 // ── SVG mouse — hover preview only, click to lock position ────────────────
@@ -399,6 +460,7 @@ function updateInfoBar(st) {
   document.getElementById('infoPosY').textContent=st.posY.toFixed(2);
   document.getElementById('infoSurface').textContent=st.surface;
   document.getElementById('infoLeg').textContent=st.leg;
+  document.getElementById('infoFront').textContent=st.is_front?'yes':'no';
   document.getElementById('regionPill').textContent=st.region;
   document.getElementById('regionPill').style.display='';
 }
@@ -621,11 +683,8 @@ function renderClipMarkers() {
   clips.forEach((c, i) => {
     const posY = c.pos_y_ratio || 0;
     const isR  = c.leg === 'right';
-    let sy;
-    if(posY <= 0.55) sy = THIGH_TOP + ((posY-0.04)/0.51)*(THIGH_BOT-THIGH_TOP);
-    else             sy = CALF_TOP  + ((posY-0.55)/0.45)*(CALF_BOT-CALF_TOP);
-    sy = Math.max(THIGH_TOP, Math.min(CALF_BOT, sy));
-    const cx  = isR ? R_CX : L_CX;
+    const sy   = Math.max(4, Math.min(VB_H-4, posY*VB_H));
+    const cx   = isR ? R_CX : L_CX;
     const col = c.flow === 'EP' ? '#22c55e' : '#f97316';
 
     const n = document.createElementNS('http://www.w3.org/2000/svg', 'g');

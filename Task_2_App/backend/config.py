@@ -14,13 +14,15 @@ GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 SLIDING_WINDOW_SIZE = 10
 STABILITY_THRESHOLD = 0.6   # fraction of window that must agree
 
-# Anatomical boundary thresholds (segment_dist)
-# Front of thigh: dist <= threshold → SFJ zone; above → GSV Thigh
-SFJ_THIGH_MAX_DIST = 0.12
-# Back of thigh: dist >= threshold → popliteal / SPJ zone
-SPJ_THIGH_MIN_DIST = 0.78
-# Back of calf: dist <= threshold → popliteal / SPJ zone; below → SSV
-SPJ_CALF_MAX_DIST = 0.12
+# Anatomical boundary thresholds (segment_dist, recomputed from bounding-box coordinates)
+# seg_dist_thigh = posY / KNEE_N (KNEE_N=0.5497)
+# seg_dist_calf  = (posY - KNEE_N) / (1 - KNEE_N)
+# Front of thigh: dist <= threshold → SFJ zone (posY ≤ 0.07 → dist ≤ 0.07/0.5497 ≈ 0.127)
+SFJ_THIGH_MAX_DIST = 0.13
+# Back of thigh: dist >= threshold → popliteal / SPJ zone (posY ≥ 0.44 → dist ≥ 0.44/0.5497 ≈ 0.800)
+SPJ_THIGH_MIN_DIST = 0.80
+# Back of calf: dist <= threshold → popliteal / SPJ zone (posY ≤ 0.57 → dist ≤ (0.57-0.5497)/0.4503 ≈ 0.045)
+SPJ_CALF_MAX_DIST = 0.05
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "task2_state.db")
 
@@ -33,7 +35,7 @@ STREAM_VIDEO_PATH = os.getenv(
     r"c:\Users\Krish\Downloads\Cygnus_Med_Demo\Task_3\Data\2 - Annotated videos\202207191643_00-Moving.mp4",
 )
 
-# How many (user, assistant) exchange pairs to keep in LLM conversation history
+# Placeholder — reserved for future windowing; full history is used while this is disabled
 STREAM_HISTORY_WINDOW = 8
 
 # Minimum posYRatio change before triggering a new VLM analysis

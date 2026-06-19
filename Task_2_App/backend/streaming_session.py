@@ -2,13 +2,16 @@
 Per-session state for continuous streaming guidance.
 
 Each session holds:
-  - clips       : EP/RP marks confirmed by the surgeon so far
-  - history     : rolling LLM conversation (list of Groq message dicts)
-  - thinking_log: every (state_msg, raw_response) pair for the UI log
-  - generation  : monotone counter — only the latest probe_move emits
+  - clips        : EP/RP marks confirmed by the surgeon so far
+  - history      : rolling LLM conversation (list of Groq message dicts)
+  - thinking_log : every (state_msg, raw_response) pair for the UI log
+  - scan_log     : lightweight record of every probe position visited this session
+                   used by history_agent to build the posY-band coverage summary
+  - generation   : monotone counter — only the latest probe_move emits
 """
 from __future__ import annotations
 
+import time
 import threading
 from dataclasses import dataclass, field
 from typing import Optional
@@ -24,6 +27,9 @@ class StreamSession:
     clips: list[dict] = field(default_factory=list)
     history: list[dict] = field(default_factory=list)   # Groq message dicts
     thinking_log: list[dict] = field(default_factory=list)
+    # Lightweight positional record for history_agent coverage summary.
+    # Each entry: {pos_y, region, surface, leg, t (unix timestamp)}
+    scan_log: list[dict] = field(default_factory=list)
     generation: int = 0
     active: bool = True
 
@@ -51,15 +57,36 @@ class StreamSession:
         with self._lock:
             return self.generation == gen
 
+    # ── scan log ──────────────────────────────────────────────────────────────
+
+    def log_scan_position(
+        self,
+        pos_y: float,
+        region: str,
+        surface: str,
+        leg: str,
+        is_front: Optional[bool] = None,
+    ) -> None:
+        """Record a probe position visit for the history agent."""
+        entry: dict = {
+            "pos_y":   round(pos_y, 3),
+            "region":  region,
+            "surface": surface,
+            "leg":     leg,
+            "t":       round(time.time(), 2),
+        }
+        if is_front is not None:
+            entry["is_front"] = is_front
+        self.scan_log.append(entry)
+        if len(self.scan_log) > 300:
+            self.scan_log = self.scan_log[-300:]
+
     # ── history management ────────────────────────────────────────────────────
 
     def push_exchange(self, user_msg: str, assistant_msg: str, window: int = 8) -> None:
-        """Append one (user, assistant) pair and trim to window size."""
+        """Append one (user, assistant) pair. window param reserved for future use."""
         self.history.append({"role": "user",      "content": user_msg})
         self.history.append({"role": "assistant", "content": assistant_msg})
-        cap = window * 2
-        if len(self.history) > cap:
-            self.history = self.history[-cap:]
 
     def push_thinking(self, pos_y: float, region: str, state_msg: str, raw: str, guidance: str) -> None:
         self.thinking_log.append({
