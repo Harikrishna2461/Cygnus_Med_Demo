@@ -197,7 +197,9 @@ def analyze(clips: list[dict]) -> str:
         )
 
     # ── Elimination test alert ────────────────────────────────────────────────
-    if has_ep_n2_n3 and has_rp_n3_n1 and has_rp_n2_n1 and not elim_done:
+    # ep_n1_n2 is REQUIRED: without SFJ/SPJ entry the ambiguity (Type 3 vs 1+2)
+    # doesn't exist — ep_n2_n3 + rp_n3_n1 + rp_n2_n1 without ep_n1_n2 is Type 2C.
+    if has_ep_n1_n2 and has_ep_n2_n3 and has_rp_n3_n1 and has_rp_n2_n1 and not elim_done:
         lines.append(
             "ELIMINATION TEST REQUIRED — EP N2→N3 + RP N3→N1 + RP N2→N1 all confirmed, no elimTest yet. "
             "Compress the tributary at the escape site. "

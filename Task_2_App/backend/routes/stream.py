@@ -47,6 +47,9 @@ def register_stream_events(socketio) -> None:
         sess.last_vlm_summary  = "No frame analyzed yet."
         sess.last_llm_pos_y    = -1.0
         sess.confirmed_shunts  = []
+        sess.rejection_notes   = []
+        sess.last_guidance     = None
+        sess.last_action       = None
         logger.info("Stream session started: %s", session_id)
         emit("session_ready", {"session_id": session_id})
 
@@ -106,6 +109,7 @@ def register_stream_events(socketio) -> None:
                 socketio.emit("shunt_confirmed", {
                     "shunt_type":     result["shunt_type"],
                     "shunt_evidence": result["shunt_evidence"],
+                    "leg":            leg,
                 }, room=client_sid, namespace=NS)
 
             socketio.emit("guidance_update", result, room=client_sid, namespace=NS)
@@ -134,6 +138,7 @@ def register_stream_events(socketio) -> None:
             "leg":              data.get("leg", "right"),
             "region":           data.get("region", "UNKNOWN"),
             "elimination_test": data.get("elimination_test", ""),
+            "pos_x_raw":        float(data.get("pos_x_raw", 0.0)),
         }
         sess.clips.append(clip)
         logger.info("Clip marked: %s  session=%s", clip, session_id)
@@ -163,6 +168,7 @@ def register_stream_events(socketio) -> None:
                 socketio.emit("shunt_confirmed", {
                     "shunt_type":     result["shunt_type"],
                     "shunt_evidence": result["shunt_evidence"],
+                    "leg":            leg,
                 }, room=client_sid, namespace=NS)
             socketio.emit("guidance_update", result, room=client_sid, namespace=NS)
 
@@ -194,3 +200,25 @@ def register_stream_events(socketio) -> None:
             "clips":      sess.clips if sess else [],
             "log_count":  len(sess.thinking_log) if sess else 0,
         })
+
+    # ── shunt_reject ──────────────────────────────────────────────────────────
+
+    @socketio.on("shunt_reject")
+    def handle_shunt_reject(data: dict):
+        from flask_socketio import emit
+        session_id = str(data.get("session_id", "default"))
+        sess = sess_store.get_or_create(session_id)
+        s_type = str(data.get("shunt_type", "unknown"))
+        leg    = str(data.get("leg", "unknown"))
+        note = (
+            f"SURGEON REJECTED '{s_type}' classification (leg={leg}). "
+            f"Re-evaluate the clip pattern far more critically — do NOT confirm "
+            f"'{s_type}' again without substantially stronger clip evidence."
+        )
+        sess.rejection_notes.append(note)
+        # Remove from confirmed_shunts so it can potentially re-trigger with better evidence
+        key = f"{leg}:{s_type}"
+        if key in sess.confirmed_shunts:
+            sess.confirmed_shunts.remove(key)
+        logger.info("Shunt rejected: type=%s leg=%s session=%s", s_type, leg, session_id)
+        emit("shunt_rejection_ack", {"session_id": session_id, "shunt_type": s_type, "leg": leg})

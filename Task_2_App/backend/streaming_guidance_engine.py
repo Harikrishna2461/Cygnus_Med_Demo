@@ -108,10 +108,20 @@ def process_probe_state(
     shunt_evidence  = None
 
     run_llm = force_llm or abs(pos_y - session.last_llm_pos_y) >= STREAM_LLM_THRESHOLD
+
+    # Echo last known action/guidance when LLM isn't called and we're in a
+    # persistent state (maneuver pending or circuit complete).
+    if not run_llm and session.last_action in ("maneuver", "complete") and session.last_guidance:
+        guidance = session.last_guidance
+        action   = session.last_action
+
     if run_llm:
+        # Only classify clips from the leg currently under the probe
+        leg_clips = [c for c in session.clips if c.get("leg", "right") == leg]
+
         # ── 3a. Gather context from sub-agents ────────────────────────────────
         hist_summary  = history_agent.build_summary(session, pos_y)
-        q_state       = q_state_agent.analyze(session.clips)
+        q_state       = q_state_agent.analyze(leg_clips)
         protocol_text = protocol_agent.get_protocol(region, pos_y)
 
         # ── 3b. Build enriched state message ──────────────────────────────────
@@ -120,7 +130,7 @@ def process_probe_state(
             pos_y           = pos_y,
             surface         = surface,
             leg             = leg,
-            clips           = session.clips,
+            clips           = leg_clips,
             vlm_summary     = vlm_summary,
             history_summary = hist_summary,
             q_state         = q_state,
@@ -138,22 +148,26 @@ def process_probe_state(
                 pos_y           = pos_y,
                 surface         = surface,
                 leg             = leg,
-                clips           = session.clips,
+                clips           = leg_clips,
                 vlm_summary     = vlm_summary,
                 history_summary = hist_summary,
                 q_state         = q_state,
                 protocol_text   = protocol_text,
                 pos_x           = pos_x,
                 is_front        = is_front,
+                rejection_notes = list(session.rejection_notes),
             )
-            # Fire shunt_confirmed only once per unique type per session.
-            if shunt_found and s_type not in session.confirmed_shunts:
-                session.confirmed_shunts.append(s_type)
+            # Fire shunt_confirmed only once per unique leg:type key per session.
+            confirmed_key = f"{leg}:{s_type}"
+            if shunt_found and confirmed_key not in session.confirmed_shunts:
+                session.confirmed_shunts.append(confirmed_key)
                 shunt_confirmed = True
                 shunt_type      = s_type
                 shunt_evidence  = s_evidence
 
             session.last_llm_pos_y = pos_y
+            session.last_guidance  = guidance
+            session.last_action    = action
             session.push_exchange(state_msg, raw, window=STREAM_HISTORY_WINDOW)
             session.push_thinking(pos_y, region, state_msg, raw, guidance)
         except Exception as exc:

@@ -41,6 +41,12 @@ class StreamSession:
     # Shunt types already confirmed and notified this session — prevents
     # re-firing the shunt_confirmed event for the same type on each probe_move.
     confirmed_shunts: list = field(default_factory=list)
+    rejection_notes: list = field(default_factory=list)
+
+    # Last computed guidance/action — echoed on probe_moves that don't trigger
+    # a new LLM call so maneuver/complete state persists across small position deltas.
+    last_guidance: Optional[str] = None
+    last_action: Optional[str] = None
 
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 

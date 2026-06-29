@@ -137,6 +137,14 @@ select:focus{outline:none;border-color:var(--accent);}
 /* ── SHUNT CONFIRMED MODAL ───────────────────────────────────────────────── */
 #shuntModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;align-items:center;justify-content:center;}
 #shuntModal.show{display:flex;}
+
+/* ── ELIMINATION TEST MODAL ─────────────────────────────────────────────── */
+#elimModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1001;align-items:center;justify-content:center;}
+#elimModal.show{display:flex;}
+#elimModal .shunt-card{border-color:var(--warn);}
+#elimModal h2{color:var(--warn) !important;}
+#elimModal .elim-prompt-msg{font-size:13px;color:var(--warn);line-height:1.6;margin-bottom:20px;font-weight:600;}
+#elimModal .elim-btn{padding:10px 0;font-size:12px;}
 .shunt-card{background:var(--surface);border:1.5px solid var(--accent2);border-radius:14px;padding:32px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.6);}
 .shunt-icon{font-size:36px;margin-bottom:10px;}
 .shunt-card h2{color:var(--accent2);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
@@ -148,6 +156,22 @@ select:focus{outline:none;border-color:var(--accent);}
 /* ── MARK POSITION BADGE ─────────────────────────────────────────────────── */
 .mark-pos-badge{font-size:10px;color:var(--muted);padding:5px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);margin-bottom:8px;text-align:center;line-height:1.5;}
 .mark-pos-badge.active{color:var(--warn);border-color:var(--warn);background:rgba(245,158,11,.08);}
+
+/* ── ELIMINATION TEST CARD — left panel, always accessible ──────────────── */
+#elimCard{transition:border-color .3s,background .3s;}
+#elimCard.required{border-color:var(--warn) !important;background:rgba(245,158,11,.05);}
+.elim-title{color:var(--muted);transition:color .3s;}
+#elimCard.required .elim-title{color:var(--warn);}
+.elim-required-note{display:none;font-size:11px;color:var(--warn);line-height:1.5;margin-bottom:8px;padding:6px 8px;background:rgba(245,158,11,.1);border-radius:4px;border-left:3px solid var(--warn);}
+#elimCard.required .elim-required-note{display:block;}
+.elim-desc{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5;}
+#elimCard.required .elim-desc{display:none;}
+/* ── REJECTION BUTTON ── */
+.btn-warn{background:rgba(245,158,11,.12);color:var(--warn);border:1px solid rgba(245,158,11,.4);}
+.btn-warn:hover{background:rgba(245,158,11,.25);border-color:var(--warn);}
+/* ── CONFIRMED SHUNTS LIST (header) ── */
+#confirmedRow{display:none;gap:4px;align-items:center;flex-shrink:0;}
+.c-pill{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(52,211,153,.12);border:1px solid var(--accent2);color:var(--accent2);}
 </style>
 </head>
 <body>
@@ -158,6 +182,7 @@ select:focus{outline:none;border-color:var(--accent);}
   <div class="hpill" id="connPill">Connecting…</div>
   <div class="hpill" id="sessionPill">No session</div>
   <div class="hpill" id="regionPill" style="display:none"></div>
+  <div id="confirmedRow"></div>
   <div class="ml">
     <a class="nav-link" href="/">Single Frame</a>
     <button class="btn-primary"  id="btnStart" onclick="startSession()">Start Session</button>
@@ -275,6 +300,17 @@ select:focus{outline:none;border-color:var(--accent);}
       </button>
     </div>
 
+    <!-- Elimination Test — always accessible, highlights when 4-clip Type 3/1+2 pattern is present -->
+    <div class="card" id="elimCard">
+      <h3 class="elim-title">Elimination Test</h3>
+      <p class="elim-required-note">⚡ All 4 clips confirmed — compress tributary at escape point, observe GSV trunk Doppler response, and record result below:</p>
+      <p class="elim-desc">For Type 3 / 1+2 differentiation: compress tributary at escape point and observe GSV Doppler. Available at any time:</p>
+      <div class="elim-btn-row">
+        <button class="elim-btn" id="elimNoRefluxCard" onclick="submitElimTest('No Reflux')">No Reflux — reflux abolished</button>
+        <button class="elim-btn" id="elimRefluxCard"   onclick="submitElimTest('Reflux')">Reflux — reflux persists</button>
+      </div>
+    </div>
+
     <!-- Clips -->
     <div class="card" style="flex:1">
       <h3>Confirmed Findings <span id="clipCount" style="color:var(--accent)">0</span></h3>
@@ -331,8 +367,8 @@ select:focus{outline:none;border-color:var(--accent);}
     <div id="elimBanner">
       <p>Compress the tributary at the marked position and observe GSV Doppler. Record the result:</p>
       <div class="elim-btn-row">
-        <button class="elim-btn" id="elimNoReflux" onclick="recordElimTest('No Reflux')">No Reflux — reflux abolished</button>
-        <button class="elim-btn" id="elimReflux"   onclick="recordElimTest('Reflux')">Reflux — reflux persists</button>
+        <button class="elim-btn" id="elimNoReflux" onclick="submitElimTest('No Reflux')">No Reflux — reflux abolished</button>
+        <button class="elim-btn" id="elimReflux"   onclick="submitElimTest('Reflux')">Reflux — reflux persists</button>
       </div>
     </div>
 
@@ -352,9 +388,31 @@ select:focus{outline:none;border-color:var(--accent);}
     <h2>Shunt Type Confirmed</h2>
     <div class="shunt-type-label" id="shuntTypeLabel">—</div>
     <p class="shunt-evidence" id="shuntEvidence"></p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary"   style="flex:1;font-size:12px" onclick="acceptShunt()">✓ Accept &amp; Continue Scanning</button>
+        <button class="btn-secondary" style="font-size:12px"        onclick="acceptShuntAndEnd()">Accept &amp; End Session</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-warn"   style="flex:1;font-size:12px" onclick="rejectShunt()">✗ Reject — Improve Classification</button>
+        <button class="btn-danger" style="font-size:12px"        onclick="endSession();closeShuntModal()">End Session</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ELIMINATION TEST MODAL ────────────────────────────────────────────── -->
+<div id="elimModal">
+  <div class="shunt-card">
+    <div class="shunt-icon" style="color:var(--warn)">⚡</div>
+    <h2>Elimination Test Required</h2>
+    <p class="elim-prompt-msg">All 4 clips confirmed — compress tributary at escape point, observe GSV trunk Doppler response, and record result:</p>
+    <div class="elim-btn-row" style="margin-bottom:20px">
+      <button class="elim-btn" id="elimModalNoReflux" onclick="submitElimTestFromModal('No Reflux')">No Reflux — reflux abolished</button>
+      <button class="elim-btn" id="elimModalReflux"   onclick="submitElimTestFromModal('Reflux')">Reflux — reflux persists</button>
+    </div>
     <div class="shunt-btn-row">
-      <button class="btn-secondary" onclick="closeShuntModal()">Continue Scanning</button>
-      <button class="btn-danger"    onclick="endSession(); closeShuntModal()">End Session</button>
+      <button class="btn-secondary" onclick="closeElimModal()">Continue Scanning</button>
     </div>
   </div>
 </div>
@@ -370,6 +428,8 @@ let clips         = [];
 let selectedFlow  = 'EP';
 let lastGuidance  = '';
 let probeTimer    = null;   // debounce for probe_move events
+let elimRequired  = false;  // true when 4-clip Type 3/1+2 pattern present without elimTest
+let currentShuntData = null; // last shunt_confirmed payload for accept/reject
 
 // ── Leg diagram hit-boxes (normalized 0-1, top-left=0,0  bottom-right=1,1) ─
 const VB_W=280, VB_H=540;
@@ -508,9 +568,9 @@ function updateLockMarker(st) {
   document.getElementById('lockLine').setAttribute('x2', st.lR);
   document.getElementById('lockLine').setAttribute('y1', sy);
   document.getElementById('lockLine').setAttribute('y2', sy);
-  document.getElementById('lockPin').setAttribute('transform', `translate(${st.lCX},${sy})`);
+  document.getElementById('lockPin').setAttribute('transform', `translate(${Math.round(st.sx)},${sy})`);
   const lbl = document.getElementById('lockLabel');
-  lbl.setAttribute('x', st.lCX);
+  lbl.setAttribute('x', Math.round(st.sx));
   lbl.setAttribute('y', sy - 10);
   lbl.textContent = '❖ ' + st.posY.toFixed(2);
 }
@@ -642,6 +702,7 @@ function initSocket() {
   });
 
   socket.on('shunt_confirmed',(d)=>{
+    currentShuntData = d;
     document.getElementById('shuntTypeLabel').textContent = 'CHIVA Type ' + (d.shunt_type||'—');
     document.getElementById('shuntEvidence').textContent  = d.shunt_evidence || '';
     document.getElementById('shuntModal').classList.add('show');
@@ -675,23 +736,40 @@ function sendProbeMove(st) {
 }
 
 // ── Clip marking ───────────────────────────────────────────────────────────
-let pendingElimTest = '';   // set by recordElimTest(), cleared after mark
-
 function selFlow(f) {
   selectedFlow=f;
   document.getElementById('flowEP').className='flow-btn ep'+(f==='EP'?' sel':'');
   document.getElementById('flowRP').className='flow-btn rp'+(f==='RP'?' sel':'');
 }
 
-function recordElimTest(result) {
-  pendingElimTest = result;
-  document.getElementById('elimNoReflux').className='elim-btn'+(result==='No Reflux'?' sel':'');
-  document.getElementById('elimReflux').className='elim-btn'+(result==='Reflux'?' sel':'');
-  // Auto-set EP N2→N3 in mark form so the user just clicks Mark Clip
-  selFlow('EP');
-  document.getElementById('fromType').value='N2';
-  document.getElementById('toType').value='N3';
-  setStatus('Elimination test result set — click Mark Clip to record EP N2→N3 with result','ok');
+function submitElimTest(result) {
+  if(!socket || !socket.connected) { setStatus('Not connected','err'); return; }
+  if(!sessionActive) { setStatus('Start a session first','warn'); return; }
+
+  // Use position from the existing EP N2→N3 clip if available, else locked position
+  const src = clips.find(c=>c.flow==='EP'&&c.from_type==='N2'&&c.to_type==='N3') || null;
+  if(!src && !currentState) {
+    setStatus('Click on the leg diagram to lock a position before recording elimination test','warn');
+    return;
+  }
+  socket.emit('clip_mark', {
+    session_id:       sessionId || 'default',
+    flow:             'EP',
+    from_type:        'N2',
+    to_type:          'N3',
+    pos_y_ratio:      src ? src.pos_y_ratio : currentState.posY,
+    leg:              src ? src.leg         : currentState.leg,
+    region:           src ? (src.region  || 'Unknown') : currentState.region,
+    surface:          src ? (src.surface || 'medial')  : currentState.surface,
+    elimination_test: result,
+  });
+
+  // Visual feedback on both button pairs
+  document.getElementById('elimNoReflux').className    = 'elim-btn'+(result==='No Reflux'?' sel':'');
+  document.getElementById('elimReflux').className      = 'elim-btn'+(result==='Reflux'?' sel':'');
+  document.getElementById('elimNoRefluxCard').className = 'elim-btn'+(result==='No Reflux'?' sel':'');
+  document.getElementById('elimRefluxCard').className   = 'elim-btn'+(result==='Reflux'?' sel':'');
+  setStatus('Elimination test: '+result+' recorded','ok');
 }
 
 function markClip() {
@@ -706,12 +784,7 @@ function markClip() {
     leg:              currentState.leg,
     region:           currentState.region,
     surface:          currentState.surface,
-    elimination_test: pendingElimTest,
   });
-  // Reset elim state after marking
-  pendingElimTest='';
-  document.getElementById('elimNoReflux').className='elim-btn';
-  document.getElementById('elimReflux').className='elim-btn';
 }
 
 function deleteClip(i) {
@@ -735,8 +808,8 @@ function setGuidance(txt, thinking, action) {
   el.textContent = txt;
   if(thinking)              el.className = 'thinking';
   else if(action==='maneuver') { el.className = 'maneuver'; banner.style.display=''; }
-  else if(action==='complete') { el.className = 'complete'; banner.style.display='none'; }
-  else                      { el.className = txt ? '' : 'dim'; banner.style.display='none'; }
+  else if(action==='complete') { el.className = 'complete'; banner.style.display='none'; elimRequired=false; document.getElementById('elimCard').classList.remove('required'); }
+  else                      { el.className = txt ? '' : 'dim'; if(!elimRequired) banner.style.display='none'; }
 }
 
 function yn(v){return v?'<span class="yes">Yes</span>':'<span class="no">No</span>';}
@@ -753,9 +826,48 @@ function renderVLM(v) {
   if(v.frame_note)document.getElementById('vlmNote').textContent=v.frame_note;
 }
 
+function showElimModal() {
+  // Reset modal buttons to unselected state each time it opens
+  document.getElementById('elimModalNoReflux').className='elim-btn';
+  document.getElementById('elimModalReflux').className='elim-btn';
+  document.getElementById('elimModal').classList.add('show');
+}
+
+function closeElimModal() {
+  document.getElementById('elimModal').classList.remove('show');
+}
+
+function submitElimTestFromModal(result) {
+  // Highlight the chosen button before submitting
+  document.getElementById('elimModalNoReflux').className='elim-btn'+(result==='No Reflux'?' sel':'');
+  document.getElementById('elimModalReflux').className='elim-btn'+(result==='Reflux'?' sel':'');
+  submitElimTest(result);
+  setTimeout(closeElimModal, 400);  // brief delay so the selection is visible
+}
+
+function checkElimTestRequired() {
+  const hasEPN1N2 = clips.some(c=>c.flow==='EP'&&c.from_type==='N1'&&c.to_type==='N2');
+  const hasEPN2N3 = clips.some(c=>c.flow==='EP'&&c.from_type==='N2'&&c.to_type==='N3');
+  const hasRPN3N1 = clips.some(c=>c.flow==='RP'&&c.from_type==='N3'&&c.to_type==='N1');
+  const hasRPN2N1 = clips.some(c=>c.flow==='RP'&&c.from_type==='N2'&&c.to_type==='N1');
+  const hasElim   = clips.some(c=>c.elimination_test);
+  const wasRequired = elimRequired;
+  elimRequired = hasEPN1N2&&hasEPN2N3&&hasRPN3N1&&hasRPN2N1&&!hasElim;
+  document.getElementById('elimCard').classList.toggle('required', elimRequired);
+  if(elimRequired && !wasRequired) {
+    // Pattern just completed — show modal and banner immediately
+    showElimModal();
+    document.getElementById('elimBanner').style.display='';
+  }
+  if(!elimRequired && wasRequired) {
+    document.getElementById('elimBanner').style.display='none';
+  }
+}
+
 function renderClips() {
   const el=document.getElementById('clipList');
   document.getElementById('clipCount').textContent=clips.length;
+  checkElimTestRequired();
   if(!clips.length){el.innerHTML='<p style="color:var(--muted);font-size:11px">None yet.</p>';return;}
   el.innerHTML=clips.map((c,i)=>{
     const elimStr = c.elimination_test ? ` <span style="color:var(--warn);font-size:10px">[${c.elimination_test}]</span>` : '';
@@ -772,28 +884,39 @@ function renderClips() {
 function renderClipMarkers() {
   const g = document.getElementById('clipMarkersG');
   g.innerHTML = '';
+  renderVeinPaths(g);
   clips.forEach((c, i) => {
-    const posY = c.pos_y_ratio || 0;
     const isR  = c.leg === 'right';
-    const sy   = Math.max(4, Math.min(VB_H-4, posY*VB_H));
-    const cx   = isR ? R_CX : L_CX;
-    const col = c.flow === 'EP' ? '#22c55e' : '#f97316';
+    const N1x  = isR ? 65 : 215;
+    const N2x  = isR ? 43 : 237;
+    const N3x  = isR ? 95 : 185;
+    const cy   = Math.max(8, Math.min(VB_H-8, c.pos_y_ratio * VB_H));
+    // Place circle between the two compartments the junction touches
+    const cX   = {N1:N1x, N2:N2x, N3:N3x};
+    const fx   = cX[c.from_type] ?? N2x;
+    const tx   = cX[c.to_type]   ?? N2x;
+    const cx   = (fx + tx) / 2;
+    const col  = c.flow === 'EP' ? '#4ade80' : '#c084fc';
+    const lx   = isR ? cx + 11 : cx - 11;
+    const anch = isR ? 'start' : 'end';
 
     const n = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     n.style.cursor = 'pointer';
-    n.setAttribute('title', 'Click to remove');
     n.innerHTML = `
-      <rect class="cm-bg" x="${cx-27}" y="${sy-10}" width="54" height="20" rx="4"
-            fill="${col}" fill-opacity=".18" stroke="${col}" stroke-width="1"/>
-      <text x="${cx-6}" y="${sy+4}" text-anchor="middle"
-            fill="${col}" font-size="7.5" font-family="Segoe UI,sans-serif" font-weight="700">
-        ${c.flow} ${c.from_type}→${c.to_type}
-      </text>
-      <text x="${cx+20}" y="${sy+4}" text-anchor="middle"
-            fill="${col}" font-size="11" font-family="Segoe UI,sans-serif" font-weight="700">×</text>`;
+      <circle class="cm-c" cx="${cx}" cy="${cy}" r="5.5"
+              fill="#dc2626" stroke="#0f1117" stroke-width="2"/>
+      <text x="${lx}" y="${cy+3}" text-anchor="${anch}"
+            fill="${col}" font-size="7" font-family="Segoe UI,sans-serif" font-weight="700">
+        ${c.flow} ${c.from_type}→${c.to_type} <tspan fill="#475569" font-size="8">×</tspan></text>`;
 
-    n.addEventListener('mouseenter', () => n.querySelector('.cm-bg').setAttribute('fill-opacity','.38'));
-    n.addEventListener('mouseleave', () => n.querySelector('.cm-bg').setAttribute('fill-opacity','.18'));
+    n.addEventListener('mouseenter', () => {
+      const c2 = n.querySelector('.cm-c');
+      c2.setAttribute('r','7'); c2.setAttribute('stroke','#f59e0b');
+    });
+    n.addEventListener('mouseleave', () => {
+      const c2 = n.querySelector('.cm-c');
+      c2.setAttribute('r','5.5'); c2.setAttribute('stroke','#0f1117');
+    });
     n.addEventListener('click', e => { e.stopPropagation(); deleteClip(i); });
     g.appendChild(n);
   });
@@ -841,6 +964,125 @@ function toggleLog(arrowId, bodyId, entry) {
 
 function esc(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Shunt modal actions ────────────────────────────────────────────────────
+function acceptShunt() {
+  closeShuntModal();
+  setStatus('Shunt type accepted — continue scanning for additional findings', 'ok');
+}
+
+function acceptShuntAndEnd() {
+  closeShuntModal();
+  endSession();
+}
+
+function rejectShunt() {
+  if(!socket || !socket.connected || !currentShuntData) {
+    closeShuntModal();
+    return;
+  }
+  socket.emit('shunt_reject', {
+    session_id: sessionId || 'default',
+    shunt_type: currentShuntData.shunt_type || 'unknown',
+    leg:        currentShuntData.leg        || 'unknown',
+  });
+  closeShuntModal();
+  setStatus('Classification rejected — re-evaluate clip pattern', 'warn');
+}
+
+// ── Vein anatomy overlay ───────────────────────────────────────────────────
+function renderVeinPaths(g) {
+  const rC = clips.filter(c=>c.leg==='right').sort((a,b)=>a.pos_y_ratio-b.pos_y_ratio);
+  const lC = clips.filter(c=>c.leg==='left' ).sort((a,b)=>a.pos_y_ratio-b.pos_y_ratio);
+  drawLegVeinPaths(g, rC, true);
+  drawLegVeinPaths(g, lC, false);
+}
+
+function drawLegVeinPaths(g, legClips, isRight) {
+  // Anatomical lane x-positions (SVG pixels, viewBox 280x540)
+  // Right leg: medial side = left in image; Left leg: medial side = right in image
+  const N1x = isRight ? 65 : 215;   // deep femoral/popliteal (thick dark bar)
+  const N2x = isRight ? 43 : 237;   // GSV saphenous trunk (medial)
+  const N3x = isRight ? 96 : 184;   // tributaries / varices
+  const botY = VB_H * 0.99;
+  const sfjY = 25;    // SFJ hook top (px)
+  const hookY = 65;   // where GSV resumes below hook
+
+  function svgEl(tag, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k, v));
+    return el;
+  }
+
+  // ── N1: thick solid dark indigo bar — full height ─────────────────
+  g.appendChild(svgEl('line', {
+    x1:N1x, y1:2, x2:N1x, y2:botY,
+    stroke:'#3730a3', 'stroke-width':'6', opacity:'0.80'
+  }));
+
+  // ── N2 GSV: thick blue path with SFJ hook connecting to N1 ────────
+  // Shape: N2 lane → hooks across to N1 at SFJ → returns to N2 lane
+  const n2d = `M ${N2x},0 L ${N2x},${sfjY} Q ${N2x},${sfjY+12} ${N1x},${sfjY+12} Q ${N1x},${hookY} ${N2x},${hookY} L ${N2x},${botY}`;
+  g.appendChild(svgEl('path', {
+    d:n2d, stroke:'#2563eb', 'stroke-width':'4.5', fill:'none', opacity:'0.75'
+  }));
+
+  // Lane labels
+  function lbl(x, y, text, col) {
+    const el = svgEl('text', {x, y, fill:col, 'font-size':'7.5', opacity:'0.5',
+      'text-anchor':'middle', 'font-family':'Segoe UI,sans-serif'});
+    el.textContent = text; g.appendChild(el);
+  }
+  lbl(N1x, 12, 'N1', '#a5b4fc');
+  lbl(N2x, 12, 'GSV', '#93c5fd');
+
+  if (!legClips.length) return;
+
+  // ── Circuit clips ────────────────────────────────────────────────────
+  const first=(f,fT,tT)=>legClips.find(c=>c.flow===f&&c.from_type===fT&&c.to_type===tT);
+  const epN1N2=first('EP','N1','N2'), epN2N2=first('EP','N2','N2');
+  const rpN2N1=first('RP','N2','N1'), epN2N3=first('EP','N2','N3');
+  const epN1N3=first('EP','N1','N3');
+  const rpN3N1=first('RP','N3','N1'), rpN3N2=first('RP','N3','N2');
+
+  // ── RED: N2 trunk reflux — overdraws GSV path in red ─────────────
+  if (rpN2N1) {
+    const entry  = epN1N2||epN2N2;
+    const entryY = entry ? Math.max(hookY, entry.pos_y_ratio*VB_H) : hookY;
+    const rawEsc = epN2N3
+      ? Math.max(rpN2N1.pos_y_ratio, epN2N3.pos_y_ratio)*VB_H
+      : rpN2N1.pos_y_ratio*VB_H;
+    const exitY  = Math.max(entryY+20, rawEsc);
+    g.appendChild(svgEl('line', {
+      x1:N2x, y1:entryY, x2:N2x, y2:exitY,
+      stroke:'#ef4444', 'stroke-width':'5.5', opacity:'0.92'
+    }));
+  }
+
+  // ── RED: N3 tributary — bezier from escape out to lateral then re-entry
+  const tribTop=epN2N3||epN1N3, tribBot=rpN3N1||rpN3N2;
+  if (tribTop && tribBot) {
+    const startX = tribTop.from_type==='N1' ? N1x : N2x;
+    const startY = tribTop.pos_y_ratio*VB_H;
+    const endX   = tribBot.to_type==='N1' ? N1x : (tribBot.to_type==='N2' ? N2x : N3x);
+    const endY   = tribBot.pos_y_ratio*VB_H;
+    const dY     = Math.max(30, endY - startY);
+    g.appendChild(svgEl('path', {
+      d:`M ${startX},${startY} C ${N3x},${startY+dY*0.15} ${N3x},${endY-dY*0.15} ${endX},${endY}`,
+      stroke:'#ef4444', 'stroke-width':'4.5', fill:'none', opacity:'0.90'
+    }));
+  }
+
+  // ── RED: perforator entry loop (EP N2→N2) ─────────────────────────
+  if (epN2N2 && !epN1N2) {
+    const py = epN2N2.pos_y_ratio*VB_H;
+    const ox = isRight ? N2x-20 : N2x+20;
+    g.appendChild(svgEl('path', {
+      d:`M ${N2x},${py} Q ${ox},${py-22} ${N2x},${py}`,
+      stroke:'#ef4444', 'stroke-width':'4', fill:'none', opacity:'0.88'
+    }));
+  }
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────

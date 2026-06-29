@@ -55,6 +55,7 @@ def run_guidance_crew(
     protocol_text: str,
     pos_x: float | None = None,
     is_front: bool | None = None,
+    rejection_notes: list[str] | None = None,
 ) -> tuple[str, str, str, bool, str, str]:
     """
     Run the 5-agent guidance crew as a single CrewAI sequential Crew.
@@ -66,6 +67,15 @@ def run_guidance_crew(
     """
     pos_x_str = f" | posX={pos_x:.2f}" if pos_x is not None else ""
     front_str = f" | is_front={'yes' if is_front else 'no'}" if is_front is not None else ""
+
+    rejection_ctx = ""
+    if rejection_notes:
+        rejection_ctx = (
+            "SURGEON FEEDBACK — PRIOR CLASSIFICATION REJECTED:\n"
+            + "\n".join(f"  • {n}" for n in rejection_notes[-3:])
+            + "\n\nRe-evaluate the evidence MORE critically than before. "
+            "Do NOT re-confirm the rejected type without a meaningfully different clip set.\n\n"
+        )
 
     clips_text = "\n".join(
         f"  {c.get('flow')} {c.get('from_type')}→{c.get('to_type')} "
@@ -84,6 +94,7 @@ def run_guidance_crew(
     # ── Task 1: Clinical Interpreter ──────────────────────────────────────────
     task1 = Task(
         description=(
+            rejection_ctx +
             "You are the first agent in a 5-agent CHIVA examination pipeline. "
             "Assess the clinical picture from the full examination state below.\n\n"
             f"{state_message}\n\n"
@@ -114,16 +125,17 @@ def run_guidance_crew(
             '   "evidence": "<one sentence: clip pattern that confirms or why unconfirmed>"}\n\n'
             '"confirmed" is true ONLY when the FULL minimum clip set is present:\n'
             "  Type 1   → EP N1→N2 (SFJ or Hunterian) + RP N2→N1; NO N3 clips at all\n"
-            "  Type 2A  → EP N2→N3; NO EP N1→N2; NO EP N2→N2; NO RP N2→N1\n"
-            "             (SFJ competent; GSV refluxes into tributary, no perforator entry)\n"
-            "  Type 2B  → EP N2→N2 (perforator or SPJ entry, NOT SFJ); NO EP N1→N2; NO RP N2→N1\n"
-            "             (perforator/SPJ feeds system; drains via tributary only)\n"
+            "  Type 2A  → EP N2→N3 + RP N3→N1; NO EP N1→N2; NO EP N2→N2; NO RP N2→N1\n"
+            "             (SFJ competent; GSV escapes into tributary; tributary re-enters deep)\n"
+            "  Type 2B  → EP N2→N2 + RP N3→N1; NO EP N1→N2; NO RP N2→N1\n"
+            "             (perforator/SPJ feeds system; tributary re-enters deep; no trunk reflux)\n"
             "  Type 2C  → (EP N2→N2 or EP N2→N3) + RP N3 + RP N2→N1; NO EP N1→N2\n"
             "             (perforator entry + secondary GSV trunk reflux back to N1; SFJ still competent)\n"
-            "  Type 3   → EP N1→N2 + EP N2→N3 + RP N3→N1 only (no RP N2→N1)\n"
-            "             OR EP N1→N2 + EP N2→N3 + RP N3→N1 + RP N2→N1 + elimTest=No Reflux\n"
+            "  Type 3   → EP N1→N2 + EP N2→N3 + RP N3→N1 + RP N2→N1 + elimTest=No Reflux\n"
+            "             (elimination test is MANDATORY — 3 clips without RP N2→N1 is NOT confirmed Type 3;\n"
+            "              trunk reflux must be confirmed via RP N2→N1, then elim test performed)\n"
             "  Type 1+2 → EP N1→N2 + EP N2→N3 + RP N3→N1 + RP N2→N1 + elimTest=Reflux\n"
-            "             (same clips as ambiguous Type 3 pattern but elim test shows escape is not isolated)\n"
+            "             (same clips as Type 3 but elim test shows trunk reflux is independent, not conducted)\n"
             "  Type 4   → EP N1→N3 + RP N2→N1 (GSV trunk carries return blood back to N1; trunk REFLUXES)\n"
             "             optional intermediate: EP N1→N3 + RP N3→N2 + RP N2→N1\n"
             "  Type 5   → EP N1→N3 + RP N3→N2 + EP N2→N3 + RP N3→N1; NO RP N2→N1\n"
@@ -289,5 +301,90 @@ def run_guidance_crew(
         shunt_evidence = t2_parsed.get("evidence", "")
     except (json.JSONDecodeError, Exception):
         pass
+
+    # ── Deterministic gate (bidirectional) ────────────────────────────────────
+    # Blocks LLM false-positives AND fills in LLM false-negatives.
+    # Also drives the action gate below.
+    def _has(flow: str, fT: str, tT: str) -> bool:
+        return any(
+            c.get("flow") == flow and c.get("from_type") == fT and c.get("to_type") == tT
+            for c in clips
+        )
+
+    ep_n1_n2       = _has("EP", "N1", "N2")
+    ep_n2_n2       = _has("EP", "N2", "N2")
+    ep_n2_n3       = _has("EP", "N2", "N3")
+    ep_n1_n3       = _has("EP", "N1", "N3")
+    rp_n2_n1       = _has("RP", "N2", "N1")
+    rp_n3_n1       = _has("RP", "N3", "N1")
+    rp_n3_n2       = _has("RP", "N3", "N2")
+    elim_no_reflux = any(c.get("elimination_test", "") == "No Reflux" for c in clips)
+    elim_reflux    = any(c.get("elimination_test", "") == "Reflux"    for c in clips)
+    has_elim       = elim_no_reflux or elim_reflux
+
+    # Elimination test trigger: requires SFJ/SPJ entry (ep_n1_n2) to be meaningful.
+    # Without ep_n1_n2, ep_n2_n3 + rp_n3_n1 + rp_n2_n1 is Type 2C, not an ambiguous trunk.
+    elim_trigger = ep_n1_n2 and ep_n2_n3 and rp_n3_n1 and rp_n2_n1 and not has_elim
+
+    # Forward-override checks (priority order, most restrictive first).
+    # Type 2A intentionally omitted: ep_n2_n3 + rp_n3_n1 is a valid intermediate state
+    # for Type 2C and Type 3/1+2, so premature auto-confirmation would be wrong.
+    _forward_checks: list[tuple[str, bool]] = [
+        ("3",   ep_n1_n2 and ep_n2_n3 and rp_n3_n1 and rp_n2_n1 and elim_no_reflux),
+        ("1+2", ep_n1_n2 and ep_n2_n3 and rp_n3_n1 and rp_n2_n1 and elim_reflux),
+        ("1",   ep_n1_n2 and rp_n2_n1 and not ep_n2_n3 and not rp_n3_n1),
+        ("5",   ep_n1_n3 and rp_n3_n2 and ep_n2_n3 and rp_n3_n1 and not rp_n2_n1),
+        ("4",   ep_n1_n3 and rp_n2_n1),
+        ("6",   ep_n1_n3 and rp_n3_n1 and not ep_n2_n2 and not ep_n2_n3
+                and not rp_n2_n1 and not rp_n3_n2),
+        ("2C",  not ep_n1_n2 and (ep_n2_n2 or ep_n2_n3)
+                and (rp_n3_n1 or rp_n3_n2) and rp_n2_n1),
+        ("2B",  not ep_n1_n2 and ep_n2_n2 and rp_n3_n1 and not rp_n2_n1),
+    ]
+
+    # Minimum-set map for LLM false-positive blocking (all types, including 2A)
+    _all_min_ok: dict[str, bool] = {
+        "1":   ep_n1_n2 and rp_n2_n1,
+        "2A":  ep_n2_n3 and rp_n3_n1,
+        "2B":  ep_n2_n2 and rp_n3_n1,
+        "2C":  (ep_n2_n2 or ep_n2_n3) and (rp_n3_n1 or rp_n3_n2) and rp_n2_n1,
+        "3":   ep_n1_n2 and ep_n2_n3 and rp_n3_n1 and rp_n2_n1 and has_elim,
+        "1+2": ep_n1_n2 and ep_n2_n3 and rp_n3_n1 and rp_n2_n1 and has_elim,
+        "4":   ep_n1_n3 and rp_n2_n1,
+        "5":   ep_n1_n3 and rp_n3_n2 and ep_n2_n3 and rp_n3_n1,
+        "6":   ep_n1_n3 and rp_n3_n1,
+    }
+
+    det_type      = "undetermined"
+    det_confirmed = False
+    for stype, ok in _forward_checks:
+        if ok:
+            det_type      = stype
+            det_confirmed = True
+            break
+
+    if det_confirmed:
+        shunt_found    = True
+        shunt_type     = det_type
+        if not shunt_evidence:
+            shunt_evidence = f"Minimum clip set for Type {det_type} complete."
+    elif shunt_found:
+        # LLM said confirmed but minimum clips are absent → block false positive
+        if not _all_min_ok.get(shunt_type, True):
+            shunt_found = False
+
+    # ── Action gate ───────────────────────────────────────────────────────────
+    if det_confirmed:
+        # Full circuit confirmed deterministically — force complete
+        if action != "complete":
+            guidance = "Circuit complete — classification confirmed, all zones mapped"
+        action = "complete"
+    elif action == "maneuver" and not elim_trigger:
+        # Spurious maneuver: elimination test condition not actually met
+        action = "move"
+    elif elim_trigger and action != "maneuver":
+        # Elimination test is pending but LLM missed it
+        action   = "maneuver"
+        guidance = "Hold probe at escape site and compress tributary — record Doppler response"
 
     return guidance, combined_raw, action, shunt_found, shunt_type, shunt_evidence
