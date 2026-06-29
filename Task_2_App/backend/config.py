@@ -42,4 +42,5 @@ STREAM_HISTORY_WINDOW = 8
 STREAM_VLM_THRESHOLD = 0.05
 
 # Minimum posYRatio change before triggering a new LLM guidance call
-STREAM_LLM_THRESHOLD = 0.03
+# Raised from 0.03 → 0.06 to prevent flooding the crew on every mousemove tick
+STREAM_LLM_THRESHOLD = 0.06

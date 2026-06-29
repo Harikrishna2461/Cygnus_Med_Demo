@@ -133,6 +133,21 @@ select:focus{outline:none;border-color:var(--accent);}
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* ── SHUNT CONFIRMED MODAL ───────────────────────────────────────────────── */
+#shuntModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;align-items:center;justify-content:center;}
+#shuntModal.show{display:flex;}
+.shunt-card{background:var(--surface);border:1.5px solid var(--accent2);border-radius:14px;padding:32px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.6);}
+.shunt-icon{font-size:36px;margin-bottom:10px;}
+.shunt-card h2{color:var(--accent2);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.shunt-type-label{font-size:30px;font-weight:800;color:#fff;margin:10px 0 8px;}
+.shunt-evidence{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:24px;}
+.shunt-btn-row{display:flex;gap:10px;justify-content:center;}
+.shunt-btn-row button{padding:9px 22px;font-size:13px;}
+
+/* ── MARK POSITION BADGE ─────────────────────────────────────────────────── */
+.mark-pos-badge{font-size:10px;color:var(--muted);padding:5px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);margin-bottom:8px;text-align:center;line-height:1.5;}
+.mark-pos-badge.active{color:var(--warn);border-color:var(--warn);background:rgba(245,158,11,.08);}
 </style>
 </head>
 <body>
@@ -160,7 +175,7 @@ select:focus{outline:none;border-color:var(--accent);}
   <!-- ── LEFT: leg + mark form + clips ─────────────────────────────────── -->
   <div class="panel">
     <div class="card" style="padding:10px">
-      <h3>Probe — click to set position, hover to preview</h3>
+      <h3>Probe — move to scan · click to lock mark position</h3>
       <div id="legWrap">
         <svg id="legSvg" viewBox="0 0 280 540" width="268" height="516">
           <rect width="280" height="540" fill="none"/>
@@ -218,13 +233,21 @@ select:focus{outline:none;border-color:var(--accent);}
 
           <!-- Clip markers (JS-populated) -->
           <g id="clipMarkersG"/>
+
+          <!-- Lock marker — amber diamond at click-locked position for clip marking -->
+          <g id="lockGroup" display="none">
+            <line id="lockLine" x1="22" x2="118" y1="0" y2="0" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,3" opacity=".85"/>
+            <polygon id="lockPin" points="0,-6 5,0 0,6 -5,0" fill="#f59e0b" stroke="#fff" stroke-width="1" opacity=".9"/>
+            <text id="lockLabel" x="70" y="-10" text-anchor="middle" fill="#f59e0b" font-size="7.5" font-family="Segoe UI,sans-serif" font-weight="700"/>
+          </g>
         </svg>
       </div>
     </div>
 
     <!-- Mark form -->
     <div class="card">
-      <h3>Mark Finding at Current Position</h3>
+      <h3>Mark Finding</h3>
+      <div id="markPosBadge" class="mark-pos-badge">Click on the leg diagram to lock mark position</div>
       <div class="flow-row">
         <button class="flow-btn ep sel" id="flowEP" onclick="selFlow('EP')">EP — antegrade</button>
         <button class="flow-btn rp"     id="flowRP" onclick="selFlow('RP')">RP — retrograde</button>
@@ -248,7 +271,7 @@ select:focus{outline:none;border-color:var(--accent);}
         </div>
       </div>
       <button class="btn-primary" style="width:100%" id="btnMark" onclick="markClip()" disabled>
-        Mark Clip
+        Mark Clip at Locked Position
       </button>
     </div>
 
@@ -322,15 +345,31 @@ select:focus{outline:none;border-color:var(--accent);}
 
 </div><!-- .layout -->
 
+<!-- ── SHUNT CONFIRMED MODAL ──────────────────────────────────────────────── -->
+<div id="shuntModal">
+  <div class="shunt-card">
+    <div class="shunt-icon">✓</div>
+    <h2>Shunt Type Confirmed</h2>
+    <div class="shunt-type-label" id="shuntTypeLabel">—</div>
+    <p class="shunt-evidence" id="shuntEvidence"></p>
+    <div class="shunt-btn-row">
+      <button class="btn-secondary" onclick="closeShuntModal()">Continue Scanning</button>
+      <button class="btn-danger"    onclick="endSession(); closeShuntModal()">End Session</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
 let socket        = null;
 let sessionId     = null;
 let sessionActive = false;
-let currentState  = null;   // locked on click only
+let currentState  = null;   // click-locked position — used for clip marking
+let scanState     = null;   // hover position — drives continuous scan
 let clips         = [];
 let selectedFlow  = 'EP';
 let lastGuidance  = '';
+let probeTimer    = null;   // debounce for probe_move events
 
 // ── Leg diagram hit-boxes (normalized 0-1, top-left=0,0  bottom-right=1,1) ─
 const VB_W=280, VB_H=540;
@@ -411,10 +450,16 @@ function mapReg(id,dist,front,posY) {
   return posY<=0.57?'SPJ':'SSV';
 }
 
-// ── SVG mouse — hover preview only, click to lock position ────────────────
+// ── SVG mouse — move=continuous scan, click=lock mark position ────────────
 legSvg.addEventListener('mousemove', e => {
   const {x,y} = svgXY(e);
-  updateIndicator(coordToState(x,y), x, y, false);   // preview, no lock
+  const st = coordToState(x, y);
+  if(!st) { document.getElementById('probeGroup').setAttribute('display','none'); return; }
+  scanState = st;
+  updateScanIndicator(st);
+  updateInfoBar(st);
+  scheduleFrame(st.posY);
+  if(sessionActive) scheduleProbeMove(st);
 });
 
 legSvg.addEventListener('click', e => {
@@ -422,36 +467,66 @@ legSvg.addEventListener('click', e => {
   const st = coordToState(x, y);
   if(!st) return;
   currentState = st;
-  updateInfoBar(st);
-  updateIndicator(st, st.sx, st.sy, true);            // lock indicator
-  scheduleFrame(st.posY);
-  if(sessionActive) sendProbeMove(st);
-  else setStatus('Click "Start Session" then click the leg to begin','warn');
+  updateLockMarker(st);
+  updateMarkPosBadge(st);
+  if(!sessionActive) setStatus('Click "Start Session" first to begin scanning','warn');
 });
 
 legSvg.addEventListener('mouseleave', () => {
-  // On leave restore locked indicator (or hide if nothing locked yet)
-  if(currentState) updateIndicator(currentState, currentState.sx, currentState.sy, true);
-  else document.getElementById('probeGroup').setAttribute('display','none');
+  clearTimeout(probeTimer);
+  document.getElementById('probeGroup').setAttribute('display','none');
+  // Lock marker stays visible at clicked position
 });
 
-function updateIndicator(st, sx, sy, locked) {
+// Scanning probe indicator — follows mouse, lighter styling
+function updateScanIndicator(st) {
   const g = document.getElementById('probeGroup');
   if(!st) { g.setAttribute('display','none'); return; }
   g.setAttribute('display','');
   const ln = document.getElementById('probeLine');
   ln.setAttribute('x1', st.lL); ln.setAttribute('x2', st.lR);
-  ln.setAttribute('y1', sy);    ln.setAttribute('y2', sy);
-  ln.setAttribute('stroke-width', locked ? '2.5' : '1.5');
-  ln.setAttribute('opacity',      locked ? '1'   : '0.4');
+  ln.setAttribute('y1', st.sy); ln.setAttribute('y2', st.sy);
+  ln.setAttribute('stroke-width', '1.5');
+  ln.setAttribute('opacity', '0.55');
   const ci = document.getElementById('probeCirc');
-  ci.setAttribute('cx', sx); ci.setAttribute('cy', sy);
-  ci.setAttribute('r',  locked ? '5' : '3.5');
-  ci.setAttribute('opacity', locked ? '1' : '0.5');
+  ci.setAttribute('cx', st.sx); ci.setAttribute('cy', st.sy);
+  ci.setAttribute('r', '3.5');
+  ci.setAttribute('opacity', '0.65');
   const tx = document.getElementById('probeLabel');
-  tx.setAttribute('x', st.lCX); tx.setAttribute('y', sy - 9);
-  tx.setAttribute('opacity', locked ? '1' : '0.5');
-  tx.textContent = locked ? st.region + ' ●' : st.region;
+  tx.setAttribute('x', st.lCX); tx.setAttribute('y', st.sy - 7);
+  tx.setAttribute('opacity', '0.7');
+  tx.textContent = st.region;
+}
+
+// Amber lock marker — persists at click position for marking
+function updateLockMarker(st) {
+  const g = document.getElementById('lockGroup');
+  if(!st) { g.setAttribute('display','none'); return; }
+  g.setAttribute('display','');
+  const sy = st.posY * VB_H;
+  document.getElementById('lockLine').setAttribute('x1', st.lL);
+  document.getElementById('lockLine').setAttribute('x2', st.lR);
+  document.getElementById('lockLine').setAttribute('y1', sy);
+  document.getElementById('lockLine').setAttribute('y2', sy);
+  document.getElementById('lockPin').setAttribute('transform', `translate(${st.lCX},${sy})`);
+  const lbl = document.getElementById('lockLabel');
+  lbl.setAttribute('x', st.lCX);
+  lbl.setAttribute('y', sy - 10);
+  lbl.textContent = '❖ ' + st.posY.toFixed(2);
+}
+
+// Mark position badge in the mark form card
+function updateMarkPosBadge(st) {
+  const el = document.getElementById('markPosBadge');
+  if(!st) {
+    el.textContent = 'Click on the leg diagram to lock mark position';
+    el.className = 'mark-pos-badge';
+    document.getElementById('btnMark').disabled = true;
+    return;
+  }
+  el.textContent = `posY ${st.posY.toFixed(2)} · ${st.region} · ${st.leg} leg`;
+  el.className = 'mark-pos-badge active';
+  if(sessionActive) document.getElementById('btnMark').disabled = false;
 }
 
 function updateInfoBar(st) {
@@ -502,14 +577,15 @@ function startSession() {
   document.getElementById('sessionPill').className='hpill ok';
   document.getElementById('btnStart').disabled=true;
   document.getElementById('btnEnd').disabled=false;
-  document.getElementById('btnMark').disabled=false;
-  setStatus('Session started — move probe over the leg diagram','ok');
+  if(currentState) document.getElementById('btnMark').disabled=false;
+  setStatus('Session started — move probe over leg to scan · click to lock mark position','ok');
   socket.emit('stream_start', {session_id:sessionId});
 }
 
 function endSession() {
   if(socket && sessionId) socket.emit('session_end',{session_id:sessionId});
   sessionActive=false;
+  clearTimeout(probeTimer);
   document.getElementById('btnStart').disabled=false;
   document.getElementById('btnEnd').disabled=true;
   document.getElementById('btnMark').disabled=true;
@@ -545,8 +621,8 @@ function initSocket() {
   });
 
   socket.on('session_ready',(d)=>{
-    setStatus('Session ready — click on the leg diagram to set probe position','ok');
-    setGuidance('Click anywhere on the leg to begin', false, 'move');
+    setStatus('Session ready — move probe over leg to scan · click to lock mark position','ok');
+    setGuidance('Move probe over the leg to begin scanning', false, 'move');
   });
 
   socket.on('guidance_update',(d)=>{
@@ -564,9 +640,25 @@ function initSocket() {
   socket.on('session_ended',(d)=>{
     setGuidance('Session complete — '+(d.clips?.length||0)+' findings recorded.',false);
   });
+
+  socket.on('shunt_confirmed',(d)=>{
+    document.getElementById('shuntTypeLabel').textContent = 'CHIVA Type ' + (d.shunt_type||'—');
+    document.getElementById('shuntEvidence').textContent  = d.shunt_evidence || '';
+    document.getElementById('shuntModal').classList.add('show');
+    setStatus('Shunt Type ' + (d.shunt_type||'—') + ' confirmed — continue or end session', 'ok');
+  });
 }
 
-// ── probe_move — sent on click only ───────────────────────────────────────
+function closeShuntModal() {
+  document.getElementById('shuntModal').classList.remove('show');
+}
+
+// ── probe_move — throttled via debounce on mousemove ─────────────────────
+function scheduleProbeMove(st) {
+  clearTimeout(probeTimer);
+  probeTimer = setTimeout(() => { sendProbeMove(st); }, 200);
+}
+
 function sendProbeMove(st) {
   if(!socket || !sessionActive || !socket.connected) return;
   if(!lastGuidance) setGuidance('Processing…', true);

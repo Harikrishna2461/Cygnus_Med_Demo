@@ -55,10 +55,10 @@ def run_guidance_crew(
     protocol_text: str,
     pos_x: float | None = None,
     is_front: bool | None = None,
-) -> tuple[str, str, str]:
+) -> tuple[str, str, str, bool, str, str]:
     """
     Run the 5-agent guidance crew as a single CrewAI sequential Crew.
-    Returns (guidance_text, raw_log, action).
+    Returns (guidance_text, raw_log, action, shunt_found, shunt_type, shunt_evidence).
 
     Agents interact through CrewAI's context mechanism: each task receives
     the outputs of its upstream tasks automatically — agents build on each
@@ -104,20 +104,39 @@ def run_guidance_crew(
     # ── Task 2: Shunt Analyst (sees task1) ───────────────────────────────────
     task2 = Task(
         description=(
-            "You are the second agent. The Clinical Interpreter (previous agent) has "
-            "assessed the clips. Using that assessment and the raw clip list below, "
-            "classify the developing CHIVA shunt type.\n\n"
+            "You are the second agent. The Clinical Interpreter has assessed the clips. "
+            "Using that assessment and the raw clip list below, determine whether a CHIVA "
+            "shunt type is confirmed.\n\n"
             f"RAW CONFIRMED CLIPS ({len(clips)} total):\n{clips_text}\n\n"
-            "In max 80 words:\n"
-            "1. Most likely developing shunt type (I, 2A, 2B, 2C, 3, 4, 5, 6, or undetermined) "
-            "and the supporting clip pattern.\n"
-            "2. Specific additional clips needed to confirm or exclude each candidate type.\n"
-            "3. Whether an elimination test is required before the type can be determined."
+            "Output ONLY valid JSON (no markdown):\n"
+            '  {"shunt_type": "1"|"2A"|"2B"|"2C"|"3"|"1+2"|"4"|"5"|"6"|"undetermined",\n'
+            '   "confirmed": true|false,\n'
+            '   "evidence": "<one sentence: clip pattern that confirms or why unconfirmed>"}\n\n'
+            '"confirmed" is true ONLY when the FULL minimum clip set is present:\n'
+            "  Type 1   → EP N1→N2 (SFJ or Hunterian) + RP N2→N1; NO N3 clips at all\n"
+            "  Type 2A  → EP N2→N3; NO EP N1→N2; NO EP N2→N2; NO RP N2→N1\n"
+            "             (SFJ competent; GSV refluxes into tributary, no perforator entry)\n"
+            "  Type 2B  → EP N2→N2 (perforator or SPJ entry, NOT SFJ); NO EP N1→N2; NO RP N2→N1\n"
+            "             (perforator/SPJ feeds system; drains via tributary only)\n"
+            "  Type 2C  → (EP N2→N2 or EP N2→N3) + RP N3 + RP N2→N1; NO EP N1→N2\n"
+            "             (perforator entry + secondary GSV trunk reflux back to N1; SFJ still competent)\n"
+            "  Type 3   → EP N1→N2 + EP N2→N3 + RP N3→N1 only (no RP N2→N1)\n"
+            "             OR EP N1→N2 + EP N2→N3 + RP N3→N1 + RP N2→N1 + elimTest=No Reflux\n"
+            "  Type 1+2 → EP N1→N2 + EP N2→N3 + RP N3→N1 + RP N2→N1 + elimTest=Reflux\n"
+            "             (same clips as ambiguous Type 3 pattern but elim test shows escape is not isolated)\n"
+            "  Type 4   → EP N1→N3 + RP N2→N1 (GSV trunk carries return blood back to N1; trunk REFLUXES)\n"
+            "             optional intermediate: EP N1→N3 + RP N3→N2 + RP N2→N1\n"
+            "  Type 5   → EP N1→N3 + RP N3→N2 + EP N2→N3 + RP N3→N1; NO RP N2→N1\n"
+            "             (blood loops N1→N3→N2→N3→N1; GSV loops but never directly drains to N1)\n"
+            "  Type 6   → EP N1→N3 + RP N3→N1; NO N2 clips whatsoever\n"
+            "             (perforator→tributary→perforator back to deep; GSV completely bypassed)\n\n"
+            "KEY DIFFERENTIATOR — all three N1→N3-entry types:\n"
+            "  Type 4: RP N2→N1 PRESENT (trunk refluxes directly to deep)\n"
+            "  Type 5: EP N2→N3 PRESENT, NO RP N2→N1 (trunk loops back to N3 before returning)\n"
+            "  Type 6: NO N2 involvement at all (tributary returns straight to N1 via perforator)\n\n"
+            "If no type matches its full set, set confirmed=false and shunt_type=undetermined."
         ),
-        expected_output=(
-            "Shunt analysis (≤80 words): developing type, supporting pattern, "
-            "missing clips, elimination test flag."
-        ),
+        expected_output='JSON only: {"shunt_type": "...", "confirmed": true|false, "evidence": "..."}',
         agent=analyst,
         context=[task1],
     )
@@ -181,10 +200,19 @@ def run_guidance_crew(
             "  'move'     — default for all probe navigation\n"
             "  'maneuver' — ONLY if circuit analysis explicitly requires elimination test\n"
             "  'complete' — ONLY if circuit analysis declares full circuit confirmed\n\n"
-            "FORBIDDEN in guidance text: EP, RP, N1, N2, N3, reflux, Q1, Q2, Q3, Q4, "
-            "confirmed, findings, diagnostic, shunt, Given, Since, As the, Currently.\n"
-            "guidance MUST contain one direction word: distally / proximally / medially / "
-            "posteriorly / laterally / transversely / deeper."
+            "FORBIDDEN words in guidance text (never use these):\n"
+            "  Clinical terms: EP, RP, N1, N2, N3, reflux, Q1, Q2, Q3, Q4,\n"
+            "    confirmed, findings, diagnostic, shunt, Given, Since, As the, Currently\n"
+            "  Maneuver names: Paranà, Parana, Valsalva, squeezing, compression, maneuver\n"
+            "  Paranà and Valsalva are maneuver TECHNIQUES, NOT anatomical destinations —\n"
+            "  NEVER write 'Move ... to Paranà' or 'Move ... to Valsalva'.\n\n"
+            "guidance format rules:\n"
+            "  - action='move'     → probe navigation: 'Move probe <direction> to <anatomical target>'\n"
+            "  - action='maneuver' → position instruction: 'Hold probe at <target> and compress'\n"
+            "  - action='complete' → 'Circuit complete — all zones confirmed'\n"
+            "  - MUST contain one direction word: distally / proximally / medially /\n"
+            "    posteriorly / laterally / transversely / deeper\n"
+            "  - anatomical targets: SFJ, GSV, SPJ, SSV, popliteal, mid-thigh, calf, ankle, perforator"
         ),
         expected_output='Valid JSON only: {"guidance": "...", "action": "move"}',
         agent=specialist,
@@ -207,6 +235,7 @@ def run_guidance_crew(
             "Continue scanning distally to locate anatomical junction",
             f"[crew-error] {exc}",
             "move",
+            False, "undetermined", "",
         )
 
     # ── Extract final output (task5) and intermediate outputs for logging ─────
@@ -214,11 +243,17 @@ def run_guidance_crew(
 
     # tasks_output is a list of TaskOutput objects, one per task
     tasks_out = getattr(result, "tasks_output", [])
-    def _t(i: int) -> str:
+
+    def _t_full(i: int) -> str:
+        """Full task output — used for JSON parsing."""
         if i < len(tasks_out):
             o = tasks_out[i]
-            return (o.raw if hasattr(o, "raw") else str(o))[:80]
-        return "—"
+            return o.raw if hasattr(o, "raw") else str(o)
+        return ""
+
+    def _t(i: int) -> str:
+        """Truncated task output — used for display only."""
+        return _t_full(i)[:80] or "—"
 
     combined_raw = (
         f"[interpret] {_t(0)} | "
@@ -228,7 +263,7 @@ def run_guidance_crew(
         f"[guidance] {raw[:80]}"
     )
 
-    # ── Parse JSON from task5 output ──────────────────────────────────────────
+    # ── Parse JSON from task5 output (guidance) ──────────────────────────────
     guidance = "Continue scanning distally to locate anatomical junction"
     action = "move"
 
@@ -241,4 +276,18 @@ def run_guidance_crew(
     except json.JSONDecodeError:
         logger.warning("[CrewAI] Could not parse GuidanceSpecialist output: %.200s", raw)
 
-    return guidance, combined_raw, action
+    # ── Parse JSON from task2 output (shunt classification) ──────────────────
+    shunt_found    = False
+    shunt_type     = "undetermined"
+    shunt_evidence = ""
+
+    try:
+        t2_raw = _t_full(1)
+        t2_parsed = json.loads(_extract_json_str(t2_raw))
+        shunt_found    = bool(t2_parsed.get("confirmed", False))
+        shunt_type     = t2_parsed.get("shunt_type", "undetermined")
+        shunt_evidence = t2_parsed.get("evidence", "")
+    except (json.JSONDecodeError, Exception):
+        pass
+
+    return guidance, combined_raw, action, shunt_found, shunt_type, shunt_evidence

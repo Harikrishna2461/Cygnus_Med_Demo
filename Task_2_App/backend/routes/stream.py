@@ -46,7 +46,7 @@ def register_stream_events(socketio) -> None:
         sess.last_vlm_pos_y    = -1.0
         sess.last_vlm_summary  = "No frame analyzed yet."
         sess.last_llm_pos_y    = -1.0
-        sess.max_visited_pos_y = 0.0
+        sess.confirmed_shunts  = []
         logger.info("Stream session started: %s", session_id)
         emit("session_ready", {"session_id": session_id})
 
@@ -101,6 +101,13 @@ def register_stream_events(socketio) -> None:
             if result.get("guidance") is None and result.get("vlm") is None:
                 return
 
+            # Emit shunt confirmation once before the guidance update
+            if result.get("shunt_confirmed"):
+                socketio.emit("shunt_confirmed", {
+                    "shunt_type":     result["shunt_type"],
+                    "shunt_evidence": result["shunt_evidence"],
+                }, room=client_sid, namespace=NS)
+
             socketio.emit("guidance_update", result, room=client_sid, namespace=NS)
 
         threading.Thread(target=process, daemon=True).start()
@@ -152,6 +159,11 @@ def register_stream_events(socketio) -> None:
             except Exception as exc:
                 logger.error("LLM after clip_mark: %s", exc, exc_info=True)
                 return
+            if result.get("shunt_confirmed"):
+                socketio.emit("shunt_confirmed", {
+                    "shunt_type":     result["shunt_type"],
+                    "shunt_evidence": result["shunt_evidence"],
+                }, room=client_sid, namespace=NS)
             socketio.emit("guidance_update", result, room=client_sid, namespace=NS)
 
         threading.Thread(target=process_after_mark, daemon=True).start()
