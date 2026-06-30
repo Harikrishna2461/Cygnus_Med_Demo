@@ -1,0 +1,18 @@
+[Unit]
+Description=Task-2 Probe Localisation & Active Guidance
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/var/www/Cygnus_Med_Demo/Task_2_App/backend
+EnvironmentFile=/var/www/Cygnus_Med_Demo/Task_2_App/.env
+ExecStartPre=/bin/bash -c 'cd /var/www/Cygnus_Med_Demo && git pull origin main && Task_2_App/backend/venv/bin/pip install -r Task_2_App/backend/requirements.txt -q'
+ExecStart=/var/www/Cygnus_Med_Demo/Task_2_App/backend/venv/bin/gunicorn -c /var/www/Cygnus_Med_Demo/Task_2_App/backend/gunicorn.conf.py wsgi:application
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/task2_probe_guidance/app.log
+StandardError=append:/var/log/task2_probe_guidance/app-error.log
+
+[Install]
+WantedBy=multi-user.target

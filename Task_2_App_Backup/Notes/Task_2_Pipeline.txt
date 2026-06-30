@@ -1,0 +1,233 @@
+The Full Pipeline
+1. Probe Position — what the frontend computes
+When you click on the leg SVG, stream.html:305-327 runs coordToState(sx, sy). It converts pixel coordinates into:
+
+leg - "right" or "left"
+seg_id - 0/1 = left thigh/calf, 2/3 = right thigh/calf
+seg_dist - 0→1 from top to bottom of that segment
+posY - 0→1 from groin to ankle (thigh: 0.04 + dist×0.51, calf: 0.55 + dist×0.45)
+region - computed by mapReg() — no server involved
+surface - "anterior-medial" if clicked left of centre, "posterior" if right
+
+mapReg() - produces the region using pure geometry — no backend call:
+Front of thigh, dist ≤ 0.12 → SFJ (groin crease)
+Front of thigh, dist > 0.12 → GSV-THI (thigh trunk)
+Back of thigh, dist ≥ 0.78 → SPJ (behind knee)
+Front of calf → GSV-CAL
+Back of calf, dist > 0.12 → SSV
+That entire mapping is client-side — the server only receives the already-resolved region string.
+
+2. WebSocket event — probe_move
+sendProbeMove() emits this payload over Socket.IO:
+
+
+{
+  "session_id": "sess_abc123",
+  "region": "GSV-THI",
+  "pos_y_ratio": 0.28,
+  "leg": "right",
+  "surface": "anterior-medial",
+  "segment_id": 2,
+  "segment_dist": 0.47
+}
+
+The handler in routes/stream.py receives it, captures client_sid = request.sid (needed for emitting back from a thread), calls sess.bump() to get a generation number, then spawns a background daemon thread to call process_probe_state. The thread checks at the end whether sess.generation > req_gen + 3 — if the user clicked 4+ more times while it was computing, it discards the stale result rather than overwriting fresh guidance.
+
+3. process_probe_state — the two-model pipeline
+streaming_guidance_engine.py runs sequentially:
+
+
+click → probe_move → process_probe_state (state parameters are computed)
+                          │
+                     Rate-limit check
+                    (did posY move ≥ 0.05?)
+                          │
+                    ┌─────┴──────┐
+                   VLM          LLM
+               (vision)      (text)
+                    └─────┬──────┘
+                     guidance_update
+                      → WebSocket
+Rate limits (config.py):
+
+VLM only re-runs if posY changed ≥ 0.05 from last VLM call
+LLM only re-runs if posY changed ≥ 0.03
+On the very first click of a session both always fire because last_vlm_pos_y = last_llm_pos_y = -1.0.
+
+4. Stage 1 — VLM (Vision Model)
+extract_frame_at(pos_y) (streaming_guidance_engine.py) uses OpenCV to seek to frame int(pos_y × 1466) in the annotated video 202207191643_00-Moving.mp4 (350×350, 60fps, 24.5s), encode it as a 70%-quality JPEG (~16KB), and return it as a base64 string.
+
+That image goes to analyze_frame() in vlm_analyzer.py:154-192, calling Groq llama-4-scout-17b-16e-instruct (multimodal) with this system prompt (vlm_analyzer.py:26-45):
+
+"You read annotated venous ultrasound frames and report which vessels are visible and where they sit relative to the fascial layer. Fascia = two bright yellow horizontal lines. N3 = yellow polygon above fascia. N2 = green polygon between the two fascia lines (the saphenous eye). N1 = blue polygon below fascia..."
+
+The user message adds context: "Probe position: GSV-THI region, right leg. Expected anatomy: GSV trunk (N2) in thigh, within fascial compartment." The VLM replies with a JSON blob:
+
+
+{
+  "image_quality": "good",
+  "fascial_layer_visible": true,
+  "n2_in_fascial_compartment": true,
+  "n3_superficial_to_fascia": false,
+  "n1_deep_to_fascia": false,
+  "label_n2_visible": true,
+  "frame_note": "N2 in fascia"
+}
+This is converted to a plain English summary by assessment.summary() (vlm_analyzer.py:89-108):
+
+"Fascial layer visible. N2 (saphenous trunk/GSV) annotated within fascial compartment. N2 in fascia"
+
+That summary becomes the VLM's contribution to the next stage.
+
+5. Stage 2 — The state message fed to the LLM
+build_state_message() (streaming_guidance_engine.py) assembles this text, which becomes the new user turn in the conversation:
+
+
+PROBE STATE
+Region: GSV-THI | Surface: anterior-medial | Leg: right | posY: 0.28
+
+CONFIRMED FINDINGS
+  • EP N1→N2  posY=0.06  right leg
+
+VLM FRAME ANNOTATION
+Fascial layer visible. N2 (saphenous trunk/GSV) annotated within fascial compartment. N2 in fascia
+Three things here:
+
+Where the probe is now — region, surface, leg, posY number
+What the surgeon has confirmed so far — all the EP/RP clips marked in this session
+What the annotated video frame shows — from the VLM, purely anatomical, no flow
+
+6. Stage 3 — LLM guidance with conversation history
+call_with_history() (streaming_guidance_engine.py) builds the full message array sent to Groq llama-3.3-70b-versatile:
+
+
+[system]  ← _STREAM_SYSTEM_PROMPT (full CHIVA knowledge, never changes)
+[user]    ← state from click #1
+[assistant] ← guidance from click #1
+[user]    ← state from click #2
+[assistant] ← guidance from click #2
+...        (rolling window, last 8 pairs = 16 messages)
+[user]    ← current state message   ← NEW
+The system prompt is the LLM's entire medical knowledge base (streaming_guidance_engine.py). It contains:
+
+Compartments: N1 = deep veins, N2 = saphenous trunk, N3 = tributaries/varicosities
+Flow notation: EP = antegrade (entering superficial), RP = retrograde (reflux)
+Anatomy positions: exactly where SFJ, SPJ, Hunterian perforators sit on the posY scale
+All 7 clip types: EP N1→N2, EP N2→N3, EP N1→N3, RP N2→N1, RP N3→N2, RP N3→N1, EP N2→N2
+Critical rules: e.g. EP N1→N2 at the SFJ does NOT mean the trunk is also refluxing (RP N2→N1 must be confirmed separately)
+6 shunt circuit types (Type 1 through 5 + Type 1+2): the combinations of clips that define each CHIVA classification
+Q1→Q4 framework: the sequential questions the examination must answer in order
+The conversation history is the LLM's memory — it knows where you've been, what you've already confirmed, and what it already told you. It reasons through Q1→Q4 internally using that context and outputs exactly one movement instruction ≤12 words, in JSON:
+
+
+{"guidance": "Scan distal thigh, medial surface, GSV trunk"}
+The output rules (streaming_guidance_engine.py:91-96) explicitly forbid the LLM from mentioning EP, RP, reflux, Valsalva, or any clinical finding — it may only say where to move the probe.
+
+7. What comes back to the frontend
+The guidance_update WebSocket event contains:
+
+
+{
+  "guidance": "Scan distal thigh, medial surface, GSV trunk",
+  "vlm": { "image_quality": "good", "fascial_layer_visible": true, ... },
+  "vlm_summary": "Fascial layer visible. N2 annotated within...",
+  "region": "GSV-THI",
+  "pos_y": 0.28,
+  "thinking": {
+    "state": "PROBE STATE\nRegion: GSV-THI...",
+    "raw": "{\"guidance\": \"Scan distal thigh...\"}"
+  }
+}
+
+The frontend renders :
+
+d.guidance → the big blue text in the Active Guidance box
+d.vlm → the VLM Frame Analysis grid
+d.thinking → a new entry in the Model Thinking Log (expandable, showing the exact state message and raw LLM response)
+The key design insight
+The conversation history is the diagnostic memory. The LLM doesn't need a separate rule engine because:
+
+Turn 1: You're at SFJ. VLM says N2 visible. LLM tells you to confirm the junction.
+You mark EP N1→N2. LLM now sees that clip in every subsequent state message.
+Turn 2: You're at mid-thigh. LLM knows Q1 is answered (SFJ incompetent, EP N1→N2 confirmed). It now works Q2: does the trunk reflux? It tells you to scan distally along the GSV.
+Turn 5: You mark RP N2→N1. LLM now knows Type 1 circuit is complete (EP N1→N2 + RP N2→N1). It moves to Q3.
+The surgeon never has to think about which question to answer next — the LLM infers it from what's already been confirmed and where in the leg you are.
+
+
+
+How the LLM decides which region to scan next :
+This is the most important question to ask about the system, and the answer is :  the LLM decides based on CHIVA protocol logic, but it produces a verbal instruction, not a coordinate and the surgeon closes the loop by clicking.
+
+Let me walk through exactly what happens inside the LLM's reasoning.
+
+What the LLM Actually Does --> When the LLM receives a state message, it implicitly runs this decision logic:
+
+Look at CONFIRMED FINDINGS in the state message
+           │
+           ▼
+    Which Q is still open?
+           │
+     ┌─────┌─────┼────┼
+     Q1               Q2                Q3                Q4
+     │                 │                  │             │
+  Find         Check      Find             Follow
+  entry      trunk     escape         tributary
+  point     reflux    point           distally
+
+Q1 — "Where does blood enter?"
+If no clips at all → the LLM knows to start at SFJ (groin, posY 0.04–0.09). Its system prompt tells it that's where EP N1→N2 would show if the junction is incompetent. Instruction: "Position probe at groin crease, anterior surface"
+
+If SFJ looks competent → check Hunterian perforators (medial thigh, posY 0.21–0.35), then SPJ (posterior knee, posY 0.40–0.50). The posY ranges for each landmark are explicitly in the system prompt (streaming_guidance_engine.py:47–58).
+
+Q2 — "Does the trunk reflux?"
+If EP N1→N2 is confirmed (in the clips list) → Q1 is answered. The LLM knows Q2 requires checking whether the GSV trunk itself flows backward (RP N2→N1), which is a separate finding from the junction being open. It tells the surgeon to follow the GSV trunk distally from the SFJ.
+
+Q3 — "Is there an escape point?"
+If EP N1→N2 + RP N2→N1 confirmed → Type 1 loop found, but Q3 asks where blood exits the trunk into a tributary (EP N2→N3). LLM directs to scan along the trunk looking for a branch connection.
+
+Q4 — "Does the tributary reflux?"
+If an escape point is marked → follow that tributary downward looking for RP N3.
+
+The Critical Gap
+The LLM outputs something like:
+
+"Scan mid-thigh medial surface, anterior to GSV"
+
+It does not output posY: 0.28 or emit a socket event. The translation chain is:
+
+
+LLM text instruction
+      │
+      ▼  (surgeon reads it)
+Surgeon clicks the leg diagram
+      │
+      ▼
+coordToState() → posY + region
+      │
+      ▼
+probe_move WebSocket event
+      │
+      ▼
+LLM gets new state → new instruction
+The surgeon is the position controller. The LLM only says where in plain English, the surgeon interprets it and clicks. This is intentional — the probe in real surgery is a physical device in someone's hand.
+
+What's in the system prompt that makes this work
+Three things give the LLM enough to reason about location:
+
+1. The posY scale (streaming_guidance_engine.py) — the LLM knows SFJ is posY 0.04–0.09, Hunterian area are 0.21–0.35, SPJ is 0.40–0.50. When the current state says posY: 0.28, it knows the probe is in the Hunterian zone.
+
+2. The conversation history — the LLM remembers every position you've already been to (via the rolling 8-pair window). It won't send you back to the SFJ if you've already confirmed it.
+
+3. The confirmed clips in every state message — every new state message includes the full list of EP/RP clips marked so far. The LLM doesn't need to remember them — they're always there.
+
+The actual limitation
+The LLM reasons which anatomical landmark to check next, but it has no map of your specific patient's varicose vein pattern. It can't say "there's a perforator at exactly posY 0.31" — that has to be discovered by the surgeon scanning through the Hunterian zone. The guidance narrows the search to the right region and surface; the VLM then confirms what the frame shows when you get there.
+
+So the precision hierarchy is:
+	                          	                           
+Layer	Precision	Who decides
+Which Q to answer next	Protocol-exact	LLM (CHIVA rules)
+Which anatomical zone to examine	   	 	Region-level (SFJ / GSV-THI / SPJetc.)	LLM (posY knowledge)
+Exact spot within that zone	Millimetre-level	Surgeon scanning
+What the frame shows at that spot	Frame-level	VLM
+	  	                 	  	                         

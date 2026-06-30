@@ -1,0 +1,9 @@
+bind = "unix:/var/www/task2/task2.sock"
+workers = 1
+worker_class = "gthread"
+threads = 4
+timeout = 300
+keepalive = 65
+errorlog = "/var/log/task2_probe_guidance/gunicorn-error.log"
+accesslog = "/var/log/task2_probe_guidance/gunicorn-access.log"
+loglevel = "info"

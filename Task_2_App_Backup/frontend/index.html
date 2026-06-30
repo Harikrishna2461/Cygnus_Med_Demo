@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Task 2 — Probe Localisation & Active Guidance</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
+    --accent: #4f8ef7; --accent2: #34d399; --warn: #f59e0b; --danger: #ef4444;
+    --text: #e2e8f0; --muted: #64748b; --border: #2d3348;
+    --radius: 8px; --font: 'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
+
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 16px; font-weight: 600; color: var(--accent); }
+  header span { color: var(--muted); font-size: 12px; }
+  .nav-links { margin-left: auto; display: flex; gap: 16px; align-items: center; }
+  .nav-links a { font-size: 12px; color: var(--muted); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 5px; transition: all .15s; }
+  .nav-links a:hover { color: var(--accent); border-color: var(--accent); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .status-dot.ok { background: var(--accent2); }
+
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: 0; height: calc(100vh - 49px); }
+
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+  .main { overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .card h3 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 10px; }
+
+  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 3px; }
+  input[type=number], input[type=text], select {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 5px; color: var(--text); padding: 7px 10px; font-size: 13px;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  .toggle-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: var(--surface2); border-radius: 20px; cursor: pointer; transition: .2s; border: 1px solid var(--border); }
+  .slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 2px; bottom: 2px; background: var(--muted); border-radius: 50%; transition: .2s; }
+  input:checked + .slider { background: var(--accent); border-color: var(--accent); }
+  input:checked + .slider:before { transform: translateX(16px); background: #fff; }
+
+  button {
+    width: 100%; padding: 9px 16px; border-radius: var(--radius); border: none; cursor: pointer;
+    font-size: 13px; font-weight: 600; transition: opacity .15s;
+  }
+  button:hover { opacity: .85; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-sm { width: auto; padding: 5px 12px; font-size: 12px; }
+
+  /* Region badge */
+  .region-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    background: var(--surface2); border: 1px solid var(--border);
+  }
+  .region-badge.sfj    { border-color: #818cf8; color: #818cf8; }
+  .region-badge.gsv-thi { border-color: #34d399; color: #34d399; }
+  .region-badge.gsv-cal { border-color: #6ee7b7; color: #6ee7b7; }
+  .region-badge.spj    { border-color: #f59e0b; color: #f59e0b; }
+  .region-badge.ssv    { border-color: #fb923c; color: #fb923c; }
+  .region-badge.unknown { border-color: var(--muted); color: var(--muted); }
+
+  .alert { padding: 10px 12px; border-radius: var(--radius); font-size: 13px; }
+  .alert-warn { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.3); color: var(--warn); }
+  .alert-ok   { background: rgba(52,211,153,.1);  border: 1px solid rgba(52,211,153,.3);  color: var(--accent2); }
+  .alert-error { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.3);  color: var(--danger); }
+
+  .guidance-text { line-height: 1.6; font-size: 13.5px; }
+  .guidance-text strong { color: var(--accent); }
+
+  .clip-list { display: flex; flex-direction: column; gap: 6px; }
+  .clip-item { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: border-color .15s; }
+  .clip-item:hover { border-color: var(--accent); }
+  .clip-item.active { border-color: var(--accent); background: rgba(79,142,247,.08); }
+  .clip-item .clip-idx { font-size: 10px; color: var(--muted); }
+  .clip-item .clip-en  { font-size: 13px; }
+  .clip-item .clip-step { font-size: 11px; color: var(--muted); }
+
+  .meta-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .meta-row .pill { font-size: 11px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 2px 8px; color: var(--muted); }
+  .meta-row .pill.hi { color: var(--accent2); border-color: var(--accent2); }
+
+  .conf-bar { height: 4px; border-radius: 4px; background: var(--surface2); overflow: hidden; margin-top: 4px; }
+  .conf-bar-fill { height: 100%; background: var(--accent); transition: width .3s; }
+
+  .vlm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .vlm-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px; }
+  .vlm-item label { font-size: 10px; text-transform: uppercase; }
+  .vlm-item .val { font-size: 13px; font-weight: 500; color: var(--text); margin-top: 2px; }
+
+  .image-drop {
+    border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px;
+    text-align: center; cursor: pointer; color: var(--muted); font-size: 13px;
+    transition: border-color .15s;
+  }
+  .image-drop:hover { border-color: var(--accent); }
+  .image-drop img { max-width: 100%; max-height: 160px; margin-top: 8px; border-radius: 6px; }
+
+  .region-select { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
+
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Probe Localisation &amp; Active Guidance</h1>
+  <span>Task 2 — Varicose Vein Examination</span>
+  <div class="nav-links">
+    <a href="/stream">Scenario Stream</a>
+    <a href="/test">Image Test</a>
+  </div>
+  <div id="statusDot" class="status-dot" title="API status"></div>
+</header>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR: scanner input ── -->
+  <div class="sidebar">
+
+    <div class="card">
+      <h3>Scanner Input</h3>
+      <div style="margin-bottom:10px">
+        <label>Segment ID</label>
+        <select id="segmentId">
+          <option value="0">0 — Left Thigh</option>
+          <option value="1">1 — Left Calf</option>
+          <option value="2" selected>2 — Right Thigh</option>
+          <option value="3">3 — Right Calf</option>
+        </select>
+      </div>
+      <div style="margin-bottom:10px">
+        <label>Segment Distance (0 = proximal, 1 = distal)</label>
+        <input type="number" id="segmentDist" value="0.86" min="0" max="1" step="0.01"/>
+      </div>
+      <div style="margin-bottom:10px">
+        <div class="toggle-row">
+          <label for="isFront" style="margin:0;cursor:pointer">Is Front</label>
+          <label class="toggle">
+            <input type="checkbox" id="isFront" checked/>
+            <span class="slider"></span>
+          </label>
+          <span id="isFrontLabel" style="font-size:12px;color:var(--accent2)">Front</span>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:10px">
+        <div><label>X</label><input type="number" id="coordX" placeholder="optional"/></div>
+        <div><label>Y</label><input type="number" id="coordY" placeholder="optional"/></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Ultrasound Frame (VLM)</h3>
+      <div class="image-drop" id="imageDrop" onclick="document.getElementById('imageFile').click()">
+        <div>Click or drop an ultrasound image here</div>
+        <div style="font-size:11px;margin-top:4px">JPEG / PNG — analysed by VLM</div>
+        <img id="imagePreview" style="display:none"/>
+      </div>
+      <input type="file" id="imageFile" accept="image/*" style="display:none"/>
+      <button class="btn-sm btn-secondary" style="margin-top:8px;width:100%" onclick="clearImage()">Clear image</button>
+    </div>
+
+    <div class="card">
+      <h3>EP / RP Findings (Task-1 JSON)</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px">Paste the shunt JSON from Task-1 (the <code>clips</code> array format). The LLM uses this to direct the sonographer toward unvisited EP/RP points.</p>
+      <textarea id="epRpJson" rows="6" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:8px;font-size:12px;font-family:monospace;resize:vertical" placeholder='{"clips":[{"flow":"EP","fromType":"N1","toType":"N2","posYRatio":0.06,"legSide":"right","step":"SFJ"},...]}' ></textarea>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button class="btn-primary" onclick="runLocalize()" id="btnLocalize">Localise</button>
+      <button class="btn-primary" onclick="runGuidance()" id="btnGuidance">Get Guidance</button>
+    </div>
+
+    <div>
+      <button class="btn-secondary" onclick="loadSampleData()">Load Sample Data</button>
+    </div>
+
+  </div>
+
+  <!-- ── MAIN: results ── -->
+  <div class="main">
+
+    <!-- LLM Guidance -->
+    <div class="card" id="guidanceCard" style="display:none">
+      <h3>Guidance <span id="guidanceSpinner" style="display:none"><span class="spinner"></span></span></h3>
+      <div class="guidance-text" id="guidanceText"></div>
+    </div>
+
+    <!-- VLM Frame Analysis -->
+    <div class="card" id="vlmCard" style="display:none">
+      <h3>Ultrasound Frame Analysis (VLM)</h3>
+      <div id="vlmContent"></div>
+    </div>
+
+    <!-- Debug panel -->
+    <details style="margin-top:4px">
+      <summary style="cursor:pointer;color:var(--muted);font-size:12px;padding:6px 0">LLM — system prompt</summary>
+      <pre id="dbgLlmSystem" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-size:11px;overflow-x:auto;margin-top:8px;color:var(--muted);white-space:pre-wrap"></pre>
+    </details>
+    <details style="margin-top:4px">
+      <summary style="cursor:pointer;color:var(--muted);font-size:12px;padding:6px 0">LLM — user prompt (what was sent)</summary>
+      <pre id="dbgLlmPrompt" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-size:11px;overflow-x:auto;margin-top:8px;color:var(--muted);white-space:pre-wrap"></pre>
+    </details>
+    <details style="margin-top:4px">
+      <summary style="cursor:pointer;color:var(--muted);font-size:12px;padding:6px 0">LLM — raw response</summary>
+      <pre id="dbgLlmRaw" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-size:11px;overflow-x:auto;margin-top:8px;color:var(--muted);white-space:pre-wrap"></pre>
+    </details>
+    <details style="margin-top:4px">
+      <summary style="cursor:pointer;color:var(--muted);font-size:12px;padding:6px 0">VLM — raw response</summary>
+      <pre id="dbgVlmRaw" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-size:11px;overflow-x:auto;margin-top:8px;color:var(--muted);white-space:pre-wrap"></pre>
+    </details>
+    <details style="margin-top:4px">
+      <summary style="cursor:pointer;color:var(--muted);font-size:12px;padding:6px 0">Full API response (JSON)</summary>
+      <pre id="rawJson" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-size:11px;overflow-x:auto;margin-top:8px;color:var(--muted)"></pre>
+    </details>
+
+  </div>
+</div>
+
+<script>
+const API = '';
+let imageBase64 = null;
+let imageMediaType = 'image/jpeg';
+
+// ── initialise ──────────────────────────────────────────────────────────────
+document.getElementById('isFront').addEventListener('change', function() {
+  document.getElementById('isFrontLabel').textContent = this.checked ? 'Front' : 'Back';
+});
+
+// Image upload
+document.getElementById('imageFile').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  imageMediaType = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    imageBase64 = dataUrl.split(',')[1];
+    const img = document.getElementById('imagePreview');
+    img.src = dataUrl;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+
+// Drag and drop image
+const drop = document.getElementById('imageDrop');
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.style.borderColor = 'var(--accent)'; });
+drop.addEventListener('dragleave', () => { drop.style.borderColor = 'var(--border)'; });
+drop.addEventListener('drop', e => {
+  e.preventDefault();
+  drop.style.borderColor = 'var(--border)';
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    document.getElementById('imageFile').files; // not needed
+    imageMediaType = file.type;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      imageBase64 = ev.target.result.split(',')[1];
+      const img = document.getElementById('imagePreview');
+      img.src = ev.target.result;
+      img.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+function clearImage() {
+  imageBase64 = null;
+  document.getElementById('imagePreview').style.display = 'none';
+  document.getElementById('imagePreview').src = '';
+  document.getElementById('imageFile').value = '';
+}
+
+// ── API helpers ─────────────────────────────────────────────────────────────
+async function post(endpoint, body) {
+  const res = await fetch(API + endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return res.json();
+}
+
+function getInputs() {
+  return {
+    segment_id: parseInt(document.getElementById('segmentId').value),
+    segment_dist: parseFloat(document.getElementById('segmentDist').value),
+    is_front: document.getElementById('isFront').checked,
+    x: document.getElementById('coordX').value ? parseInt(document.getElementById('coordX').value) : null,
+    y: document.getElementById('coordY').value ? parseInt(document.getElementById('coordY').value) : null,
+  };
+}
+
+// ── check API status ────────────────────────────────────────────────────────
+async function checkStatus() {
+  try {
+    const r = await fetch(API + '/api/status');
+    const d = await r.json();
+    const dot = document.getElementById('statusDot');
+    dot.classList.toggle('ok', d.ok);
+    dot.title = d.ok ? (d.groq_configured ? 'API OK — Groq' : 'Groq key missing') : 'API error';
+  } catch { /* offline */ }
+}
+checkStatus();
+
+// ── localise ────────────────────────────────────────────────────────────────
+async function runLocalize() {
+  const btn = document.getElementById('btnLocalize');
+  btn.disabled = true; btn.textContent = 'Localising…';
+  try {
+    const body = { session_id: 'demo', ...getInputs() };
+    const data = await post('/api/localize', body);
+    document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    showError('Localise failed: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Localise';
+  }
+}
+
+// ── guidance ─────────────────────────────────────────────────────────────────
+async function runGuidance() {
+  const btn = document.getElementById('btnGuidance');
+  btn.disabled = true; btn.textContent = 'Fetching…';
+  document.getElementById('guidanceSpinner').style.display = 'inline';
+  try {
+    let epRp = null;
+    const epRpText = document.getElementById('epRpJson').value.trim();
+    if (epRpText) { try { epRp = JSON.parse(epRpText); } catch { /* ignore */ } }
+
+    const body = {
+      session_id: 'demo',
+      ...getInputs(),
+      ep_rp_findings: epRp,
+    };
+    if (imageBase64) {
+      body.ultrasound_image = imageBase64;
+      body.image_media_type = imageMediaType;
+    }
+
+    const data = await post('/api/guidance', body);
+    renderAll(data);
+    document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    showError('Guidance failed: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Get Guidance';
+    document.getElementById('guidanceSpinner').style.display = 'none';
+  }
+}
+
+// ── render helpers ───────────────────────────────────────────────────────────
+function renderGuidance(data) {
+  const card = document.getElementById('guidanceCard');
+  const text = document.getElementById('guidanceText');
+  if (data.error) {
+    card.style.display = '';
+    text.innerHTML = `<p style="color:var(--danger)">${escHtml(data.error)}</p>`;
+    return;
+  }
+  if (!data.guidance) return;
+  card.style.display = '';
+  text.innerHTML = `<p style="line-height:1.7;font-size:14px">${escHtml(data.guidance)}</p>`;
+}
+
+function renderVLM(data) {
+  const vlm = data.ultrasound_assessment;
+  if (!vlm) return;
+  const card = document.getElementById('vlmCard');
+  card.style.display = '';
+  if (vlm.error) {
+    document.getElementById('vlmContent').innerHTML =
+      `<p style="color:var(--danger)">VLM error: ${escHtml(vlm.error)}</p>`;
+    return;
+  }
+
+  function yn(v) { return v ? '<span style="color:#4ade80">Yes</span>' : '<span style="color:var(--muted)">No</span>'; }
+
+  const labels = ['N1','N2','N3'].filter(l => vlm[`label_${l.toLowerCase()}_visible`]);
+
+  const rows = [
+    ['Quality',            vlm.image_quality || '—'],
+    ['Fascia visible',     yn(vlm.fascial_layer_visible)],
+    ['N2 in compartment',  yn(vlm.n2_in_fascial_compartment)],
+    ['N3 above fascia',    yn(vlm.n3_superficial_to_fascia)],
+    ['N1 below fascia',    yn(vlm.n1_deep_to_fascia)],
+    ['Labels in frame',    labels.length ? labels.join(', ') : '—'],
+  ];
+  const gridHtml = rows.map(([l,v]) =>
+    `<div class="vlm-item"><label style="font-size:10px;color:var(--muted);display:block">${l}</label><div style="font-size:13px;margin-top:2px">${v}</div></div>`
+  ).join('');
+  document.getElementById('vlmContent').innerHTML =
+    `<div class="vlm-grid" style="grid-template-columns:1fr 1fr">${gridHtml}</div>` +
+    (vlm.frame_note ? `<p style="margin-top:10px;font-size:13px;color:var(--muted);line-height:1.5">${escHtml(vlm.frame_note)}</p>` : '');
+}
+
+function renderAll(data) {
+  renderGuidance(data);
+  renderVLM(data);
+  if (data.debug) {
+    document.getElementById('dbgLlmSystem').textContent = data.debug.llm_system || '';
+    document.getElementById('dbgLlmPrompt').textContent = data.debug.llm_prompt || '';
+    document.getElementById('dbgLlmRaw').textContent = data.debug.llm_raw || '';
+  }
+  document.getElementById('dbgVlmRaw').textContent = data.ultrasound_assessment?.raw_text || '';
+}
+
+function showError(msg) {
+  const card = document.getElementById('guidanceCard');
+  card.style.display = '';
+  document.getElementById('guidanceText').innerHTML =
+    `<p style="color:var(--danger)">Error: ${escHtml(msg)}</p>`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── sample data ───────────────────────────────────────────────────────────────
+function loadSampleData() {
+  // Mimics example data: segment_id=2, dist=0.86, is_front=true
+  document.getElementById('segmentId').value = '2';
+  document.getElementById('segmentDist').value = '0.86';
+  document.getElementById('isFront').checked = true;
+  document.getElementById('isFrontLabel').textContent = 'Front';
+  document.getElementById('coordX').value = '450';
+  document.getElementById('coordY').value = '320';
+
+  // Sample EP/RP findings — matches actual shunt JSON format (clips array)
+  // Paste Task-1 output JSON here. Format: {"clips": [...], "ligation": {...}}
+  // Each clip: flow (EP/RP), fromType (N1/N2/N3), toType (N1/N2/N3), posYRatio (0=groin, 1=ankle), legSide, step
+  document.getElementById('epRpJson').value = JSON.stringify({
+    clips: [
+      { flow: "EP", fromType: "N1", toType: "N2", posYRatio: 0.06, legSide: "right", step: "SFJ" },
+      { flow: "RP", fromType: "N2", toType: "N1", posYRatio: 0.30, legSide: "right", step: "SFJ-Knee" }
+    ]
+  }, null, 2);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+Manual Testing of Short Scenarios to determine if Shunt System is working well: 
+
+Type 1 — SFJ entry + GSV trunk reflux
+Important: drag the probe past SPJ zone (posY ≈ 0.50) at some point before marking RP N2→N1 — the system checks that the popliteal region was visited before declaring complete.
+
+Step	Clip	posY	Notes
+1	EP N1→N2	0.06	Groin/SFJ
+2	—	0.50	Just move probe here (no mark)
+3	RP N2→N1	0.25	Mid-thigh
+→ Expected: action = complete
+→ Result: Scenario Passed and Shunt Identified Correctly 
+
+Type 2A — Trunk escape, SFJ competent, no re-entry back to trunk
+Step	Clip	posY
+1	EP N2→N3	0.30
+2	RP N3→N1	0.65
+Do NOT mark EP N1→N2 or RP N2→N1.
+→ Expected: action = complete
+→ Result: Scenario Passed and Shunt Identified Correctly 
+
+
+Type 2B — Perforator feeds GSV, drains via tributary only
+Step	Clip	posY
+1	EP N2→N2	0.40
+2	RP N3→N1	0.65
+Do NOT mark EP N1→N2 or RP N2→N1.
+→ Expected: action = complete
+→ Result: Scenario Passed and Shunt Identified Correctly 
+
+Type 2C — Perforator entry + secondary trunk reflux
+Step	Clip	posY
+1	EP N2→N2	0.40
+2	RP N3→N1	0.65
+3	RP N2→N1	0.25
+Do NOT mark EP N1→N2.
+→ Expected: action = complete
+→ Result: Scenario Passed and Shunt Identified Correctly 
+
+Type 3 — SFJ entry, GSV conduit to escape (no trunk reflux)
+Step	Clip	posY
+1	EP N1→N2	0.06
+2	EP N2→N3	0.25
+3	RP N3→N1	0.65
+Do NOT mark RP N2→N1.
+→ Expected: action = complete
+→ Result: Scenario Passed and Shunt Identified Correctly 
+
+In elimination test (more clinically rigorous): mark all four clips including RP N2→N1 → system returns action = maneuver → click "No Reflux" in the elimination test banner → action = complete.
+
+Type 1+2 — Same as Type 3 but elimination test shows reflux persists
+Step	Clip	posY
+1	EP N1→N2	0.06
+2	EP N2→N3	0.25
+3	RP N3→N1	0.65
+4	RP N2→N1	0.40
+→ System returns action = maneuver → click "Reflux" in the elimination test banner → action = complete
+→ Result: Scenario Passed and Shunt Identified Correctly 
+
+Type 4 — Deep blood directly into tributary, trunk refluxes back
+Step	Clip	posY
+1	EP N1→N3	0.35
+2	RP N2→N1	0.25
+→ Expected: action = complete (fires immediately — this is the explicit Type 4 complete rule)
+→ Result: Scenario Passed and Shunt Identified Correctly 
+
+Type 5 — Complex loop: deep→tributary→trunk→tributary→deep
+Step	Clip	posY
+1	EP N1→N3	0.30
+2	RP N3→N2	0.45
+3	EP N2→N3	0.55
+4	RP N3→N1	0.70
+Do NOT mark RP N2→N1.
+→ Expected: action = complete
+→ Result: Scenario Passed and Shunt Identified Correctly 
+
+Type 6 — Pure perforator circuit, trunk completely bypassed
+Step	Clip	posY
+1	EP N1→N3	0.35
+2	RP N3→N1	0.65
+Mark absolutely no N2 clips (no EP N1→N2, no EP N2→N3, no RP N2→N1, no RP N3→N2).
+→ Expected: action = complete
+→ Result: Scenario Passed and Shunt Identified Correctly 
+
+Quick reference — few manual mistakes that can happen and how the system would respond to the testing
+Type	Most common mistake
+1	Forgetting to drag probe to SPJ zone (posY ≥ 0.48) before marking RP N2→N1
+2A/2B	Accidentally adding RP N2→N1 — that changes it to 2C
+3	Adding RP N2→N1 without elimination test — system will demand maneuver
+1+2 vs 3	Same 4 clips; elimination test result is the only differentiator
+4	Adding any RP N3→N1 alongside RP N2→N1 changes it to Type 5
+6	Any N2 clip (RP N3→N2 or RP N2→N1) would reclassify toward Type 4/5

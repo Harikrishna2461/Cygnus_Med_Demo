@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Task 2 — Stream Mode</title>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --surface3:#2a2f42;
+  --accent:#4f8ef7; --accent2:#34d399; --warn:#f59e0b; --danger:#ef4444;
+  --ep:#22c55e; --rp:#f97316;
+  --text:#e2e8f0; --muted:#64748b; --border:#2d3348; --radius:8px;
+  --font:'Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+header h1{font-size:15px;font-weight:600;color:var(--accent);}
+.hpill{font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:2px 10px;color:var(--muted);}
+.hpill.ok{color:var(--accent2);border-color:var(--accent2);}
+.hpill.warn{color:var(--warn);border-color:var(--warn);}
+.hpill.err{color:var(--danger);border-color:var(--danger);}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .3s;flex-shrink:0;}
+.status-dot.ok{background:var(--accent2);}
+.status-dot.err{background:var(--danger);}
+.ml{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.nav-link{font-size:11px;color:var(--muted);text-decoration:none;padding:3px 8px;border:1px solid var(--border);border-radius:5px;}
+.nav-link:hover{color:var(--accent);border-color:var(--accent);}
+button{border:none;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;border-radius:6px;padding:6px 14px;transition:opacity .15s;}
+button:hover{opacity:.85;}
+button:disabled{opacity:.35;cursor:not-allowed;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+
+/* ── LAYOUT ──────────────────────────────────────────────────────────────── */
+.layout{display:grid;grid-template-columns:294px 374px 1fr;gap:0;flex:1;overflow:hidden;}
+.panel{overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;border-right:1px solid var(--border);}
+.panel:last-child{border-right:none;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;}
+.card h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;}
+
+/* ── STATUS BAR ──────────────────────────────────────────────────────────── */
+#statusBar{padding:6px 14px;font-size:11px;background:rgba(79,142,247,.08);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+#statusMsg{flex:1;color:var(--muted);}
+#statusMsg.ok{color:var(--accent2);}
+#statusMsg.warn{color:var(--warn);}
+#statusMsg.err{color:var(--danger);}
+
+/* ── LEG DIAGRAM ─────────────────────────────────────────────────────────── */
+#legWrap{display:flex;justify-content:center;}
+#legSvg{cursor:crosshair;display:block;}
+.leg-fill{fill:rgba(200,155,135,.07);stroke:#3d4456;stroke-width:1.5;transition:fill .15s;}
+.leg-fill.hot{fill:rgba(79,142,247,.14);stroke:#4f8ef7;}
+.leg-fill-post{fill:rgba(245,158,11,.07);stroke:#f59e0b;stroke-width:1;stroke-opacity:.45;stroke-dasharray:4,3;transition:fill .15s;}
+
+/* ── MARK FORM ───────────────────────────────────────────────────────────── */
+.flow-row{display:flex;gap:6px;margin-bottom:8px;}
+.flow-btn{flex:1;padding:6px 0;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.flow-btn.ep.sel{background:rgba(34,197,94,.15);border-color:var(--ep);color:var(--ep);}
+.flow-btn.rp.sel{background:rgba(249,115,22,.15);border-color:var(--rp);color:var(--rp);}
+.type-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+label.small{font-size:10px;color:var(--muted);display:block;margin-bottom:3px;}
+select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:5px 8px;font-size:12px;}
+select:focus{outline:none;border-color:var(--accent);}
+
+/* ── CLIPS ───────────────────────────────────────────────────────────────── */
+.clip-item{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);margin-bottom:4px;}
+.clip-badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;white-space:nowrap;}
+.clip-badge.EP{background:rgba(34,197,94,.2);color:var(--ep);}
+.clip-badge.RP{background:rgba(249,115,22,.2);color:var(--rp);}
+.clip-detail{font-size:11px;flex:1;}
+.clip-pos{font-size:10px;color:var(--muted);white-space:nowrap;}
+.clip-del{color:var(--muted);cursor:pointer;font-size:15px;padding:0 2px;line-height:1;}
+.clip-del:hover{color:var(--danger);}
+
+/* ── VIDEO / FRAME ───────────────────────────────────────────────────────── */
+#videoWrap{position:relative;background:#000;border-radius:6px;overflow:hidden;min-height:120px;}
+#frameImg{width:100%;display:block;object-fit:contain;min-height:160px;background:#000;}
+#frameImg.loading{opacity:.5;}
+#videoPosBadge{position:absolute;bottom:6px;right:8px;font-size:10px;color:rgba(255,255,255,.55);background:rgba(0,0,0,.45);padding:2px 6px;border-radius:4px;pointer-events:none;}
+#frameWait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;pointer-events:none;}
+#videoErr{display:none;padding:30px;text-align:center;color:var(--warn);font-size:11px;}
+
+/* ── VLM ─────────────────────────────────────────────────────────────────── */
+.vlm-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.vlm-cell{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;}
+.vlm-cell .lbl{font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
+.vlm-cell .val{font-size:12px;}
+.yes{color:var(--accent2);}
+.no{color:var(--muted);}
+
+/* ── GUIDANCE ────────────────────────────────────────────────────────────── */
+#guidanceBox{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;min-height:80px;display:flex;align-items:center;justify-content:center;}
+#guidanceText{font-size:20px;font-weight:700;color:var(--accent);text-align:center;line-height:1.4;transition:opacity .2s;}
+#guidanceText.dim{color:var(--muted);font-size:13px;font-weight:400;opacity:.7;}
+#guidanceText.thinking{color:var(--warn);font-size:13px;font-weight:400;}
+#guidanceText.maneuver{color:var(--warn);font-size:17px;font-weight:700;}
+#guidanceText.complete{color:var(--accent2);font-size:17px;font-weight:700;}
+
+/* ── ELIMINATION TEST banner ─────────────────────────────────────────────── */
+#elimBanner{display:none;background:rgba(245,158,11,.1);border:1px solid var(--warn);border-radius:var(--radius);padding:10px 14px;margin-bottom:2px;}
+#elimBanner p{font-size:11px;color:var(--warn);margin-bottom:8px;line-height:1.5;}
+.elim-btn-row{display:flex;gap:6px;}
+.elim-btn{flex:1;padding:6px 0;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
+.elim-btn:hover{border-color:var(--warn);color:var(--warn);}
+.elim-btn.sel{background:rgba(245,158,11,.18);border-color:var(--warn);color:var(--warn);}
+
+.probe-pill{display:inline-flex;gap:5px;align-items:center;padding:3px 9px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);font-size:11px;color:var(--muted);}
+.probe-pill .hi{color:var(--accent);}
+
+/* ── THINKING LOG ────────────────────────────────────────────────────────── */
+#thinkLog{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:0;min-height:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.think-entry{border-bottom:1px solid var(--border);background:var(--surface2);}
+.think-entry:last-child{border-bottom:none;}
+.think-entry.open-entry{background:var(--surface3);}
+.think-head{display:grid;grid-template-columns:28px 70px 64px 1fr 18px;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;user-select:none;min-height:40px;}
+.think-head:hover{background:rgba(79,142,247,.08);}
+.think-num{font-size:10px;color:var(--muted);font-family:monospace;font-weight:700;text-align:right;}
+.think-pos{font-size:11px;font-weight:700;color:var(--accent);font-family:monospace;}
+.think-region{font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;background:rgba(79,142,247,.12);color:var(--accent);white-space:nowrap;text-align:center;}
+.think-guidance{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
+.think-arrow{font-size:10px;color:var(--muted);text-align:center;transition:transform .2s;}
+.think-arrow.open{transform:rotate(90deg);}
+.think-body{display:none;padding:10px 14px 12px;border-top:1px solid var(--border);background:var(--bg);}
+.think-body.open{display:block;}
+.think-section-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;margin-top:8px;}
+.think-section-lbl:first-child{margin-top:0;}
+.think-body pre{white-space:pre-wrap;word-break:break-word;background:var(--surface);border:1px solid var(--border);padding:8px 10px;border-radius:4px;font-size:11px;color:#94a3b8;max-height:200px;overflow-y:auto;line-height:1.5;font-family:'Cascadia Code','Fira Code',monospace;}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* ── SHUNT CONFIRMED MODAL ───────────────────────────────────────────────── */
+#shuntModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;align-items:center;justify-content:center;}
+#shuntModal.show{display:flex;}
+
+/* ── ELIMINATION TEST MODAL ─────────────────────────────────────────────── */
+#elimModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1001;align-items:center;justify-content:center;}
+#elimModal.show{display:flex;}
+#elimModal .shunt-card{border-color:var(--warn);}
+#elimModal h2{color:var(--warn) !important;}
+#elimModal .elim-prompt-msg{font-size:13px;color:var(--warn);line-height:1.6;margin-bottom:20px;font-weight:600;}
+#elimModal .elim-btn{padding:10px 0;font-size:12px;}
+.shunt-card{background:var(--surface);border:1.5px solid var(--accent2);border-radius:14px;padding:32px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.6);}
+.shunt-icon{font-size:36px;margin-bottom:10px;}
+.shunt-card h2{color:var(--accent2);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.shunt-type-label{font-size:30px;font-weight:800;color:#fff;margin:10px 0 8px;}
+.shunt-evidence{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:24px;}
+.shunt-btn-row{display:flex;gap:10px;justify-content:center;}
+.shunt-btn-row button{padding:9px 22px;font-size:13px;}
+
+/* ── MARK POSITION BADGE ─────────────────────────────────────────────────── */
+.mark-pos-badge{font-size:10px;color:var(--muted);padding:5px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);margin-bottom:8px;text-align:center;line-height:1.5;}
+.mark-pos-badge.active{color:var(--warn);border-color:var(--warn);background:rgba(245,158,11,.08);}
+
+/* ── ELIMINATION TEST CARD — left panel, always accessible ──────────────── */
+#elimCard{transition:border-color .3s,background .3s;}
+#elimCard.required{border-color:var(--warn) !important;background:rgba(245,158,11,.05);}
+.elim-title{color:var(--muted);transition:color .3s;}
+#elimCard.required .elim-title{color:var(--warn);}
+.elim-required-note{display:none;font-size:11px;color:var(--warn);line-height:1.5;margin-bottom:8px;padding:6px 8px;background:rgba(245,158,11,.1);border-radius:4px;border-left:3px solid var(--warn);}
+#elimCard.required .elim-required-note{display:block;}
+.elim-desc{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5;}
+#elimCard.required .elim-desc{display:none;}
+/* ── REJECTION BUTTON ── */
+.btn-warn{background:rgba(245,158,11,.12);color:var(--warn);border:1px solid rgba(245,158,11,.4);}
+.btn-warn:hover{background:rgba(245,158,11,.25);border-color:var(--warn);}
+/* ── CONFIRMED SHUNTS LIST (header) ── */
+#confirmedRow{display:none;gap:4px;align-items:center;flex-shrink:0;}
+.c-pill{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(52,211,153,.12);border:1px solid var(--accent2);color:var(--accent2);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Task 2 — Stream Mode</h1>
+  <div class="status-dot" id="statusDot" title="Socket disconnected"></div>
+  <div class="hpill" id="connPill">Connecting…</div>
+  <div class="hpill" id="sessionPill">No session</div>
+  <div class="hpill" id="regionPill" style="display:none"></div>
+  <div id="confirmedRow"></div>
+  <div class="ml">
+    <a class="nav-link" href="/">Single Frame</a>
+    <button class="btn-primary"  id="btnStart" onclick="startSession()">Start Session</button>
+    <button class="btn-danger"   id="btnEnd"   onclick="endSession()" disabled>End Session</button>
+  </div>
+</header>
+
+<!-- status bar -->
+<div id="statusBar">
+  <span id="statusMsg">Waiting for socket connection…</span>
+</div>
+
+<div class="layout">
+
+  <!-- ── LEFT: leg + mark form + clips ─────────────────────────────────── -->
+  <div class="panel">
+    <div class="card" style="padding:10px">
+      <h3>Probe — move to scan · click to lock mark position</h3>
+      <div id="legWrap">
+        <svg id="legSvg" viewBox="0 0 280 540" width="268" height="516">
+          <rect width="280" height="540" fill="none"/>
+          <text x="80"  y="11" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif">R</text>
+          <text x="197" y="11" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif">L</text>
+
+          <!-- RIGHT LEG — shapes match bounding boxes:
+               Thigh X 26-133 (0.0931-0.475), Calf-medial X 29-83 (0.105-0.2947) -->
+          <path id="rThigh" class="leg-fill" d="M 26,16 Q 36,12 80,12 Q 124,12 133,16 L 120,272 Q 80,278 40,272 Z"/>
+          <path id="rCalf"  class="leg-fill" d="M 29,298 Q 56,293 83,298 L 79,525 Q 56,530 33,525 Z"/>
+          <ellipse cx="80" cy="285" rx="28" ry="10" fill="#1a1d27" stroke="#2d3348" stroke-width="1.5"/>
+          <!-- GSV scan line (center of medial calf X 29-83) -->
+          <line x1="56" y1="16" x2="56" y2="525" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.3"/>
+          <!-- Thigh front/posterior split at center X=80 -->
+          <line x1="80" y1="16" x2="80" y2="272" stroke="#4f8ef7" stroke-width="0.7" stroke-dasharray="4,4" opacity="0.22"/>
+          <text x="80" y="289" text-anchor="middle" fill="#475569" font-size="7" font-family="Segoe UI,sans-serif">KNEE</text>
+
+          <!-- LEFT LEG — shapes match bounding boxes:
+               Thigh X 140-254 (0.4985-0.909), Calf-medial X 198-255 (0.7081-0.91) -->
+          <path id="lThigh" class="leg-fill" d="M 140,16 Q 150,12 197,12 Q 244,12 254,16 L 243,272 Q 197,278 152,272 Z"/>
+          <path id="lCalf"  class="leg-fill" d="M 198,298 Q 226,293 255,298 L 251,525 Q 226,530 203,525 Z"/>
+          <ellipse cx="197" cy="285" rx="28" ry="10" fill="#1a1d27" stroke="#2d3348" stroke-width="1.5"/>
+          <!-- GSV scan line (center of medial calf X 198-255) -->
+          <line x1="226" y1="16" x2="226" y2="525" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.3"/>
+          <!-- Thigh front/posterior split at center X=197 -->
+          <line x1="197" y1="16" x2="197" y2="272" stroke="#4f8ef7" stroke-width="0.7" stroke-dasharray="4,4" opacity="0.22"/>
+          <text x="197" y="289" text-anchor="middle" fill="#475569" font-size="7" font-family="Segoe UI,sans-serif">KNEE</text>
+
+          <!-- Posterior-calf SPJ columns
+               Right: X 79-123 (0.2827-0.4386 normalised)
+               Left:  X 165-200 (0.588-0.714 normalised)
+               Both extend Y 297-525 (below knee to ankle) -->
+          <path id="rCalfPost" class="leg-fill-post" d="M 79,297 L 123,297 L 123,525 L 79,525 Z"/>
+          <path id="lCalfPost" class="leg-fill-post" d="M 156,297 L 200,297 L 200,525 L 156,525 Z"/>
+          <!-- Column separator between medial and posterior zones below knee -->
+          <line x1="81" y1="297" x2="81" y2="525" stroke="#475569" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.55"/>
+          <line x1="199" y1="297" x2="199" y2="525" stroke="#475569" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.55"/>
+          <!-- Posterior column labels: SPJ near knee, Post-Calf below -->
+          <text x="103" y="309" text-anchor="middle" fill="#f59e0b" font-size="6.5" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".75">SPJ</text>
+          <text x="178" y="309" text-anchor="middle" fill="#f59e0b" font-size="6.5" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".75">SPJ</text>
+          <text x="103" y="420" text-anchor="middle" fill="#fb923c" font-size="6.5" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">SSV</text>
+          <text x="178" y="420" text-anchor="middle" fill="#fb923c" font-size="6.5" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">SSV</text>
+
+          <!-- Zone labels (left edge, vertical) -->
+          <text transform="rotate(-90) translate(-44, 10)"  fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">SFJ</text>
+          <text transform="rotate(-90) translate(-166, 10)" fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">Thigh</text>
+          <text transform="rotate(-90) translate(-416, 10)" fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">Calf</text>
+
+          <!-- Probe indicator (updated by JS) -->
+          <g id="probeGroup" display="none">
+            <line  id="probeLine"   x1="22" x2="118" y1="0" y2="0" stroke="#4f8ef7" stroke-width="2.5" opacity=".9"/>
+            <circle id="probeCirc" cx="70"  cy="0"   r="5"          fill="#4f8ef7" stroke="#fff" stroke-width="1.5"/>
+            <text  id="probeLabel" x="70"   y="-9"   text-anchor="middle" fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700"/>
+          </g>
+
+          <!-- Clip markers (JS-populated) -->
+          <g id="clipMarkersG"/>
+
+          <!-- Lock marker — amber diamond at click-locked position for clip marking -->
+          <g id="lockGroup" display="none">
+            <line id="lockLine" x1="22" x2="118" y1="0" y2="0" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,3" opacity=".85"/>
+            <polygon id="lockPin" points="0,-6 5,0 0,6 -5,0" fill="#f59e0b" stroke="#fff" stroke-width="1" opacity=".9"/>
+            <text id="lockLabel" x="70" y="-10" text-anchor="middle" fill="#f59e0b" font-size="7.5" font-family="Segoe UI,sans-serif" font-weight="700"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Mark form -->
+    <div class="card">
+      <h3>Mark Finding</h3>
+      <div id="markPosBadge" class="mark-pos-badge">Click on the leg diagram to lock mark position</div>
+      <div class="flow-row">
+        <button class="flow-btn ep sel" id="flowEP" onclick="selFlow('EP')">EP — antegrade</button>
+        <button class="flow-btn rp"     id="flowRP" onclick="selFlow('RP')">RP — retrograde</button>
+      </div>
+      <div class="type-row">
+        <div>
+          <label class="small">From</label>
+          <select id="fromType">
+            <option value="N1">N1 (deep vein)</option>
+            <option value="N2" selected>N2 (trunk)</option>
+            <option value="N3">N3 (tributary)</option>
+          </select>
+        </div>
+        <div>
+          <label class="small">To</label>
+          <select id="toType">
+            <option value="N1">N1 (deep vein)</option>
+            <option value="N2" selected>N2 (trunk)</option>
+            <option value="N3">N3 (tributary)</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%" id="btnMark" onclick="markClip()" disabled>
+        Mark Clip at Locked Position
+      </button>
+    </div>
+
+    <!-- Elimination Test — always accessible, highlights when 4-clip Type 3/1+2 pattern is present -->
+    <div class="card" id="elimCard">
+      <h3 class="elim-title">Elimination Test</h3>
+      <p class="elim-required-note">⚡ All 4 clips confirmed — compress tributary at escape point, observe GSV trunk Doppler response, and record result below:</p>
+      <p class="elim-desc">For Type 3 / 1+2 differentiation: compress tributary at escape point and observe GSV Doppler. Available at any time:</p>
+      <div class="elim-btn-row">
+        <button class="elim-btn" id="elimNoRefluxCard" onclick="submitElimTest('No Reflux')">No Reflux — reflux abolished</button>
+        <button class="elim-btn" id="elimRefluxCard"   onclick="submitElimTest('Reflux')">Reflux — reflux persists</button>
+      </div>
+    </div>
+
+    <!-- Clips -->
+    <div class="card" style="flex:1">
+      <h3>Confirmed Findings <span id="clipCount" style="color:var(--accent)">0</span></h3>
+      <div id="clipList"><p style="color:var(--muted);font-size:11px">None yet.</p></div>
+    </div>
+  </div>
+
+  <!-- ── CENTER: video + VLM ─────────────────────────────────────────────── -->
+  <div class="panel">
+    <div class="card" style="padding:8px">
+      <h3>Ultrasound Feed — updates with probe position</h3>
+      <div id="videoWrap">
+        <img id="frameImg" alt=""/>
+        <div id="frameWait">Move probe to load frame…</div>
+        <div id="videoPosBadge">posY: 0.00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>VLM Frame Analysis</h3>
+      <div class="vlm-grid">
+        <div class="vlm-cell"><div class="lbl">Quality</div><div class="val" id="vlmQuality">—</div></div>
+        <div class="vlm-cell"><div class="lbl">Fascia visible</div><div class="val" id="vlmFascia">—</div></div>
+        <div class="vlm-cell"><div class="lbl">N2 in compartment</div><div class="val" id="vlmN2">—</div></div>
+        <div class="vlm-cell"><div class="lbl">N3 above fascia</div><div class="val" id="vlmN3">—</div></div>
+        <div class="vlm-cell"><div class="lbl">N1 below fascia</div><div class="val" id="vlmN1">—</div></div>
+        <div class="vlm-cell"><div class="lbl">Labels seen</div><div class="val" id="vlmLabels">—</div></div>
+      </div>
+      <p id="vlmNote" style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5"></p>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: probe info + guidance + thinking log ─────────────────────── -->
+  <div class="panel">
+
+    <!-- Probe position pills -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <div class="probe-pill">Region <span class="hi" id="infoRegion">—</span></div>
+      <div class="probe-pill">posY <span class="hi" id="infoPosY">—</span></div>
+      <div class="probe-pill">Surface <span class="hi" id="infoSurface">—</span></div>
+      <div class="probe-pill">Leg <span class="hi" id="infoLeg">—</span></div>
+      <div class="probe-pill">Front <span class="hi" id="infoFront">—</span></div>
+    </div>
+
+    <!-- Guidance -->
+    <div class="card">
+      <h3>Active Guidance</h3>
+      <div id="guidanceBox">
+        <div id="guidanceText" class="dim">Start a session then move the probe</div>
+      </div>
+    </div>
+
+    <!-- Elimination test banner — shown when action="maneuver" -->
+    <div id="elimBanner">
+      <p>Compress the tributary at the marked position and observe GSV Doppler. Record the result:</p>
+      <div class="elim-btn-row">
+        <button class="elim-btn" id="elimNoReflux" onclick="submitElimTest('No Reflux')">No Reflux — reflux abolished</button>
+        <button class="elim-btn" id="elimReflux"   onclick="submitElimTest('Reflux')">Reflux — reflux persists</button>
+      </div>
+    </div>
+
+    <!-- Thinking log -->
+    <div class="card" style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">
+      <h3>Model Thinking Log <span id="logCount" style="color:var(--muted);font-weight:400;font-size:9px">(0)</span></h3>
+      <div id="thinkLog"></div>
+    </div>
+  </div>
+
+</div><!-- .layout -->
+
+<!-- ── SHUNT CONFIRMED MODAL ──────────────────────────────────────────────── -->
+<div id="shuntModal">
+  <div class="shunt-card">
+    <div class="shunt-icon">✓</div>
+    <h2>Shunt Type Confirmed</h2>
+    <div class="shunt-type-label" id="shuntTypeLabel">—</div>
+    <p class="shunt-evidence" id="shuntEvidence"></p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary"   style="flex:1;font-size:12px" onclick="acceptShunt()">✓ Accept &amp; Continue Scanning</button>
+        <button class="btn-secondary" style="font-size:12px"        onclick="acceptShuntAndEnd()">Accept &amp; End Session</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-warn"   style="flex:1;font-size:12px" onclick="rejectShunt()">✗ Reject — Improve Classification</button>
+        <button class="btn-danger" style="font-size:12px"        onclick="endSession();closeShuntModal()">End Session</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ELIMINATION TEST MODAL ────────────────────────────────────────────── -->
+<div id="elimModal">
+  <div class="shunt-card">
+    <div class="shunt-icon" style="color:var(--warn)">⚡</div>
+    <h2>Elimination Test Required</h2>
+    <p class="elim-prompt-msg">All 4 clips confirmed — compress tributary at escape point, observe GSV trunk Doppler response, and record result:</p>
+    <div class="elim-btn-row" style="margin-bottom:20px">
+      <button class="elim-btn" id="elimModalNoReflux" onclick="submitElimTestFromModal('No Reflux')">No Reflux — reflux abolished</button>
+      <button class="elim-btn" id="elimModalReflux"   onclick="submitElimTestFromModal('Reflux')">Reflux — reflux persists</button>
+    </div>
+    <div class="shunt-btn-row">
+      <button class="btn-secondary" onclick="closeElimModal()">Continue Scanning</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let socket        = null;
+let sessionId     = null;
+let sessionActive = false;
+let currentState  = null;   // click-locked position — used for clip marking
+let scanState     = null;   // hover position — drives continuous scan
+let clips         = [];
+let selectedFlow  = 'EP';
+let lastGuidance  = '';
+let probeTimer    = null;   // debounce for probe_move events
+let elimRequired  = false;  // true when 4-clip Type 3/1+2 pattern present without elimTest
+let currentShuntData = null; // last shunt_confirmed payload for accept/reject
+
+// ── Leg diagram hit-boxes (normalized 0-1, top-left=0,0  bottom-right=1,1) ─
+const VB_W=280, VB_H=540;
+const KNEE_N=0.5497;   // knee as fraction of image height
+
+// Right leg hit regions
+const R_THI     = {xl:0.0931, xr:0.475,  yt:0.0,    yb:KNEE_N};  // thigh
+const R_CAL_MED = {xl:0.105,  xr:0.2947, yt:KNEE_N, yb:1.0};     // calf medial / GSV
+const R_CAL_SPJ = {xl:0.2827, xr:0.4386, yt:KNEE_N, yb:1.0};     // calf posterior / SPJ-SSV
+
+// Left leg hit regions
+const L_THI     = {xl:0.4985, xr:0.909,  yt:0.0,    yb:KNEE_N};  // thigh
+const L_CAL_MED = {xl:0.7081, xr:0.91,   yt:KNEE_N, yb:1.0};     // calf medial / GSV
+const L_CAL_SPJ = {xl:0.558,  xr:0.714,  yt:KNEE_N, yb:1.0};     // calf posterior / SPJ-SSV
+
+// SVG-pixel leg centers — for probe-indicator line and clip-marker X position
+const R_CX = (R_THI.xl + R_THI.xr) / 2 * VB_W;  // ~79.5
+const L_CX = (L_THI.xl + L_THI.xr) / 2 * VB_W;  // ~197.1
+
+const REGION_COLORS={SFJ:'#818cf8','Upper Thigh':'#34d399',Dodd:'#22d3ee',Hunterian:'#60a5fa',Giacomini:'#94a3b8',SPJ:'#f59e0b',Calf:'#6ee7b7',SSV:'#fb923c'};
+
+// ── Coord transform ────────────────────────────────────────────────────────
+function svgXY(e) {
+  const r=legSvg.getBoundingClientRect(), vb=legSvg.viewBox.baseVal;
+  return {x:(e.clientX-r.left)*(vb.width/r.width), y:(e.clientY-r.top)*(vb.height/r.height)};
+}
+const legSvg=document.getElementById('legSvg');
+
+function inBox(nx,ny,b){return nx>=b.xl&&nx<=b.xr&&ny>=b.yt&&ny<=b.yb;}
+
+function coordToState(sx,sy) {
+  const nx=sx/VB_W, ny=sy/VB_H;
+  const posY=ny;   // posY IS normalized Y: 0=groin, 1=ankle
+
+  if(ny<KNEE_N) {
+    // ── THIGH ────────────────────────────────────────────────────────
+    let leg,box,cxN;
+    if(inBox(nx,ny,R_THI)){leg='right';box=R_THI;cxN=(R_THI.xl+R_THI.xr)/2;}
+    else if(inBox(nx,ny,L_THI)){leg='left';box=L_THI;cxN=(L_THI.xl+L_THI.xr)/2;}
+    else return null;
+    const seg_id=leg==='right'?2:0;
+    const seg_dist=(ny-box.yt)/(box.yb-box.yt);
+    // Right: lower-X = medial/anterior.  Left: higher-X = medial/anterior (legs mirrored).
+    const is_front=leg==='right'?nx<cxN:nx>=cxN;
+    const surface=is_front?'anterior-medial':'posterior';
+    const lL=box.xl*VB_W, lR=box.xr*VB_W, lCX=cxN*VB_W;
+    const region=mapReg(seg_id,seg_dist,is_front,posY);
+    return {leg,seg_id,seg_dist,is_front,surface,posY,region,sx,sy,lL,lR,lCX};
+
+  } else {
+    // ── CALF — when boxes overlap pick nearest zone center ───────────
+    const cands=[];
+    if(inBox(nx,ny,R_CAL_MED))cands.push({leg:'right',seg_id:3,is_front:true, surface:'anterior-medial',z:R_CAL_MED});
+    if(inBox(nx,ny,R_CAL_SPJ))cands.push({leg:'right',seg_id:3,is_front:false,surface:'posterior',       z:R_CAL_SPJ});
+    if(inBox(nx,ny,L_CAL_MED))cands.push({leg:'left', seg_id:1,is_front:true, surface:'anterior-medial',z:L_CAL_MED});
+    if(inBox(nx,ny,L_CAL_SPJ))cands.push({leg:'left', seg_id:1,is_front:false,surface:'posterior',       z:L_CAL_SPJ});
+    if(!cands.length)return null;
+    const m=cands.reduce((b,c)=>Math.abs(nx-(c.z.xl+c.z.xr)/2)<Math.abs(nx-(b.z.xl+b.z.xr)/2)?c:b);
+    const seg_dist=(ny-KNEE_N)/(1-KNEE_N);
+    const lL=m.z.xl*VB_W, lR=m.z.xr*VB_W, lCX=(m.z.xl+m.z.xr)/2*VB_W;
+    const region=mapReg(m.seg_id,seg_dist,m.is_front,posY);
+    return {leg:m.leg,seg_id:m.seg_id,seg_dist,is_front:m.is_front,surface:m.surface,posY,region,sx,sy,lL,lR,lCX};
+  }
+}
+
+function mapReg(id,dist,front,posY) {
+  const th=(id===0||id===2);
+  if(th){
+    if(front){
+      if(posY<=0.07) return 'SFJ';
+      if(posY<=0.20) return 'Upper Thigh';
+      if(posY<=0.33) return 'Dodd';
+      return 'Hunterian';
+    }
+    return posY>=0.44?'SPJ':'Giacomini';
+  }
+  if(front) return 'Calf';
+  return posY<=0.57?'SPJ':'SSV';
+}
+
+// ── SVG mouse — move=continuous scan, click=lock mark position ────────────
+legSvg.addEventListener('mousemove', e => {
+  const {x,y} = svgXY(e);
+  const st = coordToState(x, y);
+  if(!st) { document.getElementById('probeGroup').setAttribute('display','none'); return; }
+  scanState = st;
+  updateScanIndicator(st);
+  updateInfoBar(st);
+  scheduleFrame(st.posY);
+  if(sessionActive) scheduleProbeMove(st);
+});
+
+legSvg.addEventListener('click', e => {
+  const {x,y} = svgXY(e);
+  const st = coordToState(x, y);
+  if(!st) return;
+  currentState = st;
+  updateLockMarker(st);
+  updateMarkPosBadge(st);
+  if(!sessionActive) setStatus('Click "Start Session" first to begin scanning','warn');
+});
+
+legSvg.addEventListener('mouseleave', () => {
+  clearTimeout(probeTimer);
+  document.getElementById('probeGroup').setAttribute('display','none');
+  // Lock marker stays visible at clicked position
+});
+
+// Scanning probe indicator — follows mouse, lighter styling
+function updateScanIndicator(st) {
+  const g = document.getElementById('probeGroup');
+  if(!st) { g.setAttribute('display','none'); return; }
+  g.setAttribute('display','');
+  const ln = document.getElementById('probeLine');
+  ln.setAttribute('x1', st.lL); ln.setAttribute('x2', st.lR);
+  ln.setAttribute('y1', st.sy); ln.setAttribute('y2', st.sy);
+  ln.setAttribute('stroke-width', '1.5');
+  ln.setAttribute('opacity', '0.55');
+  const ci = document.getElementById('probeCirc');
+  ci.setAttribute('cx', st.sx); ci.setAttribute('cy', st.sy);
+  ci.setAttribute('r', '3.5');
+  ci.setAttribute('opacity', '0.65');
+  const tx = document.getElementById('probeLabel');
+  tx.setAttribute('x', st.lCX); tx.setAttribute('y', st.sy - 7);
+  tx.setAttribute('opacity', '0.7');
+  tx.textContent = st.region;
+}
+
+// Amber lock marker — persists at click position for marking
+function updateLockMarker(st) {
+  const g = document.getElementById('lockGroup');
+  if(!st) { g.setAttribute('display','none'); return; }
+  g.setAttribute('display','');
+  const sy = st.posY * VB_H;
+  document.getElementById('lockLine').setAttribute('x1', st.lL);
+  document.getElementById('lockLine').setAttribute('x2', st.lR);
+  document.getElementById('lockLine').setAttribute('y1', sy);
+  document.getElementById('lockLine').setAttribute('y2', sy);
+  document.getElementById('lockPin').setAttribute('transform', `translate(${Math.round(st.sx)},${sy})`);
+  const lbl = document.getElementById('lockLabel');
+  lbl.setAttribute('x', Math.round(st.sx));
+  lbl.setAttribute('y', sy - 10);
+  lbl.textContent = '❖ ' + st.posY.toFixed(2);
+}
+
+// Mark position badge in the mark form card
+function updateMarkPosBadge(st) {
+  const el = document.getElementById('markPosBadge');
+  if(!st) {
+    el.textContent = 'Click on the leg diagram to lock mark position';
+    el.className = 'mark-pos-badge';
+    document.getElementById('btnMark').disabled = true;
+    return;
+  }
+  el.textContent = `posY ${st.posY.toFixed(2)} · ${st.region} · ${st.leg} leg`;
+  el.className = 'mark-pos-badge active';
+  if(sessionActive) document.getElementById('btnMark').disabled = false;
+}
+
+function updateInfoBar(st) {
+  document.getElementById('infoRegion').textContent=st.region;
+  document.getElementById('infoRegion').style.color=REGION_COLORS[st.region]||'#4f8ef7';
+  document.getElementById('infoPosY').textContent=st.posY.toFixed(2);
+  document.getElementById('infoSurface').textContent=st.surface;
+  document.getElementById('infoLeg').textContent=st.leg;
+  document.getElementById('infoFront').textContent=st.is_front?'yes':'no';
+  document.getElementById('regionPill').textContent=st.region;
+  document.getElementById('regionPill').style.display='';
+}
+
+// ── Frame display ──────────────────────────────────────────────────────────
+const frameImg  = document.getElementById('frameImg');
+const frameWait = document.getElementById('frameWait');
+let   frameTimer = null;
+let   lastFrameY = -1;
+
+function scheduleFrame(posY) {
+  // Debounce frame fetches at 150ms; skip if posY hasn't changed meaningfully
+  if(Math.abs(posY - lastFrameY) < 0.005) return;
+  clearTimeout(frameTimer);
+  frameTimer = setTimeout(() => {
+    lastFrameY = posY;
+    const url = '/video/frame?pos_y=' + posY.toFixed(4) + '&t=' + Date.now();
+    frameImg.onload  = () => { frameWait.style.display = 'none'; };
+    frameImg.onerror = () => {};
+    frameImg.src = url;
+    document.getElementById('videoPosBadge').textContent = 'posY: ' + posY.toFixed(2);
+  }, 150);
+}
+
+function updatePosBadge(posY) {
+  document.getElementById('videoPosBadge').textContent = 'posY: ' + posY.toFixed(2);
+}
+
+// ── Session ────────────────────────────────────────────────────────────────
+function startSession() {
+  if(!socket || !socket.connected) {
+    setStatus('Socket not connected — is the server running?','err');
+    return;
+  }
+  sessionId='sess_'+Math.random().toString(36).slice(2,9);
+  // FIX: set sessionActive immediately, don't wait for server session_ready
+  sessionActive=true;
+  document.getElementById('sessionPill').textContent='Session: '+sessionId;
+  document.getElementById('sessionPill').className='hpill ok';
+  document.getElementById('btnStart').disabled=true;
+  document.getElementById('btnEnd').disabled=false;
+  if(currentState) document.getElementById('btnMark').disabled=false;
+  setStatus('Session started — move probe over leg to scan · click to lock mark position','ok');
+  socket.emit('stream_start', {session_id:sessionId});
+}
+
+function endSession() {
+  if(socket && sessionId) socket.emit('session_end',{session_id:sessionId});
+  sessionActive=false;
+  clearTimeout(probeTimer);
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnEnd').disabled=true;
+  document.getElementById('btnMark').disabled=true;
+  document.getElementById('sessionPill').textContent='Session ended';
+  document.getElementById('sessionPill').className='hpill warn';
+  setStatus('Session ended','warn');
+}
+
+// ── Socket ─────────────────────────────────────────────────────────────────
+function initSocket() {
+  socket=io({transports:['websocket','polling']});
+
+  socket.on('connect',()=>{
+    document.getElementById('statusDot').className='status-dot ok';
+    document.getElementById('connPill').textContent='Connected';
+    document.getElementById('connPill').className='hpill ok';
+    setStatus('Connected — click Start Session to begin','ok');
+  });
+
+  socket.on('connect_error',(err)=>{
+    document.getElementById('statusDot').className='status-dot err';
+    document.getElementById('connPill').textContent='Connection error';
+    document.getElementById('connPill').className='hpill err';
+    setStatus('Socket error: '+err.message+' — restart the server with python app.py','err');
+  });
+
+  socket.on('disconnect',()=>{
+    document.getElementById('statusDot').className='status-dot';
+    document.getElementById('connPill').textContent='Disconnected';
+    document.getElementById('connPill').className='hpill';
+    sessionActive=false;
+    setStatus('Disconnected — refresh to reconnect','warn');
+  });
+
+  socket.on('session_ready',(d)=>{
+    setStatus('Session ready — move probe over leg to scan · click to lock mark position','ok');
+    setGuidance('Move probe over the leg to begin scanning', false, 'move');
+  });
+
+  socket.on('guidance_update',(d)=>{
+    if(d.guidance) { lastGuidance=d.guidance; setGuidance(d.guidance, false, d.action||'move'); }
+    if(d.vlm)        renderVLM(d.vlm);
+    if(d.thinking)   appendLog(d);
+  });
+
+  socket.on('clips_updated',(d)=>{
+    clips=d.clips||[];
+    renderClips();
+    renderClipMarkers();
+  });
+
+  socket.on('session_ended',(d)=>{
+    setGuidance('Session complete — '+(d.clips?.length||0)+' findings recorded.',false);
+  });
+
+  socket.on('shunt_confirmed',(d)=>{
+    currentShuntData = d;
+    document.getElementById('shuntTypeLabel').textContent = 'CHIVA Type ' + (d.shunt_type||'—');
+    document.getElementById('shuntEvidence').textContent  = d.shunt_evidence || '';
+    document.getElementById('shuntModal').classList.add('show');
+    setStatus('Shunt Type ' + (d.shunt_type||'—') + ' confirmed — continue or end session', 'ok');
+  });
+}
+
+function closeShuntModal() {
+  document.getElementById('shuntModal').classList.remove('show');
+}
+
+// ── probe_move — throttled via debounce on mousemove ─────────────────────
+function scheduleProbeMove(st) {
+  clearTimeout(probeTimer);
+  probeTimer = setTimeout(() => { sendProbeMove(st); }, 200);
+}
+
+function sendProbeMove(st) {
+  if(!socket || !sessionActive || !socket.connected) return;
+  if(!lastGuidance) setGuidance('Processing…', true);
+  socket.emit('probe_move',{
+    session_id:   sessionId,
+    segment_id:   st.seg_id,
+    segment_dist: st.seg_dist,
+    is_front:     st.is_front,
+    pos_y_ratio:  st.posY,
+    leg:          st.leg,
+    region:       st.region,
+    surface:      st.surface,
+  });
+}
+
+// ── Clip marking ───────────────────────────────────────────────────────────
+function selFlow(f) {
+  selectedFlow=f;
+  document.getElementById('flowEP').className='flow-btn ep'+(f==='EP'?' sel':'');
+  document.getElementById('flowRP').className='flow-btn rp'+(f==='RP'?' sel':'');
+}
+
+function submitElimTest(result) {
+  if(!socket || !socket.connected) { setStatus('Not connected','err'); return; }
+  if(!sessionActive) { setStatus('Start a session first','warn'); return; }
+
+  // Use position from the existing EP N2→N3 clip if available, else locked position
+  const src = clips.find(c=>c.flow==='EP'&&c.from_type==='N2'&&c.to_type==='N3') || null;
+  if(!src && !currentState) {
+    setStatus('Click on the leg diagram to lock a position before recording elimination test','warn');
+    return;
+  }
+  socket.emit('clip_mark', {
+    session_id:       sessionId || 'default',
+    flow:             'EP',
+    from_type:        'N2',
+    to_type:          'N3',
+    pos_y_ratio:      src ? src.pos_y_ratio : currentState.posY,
+    leg:              src ? src.leg         : currentState.leg,
+    region:           src ? (src.region  || 'Unknown') : currentState.region,
+    surface:          src ? (src.surface || 'medial')  : currentState.surface,
+    elimination_test: result,
+  });
+
+  // Visual feedback on both button pairs
+  document.getElementById('elimNoReflux').className    = 'elim-btn'+(result==='No Reflux'?' sel':'');
+  document.getElementById('elimReflux').className      = 'elim-btn'+(result==='Reflux'?' sel':'');
+  document.getElementById('elimNoRefluxCard').className = 'elim-btn'+(result==='No Reflux'?' sel':'');
+  document.getElementById('elimRefluxCard').className   = 'elim-btn'+(result==='Reflux'?' sel':'');
+  setStatus('Elimination test: '+result+' recorded','ok');
+}
+
+function markClip() {
+  if(!socket || !socket.connected) { setStatus('Not connected — cannot mark','err'); return; }
+  if(!currentState) { setStatus('Click on the leg first to set position','warn'); return; }
+  socket.emit('clip_mark',{
+    session_id:       sessionId||'default',
+    flow:             selectedFlow,
+    from_type:        document.getElementById('fromType').value,
+    to_type:          document.getElementById('toType').value,
+    pos_y_ratio:      currentState.posY,
+    leg:              currentState.leg,
+    region:           currentState.region,
+    surface:          currentState.surface,
+  });
+}
+
+function deleteClip(i) {
+  clips.splice(i,1);
+  renderClips();
+  renderClipMarkers();
+  if(socket&&socket.connected)
+    socket.emit('clips_replace',{session_id:sessionId,clips});
+}
+
+// ── Render helpers ─────────────────────────────────────────────────────────
+function setStatus(msg,type) {
+  const el=document.getElementById('statusMsg');
+  el.textContent=msg;
+  el.className=type||'';
+}
+
+function setGuidance(txt, thinking, action) {
+  const el     = document.getElementById('guidanceText');
+  const banner = document.getElementById('elimBanner');
+  el.textContent = txt;
+  if(thinking)              el.className = 'thinking';
+  else if(action==='maneuver') { el.className = 'maneuver'; banner.style.display=''; }
+  else if(action==='complete') { el.className = 'complete'; banner.style.display='none'; elimRequired=false; document.getElementById('elimCard').classList.remove('required'); }
+  else                      { el.className = txt ? '' : 'dim'; if(!elimRequired) banner.style.display='none'; }
+}
+
+function yn(v){return v?'<span class="yes">Yes</span>':'<span class="no">No</span>';}
+
+function renderVLM(v) {
+  if(!v) return;
+  document.getElementById('vlmQuality').textContent=v.image_quality||'—';
+  document.getElementById('vlmFascia').innerHTML=yn(v.fascial_layer_visible);
+  document.getElementById('vlmN2').innerHTML=yn(v.n2_in_fascial_compartment);
+  document.getElementById('vlmN3').innerHTML=yn(v.n3_superficial_to_fascia);
+  document.getElementById('vlmN1').innerHTML=yn(v.n1_deep_to_fascia);
+  const lbs=['N1','N2','N3'].filter(l=>v['label_'+l.toLowerCase()+'_visible']);
+  document.getElementById('vlmLabels').textContent=lbs.length?lbs.join(', '):'—';
+  if(v.frame_note)document.getElementById('vlmNote').textContent=v.frame_note;
+}
+
+function showElimModal() {
+  // Reset modal buttons to unselected state each time it opens
+  document.getElementById('elimModalNoReflux').className='elim-btn';
+  document.getElementById('elimModalReflux').className='elim-btn';
+  document.getElementById('elimModal').classList.add('show');
+}
+
+function closeElimModal() {
+  document.getElementById('elimModal').classList.remove('show');
+}
+
+function submitElimTestFromModal(result) {
+  // Highlight the chosen button before submitting
+  document.getElementById('elimModalNoReflux').className='elim-btn'+(result==='No Reflux'?' sel':'');
+  document.getElementById('elimModalReflux').className='elim-btn'+(result==='Reflux'?' sel':'');
+  submitElimTest(result);
+  setTimeout(closeElimModal, 400);  // brief delay so the selection is visible
+}
+
+function checkElimTestRequired() {
+  const hasEPN1N2 = clips.some(c=>c.flow==='EP'&&c.from_type==='N1'&&c.to_type==='N2');
+  const hasEPN2N3 = clips.some(c=>c.flow==='EP'&&c.from_type==='N2'&&c.to_type==='N3');
+  const hasRPN3N1 = clips.some(c=>c.flow==='RP'&&c.from_type==='N3'&&c.to_type==='N1');
+  const hasRPN2N1 = clips.some(c=>c.flow==='RP'&&c.from_type==='N2'&&c.to_type==='N1');
+  const hasElim   = clips.some(c=>c.elimination_test);
+  const wasRequired = elimRequired;
+  elimRequired = hasEPN1N2&&hasEPN2N3&&hasRPN3N1&&hasRPN2N1&&!hasElim;
+  document.getElementById('elimCard').classList.toggle('required', elimRequired);
+  if(elimRequired && !wasRequired) {
+    // Pattern just completed — show modal and banner immediately
+    showElimModal();
+    document.getElementById('elimBanner').style.display='';
+  }
+  if(!elimRequired && wasRequired) {
+    document.getElementById('elimBanner').style.display='none';
+  }
+}
+
+function renderClips() {
+  const el=document.getElementById('clipList');
+  document.getElementById('clipCount').textContent=clips.length;
+  checkElimTestRequired();
+  if(!clips.length){el.innerHTML='<p style="color:var(--muted);font-size:11px">None yet.</p>';return;}
+  el.innerHTML=clips.map((c,i)=>{
+    const elimStr = c.elimination_test ? ` <span style="color:var(--warn);font-size:10px">[${c.elimination_test}]</span>` : '';
+    return `
+    <div class="clip-item">
+      <span class="clip-badge ${c.flow}">${c.flow}</span>
+      <div class="clip-detail">${c.from_type}→${c.to_type}${elimStr}</div>
+      <div class="clip-pos">${c.leg} | posY=${(c.pos_y_ratio||0).toFixed(2)} | ${c.region}</div>
+      <span class="clip-del" onclick="deleteClip(${i})" title="Remove">×</span>
+    </div>`;
+  }).join('');
+}
+
+function renderClipMarkers() {
+  const g = document.getElementById('clipMarkersG');
+  g.innerHTML = '';
+  renderVeinPaths(g);
+  clips.forEach((c, i) => {
+    const isR  = c.leg === 'right';
+    const N1x  = isR ? 65 : 215;
+    const N2x  = isR ? 43 : 237;
+    const N3x  = isR ? 95 : 185;
+    const cy   = Math.max(8, Math.min(VB_H-8, c.pos_y_ratio * VB_H));
+    // Place circle between the two compartments the junction touches
+    const cX   = {N1:N1x, N2:N2x, N3:N3x};
+    const fx   = cX[c.from_type] ?? N2x;
+    const tx   = cX[c.to_type]   ?? N2x;
+    const cx   = (fx + tx) / 2;
+    const col  = c.flow === 'EP' ? '#4ade80' : '#c084fc';
+    const lx   = isR ? cx + 11 : cx - 11;
+    const anch = isR ? 'start' : 'end';
+
+    const n = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    n.style.cursor = 'pointer';
+    n.innerHTML = `
+      <circle class="cm-c" cx="${cx}" cy="${cy}" r="5.5"
+              fill="#dc2626" stroke="#0f1117" stroke-width="2"/>
+      <text x="${lx}" y="${cy+3}" text-anchor="${anch}"
+            fill="${col}" font-size="7" font-family="Segoe UI,sans-serif" font-weight="700">
+        ${c.flow} ${c.from_type}→${c.to_type} <tspan fill="#475569" font-size="8">×</tspan></text>`;
+
+    n.addEventListener('mouseenter', () => {
+      const c2 = n.querySelector('.cm-c');
+      c2.setAttribute('r','7'); c2.setAttribute('stroke','#f59e0b');
+    });
+    n.addEventListener('mouseleave', () => {
+      const c2 = n.querySelector('.cm-c');
+      c2.setAttribute('r','5.5'); c2.setAttribute('stroke','#0f1117');
+    });
+    n.addEventListener('click', e => { e.stopPropagation(); deleteClip(i); });
+    g.appendChild(n);
+  });
+}
+
+function appendLog(d) {
+  const log = document.getElementById('thinkLog');
+  const n   = log.children.length + 1;
+  document.getElementById('logCount').textContent = '(' + n + ')';
+
+  const div = document.createElement('div');
+  div.className = 'think-entry';
+
+  const arrowId  = 'arr'  + n;
+  const bodyId   = 'body' + n;
+
+  const actionColor = d.action==='maneuver'?'var(--warn)':d.action==='complete'?'var(--accent2)':'var(--muted)';
+  const actionLabel = d.action==='maneuver'?' ⚡':d.action==='complete'?' ✓':'';
+  div.innerHTML = `
+    <div class="think-head" onclick="toggleLog('${arrowId}','${bodyId}',this.closest('.think-entry'))">
+      <span class="think-num">#${n}</span>
+      <span class="think-pos">posY ${(d.pos_y||0).toFixed(2)}</span>
+      <span class="think-region">${esc(d.region||'—')}</span>
+      <span class="think-guidance" style="color:${actionColor}">${esc(d.guidance||'(no guidance yet)')}${actionLabel}</span>
+      <span class="think-arrow" id="${arrowId}">▶</span>
+    </div>
+    <div class="think-body" id="${bodyId}">
+      <div class="think-section-lbl">State sent to LLM</div>
+      <pre>${esc(d.thinking?.state||'(none)')}</pre>
+      <div class="think-section-lbl">Raw LLM response</div>
+      <pre>${esc(d.thinking?.raw||'(none)')}</pre>
+    </div>`;
+
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function toggleLog(arrowId, bodyId, entry) {
+  const body  = document.getElementById(bodyId);
+  const arrow = document.getElementById(arrowId);
+  const open  = body.classList.toggle('open');
+  arrow.classList.toggle('open', open);
+  entry.classList.toggle('open-entry', open);
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Shunt modal actions ────────────────────────────────────────────────────
+function acceptShunt() {
+  closeShuntModal();
+  setStatus('Shunt type accepted — continue scanning for additional findings', 'ok');
+}
+
+function acceptShuntAndEnd() {
+  closeShuntModal();
+  endSession();
+}
+
+function rejectShunt() {
+  if(!socket || !socket.connected || !currentShuntData) {
+    closeShuntModal();
+    return;
+  }
+  socket.emit('shunt_reject', {
+    session_id: sessionId || 'default',
+    shunt_type: currentShuntData.shunt_type || 'unknown',
+    leg:        currentShuntData.leg        || 'unknown',
+  });
+  closeShuntModal();
+  setStatus('Classification rejected — re-evaluate clip pattern', 'warn');
+}
+
+// ── Vein anatomy overlay ───────────────────────────────────────────────────
+function renderVeinPaths(g) {
+  const rC = clips.filter(c=>c.leg==='right').sort((a,b)=>a.pos_y_ratio-b.pos_y_ratio);
+  const lC = clips.filter(c=>c.leg==='left' ).sort((a,b)=>a.pos_y_ratio-b.pos_y_ratio);
+  drawLegVeinPaths(g, rC, true);
+  drawLegVeinPaths(g, lC, false);
+}
+
+function drawLegVeinPaths(g, legClips, isRight) {
+  // Anatomical lane x-positions (SVG pixels, viewBox 280x540)
+  // Right leg: medial side = left in image; Left leg: medial side = right in image
+  const N1x = isRight ? 65 : 215;   // deep femoral/popliteal (thick dark bar)
+  const N2x = isRight ? 43 : 237;   // GSV saphenous trunk (medial)
+  const N3x = isRight ? 96 : 184;   // tributaries / varices
+  const botY = VB_H * 0.99;
+  const sfjY = 25;    // SFJ hook top (px)
+  const hookY = 65;   // where GSV resumes below hook
+
+  function svgEl(tag, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k, v));
+    return el;
+  }
+
+  // ── N1: thick solid dark indigo bar — full height ─────────────────
+  g.appendChild(svgEl('line', {
+    x1:N1x, y1:2, x2:N1x, y2:botY,
+    stroke:'#3730a3', 'stroke-width':'6', opacity:'0.80'
+  }));
+
+  // ── N2 GSV: thick blue path with SFJ hook connecting to N1 ────────
+  // Shape: N2 lane → hooks across to N1 at SFJ → returns to N2 lane
+  const n2d = `M ${N2x},0 L ${N2x},${sfjY} Q ${N2x},${sfjY+12} ${N1x},${sfjY+12} Q ${N1x},${hookY} ${N2x},${hookY} L ${N2x},${botY}`;
+  g.appendChild(svgEl('path', {
+    d:n2d, stroke:'#2563eb', 'stroke-width':'4.5', fill:'none', opacity:'0.75'
+  }));
+
+  // Lane labels
+  function lbl(x, y, text, col) {
+    const el = svgEl('text', {x, y, fill:col, 'font-size':'7.5', opacity:'0.5',
+      'text-anchor':'middle', 'font-family':'Segoe UI,sans-serif'});
+    el.textContent = text; g.appendChild(el);
+  }
+  lbl(N1x, 12, 'N1', '#a5b4fc');
+  lbl(N2x, 12, 'GSV', '#93c5fd');
+
+  if (!legClips.length) return;
+
+  // ── Circuit clips ────────────────────────────────────────────────────
+  const first=(f,fT,tT)=>legClips.find(c=>c.flow===f&&c.from_type===fT&&c.to_type===tT);
+  const epN1N2=first('EP','N1','N2'), epN2N2=first('EP','N2','N2');
+  const rpN2N1=first('RP','N2','N1'), epN2N3=first('EP','N2','N3');
+  const epN1N3=first('EP','N1','N3');
+  const rpN3N1=first('RP','N3','N1'), rpN3N2=first('RP','N3','N2');
+
+  // ── RED: N2 trunk reflux — overdraws GSV path in red ─────────────
+  if (rpN2N1) {
+    const entry  = epN1N2||epN2N2;
+    const entryY = entry ? Math.max(hookY, entry.pos_y_ratio*VB_H) : hookY;
+    const rawEsc = epN2N3
+      ? Math.max(rpN2N1.pos_y_ratio, epN2N3.pos_y_ratio)*VB_H
+      : rpN2N1.pos_y_ratio*VB_H;
+    const exitY  = Math.max(entryY+20, rawEsc);
+    g.appendChild(svgEl('line', {
+      x1:N2x, y1:entryY, x2:N2x, y2:exitY,
+      stroke:'#ef4444', 'stroke-width':'5.5', opacity:'0.92'
+    }));
+  }
+
+  // ── RED: N3 tributary — bezier from escape out to lateral then re-entry
+  const tribTop=epN2N3||epN1N3, tribBot=rpN3N1||rpN3N2;
+  if (tribTop && tribBot) {
+    const startX = tribTop.from_type==='N1' ? N1x : N2x;
+    const startY = tribTop.pos_y_ratio*VB_H;
+    const endX   = tribBot.to_type==='N1' ? N1x : (tribBot.to_type==='N2' ? N2x : N3x);
+    const endY   = tribBot.pos_y_ratio*VB_H;
+    const dY     = Math.max(30, endY - startY);
+    g.appendChild(svgEl('path', {
+      d:`M ${startX},${startY} C ${N3x},${startY+dY*0.15} ${N3x},${endY-dY*0.15} ${endX},${endY}`,
+      stroke:'#ef4444', 'stroke-width':'4.5', fill:'none', opacity:'0.90'
+    }));
+  }
+
+  // ── RED: perforator entry loop (EP N2→N2) ─────────────────────────
+  if (epN2N2 && !epN1N2) {
+    const py = epN2N2.pos_y_ratio*VB_H;
+    const ox = isRight ? N2x-20 : N2x+20;
+    g.appendChild(svgEl('path', {
+      d:`M ${N2x},${py} Q ${ox},${py-22} ${N2x},${py}`,
+      stroke:'#ef4444', 'stroke-width':'4', fill:'none', opacity:'0.88'
+    }));
+  }
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+window.addEventListener('load', initSocket);
+</script>
+</body>
+</html>
