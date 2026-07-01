@@ -1,0 +1,61 @@
+Paper Summary: "From Scanning Guidelines to Action"
+Authors: Yuan Bi, Yiping Zhou et al. — TU Munich & University of Hong Kong
+Published: arXiv, March 15, 2026
+
+The Problem They're Solving
+Ultrasound (US) scanning is highly operator-dependent — image quality varies with the sonographer's skill, and it causes fatigue and musculoskeletal injuries. Robotic US systems exist, but they all share a critical flaw: they are hardcoded to a specific anatomy or scanning protocol. A system built for spine scanning can't do kidney scanning without a full redesign. The authors want one unified system that can follow any scanning guideline.
+
+Their Solution: An LLM Agent That Reads Scanning Handbooks
+Instead of hard-coding procedures, they give a Large Language Model (LLM) access to:
+
+A library of clinical scanning guidelines (like a textbook handbook)
+A set of software tools it can call to actually control the robot
+When a clinician says "perform a gallbladder ultrasound scan," the LLM:
+
+Retrieves the relevant guideline steps via RAG (Retrieval-Augmented Generation)
+Reasons about the current state (what has been done, what the US image looks like)
+Decides which tool to call next, with what parameters
+Loops back based on tool outputs — a true closed-loop system
+The key insight: the agent doesn't follow a fixed sequence. It can repeat steps, skip steps, adapt strategies based on what it observes (e.g., bad image quality → adjust probe contact before continuing).
+
+The Five Tools the LLM Can Call :
+                                                   Tool			                                        What It Does
+Trajectory Planning	Uses RGBD camera + skeletal atlas registration to generate a 3D scanning path from anatomical landmarks
+Robot Execution	Moves the robot arm along a trajectory or to a target pose at a given speed
+Contact Adjustment	Evaluates US image quality via confidence maps and corrects probe contact with the patient
+Voice Guidance	Issues verbal instructions to the patient (e.g., "breathe in and hold") — critical for gallbladder which hides under the rib cage
+Trajectory Refinement	After an initial scan, runs an organ-specific segmentation model to re-center the trajectory if needed
+
+Training pipeline:
+
+Dataset construction: Use a large model (Qwen3-30B) to generate "reference traces" — correct <think> reasoning + <tool> JSON call pairs for 10 training guidelines
+SFT (Supervised Fine-Tuning): Teach the small model the output format and basic tool behavior
+RL Fine-Tuning with PPO: Further optimize using a dense reward function that scores each tool call on:
+Whether the correct tool was selected (wrong tool = -0.5 penalty)
+Whether required argument keys are present
+Whether argument values are correct (exact match for discrete, tolerance-based for numeric)
+A penalty for spurious extra arguments
+They use LoRA (rank 16 for SFT, rank 8 for RL) to make fine-tuning computationally feasible.
+
+Results
+Verbal (simulated) experiments on 10 held-out guidelines:
+
+Metric	Base Model	After RL Fine-Tuning
+Step-wise Accuracy	65.1%	89.7%
+Overall Task Success	53.8%	92.3%
+The base model gives vague, minimal reasoning traces. The fine-tuned model generates coherent rationales that explain why it chose a tool — which matters for clinical transparency.
+
+Real-world robot experiments (KUKA LBR iiwa + Siemens ACUSON probe, 3 human volunteers):
+
+Spine: 100% success
+Kidney: 100% success
+Gallbladder: Near-complete — one failure due to the complexity of breath-hold coordination between patient and robot
+Key Contributions / Why This Matters
+Unified system — one pipeline handles gallbladder, spine, kidney (and anything with a guideline) without redesign
+Non-linear, adaptive workflow — unlike rule-based systems, it can loop, branch, and adapt dynamically
+Transparent reasoning — <think> traces let clinicians inspect why the robot made each decision
+RL improves both correctness AND reasoning quality — not just accuracy but interpretability
+Generalizes to unseen guidelines — trained on 10, tested on 10 completely different ones
+
+Relevance to Your Project
+This paper is directly relevant to your Cygnus Med Demo work (CHIVA varicose vein examination). The core architecture — LLM agent + tool calls + guideline RAG — is essentially the same pattern your Task 2 app implements for probe localisation and active guidance. The RL fine-tuning approach (using a large model to generate training traces for a smaller model) is also worth noting if you're considering improving your agent's tool-calling reliability.

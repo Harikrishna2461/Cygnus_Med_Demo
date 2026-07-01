@@ -1,0 +1,1216 @@
+================================================================================
+TASK 2 — PROBE LOCALISATION AND ACTIVE GUIDANCE SYSTEM
+METHODOLOGY REPORT
+================================================================================
+
+Prepared: July 2026
+Project: Cygnus Med Demo — CHIVA Duplex Ultrasound AI Assistant
+
+
+================================================================================
+1. INTRODUCTION
+================================================================================
+
+1.1 What This Report Covers
+-----------------------------
+This report describes the design, architecture, and implementation of Task 2 —
+a real-time AI system that guides a surgeon through a CHIVA duplex ultrasound
+examination of varicose veins. It explains every component of the pipeline,
+from the moment the surgeon clicks on a leg diagram to the moment a 12-word
+guidance instruction appears on screen.
+
+1.2 What is CHIVA?
+--------------------
+CHIVA (Conservatrice et Hémodynamique de l'Insuffisance Veineuse en Ambulatoire)
+is a minimally invasive surgical approach to varicose vein treatment. Rather than
+removing all varicose veins by stripping, CHIVA works by identifying and cutting
+only the specific abnormal blood flow "circuits" that feed the varices — leaving
+healthy veins intact and reducing the risk of recurrence.
+
+To plan CHIVA surgery, the surgeon first maps the patient's abnormal veins using
+duplex ultrasound. This ultrasound examination is complex — it follows a specific
+sequence of questions and requires the surgeon to correctly identify the direction
+of blood flow at multiple points along the leg. Task 2 is an AI assistant that
+guides this examination in real time.
+
+1.3 What Task 2 Does
+----------------------
+Task 2 watches the examination as it happens. At every probe position, it knows:
+  - Where the probe currently is on the leg
+  - What blood flow events the surgeon has confirmed so far
+  - What the ultrasound image currently shows (via AI vision analysis)
+  - What zones of the leg have already been scanned
+
+From all of this, it produces a short instruction — 12 words or fewer — telling
+the surgeon exactly where to move the probe next. This is not a chatbot or a
+reference guide. It is a live, adaptive navigation assistant.
+
+
+================================================================================
+2. CLINICAL BACKGROUND
+================================================================================
+
+2.1 The Three Venous Compartments (N1, N2, N3)
+-------------------------------------------------
+The CHIVA framework divides the venous system of the leg into three zones:
+
+  N1 — The DEEP system:
+       The main "highway" veins inside the leg muscles: common femoral vein
+       (CFV), femoral vein (FV), popliteal vein (PV), and deep calf veins.
+       Blood is supposed to flow upward through N1 toward the heart.
+
+  N2 — The SAPHENOUS TRUNKS:
+       The two main superficial trunk veins that run along the surface of the
+       leg beneath the skin but within a fascial compartment:
+       - Great Saphenous Vein (GSV): runs from the groin to the ankle on the
+         inner (medial) side of the leg.
+       - Small Saphenous Vein (SSV): runs from behind the knee to the ankle on
+         the back (posterior) side of the leg.
+       On ultrasound, N2 is identified by the "saphenous eye" — the GSV sitting
+       inside a bright oval formed by the fascial layer.
+
+  N3 — Everything ABOVE the fascia:
+       Tributaries, varicosities, the Anterior Accessory Saphenous Vein (AASV),
+       and perforating veins that exit through the fascia to the surface.
+
+Under normal conditions, blood flows inward from skin surface (N3) → trunk (N2)
+→ deep system (N1). In varicose vein disease, this flow reverses at specific
+points, creating abnormal circuits.
+
+2.2 Flow Direction Notation (EP and RP)
+-----------------------------------------
+The system records abnormal blood flow events as "clips":
+
+  EP (Entry Point):  Blood flows FROM deep TO superficial.
+                     This is an abnormal entry into the varicose system.
+                     Examples:
+                       EP N1→N2: Deep blood enters the saphenous trunk
+                       EP N1→N3: Deep blood enters a tributary directly
+                       EP N2→N3: Trunk blood escapes into a tributary
+
+  RP (Re-entry Point): Blood flows FROM superficial BACK TO deep.
+                        This is the circuit's return path.
+                        Examples:
+                          RP N2→N1: Trunk blood re-enters deep system (reflux)
+                          RP N3→N1: Tributary blood re-enters deep
+                          RP N3→N2: Tributary blood re-enters trunk
+
+A "clip" is a confirmed finding at a specific location on the leg. Position is
+recorded as posY — a number from 0.0 (groin) to 1.0 (ankle).
+
+2.3 CHIVA Shunt Types
+-----------------------
+Different combinations of EP and RP clips define the six CHIVA shunt types:
+
+  TYPE 1:   EP N1→N2 + RP N2→N1
+            Blood enters the GSV trunk at the SFJ or a perforator, refluxes
+            down the trunk, and re-enters the deep system lower down.
+            (No N3 tributaries involved)
+
+  TYPE 2:   EP N2→N3 + RP N3→N1
+            Blood escapes from the trunk into a tributary, and that tributary
+            returns to the deep system via a perforator.
+            (SFJ and trunk competent; SFJ not the entry)
+
+  TYPE 3:   EP N1→N2 + EP N2→N3 + RP N3→N1 + RP N2→N1 + elimTest=No Reflux
+            Complex combined circuit. An elimination test (compressing the
+            tributary while measuring GSV Doppler) is MANDATORY to confirm
+            Type 3 and distinguish it from Type 1+2.
+
+  TYPE 1+2: Same clips as Type 3 BUT elimTest=Reflux
+            When the GSV still refluxes after tributary compression, Types 1
+            and 2 coexist in the same patient.
+
+  TYPE 4:   EP N1→N3 + RP N2→N1
+            Blood enters a tributary directly (bypassing the trunk), but the
+            GSV trunk carries this blood back to the deep system.
+
+  TYPE 5:   EP N1→N3 + RP N3→N2 + EP N2→N3 + RP N3→N1
+            A complex loop: deep blood enters N3, flows into the trunk, escapes
+            again into N3, and re-enters deep — the trunk is in the middle of
+            the loop.
+
+  TYPE 6:   EP N1→N3 + RP N3→N1
+            Pure perforator-to-perforator circuit entirely in N3. The GSV and
+            SSV trunks are completely uninvolved.
+
+2.4 The Four Diagnostic Questions (Q1–Q4)
+-------------------------------------------
+Every CHIVA duplex examination follows four sequential questions. The AI uses
+these as its primary navigation logic:
+
+  Q1: Where does blood ENTER the superficial system?
+      → Find the entry perforator (EP N1→N2 or EP N1→N3)
+      → Typically starts at the SFJ (groin, posY 0.04–0.07)
+
+  Q2: Does the trunk REFLUX?
+      → If blood entered via the SFJ or a perforator into the GSV, does the
+        GSV itself carry blood backward down the leg?
+      → Looking for RP N2→N1
+
+  Q3: Where does blood ESCAPE the trunk into a tributary?
+      → Find the escape point (EP N2→N3)
+      → This is where a tributary branches off the trunk and becomes varicose
+
+  Q4: Where does the tributary RE-ENTER the deep system?
+      → Find the re-entry perforator (RP N3→N1 or RP N3→N2)
+      → This closes the circuit
+
+The Task 2 system tracks which Q is currently open at all times and always
+directs the surgeon to the anatomical zone most likely to answer it.
+
+2.5 Key Anatomy Positions (posY Landmarks)
+--------------------------------------------
+The entire guidance system is built around a 0.0–1.0 scale from groin to ankle:
+
+  posY 0.00–0.03  Iliac / above SFJ
+  posY 0.04–0.07  SFJ — GSV meets CFV at the groin crease (anterior-medial)
+  posY 0.08–0.20  Upper thigh — GSV medial surface
+  posY 0.21–0.33  Mid-thigh / Dodd perforator zone (medial)
+  posY 0.34–0.47  Lower thigh / Hunterian perforator zone (medial)
+  posY 0.48–0.57  Popliteal fossa — SPJ, SSV, Giacomini vein (posterior)
+  posY 0.58–0.88  Calf — GSV medial, SSV posterior
+  posY 0.89–1.00  Ankle region
+
+
+================================================================================
+3. SYSTEM ARCHITECTURE OVERVIEW
+================================================================================
+
+3.1 Technology Stack
+----------------------
+  Backend framework:       Flask 3.0 (Python)
+  Real-time communication: Flask-SocketIO (WebSocket / Socket.IO)
+  Text LLM:                Groq API — Llama 3.3 70B Versatile
+  Vision LLM (VLM):        Groq API — Llama 4 Scout 17B
+  Multi-agent framework:   CrewAI 0.28+
+  LLM routing layer:       LiteLLM
+  Video frame extraction:  OpenCV (headless)
+  Frontend:                Vanilla HTML / CSS / JavaScript (no build step)
+  Production server:       Gunicorn (gthread workers) + Nginx
+
+3.2 Three Operating Modes
+---------------------------
+  Single-frame mode  (/):       Surgeon positions probe on leg diagram and
+                                 calls for a single guidance result. Used for
+                                 testing individual positions.
+
+  Streaming mode     (/stream): The full real-time guidance experience. The
+                                 surgeon interacts with a live leg diagram,
+                                 marks confirmed findings, and receives
+                                 continuously updated guidance. This is the
+                                 primary clinical interface.
+
+  Test mode          (/test):   Developer interface for running pre-defined
+                                 scenarios and validating the pipeline.
+
+3.3 REST and WebSocket Endpoints
+-----------------------------------
+  REST:
+    POST /api/localize          — Ingest scanner reading, return smoothed position
+    POST /api/localize/batch    — Process a batch of readings
+    POST /api/localize/reset    — Reset the session localizer window
+    POST /api/guidance          — Single guidance call (single-frame mode)
+    GET  /api/guidance-regions  — List all guidance regions
+    GET  /api/status            — Health check
+
+  WebSocket events (incoming from browser):
+    stream_start     — Create or reset a session
+    probe_move       — New probe position from leg diagram click
+    clip_mark        — Surgeon confirms an EP/RP finding
+    clips_replace    — Surgeon deletes a clip (sends full updated list)
+    session_end      — End the session
+
+  WebSocket events (outgoing to browser):
+    session_ready    — Session confirmed, ready to receive probe_move
+    guidance_update  — New guidance instruction + VLM result + thinking log
+    clips_updated    — Updated clip list after a mark or delete
+    shunt_confirmed  — A full CHIVA circuit has been detected
+    session_ended    — Session closed
+
+
+================================================================================
+4. THE POSITION SYSTEM
+================================================================================
+
+4.1 How Probe Position is Represented
+----------------------------------------
+The entire guidance system is built around a single number: posY — a float from
+0.0 (groin) to 1.0 (ankle) representing where the probe is on the leg.
+
+The frontend leg diagram converts mouse clicks into this coordinate using a
+function called coordToState(). It also computes:
+
+  leg:          "right" or "left"
+  segment_id:   Which of 4 segments (left thigh=0, left calf=1, right thigh=2,
+                right calf=3)
+  segment_dist: 0–1 distance within that segment
+  surface:      "anterior-medial" (probe clicked left of centre line on diagram)
+                or "posterior" (clicked right of centre line)
+  region:       Anatomical zone — computed entirely on the client side using
+                mapReg(), with no server call required
+
+4.2 Client-Side Region Mapping (mapReg)
+-----------------------------------------
+Region classification happens in the browser using pure geometry, before any
+server is contacted:
+
+  Front of thigh, segment_dist ≤ 0.12  →  SFJ (groin crease)
+  Front of thigh, segment_dist > 0.12  →  GSV-THI (thigh trunk)
+  Back of thigh, segment_dist ≥ 0.78   →  SPJ (behind knee)
+  Front of calf                         →  GSV-CAL (calf trunk)
+  Back of calf, segment_dist > 0.12    →  SSV (small saphenous)
+
+The server receives the already-resolved region string in the probe_move event.
+This means the backend never needs to do region classification from raw coordinates.
+
+4.3 Probe Localizer — Backend Smoothing Module
+-----------------------------------------------
+The ProbeLocalizer module (probe_localizer.py) provides a sliding-window
+smoothing layer for applications that need stable, noise-filtered position
+feedback (e.g., when readings come from a real scanner rather than mouse clicks):
+
+  Sliding window size:     10 readings
+  Stability threshold:     60% of the window must agree on the same region
+  Output:                  Smoothed region classification
+
+This is exposed via the /api/localize REST endpoints. In streaming mode, the
+frontend's own mapReg() function is used directly instead.
+
+
+================================================================================
+5. THE STREAMING PIPELINE — HOW REAL-TIME GUIDANCE WORKS
+================================================================================
+
+When the surgeon clicks on the leg diagram, a chain of events produces the
+guidance response in approximately 5–10 seconds:
+
+  Step 1 — CLICK
+  Surgeon clicks the leg SVG diagram in stream.html.
+  coordToState() computes: posY, region, surface, leg, segment_id, segment_dist.
+
+  Step 2 — WEBSOCKET EVENT
+  sendProbeMove() emits a probe_move WebSocket event:
+  {
+    "session_id":   "sess_abc123",
+    "region":       "GSV-THI",
+    "pos_y_ratio":  0.28,
+    "leg":          "right",
+    "surface":      "anterior-medial",
+    "segment_id":   2,
+    "segment_dist": 0.47
+  }
+
+  Step 3 — RATE-LIMIT CHECK
+  streaming_guidance_engine.py checks whether the probe has moved enough to
+  warrant a new analysis (see Section 5.1 for thresholds). If not, skip.
+
+  Step 4 — PRE-PROCESSING SUB-AGENTS (run in parallel, plain Python)
+  - history_agent: updates the scan coverage map, writes a session summary
+  - q_state_agent: determines which Q is currently open from clips (no LLM)
+  - protocol_agent: looks up book-sourced protocol for this probe zone (no LLM)
+  - vlm_agent:     extracts the current video frame and calls the VLM (Groq)
+
+  Step 5 — STATE MESSAGE ASSEMBLY
+  build_state_message() in guidance_agent.py assembles all 7 signals into a
+  single structured text block (see Section 7 for details).
+
+  Step 6 — CREWAI 5-AGENT PIPELINE
+  run_guidance_crew() runs five agents in sequence. Each agent sees the outputs
+  of the agents before it. The final agent produces the guidance JSON.
+
+  Step 7 — WEBSOCKET RESPONSE
+  The guidance_update event is emitted back to the browser:
+  {
+    "guidance":     "Scan distally along medial thigh toward Hunterian perforator",
+    "action":       "move",
+    "vlm":          { "fascial_layer_visible": true, ... },
+    "vlm_summary":  "Fascial layer visible. N2 in compartment.",
+    "region":       "GSV-THI",
+    "pos_y":        0.28,
+    "thinking":     { "state": "PROBE STATE\n...", "raw": "{\"guidance\": ...}" }
+  }
+
+  Step 8 — FRONTEND UPDATE
+  The browser renders the guidance text in the Active Guidance box, updates the
+  VLM Frame Analysis grid, and adds an entry to the Thinking Log.
+
+5.1 Rate Limiting — Why Not Every Click?
+------------------------------------------
+The AI pipeline takes several seconds per call. If it ran on every small mouse
+movement, the surgeon would receive outdated guidance. Rate limiting ensures only
+meaningful probe movements trigger a new analysis:
+
+  VLM (vision):     Only fires if posY changed by ≥ 0.05 since the last VLM call
+  CrewAI (guidance): Only fires if posY changed by ≥ 0.06 since the last call
+  First click:       Both always fire (last positions start at -1.0, so any
+                     click exceeds the threshold on the first turn)
+
+5.2 Stale Response Prevention (Generation Counter)
+----------------------------------------------------
+Because the crew pipeline takes several seconds, the surgeon may click many
+times before a result arrives. Without protection, a stale result from an early
+click could overwrite a fresher result from a later click.
+
+The system uses a generation counter (sess.bump()) to handle this. When each
+background thread starts, it captures its generation number. When it finishes, it
+checks: if the session's counter is now 4 or more steps ahead, the result is
+silently discarded rather than sent to the browser. Only the result from the most
+recent relevant click is displayed.
+
+5.3 Session State (StreamSession)
+------------------------------------
+Each streaming session is tracked in a StreamSession object that holds:
+  - clips:             List of confirmed EP/RP findings this session
+  - history:           Rolling conversation history (for future use)
+  - thinking_log:      All state messages and raw crew outputs (shown in UI)
+  - scan_log:          List of all posY positions visited
+  - generation:        Counter for stale-response detection
+  - confirmed_shunts:  Set of shunt types already announced (prevents duplicates)
+  - last_vlm_pos_y:    posY at which the last VLM call was made
+  - last_llm_pos_y:    posY at which the last guidance call was made
+
+
+================================================================================
+6. THE SEVEN SIGNALS — WHAT THE AI SEES AT EACH TURN
+================================================================================
+
+At each probe position, the system assembles a rich "state message" with seven
+distinct pieces of information. This is the complete input to the AI pipeline.
+
+Signal A — PROBE STATE (Geometric Position)
+---------------------------------------------
+Where the probe is right now: region name, probe surface (anterior-medial or
+posterior), which leg, and the posY number.
+
+  PROBE STATE
+  Region: GSV-THI | Surface: anterior-medial | Leg: right | posY: 0.28
+
+Signal B — CONFIRMED FINDINGS (Clip History)
+----------------------------------------------
+Every EP/RP clip the surgeon has confirmed during this session. This is the
+growing evidence base. The AI has this in every single turn.
+
+  CONFIRMED FINDINGS
+    • EP N1→N2  posY=0.06  right leg
+    • RP N2→N1  posY=0.31  right leg
+
+Signal C — SCAN HISTORY SUMMARY (from history_agent)
+-------------------------------------------------------
+A band-by-band map of which parts of the leg have been scanned, plus a
+narrative summary of what was found at each visited zone. This prevents
+directing the surgeon back to zones they have already covered.
+
+  SCAN HISTORY SUMMARY
+  [DONE] SFJ/groin zone (0.00–0.07): Entry point confirmed at SFJ.
+  [DONE] Mid-thigh zone (0.21–0.33): Trunk reflux confirmed.
+  [    ] Hunterian/lower thigh zone (0.34–0.47)
+  [    ] Popliteal/SPJ zone (0.48–0.57)
+
+Signal D — VLM FRAME ANNOTATION (from vlm_agent)
+--------------------------------------------------
+What the annotated video frame currently shows at this probe position — analysed
+by the Llama 4 Scout 17B vision AI model. Confirms which vessels are visible and
+whether they are inside or outside the fascial compartment.
+
+  VLM FRAME ANNOTATION
+  Fascial layer visible. N2 (saphenous trunk/GSV) annotated within fascial
+  compartment. N2 in fascia.
+
+Signal E — Q1-Q4 STATUS (from q_state_agent)
+----------------------------------------------
+Which of the four diagnostic questions is currently open, derived from the
+confirmed clips using pure Python logic (no LLM, always correct). The "next
+step" line is the primary navigation hint for the crew.
+
+  Q1-Q4 STATUS
+  Q1 ANSWERED: EP N1→N2 confirmed (SFJ, right leg).
+  Q2 ANSWERED: RP N2→N1 confirmed (mid-thigh, right leg).
+  Q3 OPEN: No escape point (EP N2→N3) found yet.
+  Next step: Scan Hunterian zone (posY 0.34–0.47) for trunk-to-tributary escape.
+
+Signal F — EXAMINATION PROTOCOL (from protocol_agent)
+-------------------------------------------------------
+Zone-specific examination instructions from published clinical literature, telling
+the agents which maneuvers apply at this probe position. Sourced from Adler 2022,
+Gianesini 2014, Delfrate 2023, and AVF 2023 guidelines.
+
+  EXAMINATION PROTOCOL (Hunterian zone, posY 0.28, medial)
+  Hunterian perforators = distal third of thigh. Scan for N3 above fascia.
+  All three perforator maneuvers required: squeezing, Paranà, Valsalva.
+  Pathological perforator: outward flow ≥500 ms AND diameter ≥3.5 mm.
+
+Signal G — posX (optional lateral position)
+---------------------------------------------
+When provided, the exact horizontal (medial-to-lateral) position on the leg
+diagram, which helps disambiguate medial vs lateral surface position at the
+same posY level.
+
+
+================================================================================
+7. PRE-PROCESSING SUB-AGENTS
+================================================================================
+
+Before the main CrewAI pipeline runs, four lightweight modules prepare the
+context blocks. These are called "sub-agents" but they run as plain Python code —
+fast and deterministic. Only the VLM sub-agent makes an external API call.
+
+7.1 History Agent (history_agent.py)
+--------------------------------------
+PURPOSE: Track which zones have been visited and summarise what was found.
+
+HOW IT WORKS:
+  The agent maintains a 7-band coverage map of the leg:
+    Band 0: SFJ / groin (posY 0.00–0.07)
+    Band 1: Upper thigh (0.08–0.20)
+    Band 2: Mid-thigh / Dodd (0.21–0.33)
+    Band 3: Hunterian / lower thigh (0.34–0.47)
+    Band 4: Popliteal / SPJ (0.48–0.57)
+    Band 5: Calf (0.58–0.88)
+    Band 6: Ankle (0.89–1.00)
+
+  Every time a probe_move event is processed, the agent marks the appropriate
+  band as [DONE]. It then calls Groq LLM (temperature=0, maximum reliability)
+  to write a 2-sentence narrative summary of the full session history.
+
+EXAMPLE OUTPUT:
+  "SFJ zone scanned — EP N1→N2 entry point confirmed at groin (posY 0.06).
+   Mid-thigh Dodd zone scanned — RP N2→N1 trunk reflux confirmed (posY 0.31).
+   Hunterian zone and SPJ not yet visited."
+
+WHY IT MATTERS: Without this, the AI crew would need to infer session coverage
+from the raw clip posY values. The explicit band map prevents redundant
+navigation and keeps the state message compact.
+
+7.2 Q-State Agent (q_state_agent.py)
+--------------------------------------
+PURPOSE: Determine exactly which diagnostic question (Q1–Q4) is currently open.
+
+HOW IT WORKS:
+  Pure Python logic — no LLM call. The agent walks the confirmed clip list and
+  checks which Q criteria are satisfied:
+
+    Q1 answered: Any EP clip exists (N1→N2 or N1→N3)
+    Q2 answered: RP N2→N1 exists (trunk reflux confirmed)
+    Q3 answered: EP N2→N3 exists (escape point found)
+    Q4 answered: RP N3→N1 or RP N3→N2 exists (re-entry found)
+
+  It also handles special cases:
+  - Elimination test trigger: EP N2→N3 + RP N3→N1 + RP N2→N1 all confirmed
+    but no elimination test result recorded → alert the crew
+  - Type detection hints: specific clip patterns flag unusual shunt types
+    (e.g., EP N1→N3 triggers Type 4/5/6 branch, not standard Q1-Q4 logic)
+
+WHY IT MATTERS: This gives the crew an exact, reliable answer to "what are we
+looking for right now?" without depending on the LLM to infer it from the clip
+list. The Q-state is always logically consistent.
+
+7.3 Protocol Agent (protocol_agent.py)
+----------------------------------------
+PURPOSE: Supply book-sourced examination instructions for the current probe zone.
+
+HOW IT WORKS:
+  A lookup function — no LLM. Based on the current posY value, it returns the
+  appropriate protocol text from a pre-built dictionary of zones. The protocol
+  text contains:
+  - Which anatomical structures to look for
+  - Which examination maneuvers to apply (Valsalva, Paranà, squeezing)
+  - Which criteria define pathological findings (thresholds, diameters)
+  - Common pitfalls at this zone (e.g., AASV misidentified as GSV at SFJ)
+
+  Sources used (verified from original publications):
+    Adler et al. 2022 (RadioGraphics): Standard duplex sequence, reflux
+                                       thresholds (>500 ms), positioning
+    Gianesini et al. 2014 (Phlebology): CHIVA strategy, SFJ + SPJ protocol
+    Delfrate 2023 (JTAVR): Perforator assessment, maneuver requirements,
+                             squeezing-alone limitations
+    AVF 2023 guidelines: Pathological perforator definition
+
+EXAMPLE (for SFJ zone, posY 0.04–0.09):
+  "Transverse B-mode: identify Mickey Mouse sign — CFV at centre, GSV and
+   femoral artery as lateral ovals. Doppler sample on FEMORAL SIDE of terminal
+   valve. BOTH Valsalva AND Paranà must be positive to confirm SFJ incompetence.
+   If only Paranà positive, not Valsalva → terminal valve competent; may be
+   pre-terminal reflux or pelvic leak point. Check AASV separately (lies
+   anterior to GSV; classified N3, not N2 — common pitfall)."
+
+WHY IT MATTERS: The crew agents receive precise, reference-backed instructions
+rather than relying on training-data knowledge of duplex protocols, which may
+contain inaccuracies. All clinical facts in the protocol text are traceable to
+published literature with page numbers.
+
+7.4 VLM Agent (vlm_agent.py)
+-------------------------------
+PURPOSE: Analyse the current ultrasound video frame and report what is visible.
+
+HOW IT WORKS:
+  A thin wrapper around vlm_analyzer.analyze_frame(). It:
+  1. Receives the current posY position
+  2. Calls the frame extractor to get the frame image from the video
+  3. Sends the image to the Groq VLM
+  4. Returns both the raw JSON result and a plain English summary
+
+  The VLM is described in detail in Section 8.
+
+EXAMPLE OUTPUTS:
+  Raw JSON: {"fascial_layer_visible": true, "n2_in_fascial_compartment": true,
+             "n3_superficial_to_fascia": false, "image_quality": "good",
+             "frame_note": "N2 in fascia"}
+
+  Summary: "Fascial layer visible. N2 (saphenous trunk/GSV) annotated within
+            fascial compartment. N2 in fascia."
+
+WHY IT MATTERS: The VLM adds real-time visual confirmation to the text-based
+reasoning. If the image does not show the expected anatomy at the current
+position, the crew can recommend repositioning the probe before making a
+clinical decision.
+
+
+================================================================================
+8. THE VLM — VISION LANGUAGE MODEL
+================================================================================
+
+8.1 Purpose
+-------------
+The VLM (Vision Language Model) reads annotated ultrasound video frames and
+reports which vessels are visible and how they relate to the fascial layer.
+It adds real-time visual confirmation that the probe is in the right position
+to observe the expected anatomy.
+
+8.2 The Annotated Video
+-------------------------
+The system uses a pre-recorded annotated duplex ultrasound video:
+  File:       202207191643_00-Moving.mp4
+  Dimensions: 350 × 350 pixels
+  Frame rate: 60 fps
+  Duration:   ~24.5 seconds
+  Content:    Real duplex examination of a leg, with colour overlays marking
+              the vessel compartments:
+                - Yellow polygon (N3): superficial tributary, above the fascia
+                - Green polygon (N2): saphenous trunk inside the fascial eye
+                - Blue polygon (N1): deep vein, below the fascia
+                - Bright yellow horizontal lines: the fascial layer boundary
+
+The video is synchronised with the leg diagram: when the surgeon positions the
+probe at posY=0.35, the frame displayed is at 35% through the video duration.
+
+8.3 Frame Extraction
+----------------------
+OpenCV extracts the appropriate frame:
+  frame_number = int(pos_y × total_frame_count)
+The frame is encoded as a 70%-quality JPEG (approximately 16 KB) and converted
+to a base64 string for transmission to the VLM API.
+
+8.4 The VLM Model — Llama 4 Scout 17B
+----------------------------------------
+Model: meta-llama/llama-4-scout-17b-16e-instruct (Groq API)
+
+This is a multimodal model capable of processing both images and text
+simultaneously. The VLM receives:
+  - The annotated frame image
+  - A system prompt explaining the colour annotation scheme
+  - A context prompt: "Probe position: [region] region, [leg] leg.
+    Expected anatomy: [description of expected vessel at this zone]."
+
+8.5 VLM Output
+----------------
+The VLM returns a structured JSON assessment:
+  {
+    "image_quality":              "good" | "poor" | "off-axis",
+    "fascial_layer_visible":      true | false,
+    "n2_in_fascial_compartment":  true | false,
+    "n3_superficial_to_fascia":   true | false,
+    "n1_deep_to_fascia":          true | false,
+    "label_n2_visible":           true | false,
+    "frame_note":                 "N2 in fascia" (short descriptive note)
+  }
+
+This is converted to plain English by the VLM agent and fed into Signal D.
+
+8.6 VLM Rate Limiting
+-----------------------
+Because the VLM call takes 1–3 seconds and the video frame changes slowly, the
+VLM only re-runs when posY has changed by at least 0.05 since the last VLM
+call. This prevents unnecessary API calls on small probe movements.
+
+
+================================================================================
+9. THE CREWAI 5-AGENT PIPELINE
+================================================================================
+
+The CrewAI pipeline is the core intelligence of Task 2. Five specialised AI
+agents run in sequence, each building on the output of the agents before it.
+This architecture is called "sequential context passing."
+
+9.1 Why Five Agents Instead of One?
+--------------------------------------
+In earlier versions of the system, a single LLM received all seven signals and
+produced a guidance instruction directly. This worked but had a fundamental
+limitation: one model was simultaneously required to be a clinical interpreter,
+a classification expert, a protocol specialist, a navigation planner, and a
+concise writer — all in a single inference call. When the clinical situation was
+complex, the model sometimes confused roles.
+
+The 5-agent design solves this by giving each agent a single, focused job.
+Each agent is a separate LLM call with its own role, goal, and backstory. Each
+reads only what it needs, and passes a distilled, specialised output to the
+next agent. The result is more reliable reasoning and clearer, more accurate
+guidance.
+
+9.2 How Context Flows Through the Crew
+-----------------------------------------
+CrewAI's "context" mechanism links tasks so each agent sees the outputs of
+agents upstream of it:
+
+  Task 1 (Clinical Interpreter)
+    → output: clinical picture assessment (100 words)
+      └─ context ──→ Task 2 (Shunt Analyst)
+                      → output: shunt type + missing clips (80 words)
+                        └─ context ──→ Task 3 (Circuit Analyst)
+                                        → output: open Q + target zone (60 words)
+                                          └─ context ──→ Task 4 (Navigation Planner)
+                                                          → output: specific scan plan (50 words)
+                                                            └─ context ──→ Task 5 (Guidance Specialist)
+                                                                            → output: final 12-word JSON
+
+This means Agent 5 does not re-read the raw state message — it reads three
+layers of processed, increasingly specific guidance from the agents before it.
+
+9.3 The Five Agents in Detail
+-------------------------------
+
+━━━ AGENT 1: CLINICAL INTERPRETER ━━━
+(Ported from Task 1 — operates identically to Task 1's clinical interpretation)
+
+Role:      CHIVA Clinical Interpreter
+Sees:      The full state message (all 7 signals)
+Produces:  100-word clinical interpretation of the current evidence
+
+This agent reads the confirmed clips, compares them to the VLM frame annotation,
+and assesses the overall clinical picture. It answers four questions:
+  1. Which clips are unambiguous and what does each establish?
+  2. Is there anything suspicious? (e.g., AASV wrongly labelled as GSV)
+  3. Does the VLM frame support or contradict the confirmed clip list?
+  4. Which clips are expected but missing given the developing circuit?
+
+This agent explicitly never fabricates flow events. If a clip is not in the
+confirmed findings list, the agent treats it as absent — it does not infer it
+from VLM appearance or anatomical expectation.
+
+Example output:
+  "EP N1→N2 at SFJ (posY 0.06) unambiguous — Mickey Mouse sign confirmed,
+   both Valsalva and Paranà positive. RP N2→N1 at posY 0.31 confirms trunk
+   reflux in mid-thigh. VLM at current position shows N2 within fascial
+   compartment — consistent with GSV trunk scanning. EP N2→N3 escape point not
+   yet found — expected in Hunterian zone given confirmed trunk reflux."
+
+
+━━━ AGENT 2: SHUNT ANALYST ━━━
+(Ported from Task 1 — same classification logic, now feeds navigation instead of
+ producing a final report)
+
+Role:      CHIVA Shunt Classification Specialist
+Sees:      Agent 1's clinical interpretation
+Produces:  Shunt type classification (or "undetermined") + required next clips,
+           80 words
+
+This agent applies formal CHIVA classification rules to the clinical picture. It
+knows the exact minimum clip set for every shunt type:
+  Type 1:   EP N1→N2 + RP N2→N1 (no N3)
+  Type 2A:  EP N2→N3 + RP N3→N1 (no EP N1→N2, no RP N2→N1)
+  Type 2B:  EP N2→N2 + RP N3→N1 (perforator entry; no trunk reflux)
+  Type 2C:  (EP N2→N2 or EP N2→N3) + RP N3 + RP N2→N1 (no EP N1→N2)
+  Type 3:   All Type 1+2 clips + elimTest=No Reflux (mandatory)
+  Type 1+2: All Type 3 clips + elimTest=Reflux
+  Type 4:   EP N1→N3 + RP N2→N1
+  Type 5:   EP N1→N3 + RP N3→N2 + EP N2→N3 + RP N3→N1 (no RP N2→N1)
+  Type 6:   EP N1→N3 + RP N3→N1 (no N2 involvement)
+
+The agent never declares a type confirmed without its full minimum clip set.
+For Type 3 and Type 1+2, it always flags that an elimination test is required.
+
+In Task 2 (unlike Task 1), this agent's output feeds directly into Agent 3's
+navigation planning — so the classification serves as an intermediate step, not
+a final deliverable.
+
+Example output:
+  "Developing Type 1 circuit. EP N1→N2 (SFJ, posY 0.06) + RP N2→N1 (mid-thigh,
+   posY 0.31) confirmed. Pattern satisfies Type 1 minimum. Missing: EP N2→N3
+   escape point — if found, circuit upgrades to Type 3 or 1+2 requiring
+   elimination test. Recommend scanning Hunterian zone distally."
+
+
+━━━ AGENT 3: CIRCUIT ANALYST ━━━
+(New in Task 2 — converts classification to navigation target)
+
+Role:      CHIVA Circuit Analyst
+Sees:      Agent 2's classification + Q1–Q4 status (Signal E)
+Produces:  The specific open Q and exact anatomical zone to examine, 60 words
+
+This agent converts the classification narrative into a concrete navigation
+target. It answers: "Given these clips and this developing shunt type, which
+diagnostic question is open, and exactly where on the leg should the probe go?"
+
+It knows the posY landmarks for every anatomical zone. It also handles
+important edge cases:
+
+  After EP N1→N3 at Giacomini (posterior thigh):
+    Q2 is whether the GSV trunk (N2) carries blood back to deep via RP N2→N1.
+    → Direct to medial UPPER THIGH (posY 0.08–0.20) to check GSV for RP N2→N1.
+    → Do NOT go distally — the return path is always proximal via the trunk.
+
+  After RP N2→N1 with no EP N2→N3 found:
+    → Q3 is open. Search distally in the thigh for the escape point.
+
+Example output:
+  "Q3 open: no escape from GSV trunk to N3 tributary confirmed yet. Target
+   Hunterian zone, posY 0.34–0.47, medial surface — scan transversely for N3
+   above fascia. Also check Dodd zone (0.21–0.33). No elimination test or
+   completion trigger yet. Continue distally."
+
+
+━━━ AGENT 4: NAVIGATION PLANNER ━━━
+(New in Task 2 — converts abstract target to specific scan plan)
+
+Role:      CHIVA Navigation Planner
+Sees:      Agent 3's circuit analysis + the examination protocol (Signal F)
+Produces:  Specific posY band, probe surface, anatomical target, direction word,
+           and applicable maneuver, 50 words
+
+This agent converts the abstract navigation target from Agent 3 into a concrete
+scanning plan. It adds the clinical protocol layer: which examination maneuvers
+apply at this zone, and what criteria define a pathological finding.
+
+It knows (from the protocol text):
+  - BOTH Valsalva AND Paranà required at SFJ and SPJ (Gianesini 2014)
+  - Paranà is preferred over squeezing alone in the thigh and calf
+  - Three maneuvers required at perforators: squeezing → Paranà → Valsalva
+  - Pathological perforator: ≥500 ms outward flow AND ≥3.5 mm diameter
+
+Example output:
+  "Target posY 0.34–0.47, medial surface. Scan distally from current mid-thigh
+   position. Anatomical target: N3 perforator exiting fascia above GSV trunk.
+   Apply three maneuvers: static squeezing → Paranà → Valsalva. Pathological
+   if outward flow ≥500 ms AND diameter ≥3.5 mm (Delfrate 2023)."
+
+
+━━━ AGENT 5: GUIDANCE SPECIALIST ━━━
+(New in Task 2 — produces the final user-facing output)
+
+Role:      CHIVA Real-Time Guidance Specialist
+Sees:      Agents 2, 3, and 4's outputs
+Produces:  Single JSON object with ≤12-word guidance text and an action type
+
+This is the final output agent. It synthesises everything from upstream and
+produces the instruction that appears on screen for the surgeon.
+
+Output format (strict JSON):
+  {"guidance": "<text>", "action": "move" | "maneuver" | "complete"}
+
+Rules for guidance text:
+  - ≤ 12 words (enforced strictly)
+  - Single imperative sentence
+  - Must include a direction word: distally / proximally / medially /
+    posteriorly / laterally / transversely / deeper / superficially
+  - Must name the anatomical target
+  - ABSOLUTELY FORBIDDEN in guidance text: EP, RP, N1, N2, N3, reflux,
+    shunt type number, Q1/Q2/Q3/Q4, confirmed, findings, diagnostic.
+
+Three action values:
+  "move"      Default probe navigation (≥95% of cases)
+  "maneuver"  Surgeon must perform the elimination test (compress a tributary
+              and record whether GSV Doppler changes). Guidance must describe
+              what to DO, not where to move.
+  "complete"  Full CHIVA circuit is mapped. Fixed phrase: "Circuit mapped —
+              sufficient findings for classification"
+
+Example outputs:
+  {"guidance": "Scan distally along medial thigh toward Hunterian perforator",
+   "action": "move"}
+
+  {"guidance": "Compress tributary at mid-thigh and record Doppler response",
+   "action": "maneuver"}
+
+  {"guidance": "Circuit mapped — sufficient findings for classification",
+   "action": "complete"}
+
+9.4 Shunt Detection — By-Product of the Pipeline
+--------------------------------------------------
+As a by-product of every crew run, Agent 2's output is parsed for shunt
+confirmation. The pipeline checks whether Agent 2's text contains a confirmed
+shunt type. If a type is fully confirmed:
+
+  1. The backend emits a shunt_confirmed WebSocket event
+  2. The frontend displays a confirmation modal showing the shunt type and
+     the clips that confirmed it
+  3. The confirmed_shunts set in StreamSession is updated — preventing the
+     same type from being announced again in the same session
+
+9.5 Rejection Feedback Loop
+------------------------------
+If the surgeon dismisses a shunt confirmation (indicating they disagree with
+the AI's classification), the system records a rejection note. On the next crew
+run, this note is prepended to Agent 1's task description:
+
+  "SURGEON FEEDBACK — PRIOR CLASSIFICATION REJECTED:
+   Type 1 rejected. Re-evaluate the evidence MORE critically than before.
+   Do NOT re-confirm the rejected type without a meaningfully different
+   clip set."
+
+This prevents the crew from re-confirming the same classification without new
+clinical evidence.
+
+9.6 Technical: The Groq Compatibility Fix (LiteLLM Patch)
+-----------------------------------------------------------
+CrewAI internally uses LiteLLM to route API calls to Groq. LiteLLM injects
+a "cache_breakpoint" field into message dictionaries before sending them to
+the provider API. Groq's API strictly validates message structures and rejects
+any message containing unknown fields with a 400 error.
+
+The pipeline patches this incompatibility at module load time with a
+monkey-patch:
+
+  _orig_completion = litellm.completion
+
+  def _patched_completion(*args, **kwargs):
+      for msg in kwargs.get("messages", []):
+          msg.pop("cache_breakpoint", None)
+      return _orig_completion(*args, **kwargs)
+
+  litellm.completion = _patched_completion
+
+This strips the offending field from every outgoing message before it reaches
+the Groq API. It is applied once at startup and is completely invisible to the
+rest of the application. This was an essential fix to make the CrewAI pipeline
+stable on Groq infrastructure.
+
+
+================================================================================
+10. THE STATE MESSAGE — A COMPLETE EXAMPLE
+================================================================================
+
+Here is a complete real-world state message assembled by build_state_message()
+and sent to the crew. This shows exactly what Agent 1 reads:
+
+  ─────────────────────────────────────────────────────────────────────────────
+  PROBE STATE
+  Region: GSV-THI | Surface: anterior-medial | Leg: right | posY: 0.28
+
+  CONFIRMED FINDINGS
+    • EP N1→N2  posY=0.06  right leg
+    • RP N2→N1  posY=0.31  right leg
+
+  VLM FRAME ANNOTATION
+  Fascial layer visible. N2 (saphenous trunk/GSV) annotated within fascial
+  compartment. N2 in fascia.
+
+  SCAN HISTORY SUMMARY
+  Session coverage as of this click:
+  [DONE] SFJ/groin (0.00–0.07): Entry point at SFJ confirmed.
+  [    ] Upper thigh (0.08–0.20)
+  [DONE] Mid-thigh/Dodd (0.21–0.33): Trunk reflux confirmed.
+  [    ] Hunterian/lower thigh (0.34–0.47)
+  [    ] Popliteal/SPJ (0.48–0.57)
+  [    ] Calf (0.58–0.88)
+  [    ] Ankle (0.89–1.00)
+
+  Q1-Q4 STATUS
+  Q1 ANSWERED: EP N1→N2 confirmed (SFJ, right leg, posY 0.06).
+  Q2 ANSWERED: RP N2→N1 confirmed (mid-thigh, right leg, posY 0.31).
+  Q3 OPEN: No EP N2→N3 escape point confirmed yet.
+  Next step: Scan distally in Hunterian zone (posY 0.34–0.47, medial) for
+  trunk-to-tributary escape connection.
+
+  EXAMINATION PROTOCOL (posY 0.28, medial surface — Dodd/Hunterian zone)
+  Hunterian perforators = distal third of thigh (posY 0.34–0.47, medial).
+  If SFJ competent but thigh GSV shows reflux → Hunterian EP N1→N2 possible.
+  All three perforator maneuvers required: squeezing, Paranà, Valsalva.
+  Pathological: outward flow ≥500 ms AND diameter ≥3.5 mm (AVF 2023).
+  ─────────────────────────────────────────────────────────────────────────────
+
+The five agents process this from top to bottom, each narrowing the problem,
+until Agent 5 produces:
+
+  {"guidance": "Scan distally along medial thigh toward Hunterian perforator",
+   "action": "move"}
+
+
+================================================================================
+11. POSITION ALERTS — HARD-CODED SAFETY RULES
+================================================================================
+
+In addition to the seven signals, three hard-coded position alerts are appended
+to the state message when the probe is at a critical decision zone. These
+override any tendency for the AI to give incorrect guidance at the most
+dangerous positions.
+
+ALERT 1: Probe at SFJ, No Clips Yet
+  Condition:  posY 0.04–0.07 AND no clips confirmed yet
+  Text added: ">>> POSITION ALERT: Probe IS at SFJ zone (posY [x]).
+               Apply Mickey Mouse transverse scan.
+               Output transverse-scan instruction — do NOT navigate away. <<<"
+  Effect:     Forces the crew to output a transverse scan instruction.
+              Prevents the crew from directing the surgeon away from the SFJ
+              before the junction has been properly assessed.
+
+ALERT 2: Trunk Reflux Confirmed, No Escape Point Found
+  Condition:  posY 0.08–0.47 AND RP N2→N1 confirmed AND no EP N2→N3
+  Text added: ">>> POSITION ALERT: Trunk reflux confirmed; no escape found.
+               Probe at [zone] (posY [x]).
+               Scan for N3 above fascia at this level — do NOT output complete. <<<"
+  Effect:     Prevents the crew from declaring the circuit complete when an
+              escape point has not yet been found.
+
+ALERT 3: Probe at Popliteal Zone
+  Condition:  posY 0.48–0.57 AND posterior surface AND no SPJ entry confirmed
+  Text added: ">>> POSITION ALERT: Probe in POPLITEAL zone (posY [x], posterior).
+               Apply Paranà + CR maneuvers to assess SPJ. <<<"
+  Effect:     Reminds the crew that SPJ assessment requires both active (Paranà)
+              and passive (compression/relaxation) maneuvers simultaneously.
+
+These alerts are also reinforced as CRITICAL PRIORITY RULES in the system prompt
+that all five agents inherit.
+
+
+================================================================================
+12. FRONTEND — THE STREAMING UI
+================================================================================
+
+12.1 Three-Panel Layout (stream.html)
+----------------------------------------
+The streaming mode interface is divided into three panels:
+
+LEFT PANEL — Probe Control + Findings:
+  - Interactive SVG leg diagram
+    The surgeon clicks anywhere on the diagram to move the probe.
+    A red dot tracks the current probe position.
+    Hovering shows the region label and posY value.
+  - Mark Finding form
+    Lets the surgeon record a confirmed EP/RP clip:
+      Flow type (EP / RP)
+      From compartment (N1 / N2 / N3)
+      To compartment (N1 / N2 / N3)
+      Which leg (left / right)
+      Optional: elimination test result
+    The posY is automatically set from the current probe position.
+  - Confirmed Clips List
+    Displays all clips confirmed this session with flow type, posY, and leg.
+    Each clip has a delete button.
+
+CENTRE PANEL — Visual + Maneuver:
+  - Current Video Frame
+    The annotated ultrasound video frame at the current probe position,
+    synchronized to posY (posY=0.35 shows the frame 35% through the video).
+  - VLM Frame Analysis Grid
+    A visual summary of the VLM's assessment:
+      Fascial layer: visible / not visible
+      N1 (deep vein): present / absent
+      N2 (GSV trunk): in compartment / not visible
+      N3 (tributary): above fascia / not visible
+      Image quality: good / poor / off-axis
+  - Elimination Test Banner
+    Appears when the crew's action is "maneuver." Shows a highlighted instruction
+    for the elimination test procedure.
+
+RIGHT PANEL — Guidance + Thinking:
+  - Active Guidance Box
+    Displays the current ≤12-word instruction in large text (blue highlight).
+    Updates in real time after each probe_move event.
+  - Model Thinking Log
+    An expandable list of all guidance turns in this session.
+    Each entry shows:
+      - posY and region of the click
+      - The region badge (SFJ / GSV-THI / GSV-CAL / SPJ / SSV)
+      - The guidance produced
+      - Expandable details: full state message + raw crew output
+
+12.2 Shunt Confirmed Modal
+----------------------------
+When the crew's Agent 2 detects a fully confirmed CHIVA circuit, a modal dialog
+appears showing:
+  - The CHIVA type (e.g., "Type 1 Circuit Confirmed")
+  - The clip evidence that confirmed it (listed as EP/RP events)
+  - A "Confirm" button (accepts the classification)
+  - A "Dismiss" button (records a rejection note, triggers the feedback loop)
+
+The modal fires once per type per session (controlled by confirmed_shunts set
+in StreamSession). It does not re-fire for the same type on subsequent clicks.
+
+12.3 Real-Time Communication
+------------------------------
+All guidance updates, clip confirmations, and session events use WebSocket
+(Socket.IO), providing live updates without page reloads. The surgeon never
+waits for a page navigation — all state changes update instantly in the UI.
+
+This required Flask-SocketIO with threading async_mode on the backend, and
+Gunicorn configured with gthread workers (1 worker, 4 threads) to handle
+persistent WebSocket connections alongside REST endpoints.
+
+
+================================================================================
+13. COMPARISON WITH TASK 1
+================================================================================
+
+Task 1 was a RETROSPECTIVE CLINICAL ASSISTANT — the surgeon described a completed
+examination in natural language, and the system produced a CHIVA classification
+and surgical plan. It used a RAG (Retrieval-Augmented Generation) pipeline with
+a Qdrant vector database.
+
+Task 2 is a REAL-TIME INTRAOPERATIVE NAVIGATOR — it runs DURING the examination,
+guiding each probe movement as the surgeon scans.
+
+  Aspect              Task 1                       Task 2
+  ─────────────────   ─────────────────────────    ──────────────────────────────
+  Timing              After examination            During examination (real-time)
+  Input               Text description of case     Live probe clicks + video frames
+  Knowledge source    Qdrant vector database (RAG) Embedded in agent system prompts
+  Output              Full clinical report          ≤12-word probe instruction
+  AI architecture     Single LLM + RAG retrieval   5-agent CrewAI sequential crew
+  Communication       HTTP REST                     WebSocket (Socket.IO)
+  Vision              Not used                      Llama 4 Scout 17B VLM
+  Shunt agents        3 (Task-1 crew)               5 (3 ported + 2 new navigation)
+  Clinical knowledge  Vector DB + cross-encoder     Protocol agent (lookup table)
+
+Task 2 inherits Agents 1 and 2 (Clinical Interpreter and Shunt Analyst) from the
+Task 1 crew. Agents 3, 4, and 5 (Circuit Analyst, Navigation Planner, Guidance
+Specialist) are new additions specific to the real-time navigation problem.
+
+
+================================================================================
+14. KEY DESIGN DECISIONS AND RATIONALE
+================================================================================
+
+14.1 Why ≤12 Words for Guidance?
+-----------------------------------
+The surgeon is actively performing an examination when this guidance appears.
+They cannot read a paragraph while holding an ultrasound probe over a patient.
+12 words is long enough to be specific ("Scan distally along medial thigh toward
+Hunterian perforator") but short enough to process in a single glance. The 12-
+word constraint also prevents the model from adding clinical explanations that
+the surgeon doesn't need in real time.
+
+14.2 Why Sequential Agents Instead of Parallel?
+-------------------------------------------------
+The five agents MUST run sequentially because each depends on the previous one:
+  - Agent 5 (Guidance Specialist) cannot write "scan distally toward Hunterian
+    perforator" without Agent 3 (Circuit Analyst) first determining that the
+    Hunterian zone is the correct target.
+  - Agent 3 cannot know this without Agent 2 (Shunt Analyst) classifying the
+    developing circuit.
+  - Agent 2 cannot classify without Agent 1's clinical interpretation.
+
+Parallelising the agents would break the reasoning chain.
+
+14.3 Why Sub-Agents as Plain Python Instead of LLM?
+------------------------------------------------------
+The history, Q-state, and protocol functions were initially designed as LLM
+calls, but were converted to deterministic Python for three reasons:
+  1. Speed: Plain Python runs in milliseconds; an LLM call adds 1–3 seconds.
+     At 5 agents × 1–3 seconds each, the pipeline already takes several
+     seconds — avoiding three additional LLM calls keeps it usable in real time.
+  2. Reliability: The Q-state logic (which Q is open) must be correct 100% of
+     the time. Pure Python rule-based logic cannot hallucinate.
+  3. Cost: Three fewer API calls per guidance turn significantly reduces API
+     usage over a full examination session.
+
+14.4 Why Not Use Conversation History (as in earlier versions)?
+-----------------------------------------------------------------
+An earlier version of the streaming engine used a rolling conversation window
+(last 8 LLM turns), similar to a chatbot. This was replaced with the CrewAI
+approach because:
+  - Rolling history accumulates outdated context. What the LLM said 8 clicks
+    ago may no longer be clinically relevant.
+  - Each new state message now contains explicit, structured summaries (scan
+    history from history_agent, Q-state from q_state_agent) rather than
+    requiring the LLM to infer session context from conversation history.
+  - Specialised agents with focused roles produce more reliable reasoning than
+    a single LLM simultaneously tracking all dimensions of the examination.
+
+14.5 Why the Groq + LiteLLM Compatibility Patch?
+--------------------------------------------------
+This was a pragmatic engineering decision. Groq's API strictly validates all
+message fields; CrewAI (via LiteLLM) adds a "cache_breakpoint" field that Groq
+rejects. Rather than forking or waiting for an upstream fix in either library,
+the monkey-patch is applied at module load time. It adds zero latency, requires
+no configuration, and is invisible to all other parts of the application.
+
+14.6 Why OpenCV Headless on the Server?
+-----------------------------------------
+The standard opencv-python package links against OpenGL (libGL.so.1) — a
+display library that is not present on headless Linux servers. The headless
+variant (opencv-python-headless) provides identical image processing and video
+decoding capabilities but without the display dependency. This is the standard
+approach for any server deployment that uses OpenCV only for image/video
+processing (not GUI display).
+
+
+================================================================================
+15. CLINICAL KNOWLEDGE SOURCES
+================================================================================
+
+All clinical protocol rules, thresholds, and anatomical facts used in the
+system are derived from published, peer-reviewed literature:
+
+  Adler, D.C. et al. (2022)
+  "Varicose Veins of the Lower Extremity: Doppler US Evaluation, Protocols,
+  Patterns, and Pitfalls." RadioGraphics, 42(7), pp. 2184–2202.
+  → Used for: standard duplex examination sequence, patient positioning
+    (Reverse Trendelenburg ≥60°), reflux threshold (>500 ms), perforator
+    criteria, Dodd and Hunterian perforator anatomy, posY landmarks.
+
+  Gianesini, S. et al. (2014)
+  "CHIVA Strategy for Chronic Venous Disorder Treatment." Phlebology, 29(1).
+  → Used for: CHIVA haemodynamic classification framework, SFJ assessment
+    protocol (Mickey Mouse sign, BOTH Valsalva AND Paranà required), SPJ
+    assessment (both Paranà + compression/relaxation required simultaneously),
+    Giacomini vein evaluation.
+
+  Delfrate, R. (2023)
+  "CHIVA Method for Varicose Vein Treatment." Journal of Translational Anatomy
+  and Vascular Research (JTAVR).
+  → Used for: three-maneuver perforator assessment protocol (squeezing → Paranà
+    → Valsalva), squeezing-alone limitations and overtreatment risk, pelvic
+    leak points (SGP, IGP, OP), biphasic perforator interpretation, AASV pitfall.
+
+  American Venous Forum (AVF) 2023 Clinical Practice Guidelines.
+  → Used for: pathological perforator definition (outward flow ≥500 ms AND
+    diameter ≥3.5 mm), hemodynamic significance thresholds.
+
+  DuplexUS (2014) textbook, Chapter 3 (pp. 33–41).
+  → Used for: Dodd perforators (middle third of thigh, posY 0.21–0.33),
+    Hunterian perforators (distal third of thigh, posY 0.34–0.47), SPJ
+    anatomical variability.
+
+  Lee, B. et al. (2017) textbook, p. 129.
+  → Used for: additional Hunterian perforator posY landmark references.
+
+
+================================================================================
+16. DEPLOYMENT ARCHITECTURE
+================================================================================
+
+The Task 2 application is deployed on an Alibaba Cloud ECS (Linux) server,
+running alongside Task 1 on the same machine.
+
+  Web Server:      Nginx (reverse proxy, port 8080)
+  App Server:      Gunicorn (1 worker, 4 gthread threads, Unix socket)
+  Process Manager: systemd (service: task2)
+  Deployment:      GitHub Actions CI/CD (auto-deploys on push to main branch)
+
+The deployment chain:
+  Developer pushes to GitHub (main branch)
+    → GitHub Actions triggers deploy.yml
+      → SSH into Alibaba Cloud server
+        → git pull origin main
+          → pip install -r requirements.txt
+            → systemctl restart task2
+
+The application runs on port 8080, served via Nginx with WebSocket proxy
+headers (Upgrade, Connection) required for Socket.IO support. Task 1 runs
+simultaneously on port 80 — both applications share the same server without
+interference, using separate Unix sockets and separate systemd services.
+
+
+================================================================================
+END OF REPORT
+================================================================================

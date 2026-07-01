@@ -1,0 +1,62 @@
+Two Different RL Paradigms
+The paper's RL uses references — reward = how closely your output matches the reference tool call. This requires references.
+
+Reference-free RL — reward = whether your output is correct according to rules. No references needed. This is the DeepSeek-R1 style approach, and it actually fits Task-2 better.
+
+Why Task-2 Can Do Reference-Free RL :
+CHIVA protocol is deterministic and rule-based. Given a set of clips and a current state, there is a probably correct answer for:
+What action should be taken
+What shunt type is developing
+What zone to navigate to next
+You already have this logic encoded. Look at what you already have:
+
+q_state_agent.py — derives Q1-Q4 status from clips deterministically
+Shunt type rules in crew_pipeline.py — exact clip combinations and findings for each shunt type
+guidance_config.py — correct next steps per region
+These ARE your reward function. You don't need references.
+
+How to Model the RL Problem
+State: the 7-signal state message at a given scan step
+
+Action: the model's structured output {action, shunt_type, confirmed, target_zone}
+
+Reward: computed purely from CHIVA rules, no reference needed:
+
+
+def compute_reward(predicted, clips, posY, q_state):
+    reward = 0.0
+    
+    # 1. Action correctness — derivable from clips + q_state
+    correct_action = derive_correct_action(clips, q_state)
+    if predicted["action"] == correct_action:
+        reward += 0.4
+    else:
+        reward -= 0.5   # hard penalty, same as paper
+    
+    # 2. Shunt type — your existing rules are ground truth
+    correct_type = classify_shunt_from_clips(clips)  # q_state_agent logic
+    if predicted["shunt_type"] == correct_type:
+        reward += 0.3
+    
+    # 3. Target zone — next correct zone given current posY + q_state
+    correct_zone = next_target_zone(posY, q_state)
+    if predicted["target_zone"] == correct_zone:
+        reward += 0.2
+    
+    # 4. Confirmed flag — should only be true when circuit is complete
+    circuit_complete = check_circuit_complete(clips, correct_type)
+    if predicted["confirmed"] == circuit_complete:
+        reward += 0.1
+    
+    return clip(reward, -0.5, 1.0)
+Every single component of this reward is computable from logic you already have written.
+
+The Key Insight
+Your q_state_agent.py + shunt type rules are not just business logic — they are a verifiable oracle. Given any scan state, they can tell you the correct answer. That's exactly what you need for RL rewards.
+
+The paper had to compare against reference traces because their task (interpreting arbitrary scanning guidelines) had no such oracle. Your task does — the CHIVA protocol is fixed and deterministic.
+
+What You Still Need
+You don't need references, but you still need a model to fine-tune and synthetic scan states to train on. The synthetic states are actually much easier to generate than full traces — you just need (clips_so_far, posY, region, q_state) tuples, not labelled outputs. The reward function handles the labelling automatically.
+
+So the data problem shrinks significantly: instead of needing labelled (input → correct output) pairs, you just need unlabelled (scan state) samples, and the reward tells the model how well it did.
