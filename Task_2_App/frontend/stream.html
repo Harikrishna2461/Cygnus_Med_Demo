@@ -457,6 +457,7 @@ select:focus{outline:none;border-color:var(--accent);}
         <div class="vlm-cell"><div class="lbl">N1 below fascia</div><div class="val" id="vlmN1">—</div></div>
         <div class="vlm-cell"><div class="lbl">Labels seen</div><div class="val" id="vlmLabels">—</div></div>
       </div>
+      <div style="margin-top:6px;font-size:11px;color:var(--accent2)"><span style="color:var(--muted)">Veins: </span><span id="vlmVeinTypes">—</span></div>
       <p id="vlmNote" style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5"></p>
     </div>
 
@@ -964,6 +965,8 @@ function renderVLM(v) {
   document.getElementById('vlmN1').innerHTML=yn(v.n1_deep_to_fascia);
   const lbs=['N1','N2','N3'].filter(l=>v['label_'+l.toLowerCase()+'_visible']);
   document.getElementById('vlmLabels').textContent=lbs.length?lbs.join(', '):'—';
+  const vt = Array.isArray(v.vein_types) && v.vein_types.length ? v.vein_types.join(', ') : '—';
+  document.getElementById('vlmVeinTypes').textContent=vt;
   if(v.frame_note)document.getElementById('vlmNote').textContent=v.frame_note;
 }
 

@@ -90,7 +90,6 @@ def make_clinical_interpreter() -> Agent:
         max_iter=3,
     )
 
-
 # ── Agent 2 (ported from Task-1 ShuntAnalyst) ────────────────────────────────
 
 def make_shunt_analyst() -> Agent:

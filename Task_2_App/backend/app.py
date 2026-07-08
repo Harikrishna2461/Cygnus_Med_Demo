@@ -133,10 +133,98 @@ def create_app() -> Flask:
         resp.headers["Cache-Control"] = "no-store"
         return resp
 
-    # ── static assets ──────────────────────────────────────────────────────────
-    assets_dir  = os.path.join(os.path.dirname(__file__), "..", "assets")
+    # ── static asset paths (used by vein-frame route and static handlers below) ─
+    assets_dir   = os.path.join(os.path.dirname(__file__), "..", "assets")
     frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
 
+    # ── vein reference frame ──────────────────────────────────────────────────
+    _REGION_TO_VEINS: dict[str, list[str]] = {
+        "SFJ":         ["GSV_Prox", "CFV"],
+        "Upper Thigh": ["GSV_Prox", "FV", "AASV"],
+        "Hunterian":   ["GSV_Prox", "FV", "Hunt_Perf", "Dodd_Perf"],
+        "Dodd":        ["GSV_Distal", "FV", "Dodd_Perf"],
+        "GSV-THI":     ["GSV_Distal", "FV"],
+        "GSV-CAL":     ["GSV_Distal"],
+        "SPJ":         ["SSV", "PV"],
+        "SSV":         ["SSV", "PASV"],
+        "Giacomini":   ["SSV", "Tributary", "AASV"],
+        "Calf":        ["GSV_Distal", "Tributary", "Boyd_Perf", "Cockett_Perf", "Deep_Vein_Calf"],
+        "UNKNOWN":     ["GSV_Prox"],
+    }
+    _VEIN_LABELS: dict[str, str] = {
+        "GSV_Prox":       "GSV proximal trunk",
+        "GSV_Distal":     "GSV distal trunk",
+        "GSV":            "GSV (great saphenous)",
+        "SSV":            "SSV (small saphenous)",
+        "CFV":            "CFV (common femoral)",
+        "FV":             "FV (femoral vein)",
+        "DFV":            "DFV (deep femoral)",
+        "PV":             "PV (popliteal vein)",
+        "Deep_Vein_Calf": "Deep calf vein",
+        "FV_CFV":         "Deep vein (FV / CFV)",
+        "AASV":           "AASV (anterior accessory)",
+        "PASV":           "PASV (posterior accessory)",
+        "Tributary":      "Superficial tributary",
+        "Hunt_Perf":      "Hunterian perforator",
+        "Dodd_Perf":      "Dodd perforator",
+        "Boyd_Perf":      "Boyd perforator",
+        "Cockett_Perf":   "Cockett perforator",
+        "Ankle_Perf":     "Ankle perforator",
+    }
+
+    # Guidance (N1/N2/N3 annotated) subfolders per region
+    _REGION_TO_GUIDANCE: dict[str, list[str]] = {
+        "SFJ":         ["sfj"],
+        "Upper Thigh": ["gsv_thigh"],
+        "Hunterian":   ["gsv_thigh"],
+        "Dodd":        ["gsv_thigh"],
+        "GSV-THI":     ["gsv_thigh"],
+        "GSV-CAL":     ["gsv_calf"],
+        "SPJ":         ["spj"],
+        "SSV":         ["ssv"],
+        "Giacomini":   ["ssv"],
+        "Calf":        ["gsv_calf"],
+    }
+
+    @app.route("/api/vein-frame")
+    def vein_frame_ref():
+        import random
+        from flask import request as freq, send_file, jsonify as fjson
+        region = freq.args.get("region", "UNKNOWN")
+        vein_frames_dir = os.path.join(assets_dir, "vein_frames")
+        guidance_dir    = os.path.join(assets_dir, "guidance")
+
+        candidates: list[tuple[str, str]] = []
+
+        # 1. Segmented vein frames (classified by hue, from _seg.mp4 videos)
+        vein_names = _REGION_TO_VEINS.get(region, _REGION_TO_VEINS["UNKNOWN"])
+        for vname in vein_names:
+            d = os.path.join(vein_frames_dir, vname)
+            if os.path.isdir(d):
+                for fname in os.listdir(d):
+                    if fname.lower().endswith(".jpg"):
+                        candidates.append((vname, os.path.join(d, fname)))
+
+        # 2. N1/N2/N3 annotated guidance frames (from concat videos)
+        for subfolder in _REGION_TO_GUIDANCE.get(region, []):
+            d = os.path.join(guidance_dir, subfolder)
+            if os.path.isdir(d):
+                for fname in os.listdir(d):
+                    if fname.lower().endswith(".jpg"):
+                        candidates.append((subfolder, os.path.join(d, fname)))
+
+        if not candidates:
+            return fjson({"error": "no frames available for region"}), 404
+
+        chosen_vein, chosen_path = random.choice(candidates)
+        resp = send_file(chosen_path, mimetype="image/jpeg")
+        resp.headers["X-Vein-Type"]  = chosen_vein
+        resp.headers["X-Vein-Label"] = _VEIN_LABELS.get(chosen_vein, chosen_vein)
+        resp.headers["Cache-Control"] = "no-store"
+        resp.headers["Access-Control-Expose-Headers"] = "X-Vein-Type, X-Vein-Label"
+        return resp
+
+    # ── static assets ──────────────────────────────────────────────────────────
     @app.route("/assets/<path:filename>")
     def serve_assets(filename):
         return send_from_directory(assets_dir, filename)
