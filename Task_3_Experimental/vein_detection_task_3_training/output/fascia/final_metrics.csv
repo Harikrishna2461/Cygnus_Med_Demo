@@ -1,0 +1,2 @@
+Model,mIoU,iou_fascia,dice_fascia,boundary_f1,iou_above,iou_below
+UNet-ResNet50-TF,0.991,0.9826,0.9912,0.8469,0.9983,0.9921
