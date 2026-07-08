@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import cv2; cap = cv2.VideoCapture\\('Data/3 - Simple Annotated videos/sample_data.mp4'\\); ret, frame = cap.read\\(\\); print\\('Frame shape:', frame.shape if ret else 'Failed'\\); cap.release\\(\\)\")",
+      "Bash(pip list *)",
+      "Bash(python3 -m pip install flask flask-cors groq opencv-python-headless numpy)",
+      "Bash(python3 -c ' *)",
+      "Bash(timeout 8 python3 app.py)",
+      "Bash(npm install *)",
+      "Bash(python3 app.py)",
+      "Bash(curl -s http://localhost:5001/)",
+      "Bash(kill %1)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5001/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5001/api/status/nonexistent)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\" -Recurse -Depth 1 | Where-Object {$_.Name -match \"\\\\.docx$|\\\\.pdf$|\\\\.md$\" -and -not $_.PSPath.Contains\\(\".venv\"\\)} | Select-Object FullName)",
+      "Bash(python -c \"import docx\")",
+      "Bash(python make_report.py)",
+      "Bash(del Task3_Methodology_Report.txt)",
+      "Bash(del make_report.py)"
+    ]
+  }
+}

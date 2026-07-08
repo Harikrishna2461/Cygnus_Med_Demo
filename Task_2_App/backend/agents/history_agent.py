@@ -15,20 +15,12 @@ logger = logging.getLogger(__name__)
 _BANDS: list[tuple[float, float, str]] = [
     (0.00, 0.07, "SFJ/groin"),
     (0.08, 0.20, "upper thigh"),
-    (0.21, 0.33, "mid-thigh/Dodd"),
-    (0.34, 0.47, "lower thigh/Hunterian"),
+    (0.21, 0.33, "Hunterian (proximal thigh)"),
+    (0.34, 0.47, "Dodd (distal thigh)"),
     (0.48, 0.57, "popliteal/SPJ"),
     (0.58, 0.88, "calf"),
     (0.89, 1.00, "ankle"),
 ]
-
-_SYSTEM_PROMPT = (
-    "You are a CHIVA duplex examination assistant. "
-    "Given a structured scan log, write exactly 2 short sentences: "
-    "sentence 1 — which anatomical zones have been scanned so far; "
-    "sentence 2 — which EP/RP findings have been confirmed (or 'No findings confirmed yet'). "
-    "Be concise and clinical. No bullet points. No labels. Plain sentences only."
-)
 
 
 def _build_raw_data(session, current_pos_y: float) -> str:
@@ -36,18 +28,30 @@ def _build_raw_data(session, current_pos_y: float) -> str:
     clips: list[dict]    = getattr(session, "clips", [])
 
     band_visited: dict[str, bool] = {lbl: False for _, _, lbl in _BANDS}
+    band_x_vals: dict[str, list[float]] = {lbl: [] for _, _, lbl in _BANDS}
     for entry in scan_log:
         py = float(entry.get("pos_y", 0.0))
+        px = entry.get("pos_x")
         for lo, hi, lbl in _BANDS:
             if lo <= py <= hi:
                 band_visited[lbl] = True
+                if px is not None:
+                    band_x_vals[lbl].append(float(px))
                 break
 
     visited   = [lbl for lbl, v in band_visited.items() if v]
     unvisited = [lbl for lbl, v in band_visited.items() if not v]
 
+    visited_strs = []
+    for lbl in visited:
+        xs = band_x_vals[lbl]
+        if xs:
+            visited_strs.append(f"{lbl} (posX {min(xs):.2f}–{max(xs):.2f})")
+        else:
+            visited_strs.append(lbl)
+
     lines = []
-    lines.append(f"Zones visited: {', '.join(visited) if visited else 'none yet'}")
+    lines.append(f"Zones visited: {', '.join(visited_strs) if visited_strs else 'none yet'}")
     lines.append(f"Zones not yet visited: {', '.join(unvisited) if unvisited else 'all covered'}")
 
     if clips:
@@ -64,32 +68,11 @@ def _build_raw_data(session, current_pos_y: float) -> str:
     return "\n".join(lines)
 
 
-def _call_llm(raw_data: str) -> str:
-    from config import GROQ_API_KEY, GROQ_TEXT_MODEL
-    from groq import Groq
-
-    client = Groq(api_key=GROQ_API_KEY)
-    resp = client.chat.completions.create(
-        model=GROQ_TEXT_MODEL,
-        messages=[
-            {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user",   "content": raw_data},
-        ],
-        max_tokens=80,
-        temperature=0.0,
-    )
-    return (resp.choices[0].message.content or "").strip()
-
-
 def build_summary(session, current_pos_y: float) -> str:
     """
-    Return a short LLM-generated narrative summary of scan progress and findings.
-    Falls back to a plain structured string if the LLM call fails.
+    Return a structured scan-progress summary for the CrewAI agents.
+    The raw structured data is more useful than an LLM-generated narrative —
+    it preserves explicit visited/unvisited lists that the Circuit Analyst reasons from.
     """
     raw_data = _build_raw_data(session, current_pos_y)
-    try:
-        summary = _call_llm(raw_data)
-        return f"SCAN HISTORY SUMMARY\n{summary}"
-    except Exception as exc:
-        logger.warning("History agent LLM call failed, using raw data: %s", exc)
-        return f"SCAN HISTORY SUMMARY\n{raw_data}"
+    return f"SCAN HISTORY SUMMARY\n{raw_data}"

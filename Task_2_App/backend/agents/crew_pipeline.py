@@ -17,9 +17,12 @@ are plain Python — they build the context blocks fed INTO task1's description.
 """
 from __future__ import annotations
 
+import io
 import json
 import logging
+import sys
 import threading
+from collections import Counter
 
 from crewai import Crew, Process, Task
 
@@ -57,6 +60,8 @@ def run_guidance_crew(
     pos_x: float | None = None,
     is_front: bool | None = None,
     rejection_notes: list[str] | None = None,
+    recent_guidance: list[str] | None = None,
+    accepted_shunts: list[str] | None = None,
 ) -> tuple[str, str, str, bool, str, str]:
     """
     Run the 5-agent guidance crew as a single CrewAI sequential Crew.
@@ -69,6 +74,19 @@ def run_guidance_crew(
     pos_x_str = f" | posX={pos_x:.2f}" if pos_x is not None else ""
     front_str = f" | is_front={'yes' if is_front else 'no'}" if is_front is not None else ""
 
+    # Compute zone name deterministically — injected into Task 4 so the model
+    # never has to reason from posY to zone name (a common error source).
+    def _zone_name(y: float) -> str:
+        if y <= 0.07: return "SFJ/groin"
+        if y <= 0.20: return "upper thigh"
+        if y <= 0.33: return "Hunterian (proximal thigh)"
+        if y <= 0.47: return "Dodd (distal thigh)"
+        if y <= 0.57: return "popliteal/SPJ"
+        if y <= 0.88: return "calf"
+        return "ankle"
+
+    current_zone = _zone_name(pos_y)
+
     rejection_ctx = ""
     if rejection_notes:
         rejection_ctx = (
@@ -76,6 +94,17 @@ def run_guidance_crew(
             + "\n".join(f"  • {n}" for n in rejection_notes[-3:])
             + "\n\nRe-evaluate the evidence MORE critically than before. "
             "Do NOT re-confirm the rejected type without a meaningfully different clip set.\n\n"
+        )
+
+    accepted_ctx = ""
+    if accepted_shunts:
+        entries = ", ".join(accepted_shunts)
+        accepted_ctx = (
+            f"SURGEON-ACCEPTED SHUNTS: {entries}\n"
+            "The surgeon has already accepted these shunt classifications and is actively "
+            "searching for ADDITIONAL shunts. For any shunt type listed above, output "
+            "confirmed=false — do NOT re-confirm an already-accepted type. "
+            "Focus classification on NEW patterns from the clip set that have NOT yet been accepted.\n\n"
         )
 
     clips_text = "\n".join(
@@ -98,6 +127,10 @@ def run_guidance_crew(
             rejection_ctx +
             "You are the first agent in a 5-agent CHIVA examination pipeline. "
             "Assess the clinical picture from the full examination state below.\n\n"
+            f"IMPORTANT: The 'Region' label in the state message is from the frontend "
+            f"interface and may not perfectly match CHIVA anatomy (e.g. it may say "
+            f"'Giacomini' or a non-standard label). Always use posY as the authoritative "
+            f"position reference — posY {pos_y:.2f} = {current_zone}.\n\n"
             f"{state_message}\n\n"
             "In max 100 words:\n"
             "1. List which confirmed clips are unambiguous and what each establishes.\n"
@@ -116,120 +149,194 @@ def run_guidance_crew(
     # ── Task 2: Shunt Analyst (sees task1) ───────────────────────────────────
     task2 = Task(
         description=(
-            "You are the second agent. The Clinical Interpreter has assessed the clips. "
+            accepted_ctx +
+            "You are the second agent and the sole authority on shunt type classification. "
+            "The Clinical Interpreter has assessed the clips. "
             "Using that assessment and the raw clip list below, determine whether a CHIVA "
-            "shunt type is confirmed.\n\n"
+            "shunt type is confirmed and whether an elimination test is required right now.\n\n"
             f"RAW CONFIRMED CLIPS ({len(clips)} total):\n{clips_text}\n\n"
             "Output ONLY valid JSON (no markdown):\n"
             '  {"shunt_type": "1"|"2A"|"2B"|"2C"|"3"|"1+2"|"4"|"5"|"6"|"undetermined",\n'
             '   "confirmed": true|false,\n'
-            '   "evidence": "<one sentence: clip pattern that confirms or why unconfirmed>"}\n\n'
+            '   "elim_required": true|false,\n'
+            '   "evidence": "<one sentence: clip pattern that confirms, why unconfirmed, or why elim needed>"}\n\n'
             '"confirmed" is true ONLY when the FULL minimum clip set is present:\n'
             "  Type 1   → EP N1→N2 (SFJ or Hunterian) + RP N2→N1; NO N3 clips at all\n"
             "  Type 2A  → EP N2→N3 + RP N3→N1; NO EP N1→N2; NO EP N2→N2; NO RP N2→N1\n"
-            "             (SFJ competent; GSV escapes into tributary; tributary re-enters deep)\n"
             "  Type 2B  → EP N2→N2 + RP N3→N1; NO EP N1→N2; NO RP N2→N1\n"
-            "             (perforator/SPJ feeds system; tributary re-enters deep; no trunk reflux)\n"
             "  Type 2C  → (EP N2→N2 or EP N2→N3) + RP N3 + RP N2→N1; NO EP N1→N2\n"
-            "             (perforator entry + secondary GSV trunk reflux back to N1; SFJ still competent)\n"
             "  Type 3   → EP N1→N2 + EP N2→N3 + RP N3→N1 + RP N2→N1 + elimTest=No Reflux\n"
-            "             (elimination test is MANDATORY — 3 clips without RP N2→N1 is NOT confirmed Type 3;\n"
-            "              trunk reflux must be confirmed via RP N2→N1, then elim test performed)\n"
             "  Type 1+2 → EP N1→N2 + EP N2→N3 + RP N3→N1 + RP N2→N1 + elimTest=Reflux\n"
-            "             (same clips as Type 3 but elim test shows trunk reflux is independent, not conducted)\n"
-            "  Type 4   → EP N1→N3 + RP N2→N1 (GSV trunk carries return blood back to N1; trunk REFLUXES)\n"
-            "             optional intermediate: EP N1→N3 + RP N3→N2 + RP N2→N1\n"
+            "  Type 4   → EP N1→N3 + RP N2→N1\n"
             "  Type 5   → EP N1→N3 + RP N3→N2 + EP N2→N3 + RP N3→N1; NO RP N2→N1\n"
-            "             (blood loops N1→N3→N2→N3→N1; GSV loops but never directly drains to N1)\n"
-            "  Type 6   → EP N1→N3 + RP N3→N1; NO N2 clips whatsoever\n"
-            "             (perforator→tributary→perforator back to deep; GSV completely bypassed)\n\n"
-            "KEY DIFFERENTIATOR — all three N1→N3-entry types:\n"
-            "  Type 4: RP N2→N1 PRESENT (trunk refluxes directly to deep)\n"
-            "  Type 5: EP N2→N3 PRESENT, NO RP N2→N1 (trunk loops back to N3 before returning)\n"
-            "  Type 6: NO N2 involvement at all (tributary returns straight to N1 via perforator)\n\n"
+            "  Type 6   → EP N1→N3 + RP N3→N1; NO N2 clips whatsoever\n\n"
+            f'"elim_required": if and only if ALL FOUR of these clips are in the {len(clips)}-clip '
+            "confirmed list above: EP N1→N2, EP N2→N3, RP N3→N1, RP N2→N1 — AND no clip has "
+            "an elimination_test value. If the confirmed clip count is fewer than 4, "
+            "elim_required MUST be false. Do NOT infer clips that are not in the list above.\n\n"
+            "KEY DIFFERENTIATOR for N1→N3-entry types:\n"
+            "  Type 4: RP N2→N1 PRESENT\n"
+            "  Type 5: EP N2→N3 PRESENT, NO RP N2→N1\n"
+            "  Type 6: NO N2 involvement at all\n\n"
             "If no type matches its full set, set confirmed=false and shunt_type=undetermined."
         ),
-        expected_output='JSON only: {"shunt_type": "...", "confirmed": true|false, "evidence": "..."}',
+        expected_output=(
+            'JSON only: {"shunt_type": "...", "confirmed": true|false, '
+            '"elim_required": true|false, "evidence": "..."}'
+        ),
         agent=analyst,
         context=[task1],
     )
 
+    # ── Pre-computation for Task 3 + Task 4 ──────────────────────────────────
+    # Q1 corridor fact — numerical truth, injected so model cannot reason around it.
+    _in_q1_corridor = 0.04 <= pos_y <= 0.57
+    _corridor_fact = (
+        f"PROBE IS INSIDE Q1 CORRIDOR (posY {pos_y:.2f} is between 0.04 and 0.57): YES. "
+        f"The probe is physically at {current_zone}. Examine HERE — do not route to SFJ/groin."
+        if _in_q1_corridor else
+        f"PROBE IS INSIDE Q1 CORRIDOR (posY {pos_y:.2f} is between 0.04 and 0.57): NO. "
+        f"Probe is at {current_zone} (past all Q1 zones). "
+        "If Q1 is still open, route to the nearest unvisited Q1 zone."
+    )
+
+    # Zone-level anti-repetition — count how many times each anatomical zone has
+    # appeared in recent_guidance, regardless of exact phrasing.
+    _zone_keywords = {
+        "sfj": "SFJ/groin", "groin": "SFJ/groin",
+        "upper thigh": "upper thigh",
+        "hunterian": "Hunterian (proximal thigh)", "proximal thigh": "Hunterian (proximal thigh)",
+        "dodd": "Dodd (distal thigh)", "distal thigh": "Dodd (distal thigh)",
+        "popliteal": "popliteal/SPJ", "spj": "popliteal/SPJ",
+        "calf": "calf",
+        "ankle": "ankle",
+    }
+    _zone_hits: Counter = Counter()
+    for _g in (recent_guidance or []):
+        _g_lo = _g.lower()
+        for _kw, _cz in _zone_keywords.items():
+            if _kw in _g_lo:
+                _zone_hits[_cz] += 1
+                break
+    _overused_zones = [z for z, c in _zone_hits.items() if c >= 2]
+    _overused_zones_str = ", ".join(_overused_zones) if _overused_zones else "none"
+
     # ── Task 3: Circuit Analyst (sees task1 + task2) ──────────────────────────
+
     task3 = Task(
         description=(
-            "You are the third agent. The Clinical Interpreter and Shunt Analyst have "
-            "assessed the clips and classified the developing type. "
-            "Use their outputs alongside the Q1-Q4 status and scan history below "
-            "to identify the open diagnostic question and target zone.\n\n"
-            f"Q1-Q4 STATUS:\n{q_state}\n\n"
+            "You are the CHIVA Circuit Analyst. Describe the current examination state "
+            "and tell the Navigation Planner what the probe should focus on right now.\n\n"
+            f"PROBE POSITION: posY={pos_y:.2f} → {current_zone}\n"
+            f"{_corridor_fact}\n\n"
+            f"Q-STATE:\n{q_state}\n\n"
             f"SCAN HISTORY:\n{history_summary}\n\n"
-            "In max 60 words:\n"
-            "1. Which Q1-Q4 question is currently open?\n"
-            "2. Which anatomical zone (name + posY band) must be examined to answer it?\n"
-            "3. Is an elimination test or circuit-complete declaration required right now?"
+            "STEP 1 — Identify which examination state we are in:\n"
+            "  A: Q1 OPEN — no entry point (EP) clip found yet; surgeon seeking entry\n"
+            "  B: Q1 confirmed, Q2 open — entry found; trace GSV trunk distally for RP N2→N1\n"
+            "  C: Q1+Q2 confirmed, Q3 open — trunk reflux found; find EP N2→N3 escape\n"
+            "  D: Q3 confirmed, Q4 open — escape found; track tributary to RP N3→N1 re-entry\n"
+            "  E: Q1-Q4 confirmed, no elimTest — full circuit; elimination test required\n"
+            "  F: EP N1→N3 found — SFJ competent; trace N3 tributary to re-entry\n\n"
+            "STEP 2 — What should the probe be doing right now?\n\n"
+            f"  FOR STATE A:\n"
+            f"  • If corridor = YES (probe posY 0.04–0.57): probe is at {current_zone}. "
+            f"  The surgeon is already examining a Q1-relevant zone. "
+            f"  Describe the specific anatomical structure to find at {current_zone} "
+            "  and the surface/direction to locate it (medial, posterior, anterior-medial, etc.).\n"
+            "  • If corridor = NO (probe posY > 0.57): the three Q1 candidate zones are "
+            "  SFJ/groin (0.04–0.07), Hunterian (proximal thigh) (0.21–0.33), popliteal/SPJ (0.48–0.57). "
+            f"  Already routed to recently (do NOT suggest again): {_overused_zones_str}. "
+            "  Pick the nearest Q1 candidate NOT in that list. "
+            "  If all three are in the list, route to SFJ/groin for re-examination anyway.\n\n"
+            "  FOR STATES B–F:\n"
+            "  What does the open diagnostic question require at the current probe position? "
+            "  Name the specific structure to locate and the direction to find it, "
+            "  OR if the probe is in the wrong zone, name the destination zone and why.\n\n"
+            "Output ≤80 words. Use ONLY these zone names:\n"
+            "SFJ/groin · upper thigh · Hunterian (proximal thigh) · Dodd (distal thigh) · "
+            "popliteal/SPJ · calf · ankle"
         ),
         expected_output=(
-            "Circuit analysis (≤60 words): open Q, target zone (name + posY band), "
-            "immediate action if any."
+            "≤80 words: state (A–F), whether probe examines here or moves, "
+            "specific anatomical structure + direction if examining here, "
+            "or destination zone if moving."
         ),
         agent=circuit,
         context=[task1, task2],
     )
 
     # ── Task 4: Navigation Planner (sees task3) ───────────────────────────────
+    recent_guidance_str = (
+        "\n".join(f"  - {g}" for g in (recent_guidance or [])) or "  none"
+    )
+    _recent_counts = Counter(recent_guidance or [])
+    _banned = [g for g, n in _recent_counts.items() if n >= 2]
+
     task4 = Task(
         description=(
-            "You are the fourth agent. The Circuit Analyst has identified the open "
-            "diagnostic question and target zone. Using that output and the zone-specific "
-            "examination protocol below, produce a precise navigation plan.\n\n"
-            f"CURRENT PROBE POSITION: region={region}, posY={pos_y:.2f}, "
-            f"surface={surface}, leg={leg}{pos_x_str}{front_str}\n\n"
-            f"EXAMINATION PROTOCOL:\n{protocol_text}\n\n"
-            "In max 50 words, specify:\n"
-            "- Target posY band (e.g. 0.21–0.35 for Hunterian)\n"
-            "- Probe surface (anterior-medial / medial / posterior / lateral)\n"
-            "- Named anatomical target (e.g. 'mid-thigh GSV in saphenous eye')\n"
-            "- Direction word (distally / proximally / medially / posteriorly / "
-            "laterally / transversely)\n"
-            "- Maneuver (Paranà / Valsalva / squeezing / transverse scan)"
+            "You are a senior CHIVA vascular surgeon directing a trainee's duplex probe. "
+            "The Circuit Analyst has described the current examination state. "
+            "Issue ONE navigation command.\n\n"
+            f"Probe at: {current_zone} (posY={pos_y:.2f}) | {len(clips)} clips confirmed\n\n"
+            f"Already given — do not repeat:\n{recent_guidance_str}\n\n"
+            + (f"'{_recent_counts.most_common(1)[0][0]}' was said "
+               f"{_recent_counts.most_common(1)[0][1]}× — find different wording.\n\n"
+               if _banned else "") +
+            f"OVERUSED ZONES (suggested 2+ times already — route elsewhere): {_overused_zones_str}\n\n"
+            "FORBIDDEN TERMS — must NOT appear anywhere in your output: "
+            "Q1, Q2, Q3, Q4, corridor, EP, RP, N1, N2, N3, elimTest, elim, "
+            "shunt, circuit, 'State A', 'State B', 'State C', 'State D', 'State E', 'State F'.\n\n"
+            "A surgical navigation command has TWO components:\n"
+            "  MOVEMENT — a direction word: proximally / distally / medially / laterally / "
+            "posteriorly / anteriorly\n"
+            "  TARGET — ALWAYS includes BOTH the anatomical structure AND its zone location:\n"
+            f"    Current zone is {current_zone}. Examples of correct TARGET phrasing:\n"
+            "    'GSV in saphenous compartment at upper thigh'\n"
+            "    'SFJ junction at groin crease'\n"
+            "    'Hunterian perforator on medial proximal thigh'\n"
+            "    'SPJ junction in popliteal fossa'\n"
+            "    'Dodd perforator on medial distal thigh'\n"
+            "    'GSV at medial malleolus (ankle)'\n"
+            "    NEVER say just 'GSV' or just 'SPJ junction' without naming where on the leg.\n\n"
+            "≤15 words. Start with a movement verb."
         ),
         expected_output=(
-            "Navigation plan (≤50 words): target posY band, surface, anatomical target, "
-            "direction word, maneuver."
+            "One navigation command in ≤15 words: movement direction + anatomical structure + zone location."
         ),
         agent=planner,
         context=[task3],
     )
 
-    # ── Task 5: Guidance Specialist (sees task2 + task3 + task4) ─────────────
+    # ── Task 5: Guidance Specialist (sees task2 + task4 ONLY) ────────────────
+    # task3 deliberately excluded — Task 5 must copy task4's movement command,
+    # not fall back to the Circuit Analyst's reasoning paragraph.
     task5 = Task(
         description=(
-            "You are the fifth and final agent. The Shunt Analyst, Circuit Analyst, "
-            "and Navigation Planner have all contributed. Synthesise their outputs into "
-            "a single JSON probe-movement instruction.\n\n"
-            "Output ONLY valid JSON (no markdown, no explanation):\n"
-            '  {"guidance": "<single imperative ≤12 words>", "action": "move"}\n\n'
-            "action values:\n"
-            "  'move'     — default for all probe navigation\n"
-            "  'maneuver' — ONLY if circuit analysis explicitly requires elimination test\n"
-            "  'complete' — ONLY if circuit analysis declares full circuit confirmed\n\n"
-            "FORBIDDEN words in guidance text (never use these):\n"
-            "  Clinical terms: EP, RP, N1, N2, N3, reflux, Q1, Q2, Q3, Q4,\n"
-            "    confirmed, findings, diagnostic, shunt, Given, Since, As the, Currently\n"
-            "  Maneuver names: Paranà, Parana, Valsalva, squeezing, compression, maneuver\n"
-            "  Paranà and Valsalva are maneuver TECHNIQUES, NOT anatomical destinations —\n"
-            "  NEVER write 'Move ... to Paranà' or 'Move ... to Valsalva'.\n\n"
-            "guidance format rules:\n"
-            "  - action='move'     → probe navigation: 'Move probe <direction> to <anatomical target>'\n"
-            "  - action='maneuver' → position instruction: 'Hold probe at <target> and compress'\n"
-            "  - action='complete' → 'Circuit complete — all zones confirmed'\n"
-            "  - MUST contain one direction word: distally / proximally / medially /\n"
-            "    posteriorly / laterally / transversely / deeper\n"
-            "  - anatomical targets: SFJ, GSV, SPJ, SSV, popliteal, mid-thigh, calf, ankle, perforator"
+            "Package the Navigation Planner's movement command as JSON. "
+            "The Navigation Planner's output is in your context: it is a short movement "
+            "command (≤12 words) starting with 'Move'.\n"
+            "Output ONLY valid JSON, no markdown:\n"
+            '{"guidance": "<the Navigation Planner\'s Move command>", '
+            '"action": "move"|"maneuver"|"complete"}\n\n'
+            "action:\n"
+            "  maneuver — if Shunt Analyst output has elim_required=true\n"
+            "  complete  — if Shunt Analyst output has confirmed=true AND the confirmed "
+            "shunt_type is NOT already in the surgeon-accepted list: "
+            + (", ".join(accepted_shunts) if accepted_shunts else "none (no accepted shunts yet)")
+            + "\n"
+            "  move      — all other cases, including when the confirmed type is already accepted\n\n"
+            "guidance rules:\n"
+            "  • Copy the Navigation Planner's 'Move ...' command EXACTLY as written.\n"
+            "  • Do NOT copy text from any other agent.\n"
+            "  • If action=maneuver, replace guidance with: "
+            "'Perform elimination test at current zone'.\n"
+            "  • If action=complete, replace guidance with: "
+            "'Circuit complete — classification confirmed'."
         ),
-        expected_output='Valid JSON only: {"guidance": "...", "action": "move"}',
+        expected_output='{"guidance": "...", "action": "move"|"maneuver"|"complete"}',
         agent=specialist,
-        context=[task2, task3, task4],
+        context=[task2, task4],
     )
 
     # ── Single Crew — one kickoff, agents interact via context ────────────────
@@ -243,33 +350,43 @@ def run_guidance_crew(
     # Run kickoff in a daemon thread so we can enforce a hard wall-clock limit.
     # The thread keeps running silently if it overruns; it never emits because
     # only the caller (process() in stream.py) calls socketio.emit().
-    _result_box: list = [None]
-    _error_box:  list = [None]
+    _result_box:  list = [None]
+    _error_box:   list = [None]
+    _verbose_box: list = [""]
     _done = threading.Event()
 
     def _kickoff():
+        buf = io.StringIO()
+        _saved = sys.stdout
+        sys.stdout = buf
         try:
             _result_box[0] = crew.kickoff()
         except Exception as exc:
             _error_box[0] = exc
         finally:
+            sys.stdout = _saved
+            _verbose_box[0] = buf.getvalue()
             _done.set()
 
     threading.Thread(target=_kickoff, daemon=True).start()
 
+    _fallback_raw = {"interpret": "", "shunt": "", "circuit": "", "nav": "", "guidance": ""}
+
     if not _done.wait(timeout=90):
         logger.error("[CrewAI] Crew timed out after 90 s — returning fallback")
+        _fallback_raw["guidance"] = "[crew-timeout]"
         return (
             "Continue scanning distally to locate anatomical junction",
-            "[crew-timeout]",
+            _fallback_raw,
             "move",
             False, "undetermined", "",
         )
     if _error_box[0] is not None:
         logger.error("[CrewAI] Crew kickoff failed: %s", _error_box[0])
+        _fallback_raw["guidance"] = f"[crew-error] {_error_box[0]}"
         return (
             "Continue scanning distally to locate anatomical junction",
-            f"[crew-error] {_error_box[0]}",
+            _fallback_raw,
             "move",
             False, "undetermined", "",
         )
@@ -292,13 +409,14 @@ def run_guidance_crew(
         """Truncated task output — used for display only."""
         return _t_full(i)[:80] or "—"
 
-    combined_raw = (
-        f"[interpret] {_t(0)} | "
-        f"[shunt] {_t(1)} | "
-        f"[circuit] {_t(2)} | "
-        f"[nav] {_t(3)} | "
-        f"[guidance] {raw[:80]}"
-    )
+    agents_raw = {
+        "interpret": _t_full(0),
+        "shunt":     _t_full(1),
+        "circuit":   _t_full(2),
+        "nav":       _t_full(3),
+        "guidance":  raw,
+        "verbose":   _verbose_box[0],  # full CrewAI Thought/Action/Observation chain
+    }
 
     # ── Parse JSON from task5 output (guidance) ──────────────────────────────
     guidance = "Continue scanning distally to locate anatomical junction"
@@ -319,7 +437,7 @@ def run_guidance_crew(
     shunt_evidence = ""
 
     try:
-        t2_raw = _t_full(1)
+        t2_raw    = _t_full(1)
         t2_parsed = json.loads(_extract_json_str(t2_raw))
         shunt_found    = bool(t2_parsed.get("confirmed", False))
         shunt_type     = t2_parsed.get("shunt_type", "undetermined")
@@ -327,90 +445,4 @@ def run_guidance_crew(
     except (json.JSONDecodeError, Exception):
         pass
 
-    # ── Deterministic gate (bidirectional) ────────────────────────────────────
-    # Blocks LLM false-positives AND fills in LLM false-negatives.
-    # Also drives the action gate below.
-    def _has(flow: str, fT: str, tT: str) -> bool:
-        return any(
-            c.get("flow") == flow and c.get("from_type") == fT and c.get("to_type") == tT
-            for c in clips
-        )
-
-    ep_n1_n2       = _has("EP", "N1", "N2")
-    ep_n2_n2       = _has("EP", "N2", "N2")
-    ep_n2_n3       = _has("EP", "N2", "N3")
-    ep_n1_n3       = _has("EP", "N1", "N3")
-    rp_n2_n1       = _has("RP", "N2", "N1")
-    rp_n3_n1       = _has("RP", "N3", "N1")
-    rp_n3_n2       = _has("RP", "N3", "N2")
-    elim_no_reflux = any(c.get("elimination_test", "") == "No Reflux" for c in clips)
-    elim_reflux    = any(c.get("elimination_test", "") == "Reflux"    for c in clips)
-    has_elim       = elim_no_reflux or elim_reflux
-
-    # Elimination test trigger: requires SFJ/SPJ entry (ep_n1_n2) to be meaningful.
-    # Without ep_n1_n2, ep_n2_n3 + rp_n3_n1 + rp_n2_n1 is Type 2C, not an ambiguous trunk.
-    elim_trigger = ep_n1_n2 and ep_n2_n3 and rp_n3_n1 and rp_n2_n1 and not has_elim
-
-    # Forward-override checks (priority order, most restrictive first).
-    # Type 2A intentionally omitted: ep_n2_n3 + rp_n3_n1 is a valid intermediate state
-    # for Type 2C and Type 3/1+2, so premature auto-confirmation would be wrong.
-    _forward_checks: list[tuple[str, bool]] = [
-        ("3",   ep_n1_n2 and ep_n2_n3 and rp_n3_n1 and rp_n2_n1 and elim_no_reflux),
-        ("1+2", ep_n1_n2 and ep_n2_n3 and rp_n3_n1 and rp_n2_n1 and elim_reflux),
-        ("1",   ep_n1_n2 and rp_n2_n1 and not ep_n2_n3 and not rp_n3_n1),
-        ("5",   ep_n1_n3 and rp_n3_n2 and ep_n2_n3 and rp_n3_n1 and not rp_n2_n1),
-        ("4",   ep_n1_n3 and rp_n2_n1),
-        ("6",   ep_n1_n3 and rp_n3_n1 and not ep_n2_n2 and not ep_n2_n3
-                and not rp_n2_n1 and not rp_n3_n2),
-        ("2C",  not ep_n1_n2 and (ep_n2_n2 or ep_n2_n3)
-                and (rp_n3_n1 or rp_n3_n2) and rp_n2_n1),
-        ("2B",  not ep_n1_n2 and ep_n2_n2 and rp_n3_n1 and not rp_n2_n1),
-    ]
-
-    # Minimum-set map for LLM false-positive blocking (all types, including 2A)
-    _all_min_ok: dict[str, bool] = {
-        "1":   ep_n1_n2 and rp_n2_n1,
-        "2A":  ep_n2_n3 and rp_n3_n1,
-        "2B":  ep_n2_n2 and rp_n3_n1,
-        "2C":  (ep_n2_n2 or ep_n2_n3) and (rp_n3_n1 or rp_n3_n2) and rp_n2_n1,
-        "3":   ep_n1_n2 and ep_n2_n3 and rp_n3_n1 and rp_n2_n1 and has_elim,
-        "1+2": ep_n1_n2 and ep_n2_n3 and rp_n3_n1 and rp_n2_n1 and has_elim,
-        "4":   ep_n1_n3 and rp_n2_n1,
-        "5":   ep_n1_n3 and rp_n3_n2 and ep_n2_n3 and rp_n3_n1,
-        "6":   ep_n1_n3 and rp_n3_n1,
-    }
-
-    det_type      = "undetermined"
-    det_confirmed = False
-    for stype, ok in _forward_checks:
-        if ok:
-            det_type      = stype
-            det_confirmed = True
-            break
-
-    if det_confirmed:
-        shunt_found    = True
-        shunt_type     = det_type
-        if not shunt_evidence:
-            shunt_evidence = f"Minimum clip set for Type {det_type} complete."
-    elif shunt_found:
-        # LLM said confirmed but minimum clips are absent → block false positive
-        if not _all_min_ok.get(shunt_type, True):
-            shunt_found = False
-
-    # ── Action gate ───────────────────────────────────────────────────────────
-    if det_confirmed:
-        # Full circuit confirmed deterministically — always override guidance
-        # so the text contains the required keywords even when LLM returned
-        # action=complete with weak phrasing.
-        guidance = "Circuit complete — classification confirmed, all zones mapped"
-        action = "complete"
-    elif action == "maneuver" and not elim_trigger:
-        # Spurious maneuver: elimination test condition not actually met
-        action = "move"
-    elif elim_trigger and action != "maneuver":
-        # Elimination test is pending but LLM missed it
-        action   = "maneuver"
-        guidance = "Hold probe at escape site and compress tributary — record Doppler response"
-
-    return guidance, combined_raw, action, shunt_found, shunt_type, shunt_evidence
+    return guidance, agents_raw, action, shunt_found, shunt_type, shunt_evidence

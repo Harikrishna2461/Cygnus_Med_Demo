@@ -67,6 +67,7 @@ build/
 
 # Large training output folder
 Task_3/vein_detection_task_3_training/
+Task_3_Experimental/vein_detection_task_3_training/
 
 # PyInstaller build output
 Task_1_App/_internal/

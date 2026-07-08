@@ -18,8 +18,8 @@ from typing import Optional
 def _level(pos: float) -> str:
     if pos <= 0.07:  return f"SFJ/groin (posY={pos:.2f})"
     if pos <= 0.20:  return f"upper thigh (posY={pos:.2f})"
-    if pos <= 0.33:  return f"mid-thigh/Dodd (posY={pos:.2f})"
-    if pos <= 0.47:  return f"lower thigh/Hunterian (posY={pos:.2f})"
+    if pos <= 0.33:  return f"Hunterian/proximal thigh (posY={pos:.2f})"
+    if pos <= 0.47:  return f"Dodd/distal thigh (posY={pos:.2f})"
     if pos <= 0.57:  return f"popliteal/SPJ (posY={pos:.2f})"
     if pos <= 0.88:  return f"calf (posY={pos:.2f})"
     return f"ankle (posY={pos:.2f})"
@@ -37,11 +37,7 @@ def analyze(clips: list[dict]) -> str:
         Multi-line Q1-Q4 status string ready to embed in the LLM state message.
     """
     if not clips:
-        return (
-            "Q1-Q4 STATUS\n"
-            "Q1 NOT CONFIRMED — No clips yet.\n"
-            "  Next: move probe to groin crease (posY≈0.06), scan transversely at SFJ."
-        )
+        return "Q1-Q4 STATUS\nQ1: OPEN\nQ2: N/A\nQ3: N/A\nQ4: N/A"
 
     def has(flow: str, fT: str, tT: str) -> bool:
         return any(
@@ -73,137 +69,73 @@ def analyze(clips: list[dict]) -> str:
 
     lines = ["Q1-Q4 STATUS"]
 
-    # ── Q1 ────────────────────────────────────────────────────────────────────
+    # Q1
     if has_ep_n1_n2:
         c = first("EP", "N1", "N2")
-        lines.append(
-            f"Q1 CONFIRMED — EP N1→N2 at {_level(float(c.get('pos_y_ratio', 0.06)))}. "
-            "Deep blood entering GSV trunk (SFJ or Hunterian incompetent)."
-        )
+        lines.append(f"Q1: CONFIRMED — EP N1→N2 at {_level(float(c.get('pos_y_ratio', 0.06)))}.")
     elif has_ep_n2_n2:
         c = first("EP", "N2", "N2")
-        lines.append(
-            f"Q1 CONFIRMED — EP N2→N2 at {_level(float(c.get('pos_y_ratio', 0.25)))}. "
-            "Perforator feeds GSV directly. SFJ competent."
-        )
+        lines.append(f"Q1: CONFIRMED — EP N2→N2 at {_level(float(c.get('pos_y_ratio', 0.25)))}.")
     elif has_ep_n1_n3:
         c = first("EP", "N1", "N3")
-        lines.append(
-            f"Q1 CONFIRMED — EP N1→N3 at {_level(float(c.get('pos_y_ratio', 0.25)))}. "
-            "Deep blood enters tributary directly — SFJ competent. Pattern: Type 4/5/6."
-        )
+        lines.append(f"Q1: CONFIRMED — EP N1→N3 at {_level(float(c.get('pos_y_ratio', 0.25)))}.")
     elif has_ep_n2_n3:
-        lines.append(
-            "Q1 PARTIAL — EP N2→N3 confirmed (trunk escape). "
-            "SFJ entry NOT yet assessed — move to groin (posY≈0.06) to confirm or exclude N1→N2."
-        )
+        lines.append("Q1: PARTIAL — EP N2→N3 found; SFJ/Hunterian not yet assessed.")
     else:
-        lines.append(
-            "Q1 NOT CONFIRMED — Move to groin crease (posY≈0.05). "
-            "If SFJ competent, also check Dodd zone (posY 0.21–0.33) and Hunterian zone (posY 0.34–0.47) for perforator entry."
-        )
+        lines.append("Q1: OPEN")
 
-    # ── Q2 ────────────────────────────────────────────────────────────────────
+    # Q2
     if has_ep_n1_n2 or has_ep_n2_n2:
         if has_rp_n2_n1:
             c = first("RP", "N2", "N1")
-            lines.append(
-                f"Q2 CONFIRMED — RP N2→N1 at {_level(float(c.get('pos_y_ratio', 0.3)))}. "
-                "GSV trunk carries blood backward (toward foot)."
-            )
+            lines.append(f"Q2: CONFIRMED — RP N2→N1 at {_level(float(c.get('pos_y_ratio', 0.3)))}.")
         else:
-            ep = first("EP", "N1", "N2") or first("EP", "N2", "N2")
-            ep_pos = float(ep.get("pos_y_ratio", 0.06)) if ep else 0.06
-            lines.append(
-                f"Q2 NOT CONFIRMED — Scan GSV trunk distally from posY≈{ep_pos:.2f} (medial surface). "
-                "Apply Paranà: reversed flow = RP N2→N1. No reflux = GSV may be conduit only (Type 3)."
-            )
+            lines.append("Q2: OPEN")
+    else:
+        lines.append("Q2: N/A")
 
-    # ── Q3 ────────────────────────────────────────────────────────────────────
+    # Q3
     if has_ep_n1_n2 or has_ep_n2_n2:
         if has_ep_n2_n3:
             c = first("EP", "N2", "N3")
-            lines.append(
-                f"Q3 CONFIRMED — EP N2→N3 at {_level(float(c.get('pos_y_ratio', 0.3)))}. "
-                "Blood escapes GSV into tributary."
-            )
+            lines.append(f"Q3: CONFIRMED — EP N2→N3 at {_level(float(c.get('pos_y_ratio', 0.3)))}.")
         else:
-            if has_rp_n2_n1:
-                rp = first("RP", "N2", "N1")
-                rp_pos = float(rp.get("pos_y_ratio", 0.3)) if rp else 0.3
-                lines.append(
-                    f"Q3 NOT CONFIRMED — Scan GSV between SFJ and posY≈{rp_pos:.2f} for tributary escape (EP N2→N3). "
-                    "N3 visible above fascia while N2 in compartment = escape junction."
-                )
-            else:
-                lines.append(
-                    "Q3 NOT CONFIRMED — After Q2 assessment, scan distally along GSV for EP N2→N3."
-                )
+            lines.append("Q3: OPEN")
+    elif has_ep_n2_n3:
+        c = first("EP", "N2", "N3")
+        lines.append(f"Q3: CONFIRMED — EP N2→N3 at {_level(float(c.get('pos_y_ratio', 0.3)))}.")
+    else:
+        lines.append("Q3: N/A")
 
-    # ── Q3 perforator circuit ─────────────────────────────────────────────────
-    if has_ep_n2_n2 and not has_ep_n1_n2:
-        c = first("EP", "N2", "N2")
-        perf_pos = float(c.get("pos_y_ratio", 0.25)) if c else 0.25
-        if not has_rp_n3:
-            lines.append(
-                f"PERFORATOR CIRCUIT — EP N2→N2 at posY≈{perf_pos:.2f}. "
-                f"Scan for tributary reflux (RP N3) at posY {max(0.0, perf_pos-0.10):.2f}–{min(1.0, perf_pos+0.15):.2f}. "
-                "Also check RP N2→N1 (distinguishes Type 2B from 2C)."
-            )
-
-    # ── Q4 ────────────────────────────────────────────────────────────────────
+    # Q4
     if has_ep_n2_n3:
-        escape = first("EP", "N2", "N3")
-        esc_pos = float(escape.get("pos_y_ratio", 0.3)) if escape else 0.3
         if has_rp_n3:
-            c_rp = next(
-                (c for c in clips if c.get("flow") == "RP" and c.get("from_type") == "N3"),
-                None,
-            )
-            direction = "toward GSV (RP N3→N2)" if has_rp_n3_n2 else "into deep system (RP N3→N1)"
-            rp_level = _level(float(c_rp.get("pos_y_ratio", 0.5))) if c_rp else "unknown level"
-            lines.append(
-                f"Q4 CONFIRMED — RP N3 confirmed: tributary reflux {direction} at {rp_level}."
-            )
+            c_rp = next((c for c in clips if c.get("flow") == "RP" and c.get("from_type") == "N3"), None)
+            direction = "RP N3→N2" if has_rp_n3_n2 else "RP N3→N1"
+            rp_level  = _level(float(c_rp.get("pos_y_ratio", 0.5))) if c_rp else "unknown"
+            lines.append(f"Q4: CONFIRMED — {direction} at {rp_level}.")
         else:
-            lines.append(
-                f"Q4 NOT CONFIRMED — Follow tributary from escape posY≈{esc_pos:.2f}. "
-                "Retrograde into deep perforator = RP N3→N1. Retrograde toward GSV = RP N3→N2."
-            )
+            lines.append("Q4: OPEN")
+    else:
+        lines.append("Q4: N/A")
 
-    # ── EP N1→N3 branch (Type 4/5/6) ─────────────────────────────────────────
+    # EP N1→N3 type hint (factual only)
     if has_ep_n1_n3:
-        if has_rp_n2_n1 and not has_rp_n3:
-            c = first("EP", "N1", "N3")
-            lines.append(
-                f"TYPE 4 developing — EP N1→N3 at {_level(float(c.get('pos_y_ratio', 0.25)))} + RP N2→N1. "
-                "Trace tributary for RP N3→N2 to confirm full circuit."
-            )
-        elif not has_rp_n2_n1 and not has_rp_n3:
-            c = first("EP", "N1", "N3")
-            lines.append(
-                f"TYPE 4/5/6 developing — EP N1→N3 at {_level(float(c.get('pos_y_ratio', 0.25)))}. "
-                "Trace tributary for re-entry: RP N3→N1 (Type 6, no trunk) or RP N3→N2 then RP N2→N1 (Type 4/5)."
-            )
+        rp_n2_str = "RP N2→N1 confirmed" if has_rp_n2_n1 else "RP N2→N1 not confirmed"
+        rp_n3_str = "RP N3 confirmed" if has_rp_n3 else "RP N3 not confirmed"
+        lines.append(f"TYPE 4/5/6 pattern — {rp_n2_str}; {rp_n3_str}.")
 
-    # ── Type 3 conduit check ──────────────────────────────────────────────────
-    if has_ep_n1_n2 and has_ep_n2_n3 and not has_rp_n2_n1:
-        escape = first("EP", "N2", "N3")
-        esc_pos = float(escape.get("pos_y_ratio", 0.3)) if escape else 0.3
-        lines.append(
-            f"TYPE 3 CONDUIT CHECK — EP N1→N2 + EP N2→N3 present, NO RP N2→N1. "
-            f"GSV may act as conduit to escape at posY≈{esc_pos:.2f}. "
-            "Do NOT assume trunk reflux below escape — only record RP N2→N1 if explicitly seen below that posY."
-        )
+    # Perforator circuit factual note
+    if has_ep_n2_n2 and not has_ep_n1_n2:
+        rp_n3_str = "RP N3 confirmed" if has_rp_n3 else "RP N3 not confirmed"
+        rp_n2_str = "RP N2→N1 confirmed" if has_rp_n2_n1 else "RP N2→N1 not confirmed"
+        lines.append(f"PERFORATOR ENTRY — {rp_n3_str}; {rp_n2_str}.")
 
-    # ── Elimination test alert ────────────────────────────────────────────────
-    # ep_n1_n2 is REQUIRED: without SFJ/SPJ entry the ambiguity (Type 3 vs 1+2)
-    # doesn't exist — ep_n2_n3 + rp_n3_n1 + rp_n2_n1 without ep_n1_n2 is Type 2C.
-    if has_ep_n1_n2 and has_ep_n2_n3 and has_rp_n3_n1 and has_rp_n2_n1 and not elim_done:
-        lines.append(
-            "ELIMINATION TEST REQUIRED — EP N2→N3 + RP N3→N1 + RP N2→N1 all confirmed, no elimTest yet. "
-            "Compress the tributary at the escape site. "
-            "If GSV Doppler disappears → Type 3 (No Reflux). If persists → Type 1+2 (Reflux)."
-        )
+    # Elimination test status (factual only)
+    if has_ep_n1_n2 and has_ep_n2_n3 and has_rp_n3_n1 and has_rp_n2_n1:
+        if not elim_done:
+            lines.append("ELIM TEST: PENDING — four clips present, no elimTest recorded.")
+        else:
+            lines.append("ELIM TEST: DONE — result recorded on EP N2→N3 clip.")
 
     return "\n".join(lines)

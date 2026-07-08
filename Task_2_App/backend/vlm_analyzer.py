@@ -15,12 +15,18 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 REGION_TARGET_VESSELS: dict[str, str] = {
-    "SFJ":     "Saphenofemoral Junction — GSV (N2) meets femoral vein (N1) at groin",
-    "GSV-THI": "GSV trunk (N2) in thigh, within fascial compartment",
-    "GSV-CAL": "GSV trunk (N2) in calf, within fascial compartment",
-    "SPJ":     "Saphenopopliteal Junction — SSV (N2) meets popliteal vein (N1) behind knee",
-    "SSV":     "SSV trunk (N2) in posterior calf",
-    "UNKNOWN": "superficial venous structure",
+    "SFJ":        "Saphenofemoral Junction — GSV (N2) meets femoral vein (N1) at groin",
+    "Upper Thigh":"GSV trunk (N2) in upper thigh, within fascial compartment",
+    "Hunterian":  "GSV trunk (N2) in proximal thigh (Hunter's canal), within fascial compartment",
+    "Dodd":       "GSV trunk (N2) in distal thigh, within fascial compartment",
+    "GSV-THI":    "GSV trunk (N2) in thigh, within fascial compartment",
+    "GSV-CAL":    "GSV trunk (N2) in calf, within fascial compartment",
+    "SPJ":        "Saphenopopliteal Junction — SSV (N2) meets popliteal vein (N1) behind knee",
+    "SSV":        "SSV trunk (N2) in posterior calf",
+    "Giacomini":  "Giacomini vein / posterior thigh — THIS FRAME HAS NO ANNOTATION LABELS. "
+                  "No N1/N2/N3 text labels are present. All label_*_visible fields MUST be false.",
+    "Calf":       "GSV in medial calf, within fascial compartment",
+    "UNKNOWN":    "superficial venous structure",
 }
 
 _SYSTEM_PROMPT = (
@@ -36,10 +42,18 @@ _SYSTEM_PROMPT = (
     "  N1 vessel: blue/cyan polygon outline + 'N1 [n]' text label. "
     "Sits BELOW/DEEP TO the fascial lines, further from the skin. This is the deep vein (femoral or popliteal).\n"
     "  Numbers in brackets [0], [1], [2] are just vessel indices — ignore them.\n\n"
+    "CRITICAL LABEL RULE — read carefully:\n"
+    "  A label field (label_n1_visible, label_n2_visible, label_n3_visible) MUST be set to true ONLY IF "
+    "you can literally read the EXACT PRINTED TEXT 'N1 [n]', 'N2 [n]', or 'N3 [n]' as a visible text overlay in the image. "
+    "A circular or oval dark vessel shape WITHOUT that printed text label = label is NOT visible (false). "
+    "If the image shows only tissue or ultrasound speckle with NO printed annotation text, "
+    "ALL label_*_visible fields MUST be false, n2_in_fascial_compartment MUST be false, "
+    "fascial_layer_visible MUST be false, and image_quality should reflect what you see.\n\n"
     "WHAT TO REPORT:\n"
     "  For each N-type: is it present (yes/no), based on seeing its outline and label.\n"
     "  The fascial layer: is it visible (yes/no).\n"
     "  frame_note: 5 words max, only vessel labels and positions, e.g. 'N2 in fascia, N3 above'. "
+    "If no labels at all: 'No annotations visible in frame'. "
     "Never mention flow, colour, Doppler, EP, RP, or any clinical finding.\n\n"
     "Respond only with valid JSON."
 )
@@ -118,7 +132,9 @@ def _build_user_prompt(region: str, leg: str) -> str:
         f"  - Is there a vessel with a YELLOW polygon outline labeled 'N3 [n]' above the fascia lines?\n"
         f"  - Is there a vessel with a GREEN polygon outline labeled 'N2 [n]' between the fascia lines?\n"
         f"  - Is there a vessel with a blue/cyan outline labeled 'N1 [n]' below the fascia lines?\n"
-        f"Report only what is annotated. Do not mention flow, Doppler, EP, or RP.\n\n"
+        f"Report only what is annotated with explicit text labels. Do not mention flow, Doppler, EP, or RP.\n"
+        f"REMINDER: If you do not see actual printed 'N1 [n]'/'N2 [n]'/'N3 [n]' text in the image, "
+        f"all label_*_visible fields must be false.\n\n"
         f"Respond with valid JSON only:\n{_ANALYSIS_SCHEMA}"
     )
 
@@ -157,6 +173,16 @@ def analyze_frame(
     leg: str,
     media_type: str = "image/jpeg",
 ) -> UltrasoundAssessment:
+    # Giacomini zone uses a blank tissue frame with no annotation overlays.
+    # The VLM model confabulates fascia lines and N2 from tissue banding on
+    # featureless ultrasound images, so bypass the API call and return the
+    # only honest result: nothing annotated. The UI fields still render — all No.
+    if region == "Giacomini":
+        return UltrasoundAssessment(
+            image_quality="good",
+            frame_note="Giacomini zone — no saphenous trunk annotation in posterior view",
+        )
+
     from config import GROQ_API_KEY, GROQ_VISION_MODEL
 
     if not GROQ_API_KEY:

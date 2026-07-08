@@ -49,6 +49,7 @@ def register_stream_events(socketio) -> None:
         sess.last_llm_region   = ""
         sess.confirmed_shunts  = []
         sess.rejection_notes   = []
+        sess.accepted_shunts   = []
         sess.last_guidance     = None
         sess.last_action       = None
         logger.info("Stream session started: %s", session_id)
@@ -214,6 +215,21 @@ def register_stream_events(socketio) -> None:
             "clips":      sess.clips if sess else [],
             "log_count":  len(sess.thinking_log) if sess else 0,
         })
+
+    # ── shunt_accept ──────────────────────────────────────────────────────────
+
+    @socketio.on("shunt_accept")
+    def handle_shunt_accept(data: dict):
+        from flask_socketio import emit
+        session_id = str(data.get("session_id", "default"))
+        sess = sess_store.get_or_create(session_id)
+        s_type = str(data.get("shunt_type", "unknown"))
+        leg    = str(data.get("leg", "unknown"))
+        key = f"{leg}:{s_type}"
+        if key not in sess.accepted_shunts:
+            sess.accepted_shunts.append(key)
+        logger.info("Shunt accepted: type=%s leg=%s session=%s", s_type, leg, session_id)
+        emit("shunt_accept_ack", {"session_id": session_id, "shunt_type": s_type, "leg": leg})
 
     # ── shunt_reject ──────────────────────────────────────────────────────────
 

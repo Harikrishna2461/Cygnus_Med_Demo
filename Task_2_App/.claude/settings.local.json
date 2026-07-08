@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_2_App\\\\generate_supplement.py\")"
+    ]
+  }
+}

@@ -25,7 +25,7 @@ import logging
 import litellm
 from crewai import Agent, LLM
 
-from config import GROQ_API_KEY, GROQ_TEXT_MODEL
+from config import GROQ_API_KEY, GROQ_TEXT_MODEL, GROQ_MID_MODEL, GROQ_FAST_MODEL
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +43,14 @@ def _patched_completion(*args, **kwargs):
 litellm.completion = _patched_completion
 
 
-def _make_llm() -> LLM:
+def _make_llm(speed: str = "heavy") -> LLM:
+    _models = {
+        "heavy": GROQ_TEXT_MODEL,   # openai/gpt-oss-120b — ShuntAnalyst,GuidancePlannner
+        "mid":   GROQ_MID_MODEL,    # llama-3.3-70b-versatile — Interpreter, Circuit, Planner
+        "fast":  GROQ_FAST_MODEL,   # llama-3.1-8b-instant — JSON formatter
+    }
     return LLM(
-        model=f"groq/{GROQ_TEXT_MODEL}",
+        model=f"groq/{_models[speed]}",
         api_key=GROQ_API_KEY,
         temperature=0.3,
     )
@@ -58,15 +63,18 @@ def make_clinical_interpreter() -> Agent:
     Reads confirmed clips, VLM frame annotation, and scan history.
     Determines whether the accumulated evidence is clinically sufficient to
     describe the circuit so far, and identifies any ambiguous or missing clip evidence.
+    Uses mid-tier model — synthesis task, not strict rule reasoning.
     """
     return Agent(
         role="CHIVA Clinical Interpreter",
         goal=(
             "Given confirmed EP/RP clips, a VLM frame annotation, and a scan history summary, "
-            "assess whether the accumulated duplex findings sufficiently characterise the "
-            "haemodynamic circuit so far. Identify which clips are unambiguous, which are "
-            "absent but expected, and whether the VLM frame shows anything that modifies the "
-            "clip interpretation. Produce a concise clinical interpretation (max 100 words)."
+            "assess the clinical soundness of each confirmed clip. "
+            "Identify which clips are unambiguous and which (if any) may be artefactual or misclassified "
+            "(e.g. AASV labelled as GSV, or a clip recorded at a posY inconsistent with the anatomy). "
+            "Cross-reference the VLM annotation: does the visible anatomy support or conflict with the clip list? "
+            "Do NOT infer or project what clips should be present — report only what is confirmed. "
+            "Max 100 words."
         ),
         backstory=(
             "Expert CHIVA vascular surgeon with 20 years of duplex scanning experience. "
@@ -76,8 +84,8 @@ def make_clinical_interpreter() -> Agent:
             "that AASV is N3 not N2; and that an elimination test is required before "
             "distinguishing Type 3 from Type 1+2."
         ),
-        llm=_make_llm(),
-        verbose=False,
+        llm=_make_llm("mid"),
+        verbose=True,
         allow_delegation=False,
         max_iter=3,
     )
@@ -124,8 +132,8 @@ def make_shunt_analyst() -> Agent:
             "CRITICAL: For EP N1→N3 types — Type4=RP N2→N1 present; Type5=EP N2→N3 present, no RP N2→N1; Type6=no N2. "
             "Never declares a type confirmed without the full minimum clip set."
         ),
-        llm=_make_llm(),
-        verbose=False,
+        llm=_make_llm("heavy"),  # strict rule reasoning — needs 120B
+        verbose=True,
         allow_delegation=False,
         max_iter=3,
     )
@@ -135,33 +143,46 @@ def make_shunt_analyst() -> Agent:
 
 def make_circuit_analyst() -> Agent:
     """
-    Takes the shunt classification output and Q1-Q4 status, then derives:
-    - which diagnostic question (Q1-Q4) is currently open
-    - the specific anatomical zone that must be examined to answer it
+    Reads the Q1-Q4 status and scan history to determine the current examination
+    state and the specific next target zone — with full CHIVA progression awareness.
     """
     return Agent(
         role="CHIVA Circuit Analyst",
         goal=(
-            "From a shunt classification and Q1-Q4 status block, determine which "
-            "diagnostic question (Q1–Q4) is currently open and name the exact anatomical "
-            "zone (with posY band) that must be examined to answer it. "
-            "Also flag if an immediate action is required (elimination test or circuit complete). "
-            "Keep to 60 words."
+            "Identify the current CHIVA examination state and the specific next target zone. "
+            "Match what has been found (clips) and what has been visited (scan history) "
+            "to the CHIVA flow: Q1 open → find entry point → Q2 → trunk reflux → "
+            "Q3 → escape → Q4 → re-entry. "
+            "If no clips found after scanning all major zones, direct the probe back "
+            "to SFJ/groin to re-examine. Always name a specific zone. ≤70 words."
         ),
         backstory=(
-            "CHIVA duplex examination specialist who reads shunt type progressions and "
-            "maps them to the four diagnostic questions: "
-            "Q1=entry point, Q2=trunk reflux, Q3=trunk escape, Q4=tributary re-entry. "
-            "Knows posY landmarks: 0.04-0.09=SFJ, 0.21-0.35=Hunterian, "
-            "0.40-0.55=SPJ/popliteal, 0.56-0.80=calf, 0.81-1.00=ankle. "
-            "CRITICAL — after EP N1→N3 at Giacomini (posterior thigh): "
-            "Q2 is whether the GSV trunk (N2) carries this blood back to deep (RP N2→N1). "
-            "Direct to medial upper thigh (posY 0.08-0.20) to check GSV trunk for RP N2→N1. "
-            "Do NOT direct to calf after EP N1→N3 — the return path is always proximal via trunk. "
-            "Also check for RP N3→N2 at Giacomini-GSV junction (posterior, posY 0.10-0.20) for Type 5."
+            "Senior CHIVA examination specialist. You know exactly what anatomical "
+            "structure to look for at every zone on the leg.\n\n"
+            "ZONE ANATOMY — what each zone contains and where to find it:\n"
+            "  SFJ/groin (posY 0.04–0.07): GSV meets CFV at the groin crease, "
+            "anterior-medial surface. Terminal valve. Find: SFJ junction.\n"
+            "  Upper thigh (posY 0.08–0.20): GSV in saphenous fascial compartment, "
+            "medial surface. Find: GSV inside the 'saphenous eye' in transverse.\n"
+            "  Hunterian (proximal thigh) (posY 0.21–0.33): Hunterian perforators connect FV to GSV in Hunter's canal, "
+            "medial surface. KEY site for EP N1→N2 when SFJ is competent. Find: GSV-to-FV perforator junction on medial proximal thigh.\n"
+            "  Dodd (distal thigh) (posY 0.34–0.47): Dodd perforators connect FV to GSV just above the knee, "
+            "medial surface. Find: Dodd perforator at GSV junction on medial distal thigh.\n"
+            "  Popliteal/SPJ (posY 0.48–0.57): SSV meets popliteal vein, "
+            "posterior surface. Find: SPJ junction in popliteal fossa.\n"
+            "  Calf (posY 0.58–0.88): GSV on medial surface, SSV posterior. "
+            "Find: re-entry perforators and tributary junctions.\n"
+            "  Ankle (posY 0.89–1.00): GSV at medial malleolus. "
+            "Find: distal perforators and GSV.\n\n"
+            "CORE PRINCIPLE: The task description tells you whether the probe is "
+            "inside the Q1 corridor or not. When inside (posY 0.04–0.57), "
+            "describe what to find at the CURRENT zone. "
+            "When outside (posY > 0.57), identify which Q1 zone to route to next. "
+            "A zone visited without a clip is not cleared — but the probe is there now, "
+            "so guide it within the zone before suggesting it move."
         ),
-        llm=_make_llm(),
-        verbose=False,
+        llm=_make_llm("heavy"),  # core navigation brain — zone routing + examination state reasoning
+        verbose=True,
         allow_delegation=False,
         max_iter=3,
     )
@@ -171,27 +192,39 @@ def make_circuit_analyst() -> Agent:
 
 def make_navigation_planner() -> Agent:
     """
-    Takes the circuit analyst's open-Q output and the zone-specific protocol,
-    then selects the exact posY band, probe surface, anatomical target, and maneuver.
+    Decides where to move the probe next or what zone to scan, based on the
+    circuit analyst's open-Q output and the current probe position.
     """
     return Agent(
         role="CHIVA Navigation Planner",
         goal=(
-            "Given an open diagnostic question, the current probe position, and the "
-            "zone-specific examination protocol, produce a specific navigation plan: "
-            "target posY band, probe surface (anterior-medial/medial/posterior/lateral), "
-            "named anatomical target, direction word, and the applicable maneuver "
-            "(Paranà/Valsalva/squeezing/transverse scan). Keep to 50 words."
+            "Give the trainee ONE probe movement command in ≤15 words. "
+            "Every command starts with 'Move' and MUST contain:\n"
+            "  1. A DIRECTION: proximally / distally / medially / laterally / "
+            "posteriorly / anteriorly\n"
+            "  2. A TARGET that always names BOTH the anatomical structure AND its location "
+            "on the leg — never just 'GSV' alone, always 'GSV in saphenous compartment at upper thigh' "
+            "or 'SFJ junction at groin crease' or 'Hunterian perforator on medial proximal thigh'.\n"
+            "Example valid commands:\n"
+            "  'Move medially toward GSV in saphenous compartment at upper thigh'\n"
+            "  'Move proximally toward SFJ junction at groin crease'\n"
+            "  'Move posteriorly toward SPJ junction in popliteal fossa'\n"
+            "  'Move distally to Dodd perforator on medial distal thigh'\n"
+            "  'Move medially toward GSV at medial malleolus (ankle)'"
         ),
         backstory=(
-            "Vascular surgeon who directs duplex examinations following the Adler 2022 "
-            "standard sequence and Delfrate 2023 perforator protocol. "
-            "Knows that BOTH Valsalva AND Paranà are required at SFJ and SPJ (Gianesini 2014), "
-            "that Paranà is preferred over squeezing alone in the thigh and calf, "
-            "and that pathological perforators require ≥500 ms outward flow AND ≥3.5 mm diameter."
+            "You are the probe navigator for a real-time CHIVA duplex examination. "
+            "Your output is always a movement command: direction + destination. "
+            "When the probe needs to stay in the current zone, give micro-navigation "
+            "toward a specific structure (e.g. 'Move medially toward GSV trunk'). "
+            "When the probe needs to change zones, give a routing command "
+            "(e.g. 'Move proximally to SFJ/groin'). "
+            "You speak in anatomical terms: GSV, SFJ junction, saphenous compartment, "
+            "Hunterian perforator, Dodd perforator, SPJ junction, popliteal vein, "
+            "re-entry perforator. You never refer to clinical maneuvers."
         ),
-        llm=_make_llm(),
-        verbose=False,
+        llm=_make_llm("mid"),
+        verbose=True,
         allow_delegation=False,
         max_iter=3,
     )
@@ -201,33 +234,29 @@ def make_navigation_planner() -> Agent:
 
 def make_guidance_specialist() -> Agent:
     """
-    Synthesizes the navigation plan into a single ≤12-word JSON probe-movement
+    Converts the navigation plan into a single ≤12-word JSON probe-movement
     instruction conforming to the streaming UI format.
     """
     return Agent(
         role="CHIVA Real-Time Guidance Specialist",
         goal=(
-            "Synthesise a navigation plan into a single JSON object: "
-            '{"guidance": "<single imperative ≤12 words>", "action": "move"|"maneuver"|"complete"}. '
-            "action = 'move' (default), 'maneuver' (elimination test only), 'complete' (full circuit only). "
-            "When action='move': guidance = one imperative with a direction word + anatomical target, ≤12 words. "
-            "When action='maneuver': guidance must describe the compression/Doppler step, NOT a move direction — "
-            "e.g. 'Compress tributary at escape point and record Doppler response.' "
-            "Must include 'compress' or 'tributary' or 'Doppler' or 'record' when action='maneuver'. "
-            "When action='complete': use the fixed phrase 'Circuit complete — classification confirmed, all zones mapped'. "
-            "Forbidden in guidance text: EP, RP, N1, N2, N3, reflux, Q1-Q4, confirmed, findings, "
-            "diagnostic, shunt, Given, Since, As the, Currently."
+            "Convert the Navigation Planner's instruction into a JSON object: "
+            '{"guidance": "<≤15 words>", "action": "move"|"maneuver"|"complete"}. '
+            "guidance is navigation only — where to move the probe or what zone to scan. "
+            "action is determined by the Shunt Analyst: "
+            "maneuver if elim_required=true, complete if confirmed=true, move otherwise. "
+            "Forbidden words in guidance: Paranà, Valsalva, Doppler, compress, squeeze, "
+            "maneuver, apply, perform, EP, RP, N1, N2, N3, Q1, Q2, Q3, Q4, shunt."
         ),
         backstory=(
-            "Real-time ultrasound navigation AI embedded in a streaming guidance UI. "
-            "Produces only crisp, single-sentence probe directions the surgeon can act on instantly. "
-            "For move actions, guidance must include a direction word: "
-            "distally / proximally / medially / posteriorly / laterally / transversely / deeper. "
-            "For maneuver actions, guidance must describe what to DO (compress, record Doppler) at the named tributary — "
-            "never a movement instruction when the surgeon must perform the elimination test."
+            "You are the output formatter for a real-time ultrasound navigation system. "
+            "The Navigation Planner has already decided where the probe should go. "
+            "Your job is to package that decision as clean JSON. "
+            "The surgeon is a trained vascular specialist — they know what to do at each zone. "
+            "Your guidance just tells them where to point the probe, nothing more."
         ),
-        llm=_make_llm(),
-        verbose=False,
+        llm=_make_llm("heavy"),  # final output — must correctly parse task2 flags and copy task4 exactly
+        verbose=True,
         allow_delegation=False,
         max_iter=3,
     )

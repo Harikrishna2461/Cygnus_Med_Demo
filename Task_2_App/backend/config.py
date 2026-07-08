@@ -6,8 +6,10 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 PORT = int(os.getenv("PORT", 7861))
 
 # All LLM/VLM calls use Groq
-GROQ_API_KEY = os.getenv("GROQ_API_KEY") or ""
-GROQ_TEXT_MODEL  = "llama-3.3-70b-versatile"
+GROQ_API_KEY      = os.getenv("GROQ_API_KEY") or ""
+GROQ_TEXT_MODEL   = "openai/gpt-oss-120b"             # ShuntAnalyst only — strict rule reasoning
+GROQ_MID_MODEL    = "llama-3.3-70b-versatile"         # ClinicalInterpreter, CircuitAnalyst, NavigationPlanner
+GROQ_FAST_MODEL   = "llama-3.1-8b-instant"            # GuidanceSpecialist — JSON packaging only
 GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
 # Probe localisation — sliding window for stability
@@ -29,10 +31,19 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "task2_state.db")
 # CORS origins allowed
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
 
-# Streaming mode — annotated video for probe-position-synced playback
+# Streaming mode — video paths by annotation level
+# "annotated"  → full N1/N2/N3 label overlay  (saphenous trunk zones: GSV, SSV, SPJ)
+# "raw"        → no overlay                    (Giacomini / non-saphenous posterior)
+_DATA_ROOT = r"c:\Users\Krish\Downloads\Cygnus_Med_Demo\Task_3\Data"
+_VID_FILE  = "202207191643_00-Moving.mp4"
+
 STREAM_VIDEO_PATH = os.getenv(
     "STREAM_VIDEO_PATH",
-    r"c:\Users\Krish\Downloads\Cygnus_Med_Demo\Task_3\Data\2 - Annotated videos\202207191643_00-Moving.mp4",
+    rf"{_DATA_ROOT}\2 - Annotated videos\{_VID_FILE}",
+)
+STREAM_VIDEO_PATH_RAW = os.getenv(
+    "STREAM_VIDEO_PATH_RAW",
+    rf"{_DATA_ROOT}\0 - Raw videos\{_VID_FILE}",
 )
 
 # Placeholder — reserved for future windowing; full history is used while this is disabled

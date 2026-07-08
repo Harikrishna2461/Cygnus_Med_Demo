@@ -34,28 +34,29 @@ _PROTOCOLS: dict[str, str] = {
         "2. Measure GSV anteroposterior diameter (document at this level).\n"
         "3. Apply Paranà/squeeze and release: reflux >500 ms = trunk reflux (RP N2→N1).\n"
         "4. AASV may run parallel to GSV in upper thigh — assess it separately (N3, not N2).\n"
-        "5. If SFJ entry (EP N1→N2) confirmed, trace GSV distally for trunk reflux (RP N2→N1) or escape (EP N2→N3)."
+        "5. After SFJ entry (EP N1→N2) is confirmed, the next findings to establish are trunk reflux (RP N2→N1) and any trunk-to-tributary escape (EP N2→N3) — both assessed along the medial thigh."
     ),
 
-    "mid_thigh_dodd": (
-        "EXAMINATION PROTOCOL — Mid-Thigh / Dodd Zone (posY 0.21–0.33) (Adler 2022 + Delfrate 2023)\n"
-        "Source: Dodd perforators = middle third of thigh (DuplexUS 2014 p.33; Lee 2017 p.129)\n"
-        "1. Transverse B-mode at medial thigh: confirm GSV in fascial compartment ('saphenous eye').\n"
-        "2. Dodd perforators connect the femoral vein (FV) to the GSV at this level.\n"
+    "hunterian_proximal": (
+        "EXAMINATION PROTOCOL — Proximal Thigh / Hunterian Zone (posY 0.21–0.33) (Adler 2022 + Delfrate 2023)\n"
+        "Source: Hunterian perforators = proximal/middle thigh, within Hunter's canal (DuplexUS 2014 p.33; Lee 2017 p.129)\n"
+        "1. Transverse B-mode at medial proximal thigh: confirm GSV in fascial compartment ('saphenous eye').\n"
+        "2. KEY ZONE FOR EP N1→N2: Hunterian perforators connect femoral vein (FV) to GSV within Hunter's canal.\n"
+        "   If SFJ is competent but thigh GSV shows reflux → Hunterian perforator is the likely EP N1→N2.\n"
         "3. Perforator maneuvers — all three required (Delfrate 2023):\n"
         "   a. Static squeezing (gravitational test)\n"
         "   b. Paranà maneuver (physiological — preferred over squeezing alone)\n"
         "   c. Valsalva (hypertensive test — outward flow = pathological/pathogenic perforator)\n"
         "4. Pathological perforator: outward flow ≥500 ms AND diameter ≥3.5 mm (AVF 2023).\n"
         "5. Watch for N3 above fascia at same level as N2 in compartment — junction is EP N2→N3 (trunk escape).\n"
-        "6. If SFJ competent but trunk shows reflux here → move distally to Hunterian zone (posY 0.34–0.47)."
+        "6. Trunk reflux visible here without SFJ entry confirms Hunterian perforator as entry point (EP N1→N2)."
     ),
 
-    "lower_thigh_hunterian": (
-        "EXAMINATION PROTOCOL — Lower Thigh / Hunterian Zone (posY 0.34–0.47) (Adler 2022 + Delfrate 2023)\n"
-        "Source: Hunterian perforators = DISTAL third of thigh (DuplexUS 2014 p.33-34; Lee 2017 p.129)\n"
+    "dodd_distal": (
+        "EXAMINATION PROTOCOL — Distal Thigh / Dodd Zone (posY 0.34–0.47) (Adler 2022 + Delfrate 2023)\n"
+        "Source: Dodd perforators = distal third of thigh, just above the knee (DuplexUS 2014 p.33; Lee 2017 p.129)\n"
         "1. Transverse B-mode at medial distal thigh: confirm GSV in fascial compartment ('saphenous eye').\n"
-        "2. If SFJ competent but thigh GSV shows reflux → Hunterian perforator is the likely EP N1→N2.\n"
+        "2. Dodd perforators connect the femoral vein (FV) to the GSV just above the knee.\n"
         "3. Perforator maneuvers — all three required (Delfrate 2023):\n"
         "   a. Static squeezing (gravitational test)\n"
         "   b. Paranà maneuver (physiological — preferred over squeezing alone)\n"
@@ -143,9 +144,9 @@ def get_protocol(region: str, pos_y: float) -> str:
     if pos_y <= 0.20:
         return _PROTOCOLS["upper_thigh"]
     if pos_y <= 0.33:
-        return _PROTOCOLS["mid_thigh_dodd"]
+        return _PROTOCOLS["hunterian_proximal"]
     if pos_y <= 0.47:
-        return _PROTOCOLS["lower_thigh_hunterian"]
+        return _PROTOCOLS["dodd_distal"]
     if pos_y <= 0.57:
         return _PROTOCOLS["popliteal_spj"]
     if pos_y <= 0.88:

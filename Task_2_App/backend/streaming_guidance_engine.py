@@ -28,14 +28,35 @@ logger = logging.getLogger(__name__)
 # VIDEO FRAME EXTRACTION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def extract_frame_at(pos_y_ratio: float) -> Optional[str]:
+def _crop_roi(frame, annotated: bool):
     """
-    Seek to pos_y_ratio × total_frames in the annotated stream video.
+    Crop the raw machine capture to just the ultrasound scan region.
+
+    Annotated video (350×350): already clean — thin black border only.
+      Crop: 3px all sides → 344×344 scan area.
+
+    Raw video (720×480): full LOGIQ C9 machine output.
+      Scan rectangle sits at x≈157–490, y≈52–430.
+      Left of scan: black panel + "LOGIQ C9" label.
+      Right of scan: machine params (FR/AO%/Gn/depth markers).
+    """
+    if annotated:
+        return frame[3:348, 3:348]
+    else:
+        return frame[52:430, 157:490]
+
+
+def extract_frame_at(pos_y_ratio: float, annotated: bool = True) -> Optional[str]:
+    """
+    Seek to pos_y_ratio × total_frames in the chosen video, crop to scan ROI.
+    annotated=True  → full N1/N2/N3 overlay (saphenous zones)
+    annotated=False → raw video (Giacomini / non-saphenous posterior)
     Returns base64 JPEG string, or None on failure.
     """
-    from config import STREAM_VIDEO_PATH
+    from config import STREAM_VIDEO_PATH, STREAM_VIDEO_PATH_RAW
+    video_path = STREAM_VIDEO_PATH if annotated else STREAM_VIDEO_PATH_RAW
     try:
-        cap = cv2.VideoCapture(STREAM_VIDEO_PATH)
+        cap = cv2.VideoCapture(video_path)
         total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if total == 0:
             cap.release()
@@ -46,7 +67,8 @@ def extract_frame_at(pos_y_ratio: float) -> Optional[str]:
         cap.release()
         if not ret:
             return None
-        _, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
+        frame = _crop_roi(frame, annotated)
+        _, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
         return base64.b64encode(buf.tobytes()).decode()
     except Exception as exc:
         logger.error("Frame extraction error: %s", exc)
@@ -83,19 +105,31 @@ def process_probe_state(
     from config import STREAM_VLM_THRESHOLD, STREAM_LLM_THRESHOLD, STREAM_HISTORY_WINDOW
 
     # ── 1. Log position ───────────────────────────────────────────────────────
-    session.log_scan_position(pos_y, region, surface, leg, is_front=is_front)
+    session.log_scan_position(pos_y, region, surface, leg, pos_x=pos_x, is_front=is_front)
 
     # ── 2. VLM ───────────────────────────────────────────────────────────────
     vlm_dict: Optional[dict] = None
-    run_vlm = force_vlm or abs(pos_y - session.last_vlm_pos_y) >= STREAM_VLM_THRESHOLD
+    # Re-run whenever position moved enough OR the anatomical region changed —
+    # region change can happen at the same posY (e.g. crossing anterior→posterior).
+    run_vlm = (
+        force_vlm
+        or abs(pos_y - session.last_vlm_pos_y) >= STREAM_VLM_THRESHOLD
+        or region != session.last_vlm_region
+    )
 
     if run_vlm:
-        frame_b64 = extract_frame_at(pos_y)
+        # Giacomini (posterior thigh): show & analyse the blank tissue frame at posY=0.0
+        # (annotated video, no N1/N2/N3 labels present) so VLM output is consistent with display.
+        vlm_frame_y = 0.0 if region == 'Giacomini' else pos_y
+        frame_b64 = extract_frame_at(vlm_frame_y)
         vlm_dict, vlm_summary = vlm_agent.analyze(frame_b64, region, leg)
         if frame_b64:
             session.last_vlm_summary = vlm_summary
+            session.last_vlm_dict    = vlm_dict
             session.last_vlm_pos_y   = pos_y
+            session.last_vlm_region  = region
 
+    vlm_dict    = session.last_vlm_dict
     vlm_summary = session.last_vlm_summary
 
     # ── 3. CrewAI pipeline ────────────────────────────────────────────────────
@@ -129,6 +163,13 @@ def process_probe_state(
         q_state       = q_state_agent.analyze(leg_clips)
         protocol_text = protocol_agent.get_protocol(region, pos_y)
 
+        # Extract the last 3 guidance strings from history so Task 4 can avoid
+        # repeating them (history stores assistant=guidance, user=state_msg pairs).
+        recent_guidance = [
+            ex["content"] for ex in session.history
+            if ex.get("role") == "assistant"
+        ][-3:]
+
         # ── 3b. Build enriched state message ──────────────────────────────────
         state_msg = guidance_agent.build_state_message(
             region          = region,
@@ -161,6 +202,8 @@ def process_probe_state(
                 pos_x           = pos_x,
                 is_front        = is_front,
                 rejection_notes = list(session.rejection_notes),
+                recent_guidance = recent_guidance,
+                accepted_shunts = list(session.accepted_shunts),
             )
             # Fire shunt_confirmed only once per unique leg:type key per session.
             confirmed_key = f"{leg}:{s_type}"
@@ -174,7 +217,7 @@ def process_probe_state(
             session.last_llm_region = region
             session.last_guidance   = guidance
             session.last_action     = action
-            session.push_exchange(state_msg, raw, window=STREAM_HISTORY_WINDOW)
+            session.push_exchange(state_msg, guidance or raw, window=STREAM_HISTORY_WINDOW)
             session.push_thinking(pos_y, region, state_msg, raw, guidance)
         except Exception as exc:
             logger.error("Crew pipeline error: %s", exc)
@@ -198,7 +241,7 @@ def process_probe_state(
         "shunt_type":       shunt_type,
         "shunt_evidence":   shunt_evidence,
         "thinking": {
-            "state": state_msg,
-            "raw":   raw,
+            "state":  state_msg,
+            "agents": raw if isinstance(raw, dict) else {"guidance": raw},
         } if state_msg else None,
     }

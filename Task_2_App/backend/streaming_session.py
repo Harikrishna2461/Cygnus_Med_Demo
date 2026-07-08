@@ -35,7 +35,9 @@ class StreamSession:
 
     # Rate-limit state — avoid calling VLM/LLM on every mouse pixel
     last_vlm_pos_y: float = -1.0
+    last_vlm_region: str = ""
     last_vlm_summary: str = "No frame analyzed yet."
+    last_vlm_dict: Optional[dict] = None
     last_llm_pos_y: float = -1.0
     last_llm_region: str = ""
 
@@ -43,6 +45,7 @@ class StreamSession:
     # re-firing the shunt_confirmed event for the same type on each probe_move.
     confirmed_shunts: list = field(default_factory=list)
     rejection_notes: list = field(default_factory=list)
+    accepted_shunts: list = field(default_factory=list)
 
     # Last computed guidance/action — echoed on probe_moves that don't trigger
     # a new LLM call so maneuver/complete state persists across small position deltas.
@@ -71,6 +74,7 @@ class StreamSession:
         region: str,
         surface: str,
         leg: str,
+        pos_x: Optional[float] = None,
         is_front: Optional[bool] = None,
     ) -> None:
         """Record a probe position visit for the history agent."""
@@ -81,6 +85,8 @@ class StreamSession:
             "leg":     leg,
             "t":       round(time.time(), 2),
         }
+        if pos_x is not None:
+            entry["pos_x"] = round(pos_x, 3)
         if is_front is not None:
             entry["is_front"] = is_front
         self.scan_log.append(entry)
@@ -94,12 +100,12 @@ class StreamSession:
         self.history.append({"role": "user",      "content": user_msg})
         self.history.append({"role": "assistant", "content": assistant_msg})
 
-    def push_thinking(self, pos_y: float, region: str, state_msg: str, raw: str, guidance: str) -> None:
+    def push_thinking(self, pos_y: float, region: str, state_msg: str, raw, guidance: str) -> None:
         self.thinking_log.append({
             "pos_y":    round(pos_y, 2),
             "region":   region,
             "state":    state_msg,
-            "raw":      raw,
+            "agents":   raw if isinstance(raw, dict) else {"guidance": raw},
             "guidance": guidance,
         })
         # Keep only the last 50 entries to avoid unbounded growth

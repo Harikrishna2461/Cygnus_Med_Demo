@@ -36,7 +36,7 @@ button:disabled{opacity:.35;cursor:not-allowed;}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
 
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
-.layout{display:grid;grid-template-columns:294px 374px 1fr;gap:0;flex:1;overflow:hidden;}
+.layout{display:grid;grid-template-columns:374px 374px 1fr;gap:0;flex:1;overflow:hidden;}
 .panel{overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;border-right:1px solid var(--border);}
 .panel:last-child{border-right:none;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;}
@@ -112,7 +112,7 @@ select:focus{outline:none;border-color:var(--accent);}
 .probe-pill .hi{color:var(--accent);}
 
 /* ── THINKING LOG ────────────────────────────────────────────────────────── */
-#thinkLog{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:0;min-height:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+#thinkLog{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:0;min-height:0;border:1px solid var(--border);border-radius:6px;}
 .think-entry{border-bottom:1px solid var(--border);background:var(--surface2);}
 .think-entry:last-child{border-bottom:none;}
 .think-entry.open-entry{background:var(--surface3);}
@@ -134,11 +134,26 @@ select:focus{outline:none;border-color:var(--accent);}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
 
-/* ── SHUNT CONFIRMED MODAL ───────────────────────────────────────────────── */
+/* ── INLINE SHUNT / ELIM NOTIFICATIONS ──────────────────────────────────── */
+#shuntNotifArea{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+.shunt-notif{border-radius:var(--radius);padding:10px 14px;border:1px solid var(--accent2);background:rgba(52,211,153,.06);}
+.shunt-notif.elim-notif{border-color:var(--warn);background:rgba(245,158,11,.06);}
+.shunt-notif-head{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;}
+.shunt-notif-tag{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.shunt-notif-type{font-size:16px;font-weight:800;color:var(--accent2);}
+.shunt-notif.elim-notif .shunt-notif-type{color:var(--warn);font-size:13px;}
+.shunt-notif-ev{font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.5;}
+.shunt-notif-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.shunt-notif-btns button{font-size:10px;padding:4px 10px;}
+
+/* ── SHUNTS FOUND LIST ───────────────────────────────────────────────────── */
+.shunt-found-item{padding:6px 8px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);margin-bottom:4px;}
+.shunt-found-type{font-size:13px;font-weight:700;color:var(--accent2);}
+.shunt-found-meta{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5;}
+
+/* ── MODALS (kept, openable manually) ───────────────────────────────────── */
 #shuntModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;align-items:center;justify-content:center;}
 #shuntModal.show{display:flex;}
-
-/* ── ELIMINATION TEST MODAL ─────────────────────────────────────────────── */
 #elimModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1001;align-items:center;justify-content:center;}
 #elimModal.show{display:flex;}
 #elimModal .shunt-card{border-color:var(--warn);}
@@ -201,8 +216,94 @@ select:focus{outline:none;border-color:var(--accent);}
   <div class="panel">
     <div class="card" style="padding:10px">
       <h3>Probe — move to scan · click to lock mark position</h3>
+
+      <!-- ── VEIN LINE KEY ─────────────────────────────────────────────────── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-bottom:8px">
+        <div style="grid-column:1/-1;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:2px">Line Key — what each colour/style represents</div>
+
+        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#818cf8">
+          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#312e81" stroke-width="6" stroke-linecap="round"/></svg>
+          N1 — Femoral &amp; Deep Veins
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#93c5fd">
+          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/></svg>
+          N2 — Great Saphenous v. (GSV)
+        </div>
+
+        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#60a5fa">
+          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
+          AAGSV / PAGSV (accessory)
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#818cf8">
+          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#3730a3" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
+          Tibial &amp; Fibular Veins
+        </div>
+
+        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#f97316">
+          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#f97316" stroke-width="3.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
+          SSV &amp; SPJ connection
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#fb923c">
+          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
+          Vein of Giacomini (N3)
+        </div>
+
+        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#a78bfa">
+          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/></svg>
+          N3 — SFJ Tributaries
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#93c5fd">
+          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4,3" stroke-linecap="round"/></svg>
+          GSV Calf Branches &amp; Arch
+        </div>
+
+        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#34d399;grid-column:1/-1">
+          <svg width="14" height="14" style="flex-shrink:0"><polygon points="7,1 13,7 7,13 1,7" fill="rgba(52,211,153,0.18)" stroke="#34d399" stroke-width="1.5"/></svg>
+          ◇ Perforator connection points (Hunterian · Dodd · Boyd · Cockett)
+        </div>
+      </div>
+
+      <!-- ── VEIN ANATOMY LEGEND ──────────────────────────────────────────── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:9.5px;line-height:1.6;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-bottom:8px">
+
+        <div style="grid-column:1/-1;font-size:9px;font-weight:700;color:#818cf8;margin-top:2px;letter-spacing:.05em">N1 — DEEP VEINS</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#312e81;border-radius:2px;flex-shrink:0"></span>Ext. Iliac / Com. Femoral v.</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#312e81;border-radius:2px;flex-shrink:0"></span>Femoral v.</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #4338ca;flex-shrink:0"></span>Deep Femoral v. (Profunda)</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#312e81;border-radius:2px;flex-shrink:0"></span>Popliteal v.</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3730a3;flex-shrink:0"></span>Posterior Tibial v.</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3730a3;flex-shrink:0"></span>Anterior Tibial v.</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3730a3;flex-shrink:0"></span>Fibular / Peroneal v.</div>
+
+        <div style="grid-column:1/-1;font-size:9px;font-weight:700;color:#93c5fd;margin-top:5px;letter-spacing:.05em">N2 — GSV SYSTEM</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:4px;background:#1d4ed8;border-radius:2px;flex-shrink:0"></span>Great Saphenous v. (GSV)</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3b82f6;flex-shrink:0"></span>Ant. Accessory GSV (AAGSV)</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #60a5fa;flex-shrink:0"></span>Post. Accessory GSV (PAGSV)</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #93c5fd;flex-shrink:0"></span>Calf Ant. Branch</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #93c5fd;flex-shrink:0"></span>Calf Post. Branch</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #93c5fd;flex-shrink:0"></span>Dorsal Venous Arch</div>
+
+        <div style="grid-column:1/-1;font-size:9px;font-weight:700;color:#a78bfa;margin-top:5px;letter-spacing:.05em">N3 — SFJ TRIBUTARIES</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:2px;background:#7c3aed;flex-shrink:0"></span>Sup. Circumflex Iliac v.</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:2px;background:#7c3aed;flex-shrink:0"></span>Sup. Epigastric v.</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #7c3aed;flex-shrink:0"></span>External Pudendal v.</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #8b5cf6;flex-shrink:0"></span>Ant. Thigh Circumflex v.</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #8b5cf6;flex-shrink:0"></span>Post. Thigh Circumflex v.</div>
+
+        <div style="grid-column:1/-1;font-size:9px;font-weight:700;color:#f97316;margin-top:5px;letter-spacing:.05em">SSV SYSTEM</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #f97316;flex-shrink:0"></span>Small Saphenous v. (SSV)</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#f97316;border-radius:2px;flex-shrink:0"></span>Saphenopopliteal Jct. (SPJ)</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #fb923c;flex-shrink:0"></span>Vein of Giacomini (N3)</div>
+
+        <div style="grid-column:1/-1;font-size:9px;font-weight:700;color:#34d399;margin-top:5px;letter-spacing:.05em">PERFORATORS ◇</div>
+        <div style="color:#34d399">◇ Hunterian (proximal thigh)</div>
+        <div style="color:#34d399">◇ Dodd's (distal thigh)</div>
+        <div style="color:#34d399">◇ Boyd's (around knee)</div>
+        <div style="color:#34d399">◇ Cockett's (lower calf)</div>
+      </div>
+
       <div id="legWrap">
-        <svg id="legSvg" viewBox="0 0 280 540" width="268" height="516">
+        <svg id="legSvg" viewBox="0 0 280 540" width="348" height="671">
           <rect width="280" height="540" fill="none"/>
           <text x="80"  y="11" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif">R</text>
           <text x="197" y="11" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif">L</text>
@@ -244,10 +345,27 @@ select:focus{outline:none;border-color:var(--accent);}
           <text x="103" y="420" text-anchor="middle" fill="#fb923c" font-size="6.5" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">SSV</text>
           <text x="178" y="420" text-anchor="middle" fill="#fb923c" font-size="6.5" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">SSV</text>
 
-          <!-- Zone labels (left edge, vertical) -->
-          <text transform="rotate(-90) translate(-44, 10)"  fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">SFJ</text>
-          <text transform="rotate(-90) translate(-166, 10)" fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">Thigh</text>
-          <text transform="rotate(-90) translate(-416, 10)" fill="#4f8ef7" font-size="8" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".65">Calf</text>
+          <!-- Zone boundary lines — right leg thigh (x 26-133), left leg thigh (x 140-254) -->
+          <line x1="26" x2="133" y1="38"  y2="38"  stroke="#4f8ef7" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.22"/>
+          <line x1="140" x2="254" y1="38"  y2="38"  stroke="#4f8ef7" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.22"/>
+          <line x1="26" x2="133" y1="108" y2="108" stroke="#4f8ef7" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.22"/>
+          <line x1="140" x2="254" y1="108" y2="108" stroke="#4f8ef7" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.22"/>
+          <line x1="26" x2="133" y1="178" y2="178" stroke="#60a5fa" stroke-width="0.6" stroke-dasharray="3,3" opacity="0.28"/>
+          <line x1="140" x2="254" y1="178" y2="178" stroke="#60a5fa" stroke-width="0.6" stroke-dasharray="3,3" opacity="0.28"/>
+          <line x1="26" x2="133" y1="254" y2="254" stroke="#22d3ee" stroke-width="0.6" stroke-dasharray="3,3" opacity="0.25"/>
+          <line x1="140" x2="254" y1="254" y2="254" stroke="#22d3ee" stroke-width="0.6" stroke-dasharray="3,3" opacity="0.25"/>
+          <!-- Zone boundary lines — calf area (x 29-123 right, x 156-255 left) -->
+          <line x1="29" x2="123" y1="308" y2="308" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.22"/>
+          <line x1="156" x2="255" y1="308" y2="308" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.22"/>
+          <line x1="29" x2="123" y1="475" y2="475" stroke="#4f8ef7" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.18"/>
+          <line x1="156" x2="255" y1="475" y2="475" stroke="#4f8ef7" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.18"/>
+          <!-- Zone labels (left edge, vertical — rotate(-90): translate(-svgY, svgX)) -->
+          <text transform="rotate(-90) translate(-25,  10)" fill="#4f8ef7" font-size="7" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".60">SFJ</text>
+          <text transform="rotate(-90) translate(-73,  10)" fill="#4f8ef7" font-size="7" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".50">Up.Thigh</text>
+          <text transform="rotate(-90) translate(-143, 10)" fill="#60a5fa" font-size="7" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".60">Hunt.</text>
+          <text transform="rotate(-90) translate(-216, 10)" fill="#22d3ee" font-size="7" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".60">Dodd</text>
+          <text transform="rotate(-90) translate(-392, 10)" fill="#4f8ef7" font-size="7" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".50">Calf</text>
+          <text transform="rotate(-90) translate(-505, 10)" fill="#4f8ef7" font-size="7" font-family="Segoe UI,sans-serif" font-weight="700" opacity=".40">Ankle</text>
 
           <!-- Probe indicator (updated by JS) -->
           <g id="probeGroup" display="none">
@@ -341,6 +459,14 @@ select:focus{outline:none;border-color:var(--accent);}
       </div>
       <p id="vlmNote" style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5"></p>
     </div>
+
+    <!-- Shunts found — below VLM, scrollable -->
+    <div class="card" style="flex:1;min-height:80px;display:flex;flex-direction:column;overflow:hidden">
+      <h3>Shunts Found <span id="shuntFoundCount" style="color:var(--accent);font-weight:400">0</span></h3>
+      <div id="shuntFoundList" style="overflow-y:auto;flex:1;min-height:0">
+        <p style="color:var(--muted);font-size:11px">None confirmed yet.</p>
+      </div>
+    </div>
   </div>
 
   <!-- ── RIGHT: probe info + guidance + thinking log ─────────────────────── -->
@@ -371,6 +497,9 @@ select:focus{outline:none;border-color:var(--accent);}
         <button class="elim-btn" id="elimReflux"   onclick="submitElimTest('Reflux')">Reflux — reflux persists</button>
       </div>
     </div>
+
+    <!-- Inline shunt / elim notifications — non-blocking, above thinking log -->
+    <div id="shuntNotifArea"></div>
 
     <!-- Thinking log -->
     <div class="card" style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">
@@ -425,11 +554,13 @@ let sessionActive = false;
 let currentState  = null;   // click-locked position — used for clip marking
 let scanState     = null;   // hover position — drives continuous scan
 let clips         = [];
+let confirmedShunts = [];   // all shunts confirmed this session
 let selectedFlow  = 'EP';
 let lastGuidance  = '';
 let probeTimer    = null;   // debounce for probe_move events
 let elimRequired  = false;  // true when 4-clip Type 3/1+2 pattern present without elimTest
-let currentShuntData = null; // last shunt_confirmed payload for accept/reject
+let currentShuntData = null; // last shunt_confirmed payload for modal accept/reject
+const shuntNotifData = {};  // notif DOM id → shunt payload (for acceptShuntInline / rejectShuntInline)
 
 // ── Leg diagram hit-boxes (normalized 0-1, top-left=0,0  bottom-right=1,1) ─
 const VB_W=280, VB_H=540;
@@ -501,8 +632,8 @@ function mapReg(id,dist,front,posY) {
     if(front){
       if(posY<=0.07) return 'SFJ';
       if(posY<=0.20) return 'Upper Thigh';
-      if(posY<=0.33) return 'Dodd';
-      return 'Hunterian';
+      if(posY<=0.33) return 'Hunterian';
+      return 'Dodd';
     }
     return posY>=0.44?'SPJ':'Giacomini';
   }
@@ -518,7 +649,7 @@ legSvg.addEventListener('mousemove', e => {
   scanState = st;
   updateScanIndicator(st);
   updateInfoBar(st);
-  scheduleFrame(st.posY);
+  scheduleFrame(st.posY, st.is_front, st.region);
   if(sessionActive) scheduleProbeMove(st);
 });
 
@@ -606,17 +737,21 @@ const frameWait = document.getElementById('frameWait');
 let   frameTimer = null;
 let   lastFrameY = -1;
 
-function scheduleFrame(posY) {
-  // Debounce frame fetches at 150ms; skip if posY hasn't changed meaningfully
+function scheduleFrame(posY, isFront, region) {
+  document.getElementById('videoPosBadge').textContent = 'posY: ' + posY.toFixed(2);
+
   if(Math.abs(posY - lastFrameY) < 0.005) return;
   clearTimeout(frameTimer);
   frameTimer = setTimeout(() => {
     lastFrameY = posY;
-    const url = '/video/frame?pos_y=' + posY.toFixed(4) + '&t=' + Date.now();
+    frameImg.style.display = '';
+    // Giacomini (posterior thigh): use blank tissue frame at posY=0 from annotated video
+    // — no N2 label present, no prominent vessel; VLM also analyses same frame
+    const videoY = region === 'Giacomini' ? 0.00 : posY;
+    const url = '/video/frame?pos_y=' + videoY.toFixed(4) + '&t=' + Date.now();
     frameImg.onload  = () => { frameWait.style.display = 'none'; };
     frameImg.onerror = () => {};
     frameImg.src = url;
-    document.getElementById('videoPosBadge').textContent = 'posY: ' + posY.toFixed(2);
   }, 150);
 }
 
@@ -703,10 +838,15 @@ function initSocket() {
 
   socket.on('shunt_confirmed',(d)=>{
     currentShuntData = d;
-    document.getElementById('shuntTypeLabel').textContent = 'CHIVA Type ' + (d.shunt_type||'—');
-    document.getElementById('shuntEvidence').textContent  = d.shunt_evidence || '';
-    document.getElementById('shuntModal').classList.add('show');
-    setStatus('Shunt Type ' + (d.shunt_type||'—') + ' confirmed — continue or end session', 'ok');
+    const shuntKey = (d.leg||'?') + ':' + (d.shunt_type||'?');
+    // Only record once per leg:type — backend deduplicates too, but guard here as well
+    if (!confirmedShunts.some(s => (s.leg||'?')+':'+(s.shunt_type||'?') === shuntKey)) {
+      confirmedShunts.push(d);
+      renderShuntsList();
+    }
+    // Always show inline notification so surgeon can accept/reject each detection
+    addShuntNotif(d);
+    setStatus('Shunt Type ' + (d.shunt_type||'—') + ' confirmed — see notification above thinking log', 'ok');
   });
 }
 
@@ -729,6 +869,7 @@ function sendProbeMove(st) {
     segment_dist: st.seg_dist,
     is_front:     st.is_front,
     pos_y_ratio:  st.posY,
+    pos_x_ratio:  st.sx / VB_W,
     leg:          st.leg,
     region:       st.region,
     surface:      st.surface,
@@ -855,8 +996,8 @@ function checkElimTestRequired() {
   elimRequired = hasEPN1N2&&hasEPN2N3&&hasRPN3N1&&hasRPN2N1&&!hasElim;
   document.getElementById('elimCard').classList.toggle('required', elimRequired);
   if(elimRequired && !wasRequired) {
-    // Pattern just completed — show modal and banner immediately
-    showElimModal();
+    // Pattern just completed — show inline notification + banner, NOT the blocking modal
+    addElimNotif();
     document.getElementById('elimBanner').style.display='';
   }
   if(!elimRequired && wasRequired) {
@@ -887,9 +1028,9 @@ function renderClipMarkers() {
   renderVeinPaths(g);
   clips.forEach((c, i) => {
     const isR  = c.leg === 'right';
-    const N1x  = isR ? 65 : 215;
-    const N2x  = isR ? 43 : 237;
-    const N3x  = isR ? 95 : 185;
+    const N1x  = isR ? 72 : 208;
+    const N2x  = isR ? 44 : 236;
+    const N3x  = isR ? 100 : 180;
     const cy   = Math.max(8, Math.min(VB_H-8, c.pos_y_ratio * VB_H));
     // Place circle between the two compartments the junction touches
     const cX   = {N1:N1x, N2:N2x, N3:N3x};
@@ -922,6 +1063,14 @@ function renderClipMarkers() {
   });
 }
 
+const AGENT_LABELS = [
+  ['interpret', 'Agent 1 — Clinical Interpreter'],
+  ['shunt',     'Agent 2 — Shunt Analyst'],
+  ['circuit',   'Agent 3 — Circuit Analyst'],
+  ['nav',       'Agent 4 — Navigation Planner'],
+  ['guidance',  'Agent 5 — Guidance Specialist'],
+];
+
 function appendLog(d) {
   const log = document.getElementById('thinkLog');
   const n   = log.children.length + 1;
@@ -930,11 +1079,22 @@ function appendLog(d) {
   const div = document.createElement('div');
   div.className = 'think-entry';
 
-  const arrowId  = 'arr'  + n;
-  const bodyId   = 'body' + n;
+  const arrowId = 'arr'  + n;
+  const bodyId  = 'body' + n;
 
   const actionColor = d.action==='maneuver'?'var(--warn)':d.action==='complete'?'var(--accent2)':'var(--muted)';
   const actionLabel = d.action==='maneuver'?' ⚡':d.action==='complete'?' ✓':'';
+
+  // Build per-agent sections
+  const agents = d.thinking?.agents || {};
+  let agentSections = `<div class="think-section-lbl">Prompt sent to pipeline</div><pre>${esc(d.thinking?.state||'(none)')}</pre>`;
+  for (const [key, label] of AGENT_LABELS) {
+    agentSections += `<div class="think-section-lbl">${label} — Final Answer</div><pre>${esc(agents[key]||'(none)')}</pre>`;
+  }
+  if (agents.verbose) {
+    agentSections += `<div class="think-section-lbl" style="color:var(--warn)">Full Chain of Thought (Thought / Action / Observation)</div><pre style="max-height:600px;color:#fbbf24">${esc(agents.verbose)}</pre>`;
+  }
+
   div.innerHTML = `
     <div class="think-head" onclick="toggleLog('${arrowId}','${bodyId}',this.closest('.think-entry'))">
       <span class="think-num">#${n}</span>
@@ -943,12 +1103,7 @@ function appendLog(d) {
       <span class="think-guidance" style="color:${actionColor}">${esc(d.guidance||'(no guidance yet)')}${actionLabel}</span>
       <span class="think-arrow" id="${arrowId}">▶</span>
     </div>
-    <div class="think-body" id="${bodyId}">
-      <div class="think-section-lbl">State sent to LLM</div>
-      <pre>${esc(d.thinking?.state||'(none)')}</pre>
-      <div class="think-section-lbl">Raw LLM response</div>
-      <pre>${esc(d.thinking?.raw||'(none)')}</pre>
-    </div>`;
+    <div class="think-body" id="${bodyId}">${agentSections}</div>`;
 
   log.appendChild(div);
   log.scrollTop = log.scrollHeight;
@@ -968,6 +1123,13 @@ function esc(s){
 
 // ── Shunt modal actions ────────────────────────────────────────────────────
 function acceptShunt() {
+  if (currentShuntData && socket && socket.connected && sessionId) {
+    socket.emit('shunt_accept', {
+      session_id: sessionId,
+      shunt_type: currentShuntData.shunt_type || 'unknown',
+      leg:        currentShuntData.leg        || 'unknown',
+    });
+  }
   closeShuntModal();
   setStatus('Shunt type accepted — continue scanning for additional findings', 'ok');
 }
@@ -1000,42 +1162,168 @@ function renderVeinPaths(g) {
 }
 
 function drawLegVeinPaths(g, legClips, isRight) {
-  // Anatomical lane x-positions (SVG pixels, viewBox 280x540)
-  // Right leg: medial side = left in image; Left leg: medial side = right in image
-  const N1x = isRight ? 65 : 215;   // deep femoral/popliteal (thick dark bar)
-  const N2x = isRight ? 43 : 237;   // GSV saphenous trunk (medial)
-  const N3x = isRight ? 96 : 184;   // tributaries / varices
-  const botY = VB_H * 0.99;
-  const sfjY = 25;    // SFJ hook top (px)
-  const hookY = 65;   // where GSV resumes below hook
+  // Right leg: medial=left(low X), lateral=right(high X). Left leg: flip().
+  const flip = x => isRight ? x : (VB_W - x);
 
   function svgEl(tag, attrs) {
     const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
     Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k, v));
     return el;
   }
+  function add(tag, a) { g.appendChild(svgEl(tag, a)); }
 
-  // ── N1: thick solid dark indigo bar — full height ─────────────────
-  g.appendChild(svgEl('line', {
-    x1:N1x, y1:2, x2:N1x, y2:botY,
-    stroke:'#3730a3', 'stroke-width':'6', opacity:'0.80'
-  }));
+  // Right-leg x positions (flip() converts to left-leg)
+  const femX  = 72;   // N1 femoral/popliteal
+  const gsvX  = 44;   // N2 GSV trunk (medial)
+  const aagsX = 36;   // Anterior Accessory GSV
+  const pagsX = 90;   // Posterior Accessory GSV
+  const ssvX  = 106;  // SSV posterior calf
+  const giacX = 100;  // Giacomini posterior thigh
+  const pTibX = 68;   // Posterior tibial
+  const aTibX = 50;   // Anterior tibial
+  const fibX  = 59;   // Fibular/Peroneal
 
-  // ── N2 GSV: thick blue path with SFJ hook connecting to N1 ────────
-  // Shape: N2 lane → hooks across to N1 at SFJ → returns to N2 lane
-  const n2d = `M ${N2x},0 L ${N2x},${sfjY} Q ${N2x},${sfjY+12} ${N1x},${sfjY+12} Q ${N1x},${hookY} ${N2x},${hookY} L ${N2x},${botY}`;
-  g.appendChild(svgEl('path', {
-    d:n2d, stroke:'#2563eb', 'stroke-width':'4.5', fill:'none', opacity:'0.75'
-  }));
+  // Clip circuit anchors
+  const N1x = flip(femX);
+  const N2x = flip(gsvX);
+  const N3x = flip(giacX);
 
-  // Lane labels
-  function lbl(x, y, text, col) {
-    const el = svgEl('text', {x, y, fill:col, 'font-size':'7.5', opacity:'0.5',
-      'text-anchor':'middle', 'font-family':'Segoe UI,sans-serif'});
+  const kneeY    = VB_H * KNEE_N;
+  const sfjY     = 26;
+  const hookY    = 63;
+  const spjY     = kneeY - 15;
+  const calfTopY = kneeY + 13;
+  const ankleY   = VB_H * 0.972;
+
+  // ── 1. N1 DEEP VEINS ──────────────────────────────────────────────────────
+  add('line', {x1:flip(femX), y1:2, x2:flip(femX), y2:kneeY,
+    stroke:'#312e81', 'stroke-width':'7', opacity:'0.88'});
+  // Deep femoral vein (profunda)
+  const dfX = isRight ? flip(femX)+20 : flip(femX)-20;
+  add('path', {d:`M ${flip(femX)},52 Q ${dfX+6},95 ${dfX},148`,
+    stroke:'#4338ca', 'stroke-width':'3.5', fill:'none', opacity:'0.55', 'stroke-dasharray':'3,3'});
+  // Popliteal
+  add('path', {d:`M ${flip(femX)},${kneeY} Q ${flip(ssvX-1)},${kneeY+8} ${flip(ssvX-1)},${kneeY+22}`,
+    stroke:'#312e81', 'stroke-width':'6', fill:'none', opacity:'0.82'});
+  // Posterior tibial
+  add('line', {x1:flip(pTibX), y1:kneeY+20, x2:flip(pTibX), y2:ankleY,
+    stroke:'#3730a3', 'stroke-width':'3', opacity:'0.55', 'stroke-dasharray':'5,3'});
+  // Anterior tibial
+  add('line', {x1:flip(aTibX), y1:kneeY+17, x2:flip(aTibX), y2:ankleY*0.94,
+    stroke:'#3730a3', 'stroke-width':'3', opacity:'0.48', 'stroke-dasharray':'5,3'});
+  // Fibular
+  add('line', {x1:flip(fibX), y1:kneeY+19, x2:flip(fibX), y2:ankleY*0.89,
+    stroke:'#3730a3', 'stroke-width':'2.5', opacity:'0.40', 'stroke-dasharray':'4,4'});
+
+  // ── 2. N2 GSV + ACCESSORY ─────────────────────────────────────────────────
+  // GSV with SFJ hook
+  add('path', {
+    d:`M ${flip(gsvX)},2 L ${flip(gsvX)},${sfjY} Q ${flip(gsvX)},${sfjY+13} ${flip(femX)},${sfjY+13} Q ${flip(femX)},${hookY} ${flip(gsvX)},${hookY} L ${flip(gsvX)},${ankleY}`,
+    stroke:'#1d4ed8', 'stroke-width':'5', fill:'none', opacity:'0.85'});
+  // AAGSV
+  add('path', {
+    d:`M ${flip(aagsX)},${hookY-10} L ${flip(aagsX)},152 Q ${flip(aagsX)},168 ${flip(gsvX)},170`,
+    stroke:'#3b82f6', 'stroke-width':'2.5', fill:'none', opacity:'0.68', 'stroke-dasharray':'5,3'});
+  // PAGSV
+  const pagsEndY = kneeY * 0.76;
+  add('path', {
+    d:`M ${flip(gsvX)},${hookY+8} Q ${flip(pagsX)},${hookY+42} ${flip(pagsX)},${pagsEndY}`,
+    stroke:'#60a5fa', 'stroke-width':'2.5', fill:'none', opacity:'0.65', 'stroke-dasharray':'5,3'});
+  // GSV calf anterior branch
+  const cbAx = isRight ? flip(gsvX)-8 : flip(gsvX)+8;
+  add('path', {d:`M ${flip(gsvX)},${calfTopY+38} Q ${cbAx},${calfTopY+90} ${cbAx},${ankleY*0.93}`,
+    stroke:'#93c5fd', 'stroke-width':'2', fill:'none', opacity:'0.52', 'stroke-dasharray':'4,4'});
+  // GSV calf posterior branch
+  const cbPx = isRight ? flip(gsvX)+15 : flip(gsvX)-15;
+  add('path', {d:`M ${flip(gsvX)},${calfTopY+58} Q ${cbPx},${calfTopY+105} ${cbPx},${ankleY*0.90}`,
+    stroke:'#93c5fd', 'stroke-width':'2', fill:'none', opacity:'0.46', 'stroke-dasharray':'4,4'});
+  // Dorsal arch
+  add('path', {d:`M ${flip(aTibX)},${ankleY*0.965} Q ${flip(gsvX)},${ankleY+9} ${flip(pTibX)},${ankleY*0.965}`,
+    stroke:'#93c5fd', 'stroke-width':'2', fill:'none', opacity:'0.38', 'stroke-dasharray':'3,4'});
+
+  // ── 3. SFJ TRIBUTARIES (N3) — violet ──────────────────────────────────────
+  // Superficial circumflex iliac
+  const sciX = isRight ? flip(femX)+40 : flip(femX)-40;
+  add('path', {d:`M ${flip(femX)},${sfjY} Q ${sciX-5},${sfjY-14} ${sciX},${sfjY-11}`,
+    stroke:'#7c3aed', 'stroke-width':'2', fill:'none', opacity:'0.60'});
+  // Superficial epigastric
+  const seX = isRight ? flip(femX)-11 : flip(femX)+11;
+  add('path', {d:`M ${flip(femX)},${sfjY} Q ${seX},${sfjY-19} ${seX-2},2`,
+    stroke:'#7c3aed', 'stroke-width':'2', fill:'none', opacity:'0.52'});
+  // External pudendal
+  const epX = isRight ? flip(gsvX)-18 : flip(gsvX)+18;
+  add('path', {d:`M ${flip(gsvX)},${sfjY+5} Q ${epX},${sfjY+13} ${epX-2},${sfjY+25}`,
+    stroke:'#7c3aed', 'stroke-width':'2', fill:'none', opacity:'0.48', 'stroke-dasharray':'3,3'});
+  // Anterior thigh circumflex
+  const atcX = isRight ? flip(gsvX)+28 : flip(gsvX)-28;
+  add('path', {d:`M ${flip(gsvX)},${sfjY+50} Q ${atcX},${sfjY+58} ${atcX+4},${sfjY+72}`,
+    stroke:'#8b5cf6', 'stroke-width':'1.8', fill:'none', opacity:'0.44', 'stroke-dasharray':'3,3'});
+  // Posterior thigh circumflex
+  const ptcX = isRight ? flip(pagsX)+12 : flip(pagsX)-12;
+  add('path', {d:`M ${flip(pagsX)},${sfjY+65} Q ${ptcX+5},${sfjY+76} ${ptcX},${sfjY+94}`,
+    stroke:'#8b5cf6', 'stroke-width':'1.8', fill:'none', opacity:'0.40', 'stroke-dasharray':'3,3'});
+
+  // ── 4. SSV + SPJ ───────────────────────────────────────────────────────────
+  add('line', {x1:flip(ssvX), y1:spjY+16, x2:flip(ssvX), y2:ankleY,
+    stroke:'#f97316', 'stroke-width':'3.5', opacity:'0.75', 'stroke-dasharray':'5,4'});
+  add('path', {d:`M ${flip(ssvX)},${spjY+12} Q ${flip(ssvX)},${spjY} ${flip(femX)},${spjY}`,
+    stroke:'#f97316', 'stroke-width':'3', fill:'none', opacity:'0.68'});
+
+  // ── 5. GIACOMINI VEIN ─────────────────────────────────────────────────────
+  const giacEndY = hookY + 60;
+  add('path', {
+    d:`M ${flip(ssvX)},${spjY} Q ${flip(giacX)},${spjY-58} ${flip(giacX)},${giacEndY} Q ${flip(giacX)},${giacEndY-18} ${flip(pagsX)},${giacEndY-14}`,
+    stroke:'#fb923c', 'stroke-width':'2.2', fill:'none', opacity:'0.62', 'stroke-dasharray':'5,3'});
+
+  // ── 6. KEY LANDMARK LABELS — minimal, legible, non-overlapping ───────────
+  // Full vein names are in the legend card below the diagram.
+  // lbKey: bold label with thick dark halo (paint-order) for contrast on any background
+  function lbKey(rx, y, text, col, size, an) {
+    const x = flip(rx);
+    const el = svgEl('text', {x, y, fill:col, 'font-size':size||10,
+      opacity:'1', 'font-weight':'800', 'text-anchor':an,
+      'font-family':'Segoe UI,sans-serif', 'paint-order':'stroke',
+      stroke:'#0a0d14', 'stroke-width':'3.5', 'stroke-linejoin':'round'});
     el.textContent = text; g.appendChild(el);
   }
-  lbl(N1x, 12, 'N1', '#a5b4fc');
-  lbl(N2x, 12, 'GSV', '#93c5fd');
+  // SFJ — centred between GSV hook and femoral vein at top
+  const _sfjMx = (flip(femX)+flip(gsvX))/2;
+  const _sfjEl = svgEl('text', {x:_sfjMx, y:sfjY-6, fill:'#c4b5fd', 'font-size':'11',
+    opacity:'1', 'font-weight':'800', 'text-anchor':'middle',
+    'font-family':'Segoe UI,sans-serif', 'paint-order':'stroke',
+    stroke:'#0a0d14', 'stroke-width':'3.5', 'stroke-linejoin':'round'});
+  _sfjEl.textContent = 'SFJ'; g.appendChild(_sfjEl);
+  // GSV — medial edge of leg
+  lbKey(gsvX-1, 185, 'GSV', '#60c8ff', 10, isRight?'end':'start');
+  // N1 Femoral — just right of deep trunk
+  lbKey(femX+4, 90,  'N1', '#a5b4fc', 10, isRight?'start':'end');
+  // SPJ — posterior, above knee
+  lbKey(ssvX+3, spjY-7, 'SPJ', '#fbbf24', 11, isRight?'start':'end');
+  // SSV — mid-calf posterior
+  lbKey(ssvX+3, Math.round((spjY+ankleY)*0.54), 'SSV', '#fb923c', 10, isRight?'start':'end');
+  // Giacomini — posterior thigh
+  lbKey(giacX+3, Math.round((spjY+hookY+60)*0.5+8), 'Giac.', '#f97316', 8, isRight?'start':'end');
+
+  // ── 7. PERFORATOR DIAMONDS ────────────────────────────────────────────────
+  function perf(posYRatio, label) {
+    const py  = posYRatio * VB_H;
+    const px  = (flip(femX) + flip(gsvX)) / 2;
+    const pts = `${px},${py-5} ${px+6},${py} ${px},${py+5} ${px-6},${py}`;
+    g.appendChild(svgEl('polygon', {
+      points:pts, fill:'rgba(52,211,153,0.12)', stroke:'#34d399', 'stroke-width':'1.3', opacity:'0.72'
+    }));
+    const t = svgEl('text', {
+      x: isRight ? px+9 : px-9, y: py+3,
+      fill:'#34d399', 'font-size':'6.5', opacity:'0.70',
+      'text-anchor': isRight ? 'start' : 'end',
+      'font-family':'Segoe UI,sans-serif'
+    });
+    t.textContent = label; g.appendChild(t);
+  }
+  perf(0.27, 'Hunterian perforators');
+  perf(0.40, 'Dodd perforators');
+  perf(0.52, 'Boyd perforators');
+  perf(0.72, 'Cockett perforators');
 
   if (!legClips.length) return;
 
@@ -1085,8 +1373,101 @@ function drawLegVeinPaths(g, legClips, isRight) {
   }
 }
 
+// ── Shunts found panel ────────────────────────────────────────────────────
+function renderShuntsList() {
+  const el = document.getElementById('shuntFoundList');
+  const cnt = document.getElementById('shuntFoundCount');
+  cnt.textContent = confirmedShunts.length;
+  if (!confirmedShunts.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:11px">None confirmed yet.</p>';
+    return;
+  }
+  el.innerHTML = confirmedShunts.map(s => {
+    const posY = s.pos_y != null ? ` | posY ${Number(s.pos_y).toFixed(2)}` : '';
+    const posX = s.pos_x != null ? ` | posX ${Number(s.pos_x).toFixed(2)}` : '';
+    return `<div class="shunt-found-item">
+      <div class="shunt-found-type">CHIVA Type ${esc(s.shunt_type||'—')}</div>
+      <div class="shunt-found-meta">${esc(s.leg||'?')} leg${posY}${posX}</div>
+      <div class="shunt-found-meta" style="color:#94a3b8">${esc(s.shunt_evidence||'')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Inline notifications — non-blocking ───────────────────────────────────
+function addShuntNotif(d) {
+  const area = document.getElementById('shuntNotifArea');
+  const id   = 'snotif' + Date.now();
+  shuntNotifData[id] = d;
+  const div  = document.createElement('div');
+  div.className = 'shunt-notif';
+  div.id = id;
+  div.innerHTML = `
+    <div class="shunt-notif-head">
+      <span class="shunt-notif-tag">Shunt confirmed</span>
+      <span class="shunt-notif-type">CHIVA Type ${esc(d.shunt_type||'—')}</span>
+      <span style="font-size:10px;color:var(--muted);margin-left:auto">${esc(d.leg||'?')} leg</span>
+    </div>
+    <div class="shunt-notif-ev">${esc(d.shunt_evidence||'')}</div>
+    <div class="shunt-notif-btns">
+      <button class="btn-primary"    onclick="acceptShuntInline('${id}')">Accept Classification &amp; Continue Scanning</button>
+      <button class="btn-secondary"  onclick="acceptShuntAndEnd();document.getElementById('${id}').remove()">Accept &amp; End Session</button>
+      <button class="btn-warn"       onclick="rejectShuntInline('${id}')">Reject Classification</button>
+    </div>`;
+  area.appendChild(div);
+}
+
+function addElimNotif() {
+  const area = document.getElementById('shuntNotifArea');
+  const id   = 'enotif' + Date.now();
+  const div  = document.createElement('div');
+  div.className = 'shunt-notif elim-notif';
+  div.id = id;
+  div.innerHTML = `
+    <div class="shunt-notif-head">
+      <span class="shunt-notif-tag">⚡ Elimination test required</span>
+    </div>
+    <div class="shunt-notif-ev">All 4 clips confirmed. Compress tributary at escape point, observe GSV Doppler.</div>
+    <div class="shunt-notif-btns">
+      <button class="elim-btn" onclick="submitElimTest('No Reflux');document.getElementById('${id}').remove()">No Reflux — abolished</button>
+      <button class="elim-btn" onclick="submitElimTest('Reflux');document.getElementById('${id}').remove()">Reflux — persists</button>
+      <button class="btn-secondary" onclick="document.getElementById('${id}').remove()">Dismiss</button>
+    </div>`;
+  area.appendChild(div);
+}
+
+function acceptShuntInline(id) {
+  const d = shuntNotifData[id];
+  if (d && socket && socket.connected && sessionId) {
+    socket.emit('shunt_accept', {
+      session_id: sessionId,
+      shunt_type: d.shunt_type || 'unknown',
+      leg:        d.leg        || 'unknown',
+    });
+  }
+  delete shuntNotifData[id];
+  document.getElementById(id)?.remove();
+  setStatus('Shunt type accepted — continue scanning for additional findings', 'ok');
+}
+
+function rejectShuntInline(id) {
+  const d = shuntNotifData[id];
+  delete shuntNotifData[id];
+  document.getElementById(id)?.remove();
+  if (socket && socket.connected && d) {
+    socket.emit('shunt_reject', {
+      session_id: sessionId || 'default',
+      shunt_type: d.shunt_type || 'unknown',
+      leg:        d.leg        || 'unknown',
+    });
+  }
+  setStatus('Classification rejected — re-evaluate clip pattern', 'warn');
+}
+
 // ── Init ───────────────────────────────────────────────────────────────────
-window.addEventListener('load', initSocket);
+window.addEventListener('load', () => {
+  initSocket();
+  renderClipMarkers();   // draw N1/N2/N3/SSV vein anatomy before any clips
+});
 </script>
 </body>
 </html>

@@ -124,7 +124,9 @@ def create_app() -> Flask:
             pos_y = float(freq.args.get("pos_y", 0.0))
         except (TypeError, ValueError):
             return "Bad pos_y", 400
-        b64 = extract_frame_at(pos_y)
+        # annotated=0 → raw video (Giacomini zone); annotated=1 → label overlay (default)
+        annotated = freq.args.get("annotated", "1") != "0"
+        b64 = extract_frame_at(pos_y, annotated=annotated)
         if not b64:
             return "Frame unavailable", 404
         resp = Response(base64.b64decode(b64), mimetype="image/jpeg")
