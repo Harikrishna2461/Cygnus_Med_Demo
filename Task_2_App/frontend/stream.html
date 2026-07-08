@@ -439,11 +439,15 @@ select:focus{outline:none;border-color:var(--accent);}
   <!-- ── CENTER: video + VLM ─────────────────────────────────────────────── -->
   <div class="panel">
     <div class="card" style="padding:8px">
-      <h3>Ultrasound Feed — updates with probe position</h3>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px">
+        <h3 style="margin:0">Ultrasound Feed</h3>
+        <span id="refVeinLabel" style="font-size:10px;color:var(--accent2);font-weight:600"></span>
+        <button onclick="refreshVeinFrame()" style="margin-left:auto;font-size:10px;padding:2px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer">&#x21BA; new</button>
+      </div>
       <div id="videoWrap">
         <img id="frameImg" alt=""/>
         <div id="frameWait">Move probe to load frame…</div>
-        <div id="videoPosBadge">posY: 0.00</div>
+        <div id="videoPosBadge"></div>
       </div>
     </div>
 
@@ -732,32 +736,42 @@ function updateInfoBar(st) {
   document.getElementById('regionPill').style.display='';
 }
 
-// ── Frame display ──────────────────────────────────────────────────────────
+// ── Frame display — shows annotated vein reference frame for current region ─
 const frameImg  = document.getElementById('frameImg');
 const frameWait = document.getElementById('frameWait');
-let   frameTimer = null;
-let   lastFrameY = -1;
+let   lastVeinRegion = '';
 
 function scheduleFrame(posY, isFront, region) {
-  document.getElementById('videoPosBadge').textContent = 'posY: ' + posY.toFixed(2);
-
-  if(Math.abs(posY - lastFrameY) < 0.005) return;
-  clearTimeout(frameTimer);
-  frameTimer = setTimeout(() => {
-    lastFrameY = posY;
-    frameImg.style.display = '';
-    // Giacomini (posterior thigh): use blank tissue frame at posY=0 from annotated video
-    // — no N2 label present, no prominent vessel; VLM also analyses same frame
-    const videoY = region === 'Giacomini' ? 0.00 : posY;
-    const url = '/video/frame?pos_y=' + videoY.toFixed(4) + '&t=' + Date.now();
-    frameImg.onload  = () => { frameWait.style.display = 'none'; };
-    frameImg.onerror = () => {};
-    frameImg.src = url;
-  }, 150);
+  // Update posY badge
+  document.getElementById('videoPosBadge').textContent = region ? region + '  posY:' + posY.toFixed(2) : 'posY: ' + posY.toFixed(2);
+  // Fetch vein frame on region change
+  if (region && region !== lastVeinRegion) {
+    lastVeinRegion = region;
+    fetchVeinFrame(region);
+  }
 }
 
-function updatePosBadge(posY) {
-  document.getElementById('videoPosBadge').textContent = 'posY: ' + posY.toFixed(2);
+function fetchVeinFrame(region) {
+  if (!region) return;
+  fetch('/api/vein-frame?region=' + encodeURIComponent(region))
+    .then(resp => {
+      if (!resp.ok) return null;
+      const veinLabel = resp.headers.get('X-Vein-Label') || resp.headers.get('X-Vein-Type') || '';
+      return resp.blob().then(blob => ({ blob, veinLabel }));
+    })
+    .then(result => {
+      if (!result) return;
+      const url = URL.createObjectURL(result.blob);
+      frameImg.onload = () => { frameWait.style.display = 'none'; frameImg.style.display = 'block'; };
+      frameImg.src = url;
+      const lbl = document.getElementById('refVeinLabel');
+      if (lbl) lbl.textContent = result.veinLabel;
+    })
+    .catch(() => {});
+}
+
+function refreshVeinFrame() {
+  if (lastVeinRegion) fetchVeinFrame(lastVeinRegion);
 }
 
 // ── Session ────────────────────────────────────────────────────────────────
@@ -825,6 +839,10 @@ function initSocket() {
     if(d.guidance) { lastGuidance=d.guidance; setGuidance(d.guidance, false, d.action||'move'); }
     if(d.vlm)        renderVLM(d.vlm);
     if(d.thinking)   appendLog(d);
+    if(d.region && d.region !== lastVeinRegion) {
+      lastVeinRegion = d.region;
+      fetchVeinFrame(d.region);
+    }
   });
 
   socket.on('clips_updated',(d)=>{
