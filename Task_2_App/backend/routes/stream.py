@@ -44,7 +44,10 @@ def register_stream_events(socketio) -> None:
         sess.generation        = 0
         sess.active            = True
         sess.last_vlm_pos_y    = -1.0
+        sess.last_vlm_region   = ""
         sess.last_vlm_summary  = "No frame analyzed yet."
+        sess.last_vlm_dict     = None
+        sess.last_vlm_frame_b64 = None
         sess.last_llm_pos_y    = -1.0
         sess.last_llm_region   = ""
         sess.confirmed_shunts  = []

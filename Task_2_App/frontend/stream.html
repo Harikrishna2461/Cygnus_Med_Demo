@@ -84,6 +84,21 @@ select:focus{outline:none;border-color:var(--accent);}
 #frameWait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;pointer-events:none;}
 #videoErr{display:none;padding:30px;text-align:center;color:var(--warn);font-size:11px;}
 
+/* ── COLLAPSIBLE LEGEND SECTIONS ────────────────────────────────────────── */
+details.legend-section{background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;overflow:hidden;}
+details.legend-section>summary{display:flex;align-items:center;gap:6px;padding:6px 10px;cursor:pointer;list-style:none;user-select:none;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+details.legend-section>summary::-webkit-details-marker{display:none;}
+details.legend-section>summary::before{content:'▶';font-size:8px;transition:transform .15s;flex-shrink:0;}
+details.legend-section[open]>summary::before{transform:rotate(90deg);}
+details.legend-section>summary:hover{color:var(--fg);}
+details.legend-section .legend-body{padding:6px 10px 8px;}
+details.legend-section .legend-body.grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;}
+details.legend-section .legend-body.grid2{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:9.5px;line-height:1.6;}
+.leg-sub{grid-column:1/-1;font-size:9px;font-weight:700;letter-spacing:.05em;margin-top:5px;cursor:pointer;user-select:none;}
+.leg-sub:first-child{margin-top:0;}
+.leg-sub-rows{display:contents;}
+.leg-sub-rows.hidden > *{display:none;}
+
 /* ── VLM ─────────────────────────────────────────────────────────────────── */
 .vlm-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
 .vlm-cell{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;}
@@ -218,89 +233,110 @@ select:focus{outline:none;border-color:var(--accent);}
       <h3>Probe — move to scan · click to lock mark position</h3>
 
       <!-- ── VEIN LINE KEY ─────────────────────────────────────────────────── -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-bottom:8px">
-        <div style="grid-column:1/-1;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:2px">Line Key — what each colour/style represents</div>
-
-        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#818cf8">
-          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#312e81" stroke-width="6" stroke-linecap="round"/></svg>
-          N1 — Femoral &amp; Deep Veins
+      <details class="legend-section">
+        <summary>Line Key — what each colour/style represents</summary>
+        <div class="legend-body grid" style="gap:4px 8px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#818cf8">
+            <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#312e81" stroke-width="6" stroke-linecap="round"/></svg>
+            N1 — Femoral &amp; Deep Veins
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#93c5fd">
+            <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/></svg>
+            N2 — Great Saphenous v. (GSV)
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#60a5fa">
+            <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
+            AAGSV / PAGSV (accessory)
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#818cf8">
+            <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#3730a3" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
+            Tibial &amp; Fibular Veins
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#f97316">
+            <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#f97316" stroke-width="3.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
+            SSV &amp; SPJ connection
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#fb923c">
+            <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
+            Vein of Giacomini (N3)
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#a78bfa">
+            <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/></svg>
+            N3 — SFJ Tributaries
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#93c5fd">
+            <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4,3" stroke-linecap="round"/></svg>
+            GSV Calf Branches &amp; Arch
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#34d399;grid-column:1/-1">
+            <svg width="14" height="14" style="flex-shrink:0"><polygon points="7,1 13,7 7,13 1,7" fill="rgba(52,211,153,0.18)" stroke="#34d399" stroke-width="1.5"/></svg>
+            ◇ Perforator connection points (Hunterian · Dodd · Boyd · Cockett)
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#93c5fd">
-          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round"/></svg>
-          N2 — Great Saphenous v. (GSV)
-        </div>
-
-        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#60a5fa">
-          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
-          AAGSV / PAGSV (accessory)
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#818cf8">
-          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#3730a3" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
-          Tibial &amp; Fibular Veins
-        </div>
-
-        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#f97316">
-          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#f97316" stroke-width="3.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
-          SSV &amp; SPJ connection
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#fb923c">
-          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/></svg>
-          Vein of Giacomini (N3)
-        </div>
-
-        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#a78bfa">
-          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/></svg>
-          N3 — SFJ Tributaries
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#93c5fd">
-          <svg width="24" height="8" style="flex-shrink:0"><line x1="1" y1="4" x2="23" y2="4" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4,3" stroke-linecap="round"/></svg>
-          GSV Calf Branches &amp; Arch
-        </div>
-
-        <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#34d399;grid-column:1/-1">
-          <svg width="14" height="14" style="flex-shrink:0"><polygon points="7,1 13,7 7,13 1,7" fill="rgba(52,211,153,0.18)" stroke="#34d399" stroke-width="1.5"/></svg>
-          ◇ Perforator connection points (Hunterian · Dodd · Boyd · Cockett)
-        </div>
-      </div>
+      </details>
 
       <!-- ── VEIN ANATOMY LEGEND ──────────────────────────────────────────── -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:9.5px;line-height:1.6;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-bottom:8px">
+      <details class="legend-section">
+        <summary>Vein Anatomy Legend</summary>
+        <div class="legend-body" style="padding-top:4px">
 
-        <div style="grid-column:1/-1;font-size:9px;font-weight:700;color:#818cf8;margin-top:2px;letter-spacing:.05em">N1 — DEEP VEINS</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#312e81;border-radius:2px;flex-shrink:0"></span>Ext. Iliac / Com. Femoral v.</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#312e81;border-radius:2px;flex-shrink:0"></span>Femoral v.</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #4338ca;flex-shrink:0"></span>Deep Femoral v. (Profunda)</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#312e81;border-radius:2px;flex-shrink:0"></span>Popliteal v.</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3730a3;flex-shrink:0"></span>Posterior Tibial v.</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3730a3;flex-shrink:0"></span>Anterior Tibial v.</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3730a3;flex-shrink:0"></span>Fibular / Peroneal v.</div>
+          <details class="legend-section" style="margin-bottom:4px;border-color:rgba(129,140,248,.3)">
+            <summary style="color:#818cf8">N1 — Deep Veins</summary>
+            <div class="legend-body grid2">
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#312e81;border-radius:2px;flex-shrink:0"></span>Ext. Iliac / Com. Femoral v.</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#312e81;border-radius:2px;flex-shrink:0"></span>Femoral v.</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #4338ca;flex-shrink:0"></span>Deep Femoral v. (Profunda)</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#312e81;border-radius:2px;flex-shrink:0"></span>Popliteal v.</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3730a3;flex-shrink:0"></span>Posterior Tibial v.</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3730a3;flex-shrink:0"></span>Anterior Tibial v.</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3730a3;flex-shrink:0"></span>Fibular / Peroneal v.</div>
+            </div>
+          </details>
 
-        <div style="grid-column:1/-1;font-size:9px;font-weight:700;color:#93c5fd;margin-top:5px;letter-spacing:.05em">N2 — GSV SYSTEM</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:4px;background:#1d4ed8;border-radius:2px;flex-shrink:0"></span>Great Saphenous v. (GSV)</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3b82f6;flex-shrink:0"></span>Ant. Accessory GSV (AAGSV)</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #60a5fa;flex-shrink:0"></span>Post. Accessory GSV (PAGSV)</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #93c5fd;flex-shrink:0"></span>Calf Ant. Branch</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #93c5fd;flex-shrink:0"></span>Calf Post. Branch</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #93c5fd;flex-shrink:0"></span>Dorsal Venous Arch</div>
+          <details class="legend-section" style="margin-bottom:4px;border-color:rgba(147,197,253,.3)">
+            <summary style="color:#93c5fd">N2 — GSV System</summary>
+            <div class="legend-body grid2">
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:4px;background:#1d4ed8;border-radius:2px;flex-shrink:0"></span>Great Saphenous v. (GSV)</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #3b82f6;flex-shrink:0"></span>Ant. Accessory GSV (AAGSV)</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #60a5fa;flex-shrink:0"></span>Post. Accessory GSV (PAGSV)</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #93c5fd;flex-shrink:0"></span>Calf Ant. Branch</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #93c5fd;flex-shrink:0"></span>Calf Post. Branch</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #93c5fd;flex-shrink:0"></span>Dorsal Venous Arch</div>
+            </div>
+          </details>
 
-        <div style="grid-column:1/-1;font-size:9px;font-weight:700;color:#a78bfa;margin-top:5px;letter-spacing:.05em">N3 — SFJ TRIBUTARIES</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:2px;background:#7c3aed;flex-shrink:0"></span>Sup. Circumflex Iliac v.</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:2px;background:#7c3aed;flex-shrink:0"></span>Sup. Epigastric v.</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #7c3aed;flex-shrink:0"></span>External Pudendal v.</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #8b5cf6;flex-shrink:0"></span>Ant. Thigh Circumflex v.</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #8b5cf6;flex-shrink:0"></span>Post. Thigh Circumflex v.</div>
+          <details class="legend-section" style="margin-bottom:4px;border-color:rgba(167,139,250,.3)">
+            <summary style="color:#a78bfa">N3 — SFJ Tributaries</summary>
+            <div class="legend-body grid2">
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:2px;background:#7c3aed;flex-shrink:0"></span>Sup. Circumflex Iliac v.</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:2px;background:#7c3aed;flex-shrink:0"></span>Sup. Epigastric v.</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #7c3aed;flex-shrink:0"></span>External Pudendal v.</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #8b5cf6;flex-shrink:0"></span>Ant. Thigh Circumflex v.</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #8b5cf6;flex-shrink:0"></span>Post. Thigh Circumflex v.</div>
+            </div>
+          </details>
 
-        <div style="grid-column:1/-1;font-size:9px;font-weight:700;color:#f97316;margin-top:5px;letter-spacing:.05em">SSV SYSTEM</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #f97316;flex-shrink:0"></span>Small Saphenous v. (SSV)</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#f97316;border-radius:2px;flex-shrink:0"></span>Saphenopopliteal Jct. (SPJ)</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #fb923c;flex-shrink:0"></span>Vein of Giacomini (N3)</div>
+          <details class="legend-section" style="margin-bottom:4px;border-color:rgba(249,115,22,.3)">
+            <summary style="color:#f97316">SSV System</summary>
+            <div class="legend-body grid2">
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #f97316;flex-shrink:0"></span>Small Saphenous v. (SSV)</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:3px;background:#f97316;border-radius:2px;flex-shrink:0"></span>Saphenopopliteal Jct. (SPJ)</div>
+              <div style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;border-top:2px dashed #fb923c;flex-shrink:0"></span>Vein of Giacomini (N3)</div>
+            </div>
+          </details>
 
-        <div style="grid-column:1/-1;font-size:9px;font-weight:700;color:#34d399;margin-top:5px;letter-spacing:.05em">PERFORATORS ◇</div>
-        <div style="color:#34d399">◇ Hunterian (proximal thigh)</div>
-        <div style="color:#34d399">◇ Dodd's (distal thigh)</div>
-        <div style="color:#34d399">◇ Boyd's (around knee)</div>
-        <div style="color:#34d399">◇ Cockett's (lower calf)</div>
-      </div>
+          <details class="legend-section" style="margin-bottom:0;border-color:rgba(52,211,153,.3)">
+            <summary style="color:#34d399">Perforators ◇</summary>
+            <div class="legend-body grid2" style="color:#34d399">
+              <div>◇ Hunterian (proximal thigh)</div>
+              <div>◇ Dodd's (distal thigh)</div>
+              <div>◇ Boyd's (around knee)</div>
+              <div>◇ Cockett's (lower calf)</div>
+            </div>
+          </details>
+
+        </div>
+      </details>
 
       <div id="legWrap">
         <svg id="legSvg" viewBox="0 0 280 540" width="348" height="671">
@@ -740,13 +776,15 @@ function updateInfoBar(st) {
 const frameImg  = document.getElementById('frameImg');
 const frameWait = document.getElementById('frameWait');
 let   lastVeinRegion = '';
+let   veinFrameIsFromServer = false; // true once guidance_update has supplied the exact VLM frame
 
 function scheduleFrame(posY, isFront, region) {
   // Update posY badge
   document.getElementById('videoPosBadge').textContent = region ? region + '  posY:' + posY.toFixed(2) : 'posY: ' + posY.toFixed(2);
-  // Fetch vein frame on region change
+  // On region change: reset server-frame flag and fetch a placeholder immediately
   if (region && region !== lastVeinRegion) {
     lastVeinRegion = region;
+    veinFrameIsFromServer = false;
     fetchVeinFrame(region);
   }
 }
@@ -761,6 +799,8 @@ function fetchVeinFrame(region) {
     })
     .then(result => {
       if (!result) return;
+      // Don't override the VLM-analyzed frame if guidance_update already supplied it
+      if (veinFrameIsFromServer && lastVeinRegion === region) return;
       const url = URL.createObjectURL(result.blob);
       frameImg.onload = () => { frameWait.style.display = 'none'; frameImg.style.display = 'block'; };
       frameImg.src = url;
@@ -839,9 +879,15 @@ function initSocket() {
     if(d.guidance) { lastGuidance=d.guidance; setGuidance(d.guidance, false, d.action||'move'); }
     if(d.vlm)        renderVLM(d.vlm);
     if(d.thinking)   appendLog(d);
-    if(d.region && d.region !== lastVeinRegion) {
-      lastVeinRegion = d.region;
-      fetchVeinFrame(d.region);
+    // frame_b64 only arrives when region changed — replace placeholder with exact VLM frame
+    if(d.frame_b64) {
+      frameImg.onload = () => { frameWait.style.display='none'; frameImg.style.display='block'; };
+      frameImg.src = 'data:image/jpeg;base64,' + d.frame_b64;
+      veinFrameIsFromServer = true;
+      if(d.region) lastVeinRegion = d.region;
+      const lbl = document.getElementById('refVeinLabel');
+      if(lbl && d.vlm && d.vlm.vein_types && d.vlm.vein_types.length)
+        lbl.textContent = d.vlm.vein_types.join(', ');
     }
   });
 

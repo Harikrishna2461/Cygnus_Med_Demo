@@ -38,6 +38,7 @@ class StreamSession:
     last_vlm_region: str = ""
     last_vlm_summary: str = "No frame analyzed yet."
     last_vlm_dict: Optional[dict] = None
+    last_vlm_frame_b64: Optional[str] = None  # frame VLM actually analyzed (sent to client for display)
     last_llm_pos_y: float = -1.0
     last_llm_region: str = ""
 

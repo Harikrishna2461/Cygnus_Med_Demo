@@ -76,6 +76,107 @@ def extract_frame_at(pos_y_ratio: float, annotated: bool = True) -> Optional[str
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# GUIDANCE FRAME PICKER — for VLM analysis, use the same annotated reference
+# frames the user sees (guidance/ concat frames > vein_frames/ > streaming video)
+# ─────────────────────────────────────────────────────────────────────────────
+
+_REGION_TO_GUIDANCE_DIRS = {
+    "SFJ":         ["sfj"],
+    "Upper Thigh": ["gsv_thigh"],
+    "Hunterian":   ["gsv_thigh"],
+    "Dodd":        ["gsv_thigh"],
+    "GSV-THI":     ["gsv_thigh"],
+    "GSV-CAL":     ["gsv_calf"],
+    "SPJ":         ["spj"],
+    "SSV":         ["ssv"],
+    # Giacomini intentionally omitted — no dedicated guidance folder;
+    # Giocomini vein_frames used instead (metadata bypass, no VLM call needed).
+    "Calf":        ["gsv_calf"],
+}
+
+_REGION_TO_VEIN_DIRS = {
+    "SFJ":         ["GSV_Prox", "CFV"],
+    "Upper Thigh": ["GSV_Prox", "FV", "AASV"],
+    "Hunterian":   ["GSV_Prox", "FV", "Hunt_Perf"],
+    "Dodd":        ["GSV_Distal", "FV", "Dodd_Perf"],
+    "GSV-THI":     ["GSV_Distal", "FV"],
+    "GSV-CAL":     ["GSV_Distal"],
+    "SPJ":         ["SSV", "PV"],
+    "SSV":         ["SSV", "PASV"],
+    "Giacomini":   ["Giocomini", "SSV", "Tributary", "AASV"],
+    "Calf":        ["GSV_Distal", "Tributary", "Boyd_Perf", "Cockett_Perf"],
+    "UNKNOWN":     ["GSV_Prox"],
+}
+
+# Folder name → anatomy metadata (no VLM needed for vein_frames — the folder IS the label)
+_VEIN_FOLDER_TO_META: dict[str, dict] = {
+    "GSV_Prox":      {"vein_types": ["GSV"],              "n2": True,  "n3": False, "n1": False},
+    "GSV_Distal":    {"vein_types": ["GSV"],              "n2": True,  "n3": False, "n1": False},
+    "GSV":           {"vein_types": ["GSV"],              "n2": True,  "n3": False, "n1": False},
+    "SSV":           {"vein_types": ["SSV"],              "n2": True,  "n3": False, "n1": False},
+    "Tributary":     {"vein_types": ["Tributary"],        "n2": False, "n3": True,  "n1": False},
+    "Giocomini":     {"vein_types": ["SSV", "Tributary"], "n2": True,  "n3": True,  "n1": False},
+    "AASV":          {"vein_types": ["AASV"],             "n2": False, "n3": True,  "n1": False},
+    "PASV":          {"vein_types": ["PASV"],             "n2": False, "n3": True,  "n1": False},
+    "CFV":           {"vein_types": ["CFV"],              "n2": False, "n3": False, "n1": True},
+    "FV":            {"vein_types": ["FV"],               "n2": False, "n3": False, "n1": True},
+    "FV_CFV":        {"vein_types": ["FV", "CFV"],        "n2": False, "n3": False, "n1": True},
+    "PV":            {"vein_types": ["PV"],               "n2": False, "n3": False, "n1": True},
+    "DFV":           {"vein_types": ["DFV"],              "n2": False, "n3": False, "n1": True},
+    "Deep_Vein_Calf":{"vein_types": ["FV"],               "n2": False, "n3": False, "n1": True},
+    "Boyd_Perf":     {"vein_types": ["Boyd_Perf"],        "n2": False, "n3": True,  "n1": False},
+    "Dodd_Perf":     {"vein_types": ["Dodd_Perf"],        "n2": True,  "n3": False, "n1": True},
+    "Hunt_Perf":     {"vein_types": ["Hunt_Perf"],        "n2": True,  "n3": False, "n1": True},
+    "Cockett_Perf":  {"vein_types": ["Cockett_Perf"],     "n2": False, "n3": True,  "n1": True},
+}
+
+
+def _get_frame_for_region(
+    region: str, pos_y: float
+) -> tuple[Optional[str], str, Optional[dict]]:
+    """
+    Returns (base64_jpeg, source_type, folder_meta).
+      source_type: "guidance" | "vein_frames" | "stream"
+      folder_meta: _VEIN_FOLDER_TO_META entry when source_type=="vein_frames", else None.
+    Priority: guidance concat frames (have N1/N2/N3 labels + fascia lines)
+              > vein_frames/ (folder name is ground-truth label — skip VLM)
+              > streaming video fallback
+    """
+    import random, os
+    assets = os.path.join(os.path.dirname(__file__), "..", "assets")
+
+    # 1. Guidance frames — best: full N1/N2/N3 label overlays + yellow fascia lines
+    for subdir in _REGION_TO_GUIDANCE_DIRS.get(region, []):
+        d = os.path.join(assets, "guidance", subdir)
+        if os.path.isdir(d):
+            jpgs = [f for f in os.listdir(d) if f.lower().endswith(".jpg")]
+            if jpgs:
+                path = os.path.join(d, random.choice(jpgs))
+                try:
+                    with open(path, "rb") as f:
+                        return base64.b64encode(f.read()).decode(), "guidance", None
+                except Exception:
+                    pass
+
+    # 2. Vein frames — folder name IS the vein label; build assessment without VLM
+    for vname in _REGION_TO_VEIN_DIRS.get(region, []):
+        d = os.path.join(assets, "vein_frames", vname)
+        if os.path.isdir(d):
+            jpgs = [f for f in os.listdir(d) if f.lower().endswith(".jpg")]
+            if jpgs:
+                path = os.path.join(d, random.choice(jpgs))
+                try:
+                    with open(path, "rb") as f:
+                        meta = _VEIN_FOLDER_TO_META.get(vname)
+                        return base64.b64encode(f.read()).decode(), "vein_frames", meta
+                except Exception:
+                    pass
+
+    # 3. Fallback: streaming video
+    return extract_frame_at(pos_y), "stream", None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # COMBINED VLM + LLM STEP — called from route handler
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -117,17 +218,44 @@ def process_probe_state(
         or region != session.last_vlm_region
     )
 
+    region_changed = (region != session.last_vlm_region)
+    vlm_frame_updated = False
+
     if run_vlm:
-        # Giacomini (posterior thigh): show & analyse the blank tissue frame at posY=0.0
-        # (annotated video, no N1/N2/N3 labels present) so VLM output is consistent with display.
-        vlm_frame_y = 0.0 if region == 'Giacomini' else pos_y
-        frame_b64 = extract_frame_at(vlm_frame_y)
-        vlm_dict, vlm_summary = vlm_agent.analyze(frame_b64, region, leg)
-        if frame_b64:
-            session.last_vlm_summary = vlm_summary
-            session.last_vlm_dict    = vlm_dict
-            session.last_vlm_pos_y   = pos_y
-            session.last_vlm_region  = region
+        # Only pick a new frame and re-analyze when the anatomical region changes.
+        # Within a region, reuse the cached frame and result — avoids random frame
+        # swaps mid-scan and eliminates redundant VLM API calls.
+        if region_changed or not session.last_vlm_frame_b64:
+            frame_b64, frame_source, folder_meta = _get_frame_for_region(region, pos_y)
+
+            if frame_source == "vein_frames" and folder_meta:
+                from vlm_analyzer import UltrasoundAssessment
+                vt = list(folder_meta["vein_types"])
+                assessment = UltrasoundAssessment(
+                    image_quality="good",
+                    fascial_layer_visible=False,
+                    n2_in_fascial_compartment=folder_meta["n2"],
+                    n3_superficial_to_fascia=folder_meta["n3"],
+                    n1_deep_to_fascia=folder_meta["n1"],
+                    label_n2_visible=folder_meta["n2"],
+                    label_n3_visible=folder_meta["n3"],
+                    label_n1_visible=folder_meta["n1"],
+                    vein_types=vt,
+                    frame_note=f"Vein frame: {', '.join(vt)}",
+                )
+                vlm_dict    = assessment.to_dict()
+                vlm_summary = assessment.summary()
+            else:
+                vlm_dict, vlm_summary = vlm_agent.analyze(frame_b64, region, leg)
+
+            if frame_b64:
+                session.last_vlm_summary    = vlm_summary
+                session.last_vlm_dict       = vlm_dict
+                session.last_vlm_pos_y      = pos_y
+                session.last_vlm_region     = region
+                session.last_vlm_frame_b64  = frame_b64
+                vlm_frame_updated = True
+        # else: same region, same frame — cached result is still valid
 
     vlm_dict    = session.last_vlm_dict
     vlm_summary = session.last_vlm_summary
@@ -235,6 +363,7 @@ def process_probe_state(
         "action":           action,
         "vlm":              vlm_dict,
         "vlm_summary":      vlm_summary,
+        "frame_b64":        session.last_vlm_frame_b64 if vlm_frame_updated else None,
         "region":           region,
         "pos_y":            pos_y,
         "shunt_confirmed":  shunt_confirmed,

@@ -23,51 +23,42 @@ REGION_TARGET_VESSELS: dict[str, str] = {
     "GSV-CAL":    "GSV trunk (N2) in calf, within fascial compartment",
     "SPJ":        "Saphenopopliteal Junction — SSV (N2) meets popliteal vein (N1) behind knee",
     "SSV":        "SSV trunk (N2) in posterior calf",
-    "Giacomini":  "Giacomini vein / posterior thigh — THIS FRAME HAS NO ANNOTATION LABELS. "
-                  "No N1/N2/N3 text labels are present. All label_*_visible fields MUST be false.",
+    "Giacomini":  "Giacomini vein / posterior thigh — SSV tributary running up posterior thigh, may show SSV or Tributary annotation",
     "Calf":       "GSV in medial calf, within fascial compartment",
     "UNKNOWN":    "superficial venous structure",
 }
 
 _SYSTEM_PROMPT = (
-    "You read annotated venous ultrasound frames and report which vessels are visible, "
-    "where they sit relative to the fascial layer, and what specific vein type each annotated vessel is. "
-    "Your output is used as anatomy context — it is not a diagnosis.\n\n"
-    "HOW VESSELS ARE ANNOTATED IN THESE FRAMES:\n"
-    "  Fascia: two bright yellow HORIZONTAL LINES running across the image, "
-    "forming the saphenous fascial compartment (the 'saphenous eye').\n"
-    "  N3 vessel: YELLOW POLYGON/OVAL OUTLINE around the vessel cross-section + 'N3 [n]' text label badge. "
-    "Sits ABOVE the fascia lines, between the fascia and the probe (top of image = closer to skin). "
-    "N3 vessels are superficial tributaries or varicose branches above the fascia.\n"
-    "  N2 vessel: GREEN POLYGON/OVAL OUTLINE around the vessel cross-section + 'N2 [n]' text label badge. "
-    "Sits WITHIN the fascial compartment, BETWEEN the two yellow lines. "
-    "This is the saphenous trunk — GSV (great saphenous) in the thigh/calf, or SSV (small saphenous) posteriorly.\n"
-    "  N1 vessel: BLUE or CYAN POLYGON/OVAL OUTLINE + 'N1 [n]' text label badge. "
-    "Sits BELOW/DEEP TO the fascial lines, further from the skin. "
-    "This is the deep vein — CFV (common femoral), FV (femoral vein), or PV (popliteal vein).\n"
-    "  Numbers in brackets [0], [1], [2] are just vessel indices — ignore them.\n\n"
-    "VEIN TYPE IDENTIFICATION — for each annotated vessel you can see, identify which vein it most likely is:\n"
-    "  N1 (deep, below fascia): CFV at groin, FV at thigh, PV at popliteal fossa\n"
-    "  N2 (in fascial compartment): GSV trunk (proximal=thigh, distal=calf), SSV trunk (posterior calf)\n"
-    "  N3 (superficial, above fascia): GSV tributary, SSV tributary, AASV (anterior accessory), PASV (posterior accessory), perforator outflow\n"
-    "  Perforators: orange-outlined vessels connecting N1 to N2 — Hunterian, Dodd, Boyd, Cockett\n\n"
-    "CRITICAL LABEL RULE — read carefully:\n"
-    "  A label field (label_n1_visible, label_n2_visible, label_n3_visible) MUST be set to true ONLY IF "
-    "you can literally read the EXACT PRINTED TEXT 'N1 [n]', 'N2 [n]', or 'N3 [n]' as a visible text overlay in the image. "
-    "A circular or oval dark vessel shape WITHOUT that printed text label = label is NOT visible (false). "
-    "If the image shows only tissue or ultrasound speckle with NO printed annotation text, "
-    "ALL label_*_visible fields MUST be false, n2_in_fascial_compartment MUST be false, "
-    "fascial_layer_visible MUST be false, and image_quality should reflect what you see.\n\n"
-    "WHAT TO REPORT:\n"
-    "  For each N-type: is it present (yes/no), based on seeing its outline and label.\n"
-    "  The fascial layer: is it visible (yes/no).\n"
-    "  vein_types: list of specific vein names visible (e.g. ['GSV', 'FV', 'Tributary']). "
-    "Use only these names: GSV, SSV, CFV, FV, PV, DFV, AASV, PASV, Tributary, "
-    "Hunterian_Perf, Dodd_Perf, Boyd_Perf, Cockett_Perf. Empty list [] if nothing identifiable.\n"
-    "  frame_note: 8 words max, vessel labels and positions, e.g. 'N2 GSV in fascia, N3 tributary above'. "
-    "If no labels at all: 'No annotations visible in frame'. "
-    "Never mention flow, colour, Doppler, EP, RP, or any clinical finding.\n\n"
-    "Respond only with valid JSON."
+    "You read annotated venous duplex ultrasound frames. Respond ONLY with valid compact JSON — no markdown, no explanation.\n\n"
+    "THESE FRAMES USE ONE OF TWO ANNOTATION STYLES:\n\n"
+    "STYLE A — Guidance frames (have yellow fascia lines):\n"
+    "  Two bright YELLOW annotation lines (horizontal or gently curved, spanning the full image width) = saphenous fascia boundary.\n"
+    "  fascial_layer_visible=true ONLY if you see these two artificial yellow lines.\n"
+    "  IMPORTANT: Yellow lines alone do NOT mean a vein is present. You must ALSO find:\n"
+    "    - An anechoic (dark oval) vessel visible in the image, AND\n"
+    "    - A printed text label near that vessel.\n"
+    "  Label format in Style A: 'N2 [n]' or 'N2 [n] HL' = saphenous trunk between the fascia lines → label_n2_visible=true, n2_in_fascial_compartment=true.\n"
+    "  'N3 [n]' or 'N3 [n] SL' = tributary above fascia lines → label_n3_visible=true, n3_superficial_to_fascia=true.\n"
+    "  'N1 [n]' = deep vein below fascia lines → label_n1_visible=true, n1_deep_to_fascia=true.\n"
+    "  If you see yellow fascia lines but NO dark vessel oval and NO N-label text: fascial_layer_visible=true, all others false.\n\n"
+    "STYLE B — Segmented vein frames (NO yellow fascia lines):\n"
+    "  Oval contour drawn around each vessel + VEIN NAME text label (colour varies — ignore outline colour).\n"
+    "  Read the TEXT LABEL near each oval:\n"
+    "    'GSV', 'GSV_PROX', 'GSV_DISTAL' → label_n2_visible=true, n2_in_fascial_compartment=true, add 'GSV' to vein_types\n"
+    "    'TRIBUTARY' → label_n3_visible=true, n3_superficial_to_fascia=true, add 'Tributary' to vein_types\n"
+    "    'SSV' → label_n2_visible=true, n2_in_fascial_compartment=true, add 'SSV' to vein_types\n"
+    "    'CFV', 'FV', 'PV', 'DFV' → label_n1_visible=true, n1_deep_to_fascia=true, add that name to vein_types\n"
+    "    'AASV', 'PASV' → add to vein_types\n"
+    "  fascial_layer_visible=false (no yellow fascia lines in Style B).\n\n"
+    "CRITICAL RULES:\n"
+    "  1. Seeing yellow fascia lines is NOT sufficient to set any label_n* or n*_in_* field true.\n"
+    "  2. Only set label_n2_visible=true if you can read 'N2' text OR an oval labeled GSV/SSV.\n"
+    "  3. NEVER guess or infer a vein from anatomy alone — only from visible text labels.\n"
+    "  4. Do not report SSV unless the text 'SSV' is literally printed in the image.\n\n"
+    "frame_note: 1 natural sentence describing what you actually see in this image "
+    "(e.g. 'Yellow fascia lines visible with no labeled vessel between them.' or "
+    "'GSV oval labeled N2 visible between yellow fascia lines.' or "
+    "'Oval labeled GSV_DISTAL and another labeled TRIBUTARY, no fascia lines.')"
 )
 
 _ANALYSIS_SCHEMA = """{
@@ -80,7 +71,7 @@ _ANALYSIS_SCHEMA = """{
   "label_n2_visible": true or false,
   "label_n3_visible": true or false,
   "vein_types": ["GSV", "FV"],
-  "frame_note": "e.g. 'N2 GSV in fascia, N3 tributary above' — vessel names, N-class, positions only"
+  "frame_note": "1 natural sentence: what structures are actually visible (e.g. 'Yellow fascia lines present, no labeled vessel visible.' or 'Dark oval labeled N2 between fascia lines.')"
 }"""
 
 
@@ -143,24 +134,35 @@ class UltrasoundAssessment:
         return " ".join(parts)
 
 
+_N2_VEIN_FOR_REGION = {
+    "SFJ": "GSV", "Upper Thigh": "GSV", "Hunterian": "GSV",
+    "Dodd": "GSV", "GSV-THI": "GSV", "GSV-CAL": "GSV", "Calf": "GSV",
+    "SPJ": "SSV", "SSV": "SSV", "Giacomini": "SSV",
+}
+_N1_VEIN_FOR_REGION = {
+    "SFJ": "CFV", "Upper Thigh": "FV", "Hunterian": "FV",
+    "Dodd": "FV", "GSV-THI": "FV", "GSV-CAL": "FV",
+    "SPJ": "PV", "SSV": "PV", "Calf": "FV",
+}
+
 def _build_user_prompt(region: str, leg: str) -> str:
     target = REGION_TARGET_VESSELS.get(region, "superficial venous structure")
+    n2_vein = _N2_VEIN_FOR_REGION.get(region, "GSV")
+    n1_vein = _N1_VEIN_FOR_REGION.get(region, "FV")
     return (
-        f"Probe position: {region} region, {leg} leg.\n"
-        f"Expected anatomy: {target}.\n\n"
-        f"Look at the frame and answer:\n"
-        f"  - Are the two yellow horizontal fascia lines visible?\n"
-        f"  - Is there a vessel with a YELLOW oval/polygon outline labeled 'N3 [n]' above the fascia lines?\n"
-        f"    If yes: what specific vein is it? (e.g. GSV tributary, AASV, PASV, Cockett perforator outflow)\n"
-        f"  - Is there a vessel with a GREEN oval/polygon outline labeled 'N2 [n]' between the fascia lines?\n"
-        f"    If yes: what specific vein is it? (e.g. GSV at {region}, SSV trunk)\n"
-        f"  - Is there a vessel with a blue/cyan outline labeled 'N1 [n]' below the fascia lines?\n"
-        f"    If yes: what specific vein is it? (e.g. CFV at groin, FV at thigh, PV at popliteal fossa)\n"
-        f"  - List all specific vein names you can identify in the vein_types array.\n"
-        f"Report only what is annotated with explicit text labels. Do not mention flow, Doppler, EP, or RP.\n"
-        f"REMINDER: If you do not see actual printed 'N1 [n]'/'N2 [n]'/'N3 [n]' text in the image, "
-        f"all label_*_visible fields must be false, and vein_types should be [].\n\n"
-        f"Respond with valid JSON only:\n{_ANALYSIS_SCHEMA}"
+        f"Region: {region} ({leg} leg). Context: {target}.\n"
+        f"Step 1 — scan the image and READ EVERY TEXT LABEL printed near an oval/circle outline.\n"
+        f"Step 2 — fill in the JSON below based ONLY on what labels you literally read:\n"
+        f"{_ANALYSIS_SCHEMA}\n"
+        f"STRICT RULES for vein_types:\n"
+        f"  Style B (no yellow fascia lines): read the exact text labels on ovals — "
+        f"'TRIBUTARY'→add 'Tributary'; 'GSV','GSV_PROX','GSV_DISTAL'→add 'GSV'; "
+        f"'SSV'→add 'SSV'; 'CFV'→add 'CFV'; 'FV'→add 'FV'; 'AASV'→add 'AASV'; 'PASV'→add 'PASV'. "
+        f"Report EVERY labeled vessel — if two ovals with different labels, add both.\n"
+        f"  Style A (yellow fascia lines present): if N2 label visible → add '{n2_vein}'; "
+        f"if N3 label visible → add 'Tributary'; if N1 label visible → add '{n1_vein}'.\n"
+        f"NEVER add SSV unless the text 'SSV' or 'N2' in SPJ/SSV region is literally in the image. "
+        f"Output JSON only."
     )
 
 
@@ -177,18 +179,43 @@ def _parse_vlm_json(text: str) -> dict:
     return {}
 
 
-def _assessment_from_dict(d: dict, raw: str) -> UltrasoundAssessment:
+def _assessment_from_dict(d: dict, raw: str, region: str = "") -> UltrasoundAssessment:
     raw_vt = d.get("vein_types", [])
-    vein_types = raw_vt if isinstance(raw_vt, list) else []
+    vein_types: list = list(raw_vt) if isinstance(raw_vt, list) else []
+
+    label_n1 = bool(d.get("label_n1_visible", False))
+    label_n2 = bool(d.get("label_n2_visible", False))
+    label_n3 = bool(d.get("label_n3_visible", False))
+    n2 = bool(d.get("n2_in_fascial_compartment", False))
+    n3 = bool(d.get("n3_superficial_to_fascia", False))
+    n1 = bool(d.get("n1_deep_to_fascia", False))
+
+    # Style A guidance frames: N-class labels are detected → rebuild vein_types from
+    # region + N-class only. Discard VLM's vein_types text (model hallucinates wrong
+    # vein names, e.g. SSV for GSV regions). Region tells us exactly what each N-class is.
+    if label_n2 or n2 or label_n3 or n3 or label_n1 or n1:
+        vein_types = []
+        if label_n2 or n2:
+            vein_types.append(_N2_VEIN_FOR_REGION.get(region, "GSV"))
+            n2 = True
+        if label_n3 or n3:
+            vein_types.append("Tributary")
+            n3 = True
+        if label_n1 or n1:
+            vein_types.append(_N1_VEIN_FOR_REGION.get(region, "FV"))
+            n1 = True
+    # else: Style B or stream — use VLM-reported vein_types as-is
+    # (vein_frames are bypassed before reaching here; stream is best-effort)
+
     return UltrasoundAssessment(
         image_quality=d.get("image_quality", "unknown"),
         fascial_layer_visible=bool(d.get("fascial_layer_visible", False)),
-        n2_in_fascial_compartment=bool(d.get("n2_in_fascial_compartment", False)),
-        n3_superficial_to_fascia=bool(d.get("n3_superficial_to_fascia", False)),
-        n1_deep_to_fascia=bool(d.get("n1_deep_to_fascia", False)),
-        label_n1_visible=bool(d.get("label_n1_visible", False)),
-        label_n2_visible=bool(d.get("label_n2_visible", False)),
-        label_n3_visible=bool(d.get("label_n3_visible", False)),
+        n2_in_fascial_compartment=n2,
+        n3_superficial_to_fascia=n3,
+        n1_deep_to_fascia=n1,
+        label_n1_visible=label_n1,
+        label_n2_visible=label_n2,
+        label_n3_visible=label_n3,
         vein_types=vein_types,
         frame_note=d.get("frame_note", ""),
         raw_text=raw,
@@ -201,16 +228,6 @@ def analyze_frame(
     leg: str,
     media_type: str = "image/jpeg",
 ) -> UltrasoundAssessment:
-    # Giacomini zone uses a blank tissue frame with no annotation overlays.
-    # The VLM model confabulates fascia lines and N2 from tissue banding on
-    # featureless ultrasound images, so bypass the API call and return the
-    # only honest result: nothing annotated. The UI fields still render — all No.
-    if region == "Giacomini":
-        return UltrasoundAssessment(
-            image_quality="good",
-            frame_note="Giacomini zone — no saphenous trunk annotation in posterior view",
-        )
-
     from config import GROQ_API_KEY, GROQ_VISION_MODEL
 
     if not GROQ_API_KEY:
@@ -224,7 +241,7 @@ def analyze_frame(
         data_url = f"data:{media_type};base64,{base64_image}"
         resp = client.chat.completions.create(
             model=GROQ_VISION_MODEL,
-            max_tokens=250,
+            max_tokens=512,
             temperature=0.0,
             timeout=15,
             messages=[
@@ -240,7 +257,7 @@ def analyze_frame(
         )
         raw = resp.choices[0].message.content or ""
         d = _parse_vlm_json(raw)
-        return _assessment_from_dict(d, raw)
+        return _assessment_from_dict(d, raw, region)
 
     except Exception as exc:
         logger.error("Groq VLM error: %s", exc)

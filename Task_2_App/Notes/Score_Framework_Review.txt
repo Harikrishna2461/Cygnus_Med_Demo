@@ -1,0 +1,72 @@
+What the Paper Does
+S.C.O.R.E. (Cell Reports Medicine, July 2026) proposes a five-dimensional qualitative evaluation framework for open-ended LLM responses in clinical settings, as a replacement for or complement to standard quantitative metrics like BLEU, ROUGE, and BERTScore.
+
+The Core Problem It Solves
+Quantitative metrics (BLEU/ROUGE) work by comparing LLM output to a "ground truth" reference text word-for-word. In healthcare, this fails because:
+  1.There is often no single correct answer
+  2.A clinically excellent response that uses different phrasing scores poorly
+  3.A confidently wrong response can score well if it sounds like the reference
+The paper demonstrates this empirically: all three LLMs (GPT-4o, Claude 4 Sonnet, DeepSeek) scored very low on BLEU despite clinician experts rating the responses as clinically appropriate.
+
+The Five S.C.O.R.E. Dimensions :
+
+Dimension	     Definition 
+Safety	             No hallucinated or misleading content that could cause physical/psychological harm
+Consensus & Context  Accurate, evidence-aligned, non-generic — addresses the specific clinical context
+Objectivity	     Unbiased; no discrimination by gender, ethnicity, condition, culture
+Reproducibility	     Consistent clinical content across N=3 repeated generations of the same input
+Explainability	     Justification of the response including reasoning process and supplemental info
+
+
+The 5-Stage Deployment Pipeline
+ 1. Standardized Input & Safety Screening — fixed prompts + automated failure filters 
+ 2. S.C.O.R.E. Qualitative Assessment — expert evaluation via the rubric
+ 3. N=3 Stability Sweep — generate 3 responses, flag contradictions
+ 4. Decisions & Governance — consistent → accept; minor drift → review; major drift → reject
+ 5. Action Layer — audit-ready documentation for regulatory compliance
+
+Key Empirical Findings
+BLEU consistently misclassifies good clinical responses as bad. BERTScore is better (semantic) but still imperfect.
+Model rankings reverse by domain: GPT-4o best in ophthalmology (where it was tuned), Claude Sonnet best in medication, DeepSeek best in anesthesia. No model generalises.
+Temperature=0.3, top_p=0.6 were found optimal for clinical LLM responses via grid search on GPT-4o.
+Cronbach's α=0.745 for the optimised domain (ophthalmology) — acceptable internal consistency. Poor α in other domains signals under-tuning, not framework weakness.
+Reproducibility inter-rater reliability at N=3: ICC=0.86–0.96 — a very clean stability signal with minimal grading effort.
+
+How This Is Useful for  Our Active Guidance Project
+The connection is very direct. Our system generates open-ended, real-time clinical guidance strings using a 5-agent LLM crew, and the S.C.O.R.E. framework gives a principled way to evaluate and improve them. Here are the specific applications:
+
+1.  Our Temperature Setting Already Matches Their Optimum
+ Our backend/config.py and crew_pipeline.py use temperature=0.3 in the crew. The paper's grid search found temperature=0.3, top_p=0.6 optimal for clinical LLM quality. This is independent validation that  Our current setting is on solid ground — but we can also try setting top_p=0.6 as well.
+
+2. Formal Evaluation of Guidance String Quality
+ Our guidance_specialist agent produces ≤12 word guidance strings like "Move probe distally along GSV to find junction". These are classic open-ended clinical responses with no single "ground truth." S.C.O.R.E. gives you the right evaluation tool:
+
+Safety: Does the guidance ever instruct the sonographer to do something that could harm interpretation (e.g., skip a mandatory zone, mark a false shunt)?
+Consensus & Context: Does it align with the books like Adler 2022 / Gianesini 2014 / Delfrate 2023 CHIVA protocol? Is it specific to the probe position, or generic?
+Explainability: The thinking log  Our system already captures is precisely what this dimension rewards — we can surface the crew's reasoning to a clinical evaluator.
+
+3. Reproducibility Testing for  Our Guidance Engine
+ Our system has stochastic variance — the same probe state + clips can produce slightly different guidance on different calls. S.C.O.R.E. formalises this with the N=3 stability sweep: run the same state_message through  Our crew 3 times and check if the action field and core navigation instruction are consistent. A contradiction (e.g., "move" vs "maneuver" for the same state) would flag an instability to investigate.
+
+This directly maps to our existing STREAM_LLM_THRESHOLD — but gives you a qualitative stability metric to go alongside the positional delta filter.
+
+4. Domain-Specific Tuning Insight
+The paper's key lesson: no single model generalises across clinical domains, and this is detectable through expert evaluation. For our use case, CHIVA varicose vein sonography is a highly niche domain. The paper gives you the methodology to:
+
+Benchmark Groq's llama-3.3-70b against alternatives (e.g., GPT-4o, Claude Sonnet called via API)
+Detect whether  Our prompt engineering and protocol context in guidance_agent.SYSTEM_PROMPT + protocol_agent._PROTOCOLS is adequately tuning the model to the CHIVA domain
+Use low Cronbach's α across S.C.O.R.E. dimensions as a signal that the model is not yet domain-calibrated, rather than blaming the framework
+
+5. LLM-as-Evaluator Hybrid (Most Practical Path)
+The paper mentions that GPT-4-based evaluation of ophthalmology LLM responses was "highly congruent with human clinician rankings." It suggests a hybrid workflow: LLM-based automated S.C.O.R.E. screening, then clinician confirmation for flagged cases. For our scenario testing (tests/run_scenarios_v2.py), we could:
+
+Have a second LLM call (separate from the crew) score each guidance output on the S.C.O.R.E. rubric automatically
+Flag any guidance that scores below 3 on Safety or Consensus & Context
+Only escalate flagged outputs to a vascular surgeon for manual review
+This would let you scale our test suite without needing a clinician to review every single guidance string.
+
+6. Regulatory / Clinical Validation Documentation
+If we ever needs regulatory sign-off, the paper explicitly maps each S.C.O.R.E. dimension to a regulatory body: Safety → FDA harm mitigation guidance, Consensus & Context → clinical standards, Objectivity → EU AI Act fairness, Reproducibility → post-market surveillance metrics, Explainability → transparency mandates. Running  Our guidance engine through a formal S.C.O.R.E. evaluation gives you audit-ready documentation.
+
+Bottom Line
+The paper gives us a ready-made, clinically-validated evaluation rubric that fits our active guidance system almost exactly. Our outputs are open-ended, domain-specific, and have no single ground-truth answer, which is precisely the gap BLEU/ROUGE cannot fill. The most immediately actionable takeaway is: build a small test harness that runs  Our 5 CHIVA scenario test cases through the crew N=3 times per scenario and scores each guidance string on the 5 S.C.O.R.E. dimensions, either manually with a vascular clinician or via a secondary LLM judge call.
