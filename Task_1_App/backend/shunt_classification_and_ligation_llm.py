@@ -706,13 +706,15 @@ WHAT EACH FINDING TELLS YOU ABOUT THIS PATIENT'S VENOUS PHYSIOLOGY:
                dilation over time. Combined with SFJ entry (EP N1→N2), it means the shunt
                circuit extends into the tributary network.
 
-  RP N2→N1  — The GSV or SSV trunk is refluxing retrograde toward the deep system. Blood
-               that entered the saphenous trunk is flowing backward under hydrostatic load,
-               away from the heart. Sustained retrograde flow >500 ms is pathological.
-               This is saphenous trunk incompetence — the core reflux pathway in Type 1.
-               Turbulent oscillatory flow in the refluxing trunk drives progressive wall dilation.
-               Without this finding, Type 1 cannot be present. Its absence in the presence of
-               SFJ entry means the entry is haemodynamically incomplete — no active circuit.
+  RP N2→N1  — The GSV or SSV trunk is carrying blood backward (downward, away from the heart)
+               under hydrostatic load. Blood that entered at the SFJ or Hunterian perforator now
+               flows retrograde down the trunk. At the bottom of this refluxing segment, blood exits
+               the superficial system via an incompetent re-entry perforator back into the deep vein.
+               The RP N2→N1 marks that exit point — the perforator itself is NOT refluxing, it carries
+               blood superficial→deep. The TRUNK SEGMENT above the RP is what refluxes.
+               Sustained retrograde trunk flow >500 ms is pathological. Without this finding,
+               Type 1 cannot be present — SFJ entry alone with no trunk reflux is haemodynamically
+               incomplete and does not constitute an active shunt.
 
   RP N3→N2  — A tributary is draining retrograde back into the GSV trunk. The shunt
                loop closes through the saphenous trunk — overflow from the GSV reaches

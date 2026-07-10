@@ -776,22 +776,23 @@ function updateInfoBar(st) {
 const frameImg  = document.getElementById('frameImg');
 const frameWait = document.getElementById('frameWait');
 let   lastVeinRegion = '';
+let   lastPosY = 0;
 let   veinFrameIsFromServer = false; // true once guidance_update has supplied the exact VLM frame
 
 function scheduleFrame(posY, isFront, region) {
-  // Update posY badge
   document.getElementById('videoPosBadge').textContent = region ? region + '  posY:' + posY.toFixed(2) : 'posY: ' + posY.toFixed(2);
-  // On region change: reset server-frame flag and fetch a placeholder immediately
+  lastPosY = posY;
   if (region && region !== lastVeinRegion) {
     lastVeinRegion = region;
     veinFrameIsFromServer = false;
-    fetchVeinFrame(region);
+    fetchVeinFrame(region, posY);
   }
 }
 
-function fetchVeinFrame(region) {
+function fetchVeinFrame(region, posY) {
   if (!region) return;
-  fetch('/api/vein-frame?region=' + encodeURIComponent(region))
+  const py = (posY !== undefined) ? posY : lastPosY;
+  fetch('/api/vein-frame?region=' + encodeURIComponent(region) + '&pos_y=' + py.toFixed(3))
     .then(resp => {
       if (!resp.ok) return null;
       const veinLabel = resp.headers.get('X-Vein-Label') || resp.headers.get('X-Vein-Type') || '';
@@ -811,7 +812,9 @@ function fetchVeinFrame(region) {
 }
 
 function refreshVeinFrame() {
-  if (lastVeinRegion) fetchVeinFrame(lastVeinRegion);
+  if (!lastVeinRegion) return;
+  veinFrameIsFromServer = false;  // allow the new fetch to update the displayed frame
+  fetchVeinFrame(lastVeinRegion, lastPosY);
 }
 
 // ── Session ────────────────────────────────────────────────────────────────

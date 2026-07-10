@@ -131,48 +131,57 @@ _VEIN_FOLDER_TO_META: dict[str, dict] = {
 }
 
 
+def _build_region_sources(region: str, assets: str) -> list:
+    """
+    Build an ordered list of all available frame sources for a region:
+      [(source_type, dir_path, sorted_jpgs, folder_meta), ...]
+    guidance folders come first, then every vein_frames folder.
+    Caller cycles through this list using pos_y so every vein type gets shown.
+    """
+    import os
+    sources = []
+
+    for subdir in _REGION_TO_GUIDANCE_DIRS.get(region, []):
+        d = os.path.join(assets, "guidance", subdir)
+        if os.path.isdir(d):
+            jpgs = sorted(f for f in os.listdir(d) if f.lower().endswith(".jpg"))
+            if jpgs:
+                sources.append(("guidance", d, jpgs, None))
+
+    for vname in _REGION_TO_VEIN_DIRS.get(region, []):
+        d = os.path.join(assets, "vein_frames", vname)
+        if os.path.isdir(d):
+            jpgs = sorted(f for f in os.listdir(d) if f.lower().endswith(".jpg"))
+            if jpgs:
+                sources.append(("vein_frames", d, jpgs, _VEIN_FOLDER_TO_META.get(vname)))
+
+    return sources
+
+
 def _get_frame_for_region(
     region: str, pos_y: float
 ) -> tuple[Optional[str], str, Optional[dict]]:
     """
     Returns (base64_jpeg, source_type, folder_meta).
-      source_type: "guidance" | "vein_frames" | "stream"
-      folder_meta: _VEIN_FOLDER_TO_META entry when source_type=="vein_frames", else None.
-    Priority: guidance concat frames (have N1/N2/N3 labels + fascia lines)
-              > vein_frames/ (folder name is ground-truth label — skip VLM)
-              > streaming video fallback
+    Cycles through ALL sources for the region (guidance + every vein folder) using
+    pos_y so every vein type gets shown as the probe moves — not just the first folder.
     """
-    import random, os
+    import os
     assets = os.path.join(os.path.dirname(__file__), "..", "assets")
 
-    # 1. Guidance frames — best: full N1/N2/N3 label overlays + yellow fascia lines
-    for subdir in _REGION_TO_GUIDANCE_DIRS.get(region, []):
-        d = os.path.join(assets, "guidance", subdir)
-        if os.path.isdir(d):
-            jpgs = [f for f in os.listdir(d) if f.lower().endswith(".jpg")]
-            if jpgs:
-                path = os.path.join(d, random.choice(jpgs))
-                try:
-                    with open(path, "rb") as f:
-                        return base64.b64encode(f.read()).decode(), "guidance", None
-                except Exception:
-                    pass
+    sources = _build_region_sources(region, assets)
+    if sources:
+        bucket = int(round(pos_y * 20))   # one bucket per 0.05 step (= VLM threshold)
+        n_src  = len(sources)
+        source_type, d, jpgs, meta = sources[bucket % n_src]
+        frame_idx = (bucket // n_src) % len(jpgs)
+        try:
+            with open(os.path.join(d, jpgs[frame_idx]), "rb") as fh:
+                return base64.b64encode(fh.read()).decode(), source_type, meta
+        except Exception:
+            pass
 
-    # 2. Vein frames — folder name IS the vein label; build assessment without VLM
-    for vname in _REGION_TO_VEIN_DIRS.get(region, []):
-        d = os.path.join(assets, "vein_frames", vname)
-        if os.path.isdir(d):
-            jpgs = [f for f in os.listdir(d) if f.lower().endswith(".jpg")]
-            if jpgs:
-                path = os.path.join(d, random.choice(jpgs))
-                try:
-                    with open(path, "rb") as f:
-                        meta = _VEIN_FOLDER_TO_META.get(vname)
-                        return base64.b64encode(f.read()).decode(), "vein_frames", meta
-                except Exception:
-                    pass
-
-    # 3. Fallback: streaming video
+    # Fallback: streaming video
     return extract_frame_at(pos_y), "stream", None
 
 
@@ -218,44 +227,41 @@ def process_probe_state(
         or region != session.last_vlm_region
     )
 
-    region_changed = (region != session.last_vlm_region)
     vlm_frame_updated = False
 
     if run_vlm:
-        # Only pick a new frame and re-analyze when the anatomical region changes.
-        # Within a region, reuse the cached frame and result — avoids random frame
-        # swaps mid-scan and eliminates redundant VLM API calls.
-        if region_changed or not session.last_vlm_frame_b64:
-            frame_b64, frame_source, folder_meta = _get_frame_for_region(region, pos_y)
+        # Re-pick frame on every VLM run (pos_y changed enough OR region changed).
+        # Frame selection is position-based (not random) so moving the probe
+        # shows frames from different parts of the anatomical video.
+        frame_b64, frame_source, folder_meta = _get_frame_for_region(region, pos_y)
 
-            if frame_source == "vein_frames" and folder_meta:
-                from vlm_analyzer import UltrasoundAssessment
-                vt = list(folder_meta["vein_types"])
-                assessment = UltrasoundAssessment(
-                    image_quality="good",
-                    fascial_layer_visible=False,
-                    n2_in_fascial_compartment=folder_meta["n2"],
-                    n3_superficial_to_fascia=folder_meta["n3"],
-                    n1_deep_to_fascia=folder_meta["n1"],
-                    label_n2_visible=folder_meta["n2"],
-                    label_n3_visible=folder_meta["n3"],
-                    label_n1_visible=folder_meta["n1"],
-                    vein_types=vt,
-                    frame_note=f"Vein frame: {', '.join(vt)}",
-                )
-                vlm_dict    = assessment.to_dict()
-                vlm_summary = assessment.summary()
-            else:
-                vlm_dict, vlm_summary = vlm_agent.analyze(frame_b64, region, leg)
+        if frame_source == "vein_frames" and folder_meta:
+            from vlm_analyzer import UltrasoundAssessment
+            vt = list(folder_meta["vein_types"])
+            assessment = UltrasoundAssessment(
+                image_quality="good",
+                fascial_layer_visible=False,
+                n2_in_fascial_compartment=folder_meta["n2"],
+                n3_superficial_to_fascia=folder_meta["n3"],
+                n1_deep_to_fascia=folder_meta["n1"],
+                label_n2_visible=folder_meta["n2"],
+                label_n3_visible=folder_meta["n3"],
+                label_n1_visible=folder_meta["n1"],
+                vein_types=vt,
+                frame_note=f"Vein frame: {', '.join(vt)}",
+            )
+            vlm_dict    = assessment.to_dict()
+            vlm_summary = assessment.summary()
+        else:
+            vlm_dict, vlm_summary = vlm_agent.analyze(frame_b64, region, leg)
 
-            if frame_b64:
-                session.last_vlm_summary    = vlm_summary
-                session.last_vlm_dict       = vlm_dict
-                session.last_vlm_pos_y      = pos_y
-                session.last_vlm_region     = region
-                session.last_vlm_frame_b64  = frame_b64
-                vlm_frame_updated = True
-        # else: same region, same frame — cached result is still valid
+        if frame_b64:
+            session.last_vlm_summary    = vlm_summary
+            session.last_vlm_dict       = vlm_dict
+            session.last_vlm_pos_y      = pos_y
+            session.last_vlm_region     = region
+            session.last_vlm_frame_b64  = frame_b64
+            vlm_frame_updated = True
 
     vlm_dict    = session.last_vlm_dict
     vlm_summary = session.last_vlm_summary

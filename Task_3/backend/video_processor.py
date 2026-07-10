@@ -183,20 +183,19 @@ def process_video(
 
         if frame_cb is not None and frame_idx % 2 == 0:
             frame_cb(encode_jpeg(annotated, quality=65))
+            if progress_cb:
+                pct = int(frame_idx / max(total, 1) * 88)
+                progress_cb(
+                    pct,
+                    f"Frame {frame_idx}/{total}  |  VLM calls: {vlm_calls}",
+                    {
+                        "frames_processed":        frame_idx,
+                        "veins_found":             total_veins,
+                        "current_classifications": [v["classification"] for v in veins],
+                    },
+                )
 
         frame_idx += 1
-
-        if progress_cb and (frame_idx % 15 == 0 or frame_idx == total):
-            pct = int(frame_idx / max(total, 1) * 88)
-            progress_cb(
-                pct,
-                f"Frame {frame_idx}/{total}  |  VLM calls: {vlm_calls}",
-                {
-                    "frames_processed":       frame_idx,
-                    "veins_found":            total_veins,
-                    "current_classifications": [v["classification"] for v in veins],
-                },
-            )
 
     cap.release()
     writer.release()

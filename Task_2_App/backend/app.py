@@ -137,20 +137,7 @@ def create_app() -> Flask:
     assets_dir   = os.path.join(os.path.dirname(__file__), "..", "assets")
     frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
 
-    # ── vein reference frame ──────────────────────────────────────────────────
-    _REGION_TO_VEINS: dict[str, list[str]] = {
-        "SFJ":         ["GSV_Prox", "CFV"],
-        "Upper Thigh": ["GSV_Prox", "FV", "AASV"],
-        "Hunterian":   ["GSV_Prox", "FV", "Hunt_Perf", "Dodd_Perf"],
-        "Dodd":        ["GSV_Distal", "FV", "Dodd_Perf"],
-        "GSV-THI":     ["GSV_Distal", "FV"],
-        "GSV-CAL":     ["GSV_Distal"],
-        "SPJ":         ["SSV", "PV"],
-        "SSV":         ["SSV", "PASV"],
-        "Giacomini":   ["SSV", "Tributary", "AASV"],
-        "Calf":        ["GSV_Distal", "Tributary", "Boyd_Perf", "Cockett_Perf", "Deep_Vein_Calf"],
-        "UNKNOWN":     ["GSV_Prox"],
-    }
+    # ── vein label display names (used by vein-frame route header) ──────────────
     _VEIN_LABELS: dict[str, str] = {
         "GSV_Prox":       "GSV proximal trunk",
         "GSV_Distal":     "GSV distal trunk",
@@ -170,56 +157,39 @@ def create_app() -> Flask:
         "Boyd_Perf":      "Boyd perforator",
         "Cockett_Perf":   "Cockett perforator",
         "Ankle_Perf":     "Ankle perforator",
-    }
-
-    # Guidance (N1/N2/N3 annotated) subfolders per region
-    _REGION_TO_GUIDANCE: dict[str, list[str]] = {
-        "SFJ":         ["sfj"],
-        "Upper Thigh": ["gsv_thigh"],
-        "Hunterian":   ["gsv_thigh"],
-        "Dodd":        ["gsv_thigh"],
-        "GSV-THI":     ["gsv_thigh"],
-        "GSV-CAL":     ["gsv_calf"],
-        "SPJ":         ["spj"],
-        "SSV":         ["ssv"],
-        "Giacomini":   ["ssv"],
-        "Calf":        ["gsv_calf"],
+        "sfj":            "SFJ (saphenofemoral junction)",
+        "gsv_thigh":      "GSV thigh",
+        "gsv_calf":       "GSV calf",
+        "spj":            "SPJ (saphenopopliteal junction)",
+        "ssv":            "SSV (small saphenous)",
     }
 
     @app.route("/api/vein-frame")
     def vein_frame_ref():
-        import random
         from flask import request as freq, send_file, jsonify as fjson
+        from streaming_guidance_engine import _build_region_sources
         region = freq.args.get("region", "UNKNOWN")
-        vein_frames_dir = os.path.join(assets_dir, "vein_frames")
-        guidance_dir    = os.path.join(assets_dir, "guidance")
+        try:
+            pos_y = float(freq.args.get("pos_y", 0.0))
+        except (TypeError, ValueError):
+            pos_y = 0.0
 
-        candidates: list[tuple[str, str]] = []
-
-        # 1. Segmented vein frames (classified by hue, from _seg.mp4 videos)
-        vein_names = _REGION_TO_VEINS.get(region, _REGION_TO_VEINS["UNKNOWN"])
-        for vname in vein_names:
-            d = os.path.join(vein_frames_dir, vname)
-            if os.path.isdir(d):
-                for fname in os.listdir(d):
-                    if fname.lower().endswith(".jpg"):
-                        candidates.append((vname, os.path.join(d, fname)))
-
-        # 2. N1/N2/N3 annotated guidance frames (from concat videos)
-        for subfolder in _REGION_TO_GUIDANCE.get(region, []):
-            d = os.path.join(guidance_dir, subfolder)
-            if os.path.isdir(d):
-                for fname in os.listdir(d):
-                    if fname.lower().endswith(".jpg"):
-                        candidates.append((subfolder, os.path.join(d, fname)))
-
-        if not candidates:
+        # Use the identical source pool + selection logic as the VLM frame picker
+        # so the placeholder always shows the same frame VLM will analyze.
+        sources = _build_region_sources(region, assets_dir)
+        if not sources:
             return fjson({"error": "no frames available for region"}), 404
 
-        chosen_vein, chosen_path = random.choice(candidates)
+        bucket = int(round(pos_y * 20))
+        n_src  = len(sources)
+        _, d, jpgs, _ = sources[bucket % n_src]
+        frame_idx  = (bucket // n_src) % len(jpgs)
+        chosen_path = os.path.join(d, jpgs[frame_idx])
+        vein_label  = os.path.basename(d)
+
         resp = send_file(chosen_path, mimetype="image/jpeg")
-        resp.headers["X-Vein-Type"]  = chosen_vein
-        resp.headers["X-Vein-Label"] = _VEIN_LABELS.get(chosen_vein, chosen_vein)
+        resp.headers["X-Vein-Type"]  = vein_label
+        resp.headers["X-Vein-Label"] = _VEIN_LABELS.get(vein_label, vein_label)
         resp.headers["Cache-Control"] = "no-store"
         resp.headers["Access-Control-Expose-Headers"] = "X-Vein-Type, X-Vein-Label"
         return resp

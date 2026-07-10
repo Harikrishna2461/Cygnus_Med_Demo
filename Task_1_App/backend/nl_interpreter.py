@@ -23,8 +23,10 @@ COMPARTMENTS:
   N3 = Tributaries, perforators branching off the saphenous trunk, varicosities, superficial branches
 
 FLOW DIRECTIONS:
-  EP = Antegrade (forward, physiological, normal direction toward heart)
-  RP = Retrograde (reflux, backward, pathological, away from heart)
+  EP = Entry Point — blood pathologically escapes FROM deep INTO superficial (valve has failed).
+  RP = Re-entry Point — blood exits FROM superficial BACK INTO deep via a perforator.
+       The RP perforator carries blood superficial→deep (correct perforator direction).
+       The segment ABOVE the RP is what refluxes — the RP itself does not reflux.
 
 POSITION RATIOS (posYRatio — 0 = groin, 1 = ankle):
   SFJ / groin area:           0.04 – 0.09
@@ -46,8 +48,10 @@ KEY MAPPINGS FROM CLINICAL LANGUAGE:
   "GSV discharges blood into" / "blood exits the GSV into a tributary" / "GSV empties into a tributary"
       → EP  N2→N3  (at the level described)
 
-  "blood refluxes back in the tributary" / "tributary drains backward"
-      → RP  N3→N2 or RP N3→N1  (depending on where it drains to)
+  "blood refluxes back in the tributary" / "tributary drains backward" / "tributary carries blood retrograde"
+      → RP N3→N2 (if the tributary drains back into the GSV trunk)
+        RP N3→N1 (if the tributary drains directly to the deep system)
+      The RP marks where the refluxing tributary exits — the tributary segment above is what refluxes.
 
   "perforator feeds GSV" / "there is a perforator entry into the trunk"
       → EP  N2→N2  (perforator entry — note: fromType=N2, toType=N2, NOT N1→N2)
@@ -60,11 +64,13 @@ KEY MAPPINGS FROM CLINICAL LANGUAGE:
       → EP  N1→N2  posYRatio≈0.25 (SFJ INCOMPETENT via Hunterian)
 
 IMPORTANT DISTINCTIONS:
-  - EP N1→N2 means deep system → saphenous trunk (SFJ or Hunterian INCOMPETENT)
-  - EP N2→N2 means perforator → saphenous trunk (SFJ COMPETENT)
-  - RP N2→N1 means saphenous trunk reflux (backward in GSV)
-  - RP N3→N2 means tributary reflux back into GSV
-  - RP N3→N1 means tributary reflux all the way back to deep system
+  - EP N1→N2: incompetent SFJ or Hunterian perforator — deep blood floods into GSV trunk
+  - EP N2→N2: incompetent mid-segment perforator — deep blood enters GSV trunk (SFJ COMPETENT)
+  - EP N2→N3: GSV trunk overflows forward into a tributary (GSV pressure exceeds tributary threshold)
+  - EP N1→N3: deep blood enters a tributary directly, bypassing the GSV trunk entirely
+  - RP N2→N1: GSV trunk carries blood downward (reflux); blood re-enters deep via perforator here
+  - RP N3→N2: tributary carries blood backward; blood re-enters GSV trunk at this point
+  - RP N3→N1: tributary carries blood backward; blood re-enters deep system directly at this point
 
 === CLINICAL DESCRIPTION TO INTERPRET ===
 {description}
@@ -133,8 +139,10 @@ COMPARTMENTS — READ CAREFULLY:
       Posterior tibial perforators — medial calf / ankle
 
 FLOW DIRECTIONS:
-  EP = Antegrade (forward, physiological, normal direction toward heart)
-  RP = Retrograde (reflux, backward, pathological, away from heart)
+  EP = Entry Point — blood pathologically escapes FROM deep INTO superficial (valve has failed).
+  RP = Re-entry Point — blood exits FROM superficial BACK INTO deep via a perforator.
+       The RP perforator carries blood superficial→deep (correct perforator direction).
+       The segment ABOVE the RP is what refluxes — the RP itself does not reflux.
 
 POSITION RATIOS (posYRatio — 0 = groin, 1 = ankle):
   SFJ / groin area:                        0.04 – 0.09
