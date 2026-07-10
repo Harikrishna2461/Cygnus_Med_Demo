@@ -909,6 +909,7 @@ STRICT OUTPUT RULES:
 - reasoning: describe each decision step in plain clinical language (e.g. "EP N1→N2 present, indicating SFJ incompetence"). Do NOT reference internal clip indices ("Clip 00", "Clip 01", etc.), y-coordinates, or posYRatio values in any reasoning step.
 - STRICT NO-INFERENCE RULE: classify ONLY based on flow findings listed in the assessment above. Do NOT write "RP might be present", "could have reflux", or any similar inference. If no RP finding is listed, no RP exists.
 - NEVER use the word "clip" or "clips" anywhere in summary, reasoning, or chain_of_thought. Say "finding", "flow finding", "entry point", "reflux finding", or "EP/RP finding" instead.
+- needs_elim_test: Set to true when EP N2→N3 is present AND both RP N3→N1 and RP N2→N1 are present AND no eliminationTest result has been provided on any EP N2→N3 or RP N3 finding (Case B3). When needs_elim_test is true, shunt_type MUST be "Undetermined" — do NOT output Type 1+2 or Type 3. This is MANDATORY: reaching B3 conditions without an eliminationTest result means you CANNOT classify further.
 
 Output ONLY the JSON below — no other text, no markdown.
 
@@ -917,6 +918,7 @@ Output ONLY the JSON below — no other text, no markdown.
     "shunt_type": "<Type 1 / Type 2A / Type 2B / Type 2C / Type 3 / Type 4 / Type 5 / Type 6 / Type 1+2 / No shunt detected / Undetermined>",
     "confidence": <0.0-1.0>,
     "reasoning": ["<decision step 1>", "<decision step 2>", "..."],
+    "needs_elim_test": <true/false>,
     "ask_branching": <true/false>,
     "summary": "<1 sentence clinical summary>"
 }}"""
