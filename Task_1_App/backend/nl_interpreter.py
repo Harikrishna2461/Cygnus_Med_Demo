@@ -265,22 +265,33 @@ CRITICAL RULE 2C — GSV AS CONDUIT: DO NOT generate RP N2→N1 for the Type 3 c
 
 CRITICAL RULE 2B — eliminationTest values and when to add:
   Only add "eliminationTest" to a finding if the description EXPLICITLY describes performing
-  a compression or elimination test AND states its result (e.g. "reflux persists", "reflux
-  disappears", "elimination test positive/negative", "compression abolished reflux").
+  a compression or elimination test AND states its result.
   If no elimination test is mentioned → do NOT add eliminationTest to any finding.
   *** Never infer or guess an eliminationTest result from the reflux pattern alone. ***
 
-  eliminationTest VALUE ASSIGNMENT:
-    Use "Reflux" when compression ABOLISHED / ELIMINATED tributary reflux:
-      Trigger phrases: "reflux disappeared on compression", "reflux abolished", "tributary reflux gone",
-      "compression eliminated all reflux", "reflux ceased", "tributary reflux disappeared",
-      "elimination test positive", "reflux disappeared", "reflux eliminated on compression"
-      → eliminationTest="Reflux"  (Type 1+2 pattern confirmed — GSV is the single feeder)
+  The elimination test has TWO valid methods. You MUST first identify which method the
+  clinician used by reading WHAT was compressed and WHAT was observed.
 
-    Use "No Reflux" when reflux PERSISTED / was UNCHANGED despite compression:
-      Trigger phrases: "reflux persists", "reflux unchanged", "no change on compression",
-      "tributary continued to reflux", "reflux not abolished"
-      → eliminationTest="No Reflux"  (Type 3 pattern — tributary has independent source)
+  METHOD 1 — Clinician compresses the TRIBUTARY and observes the SAPHENOUS VEIN:
+    If saphenous vein reflux CONTINUES / PERSISTS despite tributary compression:
+      The GSV has its own independent drainage perforator (RP N2→N1) unaffected by the tributary.
+      → eliminationTest="Reflux"  (Type 1+2)
+
+    If saphenous vein reflux STOPS / DISAPPEARS when tributary is compressed:
+      All recirculating volume was draining through the tributary — no independent GSV drainage.
+      → eliminationTest="No Reflux"  (Type 3)
+
+  METHOD 2 — Clinician compresses the EP/SFJ and observes the TRIBUTARY:
+    If tributary reflux DISAPPEARS when SFJ/GSV is compressed:
+      The tributary had no independent source — entirely fed by the GSV shunt.
+      → eliminationTest="Reflux"  (Type 1+2)
+
+    If tributary reflux PERSISTS / CONTINUES when SFJ/GSV is compressed:
+      The tributary has its own independent perforator still feeding it.
+      → eliminationTest="No Reflux"  (Type 3)
+
+  Read the clinical meaning of the description. Do not pattern-match on individual words.
+  "confirmed there is a reflux" in the context of Method 1 = saphenous reflux continues = eliminationTest="Reflux".
 
 ═══════════════════════════════════════════════════════════
 CRITICAL RULE 3 — TYPE 1 vs TYPE 4 (both have GSV reflux RP N2→N1):
