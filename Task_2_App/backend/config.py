@@ -23,8 +23,9 @@ STABILITY_THRESHOLD = 0.6   # fraction of window that must agree
 SFJ_THIGH_MAX_DIST = 0.13
 # Back of thigh: dist >= threshold → popliteal / SPJ zone (posY ≥ 0.44 → dist ≥ 0.44/0.5497 ≈ 0.800)
 SPJ_THIGH_MIN_DIST = 0.80
-# Back of calf: dist <= threshold → popliteal / SPJ zone (posY ≤ 0.57 → dist ≤ (0.57-0.5497)/0.4503 ≈ 0.045)
-SPJ_CALF_MAX_DIST = 0.05
+# Back of calf: dist <= threshold → popliteal / SPJ zone
+# 0.10 ≈ upper 5–6 cm of posterior calf, covering the full popliteal fossa approach
+SPJ_CALF_MAX_DIST = 0.10
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "task2_state.db")
 

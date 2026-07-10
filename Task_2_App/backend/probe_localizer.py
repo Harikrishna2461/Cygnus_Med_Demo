@@ -20,7 +20,7 @@ Region mapping:
     GSV-THI – GSV Thigh                 (thigh, front, dist 0.12–1.00)
     GSV-CAL – GSV Calf                  (calf,  front, any dist)
     SPJ     – Saphenopopliteal Junction (thigh, back, dist ≥0.78)
-                                         (calf,  back, dist ≤0.12)
+                                         (calf,  back, dist ≤0.10)
     SSV     – Small Saphenous Vein      (calf,  back, dist >0.12)
     UNKNOWN – posterior thigh / transition zone
 """

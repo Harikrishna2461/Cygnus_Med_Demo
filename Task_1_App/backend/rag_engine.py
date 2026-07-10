@@ -156,6 +156,7 @@ def load_bm25_from_qdrant():
         logger.warning(f"BM25 from Qdrant failed: {e}. Continuing without BM25.")
 
 
+
 # ── Two-stage retrieval ────────────────────────────────────────────────────────
 
 def retrieve_context(query: str, k: int = RERANK_TOP_N) -> list[str]:

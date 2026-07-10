@@ -60,9 +60,52 @@ def clear_history(session_id: str) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 
 _CHIVA_SYSTEM_PROMPT = """You are a real-time CHIVA duplex ultrasound guidance assistant.
-You receive: (1) current probe position, (2) Q1-Q4 diagnostic status + circuit prediction
-derived from confirmed EP/RP clips, (3) VLM frame annotation context.
-Write ONE line (≤12 words) — the single next action for the sonographer.
+You receive: (1) current probe position including region, segment_type, and % along segment,
+(2) confirmed EP/RP clips, (3) Q1-Q4 diagnostic status, (4) VLM frame annotation.
+Write ONE line (≤16 words) — the single next action for the sonographer.
+Always name the vessel (N2, GSV, SSV, N1, CFV, popliteal) and the target anatomy.
+Never specify distances or percentages. Never mention Doppler modes or clinical interpretations.
+
+━━━ GUIDANCE DECISION RULES ━━━
+Read "Region", "Segment type", and "% along segment" from the user message, then output the matching sentence verbatim (you may rephrase slightly to ≤16 words but you MUST keep every vessel name and anatomical location):
+
+Use the "% along segment" number directly (not the anatomical label) to pick a rule. Output the sentence after "→" verbatim — you may trim to ≤16 words but KEEP every slash-pair (GSV/N2, N1/CFV, SSV/N2) intact:
+
+SFJ, no clips or Q1 not confirmed:
+  → Scan thigh from SFJ; confirm GSV/N2 alongside N1/CFV at saphenofemoral junction.
+
+SFJ, Q1 confirmed, Q2 not confirmed:
+  → Move distally along thigh to map GSV/N2 trunk in fascial compartment from SFJ.
+
+SFJ, Q1+Q2 confirmed, Q3 not confirmed:
+  → Scan GSV/N2 trunk along thigh for N3 escape above fascial compartment.
+
+SFJ, Q1+Q2+Q3 confirmed:
+  → Move to popliteal fossa; assess SSV/N2 at SPJ saphenopopliteal junction.
+
+GSV-THI, numeric % < 50 (proximal or mid-thigh): [Do NOT mention SFJ here]
+  → Scan GSV/N2 distally through thigh in fascial compartment.
+
+GSV-THI, numeric % ≥ 50 (distal thigh):
+  → GSV/N2 toward calf: transition probe from thigh to calf fascial compartment.
+
+GSV-CAL, numeric % < 75:
+  → Continue mapping GSV/N2 through calf in fascial compartment toward ankle.
+
+GSV-CAL, numeric % ≥ 75 (near ankle):
+  → GSV/N2 ankle mapping complete; reposition probe to SPJ saphenopopliteal junction.
+
+SPJ, segment_type = thigh:
+  → At SPJ saphenopopliteal junction: identify SSV/N2 joining popliteal vein N1.
+
+SPJ, segment_type = calf:
+  → Return probe to SFJ groin crease for elimination test.
+
+SSV:
+  → Track SSV/N2 toward popliteal fossa; confirm SPJ saphenopopliteal junction.
+
+UNKNOWN:
+  → Reposition probe to anterior thigh groin crease to begin at SFJ junction.
 
 ━━━ COMPARTMENTS (source: nl_interpreter.py _NL_TO_CHIVA_PROMPT lines 109-117) ━━━
 N1 = Deep venous system ONLY: femoral vein, popliteal vein, deep calf veins.
@@ -155,7 +198,7 @@ Q4: Does blood travel backward through that tributary? (required when Q3=YES)
 Do not add findings not present in the data.
 Output ONLY a probe movement or scan location instruction — where to move or what to look at next.
 Never mention techniques (Valsalva, calf augmentation), clinical findings, or explanations.
-Respond only with valid JSON: {"guidance": "<≤12 words>"}"""
+Respond only with valid JSON: {"guidance": "<≤16 words>"}"""
 
 
 # ── posYRatio → readable anatomical level ─────────────────────────────────────
@@ -205,11 +248,14 @@ def _ep_rp_summary(clips: list[dict]) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _chiva_component_status(clips: list[dict]) -> str:
+    """Pure factual Q1-Q4 status — no navigation hints. Decision logic lives in the system prompt."""
     if not clips:
         return (
-            "No clips confirmed yet.\n"
-            "Q1 (entry point): NOT CONFIRMED — move probe to groin crease, anterior thigh, posY≈0.06. "
-            "Look for N2 in fascial compartment. If N1 (deep vein) visible alongside N2 at that level, confirm SFJ junction."
+            "No clips confirmed yet. Q1-Q4 all pending.\n"
+            "CHIVA anatomy: SFJ (saphenofemoral junction) in anteromedial groin — N2 (GSV) joins N1 (CFV/femoral). "
+            "GSV (N2) runs distally in saphenous fascial compartment through thigh → calf → ankle. "
+            "SPJ (saphenopopliteal junction) at posterior knee — N2 (SSV) joins N1 (popliteal vein). "
+            "SSV (N2) runs posteriorly ankle → SPJ. Confirm Q1 entry point, Q2 trunk reflux, Q3 escape, Q4 tributary reflux."
         )
 
     def has(flow: str, fT: str, tT: str) -> bool:
@@ -237,131 +283,73 @@ def _chiva_component_status(clips: list[dict]) -> str:
         c = first("EP", "N1", "N2")
         lines.append(
             f"Q1 CONFIRMED — EP N1→N2: SFJ/Hunterian incompetent at {_posY_to_level(c.get('posYRatio', 0.06))} "
-            f"({c.get('legSide','?')} leg). Deep blood entering GSV (N2 in fascial compartment)."
+            f"({c.get('legSide','?')} leg). Deep blood entering N2 (GSV) in fascial compartment."
         )
     elif has_ep_n2_n2:
         c = first("EP", "N2", "N2")
         lines.append(
-            f"Q1 CONFIRMED — EP N2→N2: Perforator feeds GSV at {_posY_to_level(c.get('posYRatio', 0.25))} "
-            f"({c.get('legSide','?')} leg). SFJ is competent."
+            f"Q1 CONFIRMED — EP N2→N2: Perforator feeds N2 (GSV) at {_posY_to_level(c.get('posYRatio', 0.25))} "
+            f"({c.get('legSide','?')} leg). SFJ competent."
         )
     elif has_ep_n1_n3:
         c = first("EP", "N1", "N3")
         lines.append(
-            f"Q1 CONFIRMED — EP N1→N3: Deep system enters tributary directly at "
-            f"{_posY_to_level(c.get('posYRatio', 0.25))} ({c.get('legSide','?')} leg). "
-            "SFJ competent. Pattern consistent with Type 4 or 5."
+            f"Q1 CONFIRMED — EP N1→N3: Deep system enters N3 (tributary) directly at "
+            f"{_posY_to_level(c.get('posYRatio', 0.25))} ({c.get('legSide','?')} leg). SFJ competent."
         )
     elif has_ep_n2_n3:
-        lines.append(
-            "Q1 PARTIAL — EP N2→N3 (tributary escape) confirmed. SFJ entry not yet assessed. "
-            "Move probe to groin crease, posY≈0.06 — check whether N1 (deep vein) and N2 (GSV) "
-            "are both visible at groin level to confirm or exclude SFJ incompetence."
-        )
+        lines.append("Q1 PARTIAL — EP N2→N3 confirmed. SFJ/Hunterian entry not yet assessed.")
     else:
-        lines.append(
-            "Q1 NOT CONFIRMED — Move probe to groin crease, anterior surface, posY≈0.06. "
-            "VLM should show N2 (GSV) in fascial compartment alongside N1 (deep vein) at SFJ. "
-            "If SFJ competent, scan medial thigh for Hunterian perforator (posY 0.21–0.35)."
-        )
+        lines.append("Q1 NOT CONFIRMED — no entry clip recorded.")
 
-    # ── Q2: GSV trunk reflux (required when Q1 = SFJ/Hunterian or perforator) ─
+    # ── Q2: Trunk reflux ──────────────────────────────────────────────────────
     if has_ep_n1_n2 or has_ep_n2_n2:
-        ep_clip = first("EP", "N1", "N2") or first("EP", "N2", "N2")
-        ep_pos  = ep_clip.get("posYRatio", 0.06) if ep_clip else 0.06
-
         if has_rp_n2_n1:
             c = first("RP", "N2", "N1")
             lines.append(
-                f"Q2 CONFIRMED — RP N2→N1: GSV trunk reflux at {_posY_to_level(c.get('posYRatio', 0.3))}. "
-                "Trunk is carrying blood backward (toward foot)."
+                f"Q2 CONFIRMED — RP N2→N1: GSV trunk reflux at {_posY_to_level(c.get('posYRatio', 0.3))}."
             )
         else:
-            lines.append(
-                f"Q2 NOT CONFIRMED — Scan GSV trunk distally from posY≈{ep_pos:.2f}, "
-                "anterior medial thigh surface. "
-                "VLM should show N2 continuously in fascial compartment along trunk. "
-                "If retrograde flow seen: RP N2→N1. If no trunk reflux: GSV may be conduit to tributary escape (Q3)."
-            )
+            lines.append("Q2 NOT CONFIRMED — no trunk reflux (RP N2→N1) recorded yet.")
 
-    # ── Q3: Tributary escape (required when Q1 = SFJ/Hunterian or perforator) ─
+    # ── Q3: Tributary escape ──────────────────────────────────────────────────
     if has_ep_n1_n2 or has_ep_n2_n2:
         if has_ep_n2_n3:
             c = first("EP", "N2", "N3")
             lines.append(
-                f"Q3 CONFIRMED — EP N2→N3: Blood escapes from GSV into tributary at "
-                f"{_posY_to_level(c.get('posYRatio', 0.3))} ({c.get('legSide','?')} leg). "
-                "VLM at this posY should show both N2 in fascia AND N3 above fascia."
+                f"Q3 CONFIRMED — EP N2→N3: GSV escape into N3 tributary at "
+                f"{_posY_to_level(c.get('posYRatio', 0.3))} ({c.get('legSide','?')} leg)."
             )
         else:
-            # Give location hint based on what's confirmed
-            if has_rp_n2_n1:
-                rp = first("RP", "N2", "N1")
-                rp_pos = rp.get("posYRatio", 0.3) if rp else 0.3
-                lines.append(
-                    f"Q3 NOT CONFIRMED — Scan along GSV between posY≈0.06 (SFJ) and posY≈{rp_pos:.2f} (trunk reflux level). "
-                    "Watch for N3 appearing above fascia while N2 is in compartment — that junction is the escape point (EP N2→N3). "
-                    "Note: if GSV conduit to escape point, RP N2→N1 may NOT be present below escape (Type 3 rule)."
-                )
-            else:
-                lines.append(
-                    "Q3 NOT CONFIRMED — After confirming Q2, scan distally along GSV. "
-                    "When VLM shows N3 above fascia at same level as N2 in fascia, that is the likely escape point (EP N2→N3)."
-                )
+            lines.append("Q3 NOT CONFIRMED — no tributary escape (EP N2→N3) recorded yet.")
 
-    # ── Q3 for perforator entry (EP N2→N2): look for RP N3 near perforator ──
+    # ── Q3 for perforator circuit ─────────────────────────────────────────────
     if has_ep_n2_n2 and not has_ep_n1_n2:
         c = first("EP", "N2", "N2")
         perf_pos = c.get("posYRatio", 0.25) if c else 0.25
         if not has_rp_n3:
-            lines.append(
-                f"PERFORATOR CIRCUIT — EP N2→N2 at posY≈{perf_pos:.2f}. "
-                f"Look for tributary reflux (RP N3) near same level: scan for N3 above fascia at posY "
-                f"{max(0.0, perf_pos-0.10):.2f}–{min(1.0, perf_pos+0.15):.2f}. "
-                "Also check if GSV trunk refluxes below perforator (RP N2→N1) — distinguishes Type 2B from Type 2C."
-            )
-        elif has_rp_n3 and not has_rp_n2_n1:
-            lines.append(
-                "PERFORATOR CIRCUIT (Type 2B so far) — RP N3 confirmed. "
-                "Check for RP N2→N1 (GSV trunk reflux) to distinguish Type 2B (no trunk reflux) from Type 2C (trunk also refluxes)."
-            )
+            lines.append(f"PERFORATOR CIRCUIT — EP N2→N2 at posY≈{perf_pos:.2f}. RP N3 not yet confirmed.")
+        elif not has_rp_n2_n1:
+            lines.append("PERFORATOR CIRCUIT (Type 2B pattern) — RP N3 confirmed, RP N2→N1 not yet.")
 
-    # ── Q4: Tributary reflux (required when Q3 = confirmed) ──────────────────
+    # ── Q4: Tributary reflux ──────────────────────────────────────────────────
     if has_ep_n2_n3:
         escape = first("EP", "N2", "N3")
         esc_pos = escape.get("posYRatio", 0.3) if escape else 0.3
-
         if has_rp_n3:
             rp3 = first_rp_n3()
             direction = "back toward GSV (RP N3→N2)" if has_rp_n3_n2 else "into deep system (RP N3→N1)"
-            rp3_level = _posY_to_level(rp3.get("posYRatio", 0.5)) if rp3 else "unknown level"
-            lines.append(
-                f"Q4 CONFIRMED — RP N3 confirmed: tributary reflux {direction} at {rp3_level}."
-            )
+            rp3_level = _posY_to_level(rp3.get("posYRatio", 0.5)) if rp3 else "unknown"
+            lines.append(f"Q4 CONFIRMED — RP N3: tributary reflux {direction} at {rp3_level}.")
         else:
-            lines.append(
-                f"Q4 NOT CONFIRMED — Follow tributary branch from escape point at posY≈{esc_pos:.2f}. "
-                "VLM should show N3 above fascia. Scan along branch direction — "
-                "retrograde flow toward GSV = RP N3→N2; retrograde into deep system via perforator = RP N3→N1."
-            )
+            lines.append(f"Q4 NOT CONFIRMED — follow N3 tributary from escape at posY≈{esc_pos:.2f}.")
 
-    # ── EP N1→N3 circuit: Type 4/5 branch ────────────────────────────────────
+    # ── EP N1→N3 circuit ─────────────────────────────────────────────────────
     if has_ep_n1_n3:
         if has_rp_n2_n1 and not has_rp_n3:
-            c = first("EP", "N1", "N3")
-            lines.append(
-                f"TYPE 4 PATTERN developing — EP N1→N3 at {_posY_to_level(c.get('posYRatio', 0.25))} + RP N2→N1. "
-                "Still need to confirm: does N3 drain into GSV (RP N3→N2) before GSV returns to deep? "
-                "Scan the tributary for backward flow toward GSV."
-            )
+            lines.append("TYPE 4 pattern developing — RP N2→N1 confirmed; RP N3 pending.")
         elif not has_rp_n2_n1 and not has_rp_n3:
-            c = first("EP", "N1", "N3")
-            lines.append(
-                f"TYPE 4/5 PATTERN — EP N1→N3 confirmed at {_posY_to_level(c.get('posYRatio', 0.25))}. "
-                "Need to know how blood re-enters deep system: "
-                "via GSV trunk (RP N3→N2 then RP N2→N1 = Type 4), or directly via perforator (RP N3→N1 = Type 5). "
-                "Scan tributary for backward flow."
-            )
+            lines.append("TYPE 4/5 pattern — EP N1→N3 confirmed; how blood re-enters deep system unclear.")
 
     # ── Type 3 conduit check ──────────────────────────────────────────────────
     if has_ep_n1_n2 and has_ep_n2_n3 and not has_rp_n2_n1:
@@ -369,8 +357,7 @@ def _chiva_component_status(clips: list[dict]) -> str:
         esc_pos = escape.get("posYRatio", 0.3) if escape else 0.3
         lines.append(
             f"TYPE 3 CONDUIT CHECK — EP N1→N2 + EP N2→N3 confirmed, NO RP N2→N1 yet. "
-            f"GSV may be acting as conduit from SFJ to escape at posY≈{esc_pos:.2f} (Type 3 pattern). "
-            "Do NOT assume trunk reflux below escape point — only record RP N2→N1 if explicitly seen below escape posY."
+            f"GSV may be conduit from SFJ to escape at posY≈{esc_pos:.2f}."
         )
 
     return "\n".join(lines) if lines else "No status determined."
@@ -415,7 +402,7 @@ def _build_prompt(
     lines = [
         "## Current probe position",
         f"Region: {probe.region} ({probe.region_full_name})",
-        f"Leg: {probe.leg}  |  Surface: {side}  |  {pct} along segment ({_posY_to_level(probe.segment_dist)})",
+        f"Leg: {probe.leg}  |  Surface: {side}  |  Segment type: {probe.segment_type}  |  {pct} along segment",
     ]
 
     if expected_region:
@@ -429,14 +416,15 @@ def _build_prompt(
         "## Confirmed EP/RP clips",
         _ep_rp_summary(clips),
         "",
-        "## CHIVA Q1-Q4 status + circuit prediction",
+        "## CHIVA Q1-Q4 status",
         _chiva_component_status(clips),
         "",
         "## VLM frame: annotated anatomy visible right now",
         vlm_summary,
         "",
-        "## Task: ONE line, ≤12 words — the single next action.",
-        'JSON only: {"guidance": "<≤12 words>"}',
+        "## Task",
+        "Apply the GUIDANCE DECISION RULES from your system prompt. Output ONE line ≤16 words.",
+        'JSON only: {"guidance": "<≤16 words>"}',
     ]
     return "\n".join(lines)
 
@@ -457,7 +445,7 @@ def _call_groq(
     ]
     resp = client.chat.completions.create(
         model=model,
-        max_tokens=40,
+        max_tokens=80,
         temperature=0.0,
         messages=messages,
     )
@@ -476,10 +464,9 @@ def generate_guidance(
     expected_region: Optional[str] = None,
     ep_rp_findings: Optional[dict] = None,
     vlm_assessment: Optional[UltrasoundAssessment] = None,
-    current_clip_index: int = 0,
     session_id: str = "default",
 ) -> ActiveGuidanceResponse:
-    from config import GROQ_API_KEY, GROQ_TEXT_MODEL
+    from config import GROQ_API_KEY, GROQ_MID_MODEL
 
     wrong = check_wrong_region(probe.region, expected_region)
     clips: list[dict] = (ep_rp_findings or {}).get("clips", [])
@@ -501,7 +488,7 @@ def generate_guidance(
 
     try:
         result, raw = _call_groq(
-            _CHIVA_SYSTEM_PROMPT, prompt, GROQ_API_KEY, GROQ_TEXT_MODEL,
+            _CHIVA_SYSTEM_PROMPT, prompt, GROQ_API_KEY, GROQ_MID_MODEL,
             history=history,
         )
     except Exception as exc:

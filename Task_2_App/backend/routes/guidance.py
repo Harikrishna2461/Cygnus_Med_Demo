@@ -98,7 +98,6 @@ def guidance():
         }), 400
 
     expected_region = data.get("expected_region")
-    current_clip_index = int(data.get("current_clip_index", 0))
     ep_rp_findings = data.get("ep_rp_findings")
 
     # --- optional VLM analysis ---
@@ -121,7 +120,6 @@ def guidance():
             expected_region=expected_region,
             ep_rp_findings=ep_rp_findings,
             vlm_assessment=vlm_result,
-            current_clip_index=current_clip_index,
             session_id=session_id,
         )
     except Exception as exc:
