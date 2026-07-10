@@ -665,48 +665,9 @@ def build_shunt_classification_prompt(clips: list[dict], leg_label: str) -> str:
     """Build prompt for shunt classification — NO RAG context."""
     clips_str = _summarise_clips(clips)
 
-    # Pre-compute RP count to state it as a fact in the prompt, preventing counting errors.
     rp_count = sum(1 for c in clips if c.get("flow") == "RP")
-    has_ep_n2_n3 = any(
-        c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3"
-        for c in clips
-    )
 
-    if rp_count == 0:
-        if has_ep_n2_n3:
-            zero_rp_type = "Type 2A"
-            zero_rp_conf = "0.92"
-            zero_rp_reason = "EP N2→N3 present with zero RP → early developing shunt, no reflux yet."
-        else:
-            zero_rp_type = "No shunt detected"
-            zero_rp_conf = "0.97"
-            zero_rp_reason = "Zero RP clips = zero retrograde flow anywhere. No shunt."
-        zero_rp_block = f"""
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!! MANDATORY ZERO-RP OVERRIDE — ACT ON THIS BEFORE READING ANY RULES BELOW !!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-PRE-COMPUTED RP CLIP COUNT: {rp_count} — ZERO RP FINDINGS IN THIS ASSESSMENT.
-
-Zero RP clips means ZERO retrograde/reflux flow exists anywhere in this leg.
-This single fact FULLY DETERMINES the classification:
-
-  REQUIRED OUTPUT:
-    shunt_type  = "{zero_rp_type}"
-    confidence  = {zero_rp_conf}
-    reasoning   = ["{zero_rp_reason}"]
-
-ABSOLUTE RULES when RP count = 0:
-  • TYPE 1 IS IMPOSSIBLE — Type 1 requires RP N2→N1. None present. DO NOT output Type 1.
-  • EP N1→N2 ALONE ≠ TYPE 1 — antegrade entry without reflux is NOT a shunt.
-  • STOP HERE. Output the required JSON above. Do NOT read further rules.
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-"""
-    else:
-        zero_rp_block = f"[RP pre-check: {rp_count} RP finding(s) present — full classification rules apply.]\n"
-
-    return f"""{zero_rp_block}
+    return f"""[Findings summary: {len(clips)} total finding(s), {rp_count} RP finding(s).]
 {CHIVA_RULES}
 
 === ASSESSMENT: {leg_label} ({len(clips)} clips) ===
@@ -1143,6 +1104,26 @@ TYPE 6:
   Follow-up: Duplex at 6 weeks and 3 months to confirm RP N3→N1 has resolved. If it persists, consider additional perforator ligation.
   Complications: Incomplete ligation if multiple entry perforators not mapped; neo-angiogenesis in recurrent post-stripping cases; sural or peroneal nerve proximity; DVT risk; residual RP N3→N1 if secondary perforators missed.
 
+NO SHUNT DETECTED:
+  No pathological shunt identified. No surgical intervention required.
+  ligation_steps: [] (empty — no ligation indicated)
+  clinical_rationale: Venous system haemodynamically normal. No entry point, reflux, or re-entry circuit present.
+  chiva_approach: None — no shunt, no procedure.
+  followup_schedule: Routine clinical review if symptoms persist. Repeat duplex in 12 months if clinically indicated.
+  complications_contraindications: Not applicable — no intervention planned.
+  confidence: 0.95
+
+UNDETERMINED:
+  Shunt type cannot be classified without the elimination (compression) test result.
+  Type 3 and Type 1+2 share identical clip patterns — only the elimination test distinguishes them.
+  ligation_steps: ["Perform elimination test before ligation planning can proceed — compress the EP at the SFJ or Hunterian level and observe whether tributary reflux is abolished (Type 1+2) or persists (Type 3)."]
+  clinical_rationale: Cannot safely plan ligation without knowing whether the tributary is a dependent loop (Type 1+2) or independently fed (Type 3) — the procedures are different.
+  chiva_approach: Deferred pending elimination test result.
+  followup_schedule: Resubmit with elimination test result to proceed with classification and ligation planning.
+  complications_contraindications: Not applicable — no procedure planned until classification is confirmed.
+  additional_info_needed: ["Elimination test result required: compress GSV/SFJ and report whether tributary reflux is abolished or persists."]
+  confidence: 0.0
+
 === OUTPUT REQUIREMENTS ===
 - ligation_steps: REQUIRED. Short, direct surgical statements — one action per step.
   ligation_steps[0] MUST be exactly the string from "STEP 1 OF LIGATION PLAN" above.
@@ -1356,7 +1337,6 @@ def classify_and_plan_ligation_with_llm(
         }
     """
     # Group by leg — if no clips provided, run with an empty "Unspecified" group
-    # so the zero-RP override fires and returns "No shunt detected" via the LLM
     groups: dict[str, list[dict]] = {}
     if not clip_list:
         groups["Unspecified"] = []
@@ -1364,29 +1344,6 @@ def classify_and_plan_ligation_with_llm(
         for c in clip_list:
             side = (c.get("legSide") or c.get("leg_side") or "Assessment").strip().capitalize()
             groups.setdefault(side, []).append(c)
-
-    _NO_LIGATION_RESULT = {
-        "No shunt detected": {
-            "ligation_steps": [],
-            "clinical_rationale": "No pathological shunt identified. No surgical intervention required.",
-            "additional_info_needed": [],
-            "complications_contraindications": [],
-            "followup_schedule": "",
-            "chiva_approach": "",
-            "confidence": 0.95,
-            "_llm_usage": {},
-        },
-        "Undetermined": {
-            "ligation_steps": ["Elimination test required before ligation planning can proceed"],
-            "clinical_rationale": "Cannot distinguish Type 3 from Type 1+2 without the elimination test result.",
-            "additional_info_needed": ["Perform elimination test and resubmit"],
-            "complications_contraindications": [],
-            "followup_schedule": "",
-            "chiva_approach": "",
-            "confidence": 0.0,
-            "_llm_usage": {},
-        },
-    }
 
     findings = []
     total_prompt_tokens = 0
@@ -1397,17 +1354,13 @@ def classify_and_plan_ligation_with_llm(
         classification_usage = classification.pop("_llm_usage", {})
         shunt_type = classification.get("shunt_type", "Unknown")
 
-        # Step 2: Ligation Planning — skip entirely for types that require no ligation
-        if shunt_type in _NO_LIGATION_RESULT:
-            ligation = dict(_NO_LIGATION_RESULT[shunt_type])
-            ligation_usage = ligation.pop("_llm_usage", {})
-        else:
-            rag_context = (
-                _retrieve_rag_context_for_ligation(shunt_type, retrieve_ligation_context_fn)
-                if retrieve_ligation_context_fn else "No RAG context available."
-            )
-            ligation = _call_llm_for_ligation(shunt_type, group, rag_context, leg_label, call_llm_fn)
-            ligation_usage = ligation.pop("_llm_usage", {})
+        # Step 2: Ligation Planning — LLM handles all types including No shunt / Undetermined
+        rag_context = (
+            _retrieve_rag_context_for_ligation(shunt_type, retrieve_ligation_context_fn)
+            if retrieve_ligation_context_fn else "No RAG context available."
+        )
+        ligation = _call_llm_for_ligation(shunt_type, group, rag_context, leg_label, call_llm_fn)
+        ligation_usage = ligation.pop("_llm_usage", {})
 
         total_prompt_tokens += classification_usage.get("prompt_tokens", 0) + ligation_usage.get("prompt_tokens", 0)
         total_completion_tokens += classification_usage.get("completion_tokens", 0) + ligation_usage.get("completion_tokens", 0)
