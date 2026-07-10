@@ -672,6 +672,30 @@ def build_shunt_classification_prompt(clips: list[dict], leg_label: str) -> str:
         for c in clips
     )
 
+    # Pre-compute B3 conditions to inject a hard override when met.
+    has_ep_n1_n2 = any(
+        c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N2"
+        for c in clips
+    )
+    has_rp_n3_n1 = any(
+        c.get("flow") == "RP" and c.get("fromType") == "N3" and c.get("toType") == "N1"
+        for c in clips
+    )
+    has_rp_n2_n1 = any(
+        c.get("flow") == "RP" and c.get("fromType") == "N2" and c.get("toType") == "N1"
+        for c in clips
+    )
+    elim_test_clips = [
+        c for c in clips
+        if (c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3")
+        or (c.get("flow") == "RP" and c.get("fromType") == "N3")
+    ]
+    has_elim_test_result = any(
+        isinstance(c.get("eliminationTest"), str) and c.get("eliminationTest").strip()
+        for c in elim_test_clips
+    )
+    is_b3 = has_ep_n1_n2 and has_ep_n2_n3 and has_rp_n3_n1 and has_rp_n2_n1 and not has_elim_test_result
+
     if rp_count == 0:
         if has_ep_n2_n3:
             zero_rp_type = "Type 2A"
@@ -706,7 +730,40 @@ ABSOLUTE RULES when RP count = 0:
     else:
         zero_rp_block = f"[RP pre-check: {rp_count} RP finding(s) present — full classification rules apply.]\n"
 
-    return f"""{zero_rp_block}
+    if is_b3:
+        b3_override_block = """
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! MANDATORY B3 OVERRIDE — ACT ON THIS BEFORE READING ANY RULES BELOW       !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+PRE-COMPUTED FINDING: This assessment contains ALL FOUR of the following:
+  ✓ EP N1→N2  (deep → saphenous trunk entry)
+  ✓ EP N2→N3  (saphenous trunk → tributary escape)
+  ✓ RP N3→N1  (tributary → deep re-entry)
+  ✓ RP N2→N1  (saphenous trunk → deep re-entry)
+  ✗ eliminationTest  — NO elimination test result provided on any EP N2→N3 or RP N3 finding
+
+This is CASE B3. The elimination test result is MISSING.
+Without it, Type 1+2 and Type 3 CANNOT be distinguished.
+
+REQUIRED OUTPUT — no exceptions:
+  shunt_type    = "Undetermined"
+  needs_elim_test = true
+  confidence    = 0.0
+  reasoning     = ["EP N1→N2, EP N2→N3, RP N3→N1, and RP N2→N1 all present. Elimination test result absent — cannot distinguish Type 1+2 from Type 3 without it."]
+
+ABSOLUTE RULES:
+  • DO NOT output Type 1 — Type 1 has NO EP N2→N3. This case DOES.
+  • DO NOT output Type 1+2 — requires eliminationTest="Reflux". ABSENT here.
+  • DO NOT output Type 3 — requires eliminationTest="No Reflux". ABSENT here.
+  • STOP HERE. Output the required JSON above. Do NOT read further rules.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+"""
+    else:
+        b3_override_block = ""
+
+    return f"""{zero_rp_block}{b3_override_block}
 {CHIVA_RULES}
 
 === ASSESSMENT: {leg_label} ({len(clips)} clips) ===
