@@ -586,9 +586,15 @@ There are four things you need to know about the flow:
   QUESTION 3 — Does blood escape from the GSV into a tributary?
     Answer: does blood leave the saphenous trunk and enter any side branch?
     - YES: any statement that blood moves from GSV into a tributary, branch, or side vessel.
-    - NO: explicitly stated no branches involved, no tributary filling.
+    - NO: explicitly stated no branches involved, no tributary filling. Phrases like "no tributary involvement", "isolated GSV reflux", "no branch escape", "tributaries not involved" confirm NO.
     NOT ANSWERED: tributary involvement not mentioned at all.
     REQUIRED when Q1 = SFJ, Hunterian, or perforator entry.
+    *** EXCEPTION — Q3 OVERRIDES THE GENERAL CLINICAL IMPLICATION RULE ***
+    A complete EP→RP circuit description with NO mention of tributaries does NOT confirm Q3=NO.
+    Absence of mention is NOT confirmation of absence. Even if the doctor describes a full
+    EP at SFJ + RP at Hunterian, this does not mean "no tributaries" — there may be tributaries
+    the doctor simply has not described yet. Q3 MUST be explicitly answered YES or NO.
+    Do NOT infer Q3=NO from the absence of tributary mention. ALWAYS ask if Q3 is not stated.
 
   QUESTION 4 — Does blood travel backward through that tributary?
     Answer: does the tributary carry blood in reverse?
