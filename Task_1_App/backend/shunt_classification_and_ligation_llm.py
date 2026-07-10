@@ -148,45 +148,35 @@ the GSV or SFJ is compressed?"
 
 ─── WHAT THE ELIMINATION TEST TELLS YOU ───────────────────────────────────────
 
-    SCENARIO A — Tributary reflux DISAPPEARS on compression:
-        Clinically means: the tributary had NO independent source of its own.
-        Its entire blood supply came from the GSV/SFJ shunt.
-        When you cut off the GSV inflow, the tributary has nothing left to reflux.
-        → The tributary is a DEPENDENT loop of the Type 1 shunt = TYPE 1+2
-        Clip value: eliminationTest="Reflux"
-        Trigger phrases: "reflux abolished", "reflux disappeared on compression",
-            "tributary reflux gone", "compression eliminated all reflux",
-            "reflux ceased", "elimination test positive",
-            "tributary reflux disappeared when compressed"
+The elimination test has TWO valid methods. Read the clinician's description and
+understand WHAT was compressed and WHAT was observed, then map to the correct type.
 
-    SCENARIO B — Tributary reflux PERSISTS / REMAINS on compression:
-        Clinically means: the tributary has its OWN independent incompetent perforator.
-        Even after the GSV/SFJ inflow is cut off, the perforator keeps feeding it.
-        The SFJ compression only removed ONE of the tributaryʼs two blood sources.
-        → The tributary is independently fed = TYPE 3
-        Clip value: eliminationTest="No Reflux"
-        Trigger phrases: "reflux persists", "reflux remains", "reflux continues",
-            "does not abolish the distal reflux", "reflux unchanged on compression",
-            "no change on compression", "reflux remains when SFJ occluded",
-            "compression does not eliminate reflux", "elimination test negative"
+    ══ METHOD 1: Compress the TRIBUTARY — observe the SAPHENOUS VEIN ══
+
+    If compressing the tributary causes the saphenous vein reflux to STOP:
+        The entire recirculating volume was draining through the tributary alone.
+        The GSV has no independent drainage path to the deep system.
+        → TYPE 3. Clip value: eliminationTest="No Reflux"
+
+    If compressing the tributary leaves saphenous vein reflux UNCHANGED/CONTINUING:
+        The GSV has its own independent perforator (RP N2→N1) draining it regardless.
+        Blocking the tributary does not interrupt the GSV recirculation.
+        → TYPE 1+2. Clip value: eliminationTest="Reflux"
+
+    ══ METHOD 2: Compress the EP/SFJ — observe the TRIBUTARY ══
+
+    If compressing the SFJ/GSV causes the tributary reflux to DISAPPEAR:
+        The tributary had no independent blood source — it was entirely fed by the shunt.
+        Cut off the GSV inflow and the tributary has nothing left to reflux.
+        → TYPE 1+2. Clip value: eliminationTest="Reflux"
+
+    If compressing the SFJ/GSV leaves tributary reflux UNCHANGED/CONTINUING:
+        The tributary has its own independent incompetent perforator feeding it.
+        Even with GSV inflow cut off, the perforator keeps it refluxing.
+        → TYPE 3. Clip value: eliminationTest="No Reflux"
 
     SCENARIO C — No compression test described at all:
-        You cannot safely distinguish Type 1+2 from Type 3 without the test.
         → UNDETERMINED (set needs_elim_test=true)
-
-─── WORKED EXAMPLES ────────────────────────────────────────────────────────────
-
-    "...compression of the GSV abolished tributary reflux, confirming GSV as source"
-        → eliminationTest="Reflux"  → TYPE 1+2
-
-    "...compression of the SFJ does not abolish the distal reflux"
-        → eliminationTest="No Reflux"  → TYPE 3
-
-    "...elimination testing confirms reflux remains even when SFJ inflow occluded"
-        → eliminationTest="No Reflux"  → TYPE 3
-
-    "...tributary reflux disappeared when mid-thigh GSV was compressed"
-        → eliminationTest="Reflux"  → TYPE 1+2
 
 ─── DECISION RULE ───────────────────────────────────────────────────────────────
 
@@ -194,8 +184,8 @@ the GSV or SFJ is compressed?"
       1. Is there an elimination test result in the clips?
          NO  → change output to UNDETERMINED, set needs_elim_test=true
          YES → read the value:
-               "Reflux" (abolished)    → TYPE 1+2
-               "No Reflux" (persisted) → TYPE 3
+               "Reflux"    → TYPE 1+2
+               "No Reflux" → TYPE 3
 
     This check is MANDATORY. Do not skip it.
 
