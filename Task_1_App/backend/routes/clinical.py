@@ -100,6 +100,25 @@ def api_chat():
             save_message(session_id, "assistant", error_msg)
             return jsonify({"type": "error", "conversational_response": error_msg, "session_title": new_title}), 500
 
+        # If the elimination test is still needed, route back to dialogue — do not show classification card
+        if result.get("needs_elim_test"):
+            elim_msg = (
+                f"Interpreted so far: {interp_text}\n\n"
+                "To distinguish between Type 1+2 and Type 3, I need the elimination test result. "
+                "Compress the GSV or SFJ manually and observe what happens to the tributary reflux: "
+                "does it disappear (abolished) or remain (persists)? "
+                "For example: 'compression of the GSV abolished tributary reflux' or "
+                "'reflux in the tributary persisted when the SFJ was compressed'."
+            )
+            save_message(session_id, "assistant", elim_msg)
+            return jsonify({
+                "type": "insufficient",
+                "missing_info": elim_msg,
+                "conversational_response": elim_msg,
+                "message_id": user_msg_id,
+                "session_title": new_title,
+            })
+
         services.analysis_cache[session_id] = services.format_analysis_for_context(result)
 
         # Refine title with shunt type on first classification
