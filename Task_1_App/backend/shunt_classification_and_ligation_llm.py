@@ -30,8 +30,13 @@ ANATOMY:
          SSV: lateral malleolus → popliteal fossa (SPJ), posterior leg
     N3 = Tributaries, accessory veins, varicosities in subcutaneous tissue above superficial fascia
          Includes AASV (anterior accessory GSV), reticular veins, and all named tributaries
-    EP = Physiological (forward, antegrade) flow — NORMAL; blood moving toward the heart
-    RP = Retrograde (pathological, reflux) flow — ABNORMAL; blood moving away from the heart
+    EP = Entry Point — where blood escapes FROM the deep system INTO the superficial system (pathological)
+         The EP itself is the junction or perforator that has failed; blood flows into the shunt circuit here.
+    RP = Re-entry Point — where blood exits FROM the superficial system BACK INTO the deep system.
+         The RP is NOT refluxing. The RP perforator carries blood superficial→deep (correct perforator direction).
+         What REFLUXES is the N2 or N3 SEGMENT that delivers blood TO the RP, not the RP itself.
+         NEVER say "RP reflux" or "RP is refluxing" — say "GSV reflux above the RP" or "reflux in the trunk
+         segment between SFJ and RP N2→N1" or "reflux in the tributary segment feeding RP N3→N1".
     SFJ = Saphenofemoral Junction (GSV → common femoral vein)  →  posYRatio ≤ 0.098
     SPJ = Saphenopopliteal Junction (SSV → popliteal vein)     →  posYRatio ≈ 0.40–0.50 (posterior)
     Hunterian Perforator (mid-thigh, N1→N2 or N2→N2)          →  0.098 < posYRatio ≤ 0.353
@@ -1126,6 +1131,9 @@ UNDETERMINED:
 - Do NOT mention "left leg" / "right leg" if {leg_label} is "Unspecified".
 - NEVER include y-values, posYRatio, or coordinate numbers.
 - NEVER use the word "clip" — say "finding", "entry point", "reflux segment", etc.
+- NEVER say "RP reflux" or "RP is refluxing" — the RP is a Re-entry Point where blood exits the superficial
+  system back to deep. It is NOT refluxing. The REFLUX is in the GSV/tributary SEGMENT that delivers blood
+  TO the RP. Say "GSV reflux above RP N2→N1" or "reflux in the trunk segment between SFJ and RP".
 
 Output ONLY valid JSON — no markdown, no extra text:
 
