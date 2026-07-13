@@ -128,13 +128,15 @@ Case B — EP N1→N2 EXISTS (SFJ or Hunterian) AND EP N2→N3 EXISTS
     TYPE 3 Ligation:
         Single RP at N3: Ligate EP at N2→N3. Follow up 6–12 months; if N2 reflux develops, ligate SFJ.
         Multiple RP at N3: Ligate every refluxing tributary at N2 junction (CHIVA 2 step 1). Same follow-up.
+        CHIVA 2 contraindication: GSV calibre >10 mm → must use CHIVA 1 simultaneous instead (thrombosis risk).
 
     TYPE 1+2 Ligation — depends on RP N2→N1 calibre:
         Small RP N2→N1 (small-calibre re-entry perforator — lower shunt volume):
-            CHIVA 2 staged.
+            CHIVA 2 staged (treat as Type 3 per Franceschi).
             Stage 1: Ligate EP N2→N3 (flush tie at GSV-to-tributary junction). Wait 6–12 months.
             Stage 2: If SFJ/trunk reflux persists at follow-up duplex → high tie / flush SFJ ligation.
             Alternative Stage 1: Ligate SFJ + all tributaries except one; once GSV normalises, ligate the last tributary.
+            CHIVA 2 contraindication: GSV calibre >10 mm → must use CHIVA 1 simultaneous instead.
         Large / multiple RP N2→N1 (large-calibre re-entry perforator — high shunt volume):
             CHIVA 1 simultaneous.
             Ligate SFJ/Hunterian (EP N1→N2) AND every refluxing N2→N3 junction in the same session.
@@ -1063,6 +1065,9 @@ CHIVA 2 (two-stage sequential):
   Stage 1: Ligate primary escape point only. Wait 6–12 months for venous haemodynamic adaptation.
   Stage 2: Reassess duplex. Ligate remaining refluxing points if still present.
   Indicated when: Type 3, Type 1+2 with small-calibre RP N2→N1, Type 5, complex multi-tributary cases.
+  CONTRAINDICATION — GSV calibre >10 mm: CHIVA 2 is contraindicated when the GSV diameter exceeds 10 mm.
+  A thick, hypertrophied GSV left with an open SFJ (Stage 1 of CHIVA 2) carries a significant risk of
+  thrombosis and deep vein thrombosis. In such cases convert to CHIVA 1 simultaneous ligation.
 
 === LIGATION TECHNIQUE VOCABULARY ===
 
@@ -1112,22 +1117,34 @@ TYPE 2C:
   Complications: Multiple incision sites, saphenous nerve risk, incomplete decompression if GSV trunk segments missed.
 
 TYPE 3:
-  Procedure: CHIVA 2 (staged).
+  Procedure: CHIVA 2 (staged) — UNLESS GSV calibre >10 mm (see contraindication below).
   Stage 1 technique: Selective tributary ligation (flush tie at N2→N3). Do NOT ligate SFJ at this stage.
   Stage 2 technique: If N2 (GSV trunk) reflux develops after follow-up → high tie / flush ligation at SFJ.
+  Stage 2 mechanism: After Stage 1 (N2→N3 tributary ligation), the shunt loop is broken. The SFJ entry
+    (EP N1→N2) is now isolated — blood that enters via the SFJ can no longer escape via the tributary.
+    Over time this isolated circuit converts to a Type 1 pattern with GSV trunk reflux (RP N2→N1).
+    Stage 2 is triggered ONLY IF this trunk reflux develops and persists at the 6–12 month duplex.
+    If trunk reflux does NOT develop, no further surgery is needed.
   Steps (Stage 1): (1) Expose and flush-ligate each refluxing tributary at its N2→N3 junction. (2) Avoid SFJ. (3) Document tributary positions for follow-up duplex.
   Steps (Stage 2 — only if N2 reflux confirmed): (1) Groin incision. (2) High tie with flush SFJ ligation. (3) Divide all SFJ tributaries.
+  CONTRAINDICATION: GSV calibre >10 mm → convert to CHIVA 1 simultaneous (SFJ high tie + flush N2→N3 ligation
+    in one session) because leaving a hypertrophied GSV with an open SFJ risks thrombosis.
   Follow-up: Duplex at 6 weeks (Stage 1 outcome), then 6–12 months (Stage 2 trigger).
-  Complications: Stage 1 — tributary recurrence. Stage 2 — lymphocele, groin wound, nerve injury.
+  Complications: Stage 1 — tributary recurrence. Stage 2 — lymphocele, groin wound, nerve injury. GSV thrombosis if >10 mm calibre and CHIVA 2 used despite contraindication.
 
 TYPE 1+2 (small-calibre RP N2→N1):
-  Procedure: CHIVA 2 (staged). RP N2→N1 has small calibre — shunt volume is lower; staged haemodynamic correction is appropriate.
+  Procedure: CHIVA 2 (staged) — UNLESS GSV calibre >10 mm (see contraindication below).
+  Rationale: Small-calibre RP N2→N1 means the shunt can be treated as equivalent to Type 3 (Franceschi:
+    "when in a shunt 1+2, the REP in shunt 1 is not obviously efficient, this composite shunt can be
+    assimilated to a shunt 3 and treated by CHIVA 2").
   Stage 1 technique: Flush tie at N2→N3 (cut tributary supply from GSV). Wait for GSV to normalise.
   Stage 1 steps: (1) Identify each refluxing N2→N3 tributary junction on pre-op duplex. (2) Targeted incision over junction. (3) Flush tie at N2→N3 — divide branch flush with GSV trunk, double-ligate. (4) Do NOT ligate SFJ at this stage. (5) Post-op compression 6–8 weeks.
   Stage 2 (triggered if SFJ/trunk reflux persists at 6–12 month duplex): (1) Groin incision. (2) High tie with flush SFJ ligation. (3) Divide all inguinal tributaries flush — no cribriform stump.
   Alternative Stage 1 approach: Ligate SFJ + all tributaries except one; once N2 normalises, ligate last tributary.
+  CONTRAINDICATION: GSV calibre >10 mm → convert to CHIVA 1 simultaneous regardless of RP N2→N1 calibre.
+    Leaving a hypertrophied GSV with an open SFJ risks thrombosis. Use Type 1+2 large-calibre plan instead.
   Follow-up: Duplex at 6 weeks (Stage 1 outcome), then 6–12 months (Stage 2 trigger).
-  Complications: Stage 1 — tributary recurrence if stump retained. Stage 2 — lymphocele, groin wound, saphenous nerve injury.
+  Complications: Stage 1 — tributary recurrence if stump retained. Stage 2 — lymphocele, groin wound, saphenous nerve injury. GSV thrombosis if >10 mm calibre and CHIVA 2 used despite contraindication.
 
 TYPE 1+2 (large-calibre RP N2→N1):
   Procedure: CHIVA 1 (simultaneous). RP N2→N1 has large calibre — high shunt volume requires simultaneous closure of all entry points.
@@ -1183,7 +1200,7 @@ NO SHUNT DETECTED:
 UNDETERMINED:
   Shunt type cannot be classified without the elimination (compression) test result.
   Type 3 and Type 1+2 share identical clip patterns — only the elimination test distinguishes them.
-  ligation_steps: ["Perform elimination test before ligation planning can proceed — compress the EP at the SFJ or Hunterian level and observe whether tributary reflux is abolished (Type 1+2) or persists (Type 3)."]
+  ligation_steps: ["Perform elimination test before ligation planning can proceed — compress the EP at the SFJ or Hunterian level and observe whether tributary reflux persists (→ Type 1+2: bidirectional RP N2→N1 maintains tributary independently) or is abolished (→ Type 3: tributary was fully dependent on SFJ inflow)."]
   clinical_rationale: Cannot safely plan ligation without knowing whether the tributary is a dependent loop (Type 1+2) or independently fed (Type 3) — the procedures are different.
   chiva_approach: Deferred pending elimination test result.
   followup_schedule: Resubmit with elimination test result to proceed with classification and ligation planning.
