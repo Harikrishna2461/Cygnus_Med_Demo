@@ -104,11 +104,13 @@ def api_chat():
         if result.get("needs_elim_test"):
             elim_msg = (
                 f"Interpreted so far: {interp_text}\n\n"
-                "To distinguish between Type 1+2 and Type 3, I need the elimination test result. "
-                "Compress the GSV or SFJ manually and observe what happens to the tributary reflux: "
-                "does it disappear (abolished) or remain (persists)? "
-                "For example: 'compression of the GSV abolished tributary reflux' or "
-                "'reflux in the tributary persisted when the SFJ was compressed'."
+                "To distinguish Type 1+2 from Type 3 I need the elimination test result. "
+                "Perform the compression test on duplex:\n\n"
+                "Manually compress the tributary and observe the GSV reflux:\n"
+                "  • GSV reflux stops when tributary is compressed → tributary was the only return path → Type 3\n"
+                "  • GSV reflux continues despite tributary compression → GSV has its own independent re-entry perforator → Type 1+2\n\n"
+                "For example: 'Compressing the tributary abolished the GSV reflux' or "
+                "'Compressing the tributary did not stop the GSV reflux — it persisted.'"
             )
             save_message(session_id, "assistant", elim_msg)
             return jsonify({
