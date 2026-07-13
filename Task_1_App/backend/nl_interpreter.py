@@ -158,75 +158,61 @@ POSITION RATIOS (posYRatio — 0 = groin, 1 = ankle):
 CRITICAL RULE 1 — EP N2→N2 vs EP N1→N2 (most common error):
 ═══════════════════════════════════════════════════════════
 
+  Understand the CLINICAL CONCEPT — do not pattern-match on specific words.
+  Ask yourself: "What is the blood source? Is it the deep venous system itself, or a perforating vessel?"
+
   EP N2→N2  (fromType=N2, toType=N2) — SFJ COMPETENT, perforator entry:
-    Use when a perforating vessel inserts into, enters, or feeds the GSV — UNLESS the
-    description explicitly states the perforator bridges the DEEP VENOUS SYSTEM to the GSV
-    (see Hunterian Exception below).
-    The descriptor "deep" alone (e.g. "deep perforating vessel") describes anatomical depth
-    only — it does NOT mean N1 origin unless the deep venous system is explicitly the blood source.
-    Trigger phrases: "perforator enters the GSV", "perforator inserts into the GSV",
-    "perforating vessel connects to the saphenous trunk", "perforator feeds mid-GSV",
-    "communicating vein inserts into the GSV", "SFJ competent but a perforator connects to the GSV".
+    Concept: A perforating vein connects into the GSV trunk from within the fascial layers.
+    The SFJ and SPJ junctions are working normally. The deep venous system (femoral/popliteal
+    vein) is NOT the driving source — it is a perforator that happens to be incompetent.
+    The word "deep" used as an anatomical descriptor (e.g. "deep perforating vessel") does NOT
+    mean N1 is the source — it just means the vessel runs in the deep tissue.
+    Any description where the clinician conveys that a perforating or communicating vessel is
+    connecting to the GSV, with the SFJ explicitly or implicitly intact, generates EP N2→N2.
 
   EP N1→N2  (fromType=N1, toType=N2) — SFJ or Hunterian INCOMPETENT:
-    Use when the DEEP VENOUS SYSTEM ITSELF delivers blood into the GSV, either at the SFJ
-    (groin) or via an incompetent Hunterian perforator (upper/mid-thigh).
-    Trigger phrases: "SFJ incompetent", "femoral vein feeds GSV", "deep venous blood enters GSV",
-    "blood from deep system enters GSV", "Hunterian perforator incompetent".
+    Concept: The main deep venous system itself (common femoral vein, femoral vein, or popliteal
+    vein) is delivering blood into the saphenous trunk through a failed named junction — either
+    the SFJ (groin), SPJ (popliteal fossa), or an incompetent Hunterian perforator (mid-thigh)
+    where the N1 system is the explicit blood driver.
+    Any description where the clinician conveys that deep venous blood is entering the saphenous
+    trunk — at the groin, popliteal fossa, or mid-thigh via the Hunterian — generates EP N1→N2.
 
-  *** HUNTERIAN EXCEPTION — EP N1→N2 even when the word "perforator" is present: ***
-    This exception has a VERY NARROW trigger. Use EP N1→N2 ONLY when the description
-    uses one of these specific phrases:
-      ✓ "[perforator] connects the deep system to the GSV"     → EP N1→N2
-      ✓ "Hunterian perforator incompetent"                     → EP N1→N2
-      ✓ "incompetent Hunterian"                                → EP N1→N2
-      ✓ "allowing deep venous blood to enter the GSV directly" → EP N1→N2
+  HUNTERIAN EXCEPTION — EP N1→N2 even when a "perforator" is mentioned:
+    The key question is: IS THE DEEP VENOUS SYSTEM THE EXPLICIT BLOOD DRIVER?
+    If the clinician is saying that the femoral/popliteal/deep vein is the source pushing blood
+    into the GSV through a mid-thigh perforator → EP N1→N2 (Hunterian incompetent).
+    If the clinician is saying a perforating vessel is connecting to the GSV, without identifying
+    the deep venous system as the explicit source → EP N2→N2 (perforator entry, SFJ competent).
 
-    The following phrases look similar but are NOT Hunterian — use EP N2→N2:
-      ✗ "from the deep system"         → EP N2→N2 (anatomical position, not the blood source driving the shunt)
-      ✗ "from a deep perforating vessel" → EP N2→N2 ("deep" describes the vessel's depth, NOT that N1 is the source)
-      ✗ "perforator entry from the deep system" → EP N2→N2 (positional phrase, not a drive from N1)
-      ✗ "a deep perforating vessel enters the GSV" → EP N2→N2 ("deep" = anatomical depth only)
-      ✗ "perforator at [location] enters/inserts into/feeds the GSV" → EP N2→N2
-      ✗ "a perforating vessel feeds into the GSV from the deep system" → EP N2→N2
-         (even though "from the deep system" is present — "perforating vessel feeds GSV" is a perforator entry, NOT N1→N2)
-      ✗ "feeds into the GSV from the deep system" → EP N2→N2 (perforator = N2→N2 regardless of depth qualifier)
-
-    CRITICAL DISTINCTION:
-      "connects the deep SYSTEM to the GSV" (deep system = the blood driver) → EP N1→N2
-      "from the deep system" / "from a deep vessel" (positional or descriptive) → EP N2→N2
-
-  DECISION RULE:
-    Does the description use the exact phrase "connects the deep system to the GSV"
-    OR explicitly call the Hunterian perforator incompetent?
-      YES → EP N1→N2 (Hunterian incompetent — even if SFJ stated as competent)
-      NO  → EP N2→N2 (perforator entry, SFJ competent)
+    The distinction is about CLINICAL MEANING, not specific words:
+    "Deep blood enters the GSV through a mid-thigh perforator" → EP N1→N2 (deep system is the driver)
+    "A perforator at mid-thigh connects to the GSV" → EP N2→N2 (perforator is the connection, not deep system)
+    "Hunterian perforator is incompetent, allowing femoral vein blood into the GSV" → EP N1→N2
+    "A perforating vessel from the deep tissue feeds into the GSV at the thigh" → EP N2→N2
 
 ═══════════════════════════════════════════════════════════
 CRITICAL RULE 2 — DO NOT HALLUCINATE RP CLIPS:
 ═══════════════════════════════════════════════════════════
 
-  Generate RP clips ONLY when the description EXPLICITLY contains words such as:
-    "reflux", "refluxes", "retrograde", "backward", "backwards", "back toward the deep",
-    "drains back", "flows back", "carries blood back", or direct equivalent phrasing.
+  Generate RP clips ONLY when the description clearly conveys that blood is moving in the
+  physiologically wrong direction in a vessel — backward, away from the heart, against normal
+  venous flow direction. Understand this from the CLINICAL MEANING of the description.
 
-  If the description mentions ONLY forward / antegrade flow — words like "feeds", "enters",
-  "passes into", "escapes to", "discharges into", "flows forward", "antegrade" — and contains
-  NO mention of backward or retrograde flow anywhere, then generate EP clips ONLY.
+  If the description conveys only forward, antegrade, or physiologically normal flow — blood
+  entering, feeding, escaping into, filling, passing into a vessel — and there is no indication
+  anywhere that blood is moving backward in any vessel, generate EP clips only and zero RP.
 
-  NEGATIVE STATEMENTS CONFIRM NO RP — treat these as zero RP when global in scope:
-    "no retrograde flow detected anywhere", "no reflux anywhere", "no reflux is present anywhere",
-    "no retrograde flow is identified", "not refluxing anywhere", "without any reflux" — when
-    these phrases appear and clearly deny ALL reflux (not just reflux in one specific vessel),
-    generate ZERO RP findings regardless of what EP pattern is described.
-    *** IMPORTANT: "no reflux in the GSV trunk" or "GSV is not refluxing" are PARTIAL statements
-    about one vessel — they do NOT mean zero RP overall. Do not suppress RP N3 findings because
-    the GSV trunk specifically has no reflux. ***
+  GLOBAL DENIAL OF REFLUX — if the clinician's description conveys that there is no backward
+  flow anywhere in the limb (not just in one vessel), generate zero RP clips regardless of
+  what EP pattern is described. Read the scope of the denial: if it applies to the whole limb
+  or the whole venous system, no RP. If it applies only to one specific vessel (e.g. "the GSV
+  is not refluxing"), it is a partial denial — do not suppress RP clips for other vessels.
 
   SFJ INCOMPETENCE ALONE DOES NOT IMPLY RP:
     The presence of SFJ incompetence (EP N1→N2) does NOT automatically mean GSV reflux
     (RP N2→N1) exists. They are separate findings. Only add RP N2→N1 if the description
-    explicitly states the GSV is refluxing or carrying blood backward.
+    explicitly conveys that the GSV is carrying blood in the wrong direction.
 
   CONCRETE NO-SHUNT EXAMPLES — generate EP clips only, zero RP:
     "SFJ incompetent, blood enters GSV at groin, no retrograde flow detected anywhere"
@@ -327,18 +313,17 @@ DECISION RULE — when a description mentions BOTH GSV reflux AND a deep-to-supe
     Into the GSV/SSV trunk at the SFJ, SPJ, or Hunterian → EP N1→N2 → Type 1 family
     Into a tributary, branch, or varicosity (not the trunk itself) → EP N1→N3 → Type 4/5
 
-  KEY PHRASES that mean EP N1→N2 (Type 1, NOT Type 4):
-    "SFJ incompetent", "deep blood enters the GSV at the groin", "SFJ junction reflux",
-    "femoral vein feeds the saphenous", "Hunterian perforator delivers deep blood into GSV"
+  EP N1→N2 concept: the SFJ, SPJ, or Hunterian junction has failed and the deep venous
+  system is delivering blood directly into the named saphenous trunk. Any description
+  conveying this — however phrased — generates EP N1→N2.
 
-  KEY PHRASES that mean EP N1→N3 (Type 4, NOT Type 1):
-    "perforator feeds a tributary", "pelvic vein enters a branch", "deep blood enters a
-    varicosity directly", "pudendal vein feeds a groin tributary", "blood bypasses the
-    GSV and enters a branch", "perforator not at SFJ but feeds a superficial branch"
+  EP N1→N3 concept: blood enters a tributary or branch directly from a pelvic, perforating,
+  or deep source, WITHOUT going through the saphenous trunk. The SFJ is competent. Any
+  description conveying this — however phrased — generates EP N1→N3.
 
   *** NEVER generate EP N1→N2 AND EP N1→N3 together for a pure Type 1 or Type 4 case. ***
-  *** If both are explicitly described, that may indicate a complex Type 1+2/4 overlap
-      — note the ambiguity and generate both clips, flagging the unusual pattern. ***
+  *** If both are explicitly described, that may indicate a complex overlap
+      — generate both clips and flag the unusual pattern. ***
 
 ═══════════════════════════════════════════════════════════
 
@@ -840,46 +825,6 @@ Keep the answer focused — no unnecessary preamble. If the question cannot be a
 available analysis, say so directly and suggest what additional information would help."""
 
 
-_NO_REFLUX_PHRASES = [
-    # Only match phrases that unambiguously deny reflux GLOBALLY (not vessel-specific statements).
-    # Bare "no reflux" / "no retrograde flow" are intentionally excluded — they match partial
-    # vessel-specific sentences like "no reflux in the GSV trunk" which do NOT mean zero RP overall.
-    "no retrograde flow is detected anywhere",
-    "no retrograde flow detected anywhere",
-    "no retrograde flow identified anywhere",
-    "no retrograde flow is identified anywhere",
-    "no retrograde flow anywhere",
-    "no retrograde flow is identified",
-    "no retrograde flow is detected",
-    "no reflux anywhere",
-    "no reflux is present anywhere",
-    "no reflux detected anywhere",
-    "no reflux identified anywhere",
-    "no reflux is identified",
-    "no backward flow anywhere",
-    "no backward flow is detected anywhere",
-    "no backward flow detected anywhere",
-    "no backward flow identified anywhere",
-    "no backward flow is identified anywhere",
-    "no backward flow is detected",
-    "backward flow is not detected",
-    "not refluxing anywhere",
-    "without any reflux",
-    "reflux-free",
-    "no pathological reflux",
-    "reflux is absent",
-    "reflux is not present",
-    "no reflux is present",
-    "no reflux identified in the gsv or tributaries",
-    "no reflux in the gsv or tributaries",
-]
-
-
-def _has_no_reflux_statement(description: str) -> bool:
-    desc_lower = description.lower()
-    return any(phrase in desc_lower for phrase in _NO_REFLUX_PHRASES)
-
-
 def _clean_json(raw: str) -> str:
     raw = raw.strip()
     raw = re.sub(r"^```[a-z]*\n?", "", raw)
@@ -961,12 +906,6 @@ def parse_nl_to_clips(user_message: str, call_llm_fn: Callable, history: list[di
         )
         result = json.loads(_clean_json(raw))
         if isinstance(result, dict) and "clips" in result:
-            if _has_no_reflux_statement(accumulated) and result.get("clips"):
-                before = len(result["clips"])
-                result["clips"] = [c for c in result["clips"] if c.get("flow") != "RP"]
-                after = len(result["clips"])
-                if before != after:
-                    logger.info(f"Stripped {before - after} hallucinated RP clip(s) — explicit no-reflux statement.")
             return {
                 "is_clinical": True,
                 "sufficient_information": True,
