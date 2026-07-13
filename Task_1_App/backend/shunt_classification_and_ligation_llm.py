@@ -129,11 +129,16 @@ Case B — EP N1→N2 EXISTS (SFJ or Hunterian) AND EP N2→N3 EXISTS
         Single RP at N3: Ligate EP at N2→N3. Follow up 6–12 months; if N2 reflux develops, ligate SFJ.
         Multiple RP at N3: Ligate every refluxing tributary at N2 junction (CHIVA 2 step 1). Same follow-up.
 
-    TYPE 1+2 Ligation:
-        Procedure: CHIVA 1 (single stage, simultaneous).
-        Ligate SFJ/Hunterian (EP N1→N2) AND every refluxing N2→N3 junction in the same operative session.
-        If RP N2→N1 segments are present along the GSV trunk: ligate below each except the most distal.
-        Do NOT use a staged CHIVA 2 approach for Type 1+2 — the SFJ and tributary escapes must be addressed together.
+    TYPE 1+2 Ligation — depends on RP N2→N1 calibre:
+        Small RP N2→N1 (small-calibre re-entry perforator — lower shunt volume):
+            CHIVA 2 staged.
+            Stage 1: Ligate EP N2→N3 (flush tie at GSV-to-tributary junction). Wait 6–12 months.
+            Stage 2: If SFJ/trunk reflux persists at follow-up duplex → high tie / flush SFJ ligation.
+            Alternative Stage 1: Ligate SFJ + all tributaries except one; once GSV normalises, ligate the last tributary.
+        Large / multiple RP N2→N1 (large-calibre re-entry perforator — high shunt volume):
+            CHIVA 1 simultaneous.
+            Ligate SFJ/Hunterian (EP N1→N2) AND every refluxing N2→N3 junction in the same session.
+            Ligate GSV below each RP N2→N1 segment except the most distal.
 
 ═══════════════════════════════════════════════════════════
 TYPE 3 vs TYPE 1+2 — REASONING GUIDE
@@ -436,22 +441,31 @@ def _compute_primary_step(shunt_type: str, clips: list[dict]) -> str:
             return f"Ligate the EP at N2->N3" + (f" at {loc}" if loc else "")
 
     elif shunt_type == "Type 1+2":
+        rp_n2n1 = [c for c in clips if c.get("flow") == "RP" and c.get("fromType") == "N2" and c.get("toType") == "N1"]
+        small_calibre = any(c.get("calibre", "").lower() in ("small", "narrow", "fine") for c in rp_n2n1)
         ep_sfj = _pick_ligation_clip(
             [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N2"]
         )
         ep_trib = _pick_ligation_clip(
             [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3"]
         )
-        parts = []
-        if ep_sfj:
-            entry = "SFJ" if (ep_sfj.get("posYRatio") or 0.0) <= 0.098 else "Hunterian perforator"
-            loc = _loc(ep_sfj)
-            parts.append(f"Ligation at {entry}" + (f" at {loc}" if loc else ""))
-        if ep_trib:
-            loc = _loc(ep_trib)
-            parts.append(f"ligate EP at N2->N3" + (f" at {loc}" if loc else ""))
-        if parts:
-            return " + ".join(parts)
+        if small_calibre:
+            # CHIVA 2 — tributary ligation first
+            if ep_trib:
+                loc = _loc(ep_trib)
+                return f"Stage 1: flush tie EP at N2->N3" + (f" at {loc}" if loc else "") + " (SFJ deferred to Stage 2)"
+        else:
+            # CHIVA 1 — simultaneous
+            parts = []
+            if ep_sfj:
+                entry = "SFJ" if (ep_sfj.get("posYRatio") or 0.0) <= 0.098 else "Hunterian perforator"
+                loc = _loc(ep_sfj)
+                parts.append(f"Ligation at {entry}" + (f" at {loc}" if loc else ""))
+            if ep_trib:
+                loc = _loc(ep_trib)
+                parts.append(f"ligate EP at N2->N3" + (f" at {loc}" if loc else ""))
+            if parts:
+                return " + ".join(parts)
 
     elif shunt_type == "Type 4":
         ep = _pick_ligation_clip(
@@ -559,19 +573,46 @@ def _compute_ligation_hints(shunt_type: str, clips: list[dict]) -> str:
 
     elif shunt_type == "Type 1+2":
         ep_n1n2 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N2"]
-        c1 = _pick_ligation_clip(ep_n1n2)
-        if c1:
-            y = c1.get("posYRatio") or 0.0
-            loc = _loc_label(c1)
-            if y <= 0.098:
-                hints.append(f"LIGATION POINT 1 — SFJ at the groin [{loc}]: high tie / flush SFJ ligation")
-            else:
-                hints.append(f"LIGATION POINT 1 — Hunterian Perforator at [{loc}]: flush ligation")
         ep_n2n3 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3"]
-        c2 = _pick_ligation_clip(ep_n2n3)
-        if c2:
-            loc = _loc_label(c2)
-            hints.append(f"LIGATION POINT 2 — GSV-to-tributary junction at [{loc}]: flush tie at this level")
+        rp_n2n1 = sorted(
+            [c for c in clips if c.get("flow") == "RP" and c.get("fromType") == "N2" and c.get("toType") == "N1"],
+            key=lambda c: c.get("posYRatio") or 0.0,
+        )
+        small_calibre = any(c.get("calibre", "").lower() in ("small", "narrow", "fine") for c in rp_n2n1)
+        c_ep = _pick_ligation_clip(ep_n2n3)
+        c1 = _pick_ligation_clip(ep_n1n2)
+
+        if small_calibre:
+            # CHIVA 2 — tributary first
+            if c_ep:
+                loc = _loc_label(c_ep)
+                hints.append(
+                    f"LIGATION POINT 1 (Stage 1) — GSV-to-tributary junction at [{loc}]: "
+                    f"flush tie at this level. SFJ NOT touched in Stage 1 (small-calibre RP N2→N1 → CHIVA 2)."
+                )
+            if c1:
+                y = c1.get("posYRatio") or 0.0
+                loc = _loc_label(c1)
+                entry = "SFJ" if y <= 0.098 else "Hunterian Perforator"
+                hints.append(
+                    f"LIGATION POINT 2 (Stage 2, only if trunk reflux persists at 6–12 month duplex) — "
+                    f"{entry} at [{loc}]: high tie / flush ligation."
+                )
+        else:
+            # CHIVA 1 — simultaneous
+            if c1:
+                y = c1.get("posYRatio") or 0.0
+                loc = _loc_label(c1)
+                if y <= 0.098:
+                    hints.append(f"LIGATION POINT 1 — SFJ at the groin [{loc}]: high tie / flush SFJ ligation (large-calibre RP N2→N1 → CHIVA 1)")
+                else:
+                    hints.append(f"LIGATION POINT 1 — Hunterian Perforator at [{loc}]: flush ligation (large-calibre RP N2→N1 → CHIVA 1)")
+            if c_ep:
+                loc = _loc_label(c_ep)
+                hints.append(f"LIGATION POINT 2 — GSV-to-tributary junction at [{loc}]: flush tie (same session as SFJ)")
+        for i, rc in enumerate(rp_n2n1[:-1], start=3):
+            loc = _loc_label(rc)
+            hints.append(f"LIGATION POINT {i} — GSV trunk RP N2→N1 segment at [{loc}]: ligate below this reflux point")
 
     elif shunt_type == "Type 4":
         ep_n1n3 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"]
@@ -979,8 +1020,9 @@ LIGATION_QUERIES = {
         "Type 1+2 CHIVA shunt dual entry SFJ incompetent N1→N2 plus tributary escape N2→N3. "
         "Both GSV trunk reflux N2→N1 and tributary reflux N3 present. "
         "Elimination test confirmed GSV as sole feeder of tributary. "
-        "CHIVA 1 single stage simultaneous: high tie at SFJ plus flush tie at every N2→N3 junction in same session. "
-        "Ligate GSV below each RP N2→N1 segment except the most distal."
+        "RP N2→N1 calibre determines approach: "
+        "small calibre RP N2→N1 → CHIVA 2 staged (tributary ligation first, then SFJ at 6–12 months if reflux persists). "
+        "Large calibre RP N2→N1 → CHIVA 1 simultaneous (SFJ high tie plus all N2→N3 junctions in same session)."
     ),
     "No shunt detected": "No pathological venous shunt identified. No surgical intervention required. Conservative management compression therapy.",
     "Undetermined": (
@@ -1013,13 +1055,13 @@ def build_ligation_prompt(shunt_type: str, clips: list[dict], rag_context: str, 
 
 CHIVA 1 (single-stage simultaneous):
   All escape/entry points ligated in one operative session.
-  Indicated when: Type 1, Type 2A/2B/2C with single tributary, Type 1+2, Type 6.
+  Indicated when: Type 1, Type 2A/2B/2C with single tributary, Type 1+2 with large-calibre RP N2→N1, Type 6.
   Technique: under local or tumescent anaesthesia, expose target junction, divide and double-ligate with flush tie.
 
 CHIVA 2 (two-stage sequential):
   Stage 1: Ligate primary escape point only. Wait 6–12 months for venous haemodynamic adaptation.
   Stage 2: Reassess duplex. Ligate remaining refluxing points if still present.
-  Indicated when: Type 3, Type 5, complex multi-tributary cases requiring staged decompression.
+  Indicated when: Type 3, Type 1+2 with small-calibre RP N2→N1, Type 5, complex multi-tributary cases.
 
 === LIGATION TECHNIQUE VOCABULARY ===
 
@@ -1077,9 +1119,17 @@ TYPE 3:
   Follow-up: Duplex at 6 weeks (Stage 1 outcome), then 6–12 months (Stage 2 trigger).
   Complications: Stage 1 — tributary recurrence. Stage 2 — lymphocele, groin wound, nerve injury.
 
-TYPE 1+2:
-  Procedure: CHIVA 1 (single stage, simultaneous). Do NOT use a staged CHIVA 2 approach for Type 1+2.
-  Rationale: Both the SFJ entry (EP N1→N2) and the tributary escape (EP N2→N3) are driven by the same GSV pressure head. Eliminating only one in isolation leaves the circuit partially open. CHIVA 1 simultaneously addresses all escape points, collapsing the shunt in a single session.
+TYPE 1+2 (small-calibre RP N2→N1):
+  Procedure: CHIVA 2 (staged). RP N2→N1 has small calibre — shunt volume is lower; staged haemodynamic correction is appropriate.
+  Stage 1 technique: Flush tie at N2→N3 (cut tributary supply from GSV). Wait for GSV to normalise.
+  Stage 1 steps: (1) Identify each refluxing N2→N3 tributary junction on pre-op duplex. (2) Targeted incision over junction. (3) Flush tie at N2→N3 — divide branch flush with GSV trunk, double-ligate. (4) Do NOT ligate SFJ at this stage. (5) Post-op compression 6–8 weeks.
+  Stage 2 (triggered if SFJ/trunk reflux persists at 6–12 month duplex): (1) Groin incision. (2) High tie with flush SFJ ligation. (3) Divide all inguinal tributaries flush — no cribriform stump.
+  Alternative Stage 1 approach: Ligate SFJ + all tributaries except one; once N2 normalises, ligate last tributary.
+  Follow-up: Duplex at 6 weeks (Stage 1 outcome), then 6–12 months (Stage 2 trigger).
+  Complications: Stage 1 — tributary recurrence if stump retained. Stage 2 — lymphocele, groin wound, saphenous nerve injury.
+
+TYPE 1+2 (large-calibre RP N2→N1):
+  Procedure: CHIVA 1 (simultaneous). RP N2→N1 has large calibre — high shunt volume requires simultaneous closure of all entry points.
   Technique: Simultaneous high-tie SFJ ligation + flush tie at every refluxing N2→N3 junction.
   Steps: (1) Groin incision — high tie with flush SFJ ligation; divide all inguinal tributaries flush — no cribriform stump. (2) Expose each refluxing N2→N3 tributary junction; flush tie at each junction — double-ligate. (3) For any GSV trunk RP N2→N1 segments: ligate the GSV below each refluxing segment except the most distal (preserve distal drainage outflow). (4) All steps performed in the same operative session under local or tumescent anaesthesia.
   Follow-up: Duplex at 6 weeks and 6 months to confirm shunt resolution.

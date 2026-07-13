@@ -119,6 +119,36 @@ def api_chat():
                 "session_title": new_title,
             })
 
+        # For Type 1+2: RP N2→N1 calibre determines CHIVA 1 vs CHIVA 2 — ask before showing card
+        if result.get("shunt_type") == "Type 1+2":
+            rp_n2n1_clips = [
+                c for c in clips
+                if c.get("flow") == "RP" and c.get("fromType") == "N2" and c.get("toType") == "N1"
+            ]
+            has_rp_calibre = any(c.get("calibre") for c in rp_n2n1_clips)
+            if rp_n2n1_clips and not has_rp_calibre:
+                calibre_msg = (
+                    f"Interpreted so far: {interp_text}\n\n"
+                    "To determine the correct ligation strategy for Type 1+2, I need to know the calibre "
+                    "of the RP N2→N1 re-entry perforator — the point where the GSV trunk returns blood to "
+                    "the deep system.\n\n"
+                    "Small calibre → CHIVA 2 staged (ligate the tributary junction first, reassess SFJ at "
+                    "6–12 months).\n"
+                    "Large calibre → CHIVA 1 simultaneous (ligate SFJ and all tributary junctions in the "
+                    "same session).\n\n"
+                    "Please describe the calibre of the RP N2→N1 perforator — for example: "
+                    "'The re-entry perforator at the calf is small calibre' or "
+                    "'The RP N2→N1 perforator has large calibre.'"
+                )
+                save_message(session_id, "assistant", calibre_msg)
+                return jsonify({
+                    "type": "insufficient",
+                    "missing_info": calibre_msg,
+                    "conversational_response": calibre_msg,
+                    "message_id": user_msg_id,
+                    "session_title": new_title,
+                })
+
         # If multiple tributary branches need detail for ligation planning, ask before showing card
         if result.get("ask_branching"):
             has_branching_details = any(
