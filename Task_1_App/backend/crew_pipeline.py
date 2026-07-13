@@ -33,7 +33,6 @@ from nl_interpreter import (
     _SUFFICIENCY_PROMPT,
     _build_accumulated_description,
     _clean_json,
-    _has_no_reflux_statement,
 )
 from shunt_classification_and_ligation_llm import (
     _LEG_ORDER,
@@ -188,15 +187,6 @@ def parse_nl_to_clips(
         )
         result = _parse_agent_json(raw)
         if isinstance(result, dict) and "clips" in result:
-            if _has_no_reflux_statement(accumulated) and result.get("clips"):
-                before = len(result["clips"])
-                result["clips"] = [c for c in result["clips"] if c.get("flow") != "RP"]
-                after = len(result["clips"])
-                if before != after:
-                    logger.info(
-                        f"[CrewAI] Stripped {before - after} hallucinated RP clip(s) "
-                        f"— explicit no-reflux statement present."
-                    )
             return {
                 "is_clinical": True,
                 "sufficient_information": True,
