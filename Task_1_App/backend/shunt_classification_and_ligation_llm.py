@@ -509,14 +509,31 @@ def _compute_ligation_hints(shunt_type: str, clips: list[dict]) -> str:
     elif shunt_type in ("Type 2A", "Type 2B", "Type 2C"):
         ep_n2n2 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N2"]
         ep_n2n3 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3"]
+        rp_n3 = [c for c in clips if c.get("flow") == "RP" and c.get("fromType") == "N3"]
         primary = _pick_ligation_clip(ep_n2n2 or ep_n2n3)
         if primary:
             loc = _loc_label(primary)
             ft, tt = primary.get("fromType"), primary.get("toType")
+            calibre_note = f" [calibre: {primary['calibre']}]" if primary.get("calibre") else ""
+            notes_note = f" [{primary['notes']}]" if primary.get("notes") else ""
             if ft == "N2" and tt == "N2":
-                hints.append(f"LIGATION POINT 1 — Perforator entry into GSV at [{loc}]: divide flush at this level")
+                hints.append(f"LIGATION POINT 1 — Perforator entry into GSV at [{loc}]{calibre_note}{notes_note}: divide flush at this level")
             elif ft == "N2" and tt == "N3":
-                hints.append(f"LIGATION POINT 1 — GSV-to-tributary junction at [{loc}]: flush tie at this level")
+                hints.append(f"LIGATION POINT 1 — GSV-to-tributary junction at [{loc}]{calibre_note}{notes_note}: flush tie at this level")
+        # Additional N3 branches with calibre/notes info for ligation sequence guidance
+        extra_ep_n2n3 = [c for c in ep_n2n3 if c is not primary]
+        for i, bc in enumerate(extra_ep_n2n3, start=2):
+            loc = _loc_label(bc)
+            calibre_note = f" [calibre: {bc['calibre']}]" if bc.get("calibre") else ""
+            notes_note = f" [{bc['notes']}]" if bc.get("notes") else ""
+            hints.append(f"BRANCH {i} — Additional GSV-to-tributary junction at [{loc}]{calibre_note}{notes_note}: ligate after primary branch if indicated")
+        # Surface calibre/notes on RP N3 clips for context
+        for rc in rp_n3:
+            if rc.get("calibre") or rc.get("notes"):
+                loc = _loc_label(rc)
+                calibre_note = f" [calibre: {rc['calibre']}]" if rc.get("calibre") else ""
+                notes_note = f" [{rc['notes']}]" if rc.get("notes") else ""
+                hints.append(f"TRIBUTARY INFO — RP {rc.get('fromType')}→{rc.get('toType')} at [{loc}]{calibre_note}{notes_note}")
         if shunt_type == "Type 2C":
             rp_n2n1 = sorted(
                 [c for c in clips if c.get("flow") == "RP" and c.get("fromType") == "N2" and c.get("toType") == "N1"],
@@ -652,6 +669,12 @@ def _summarise_clips(clips: list[dict]) -> str:
             parts.append("[ligation-point-marker]")
         if elim:
             parts.append(f'eliminationTest="{elim}"')
+        if c.get("calibre"):
+            parts.append(f'calibre="{c["calibre"]}"')
+        if c.get("source"):
+            parts.append(f'source="{c["source"]}"')
+        if c.get("notes"):
+            parts.append(f'notes="{c["notes"]}"')
         lines.append("  ".join(parts))
     return "\n".join(lines)
 

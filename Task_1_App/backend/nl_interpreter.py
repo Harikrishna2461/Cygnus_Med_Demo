@@ -521,6 +521,19 @@ If the clip is missing, add it now.
 If you answered YES to D, you must have clips for both D AND E (assuming E is also described).
 The most common error is generating A + C but omitting D and E. Do not do this.
 
+OPTIONAL CLIP FIELDS — add ONLY when the description explicitly provides this information:
+  calibre  — vein diameter or relative size of this specific vessel.
+             Values: "large", "small", "equal", or a specific measurement (e.g. "6mm", "4mm").
+             Add when the clinician describes size of a tributary or branch (e.g. "larger tributary",
+             "dominant branch", "5mm calibre", "both branches are equal calibre").
+             Apply to the specific clip(s) the size description refers to.
+  source   — for EP N1→N3 clips ONLY. Use "pelvic" when the origin is a pudendal, labial,
+             gluteal, or ovarian vein from the pelvis. Use "perforating" when the origin is an
+             incompetent perforator at a specific body level (thigh, calf).
+  notes    — brief supplementary note about this finding that aids ligation planning.
+             e.g. "closer to perforator than the other branch", "independent drainage available",
+             "dominant tributary — larger calibre and longer distance from perforator".
+
 Output ONLY valid JSON — no markdown, no explanation:
 {{
     "interpretation": "<2-3 sentences summarising the findings in CHIVA terms>",

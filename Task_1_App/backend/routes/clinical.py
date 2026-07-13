@@ -119,6 +119,33 @@ def api_chat():
                 "session_title": new_title,
             })
 
+        # If multiple tributary branches need detail for ligation planning, ask before showing card
+        if result.get("ask_branching"):
+            has_branching_details = any(
+                c.get("calibre") or c.get("notes")
+                for c in clips
+                if c.get("fromType") == "N3" or c.get("toType") == "N3"
+            )
+            if not has_branching_details:
+                branch_msg = (
+                    f"Interpreted so far: {interp_text}\n\n"
+                    "Multiple tributary branches are present. To determine the optimal ligation sequence "
+                    "I need a few more details about the branches:\n"
+                    "1. Which branch has the larger calibre — or are they equal in diameter?\n"
+                    "2. Which branch is closer to its nearest perforator?\n"
+                    "3. Is there sufficient independent drainage available through either branch?\n\n"
+                    "For example: 'The anterior branch is the dominant one — larger calibre and further from "
+                    "the perforator. The posterior branch is smaller but has adequate independent drainage.'"
+                )
+                save_message(session_id, "assistant", branch_msg)
+                return jsonify({
+                    "type": "insufficient",
+                    "missing_info": branch_msg,
+                    "conversational_response": branch_msg,
+                    "message_id": user_msg_id,
+                    "session_title": new_title,
+                })
+
         services.analysis_cache[session_id] = services.format_analysis_for_context(result)
 
         # Refine title with shunt type on first classification
