@@ -276,12 +276,15 @@ CRITICAL RULE 2B — eliminationTest values and when to add:
       → eliminationTest="No Reflux"  (Type 3)
 
   METHOD 2 — Clinician compresses the EP/SFJ and observes the TRIBUTARY:
-    If tributary reflux DISAPPEARS when SFJ/GSV is compressed:
-      The tributary had no independent source — entirely fed by the GSV shunt.
+    If tributary reflux PERSISTS / CONTINUES when SFJ/GSV is compressed:
+      The re-entry perforator (RP N2→N1) is bidirectional — with the SFJ occluded,
+      deep venous pressure drives blood back through this perforator into the GSV,
+      refilling the tributary independently of SFJ inflow.
       → eliminationTest="Reflux"  (Type 1+2)
 
-    If tributary reflux PERSISTS / CONTINUES when SFJ/GSV is compressed:
-      The tributary has its own independent perforator still feeding it.
+    If tributary reflux DISAPPEARS / IS ABOLISHED when SFJ/GSV is compressed:
+      The tributary was entirely dependent on GSV inflow from the SFJ.
+      No independent re-entry perforator exists to maintain the tributary circuit once SFJ is blocked.
       → eliminationTest="No Reflux"  (Type 3)
 
   Read the clinical meaning of the description. Do not pattern-match on individual words.

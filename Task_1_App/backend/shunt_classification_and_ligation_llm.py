@@ -175,14 +175,15 @@ understand WHAT was compressed and WHAT was observed, then map to the correct ty
 
     ══ METHOD 2: Compress the EP/SFJ — observe the TRIBUTARY ══
 
-    If compressing the SFJ/GSV causes the tributary reflux to DISAPPEAR:
-        The tributary had no independent blood source — it was entirely fed by the shunt.
-        Cut off the GSV inflow and the tributary has nothing left to reflux.
+    If compressing the SFJ/GSV leaves tributary reflux UNCHANGED/CONTINUING (PERSISTS):
+        The re-entry perforator (RP N2→N1) is bidirectional — with the SFJ occluded,
+        deep venous pressure drives blood back through this perforator into the GSV,
+        refilling the tributary circuit independently of SFJ inflow.
         → TYPE 1+2. Clip value: eliminationTest="Reflux"
 
-    If compressing the SFJ/GSV leaves tributary reflux UNCHANGED/CONTINUING:
-        The tributary has its own independent incompetent perforator feeding it.
-        Even with GSV inflow cut off, the perforator keeps it refluxing.
+    If compressing the SFJ/GSV causes the tributary reflux to DISAPPEAR (ABOLISHED):
+        The tributary was entirely dependent on GSV inflow from the SFJ.
+        No independent re-entry perforator exists to maintain the tributary circuit.
         → TYPE 3. Clip value: eliminationTest="No Reflux"
 
     SCENARIO C — No compression test described at all:
