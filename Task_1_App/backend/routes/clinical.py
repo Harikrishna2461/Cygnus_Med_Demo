@@ -149,6 +149,37 @@ def api_chat():
                     "session_title": new_title,
                 })
 
+        # For Type 4: pelvic vs perforating subtype determines surgical approach — ask if unknown
+        if result.get("shunt_type") == "Type 4":
+            ep_n1n3_clips = [
+                c for c in clips
+                if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"
+            ]
+            has_source = any(c.get("source") for c in ep_n1n3_clips)
+            if ep_n1n3_clips and not has_source:
+                source_msg = (
+                    f"Interpreted so far: {interp_text}\n\n"
+                    "To plan the correct Type 4 ligation approach, I need to know the origin of the "
+                    "entry point (EP N1→N3) — these two subtypes require different operations:\n\n"
+                    "Perforating subtype: an incompetent perforator at a specific body level (thigh or "
+                    "calf) delivers deep blood directly into a tributary. Requires sub-fascial or "
+                    "mini-open perforator ligation at that level.\n\n"
+                    "Pelvic subtype: a pelvic, pudendal, gluteal, labial, or ovarian vein enters a "
+                    "groin tributary, bypassing the SFJ. Requires a groin incision targeting the "
+                    "pelvic/pudendal vein; coil embolisation may be needed if reflux persists.\n\n"
+                    "Please clarify the source — for example: "
+                    "'An incompetent Hunterian-level perforator feeds a thigh tributary directly' or "
+                    "'A pudendal vein from the pelvis enters a groin tributary.'"
+                )
+                save_message(session_id, "assistant", source_msg)
+                return jsonify({
+                    "type": "insufficient",
+                    "missing_info": source_msg,
+                    "conversational_response": source_msg,
+                    "message_id": user_msg_id,
+                    "session_title": new_title,
+                })
+
         # If multiple tributary branches need detail for ligation planning, ask before showing card
         if result.get("ask_branching"):
             has_branching_details = any(
