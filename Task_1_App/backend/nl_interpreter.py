@@ -751,7 +751,9 @@ Turn 5: "Does blood reflux through the tributary?"
 Output ONLY valid JSON — no markdown:
 {{"verdict": "sufficient"}}
 or
-{{"verdict": "insufficient", "missing": "<natural language paragraph as described above>"}}
+{{"verdict": "insufficient", "missing": "<natural language paragraph as described above>", "is_contradiction": false}}
+  Set "is_contradiction" to true ONLY when two messages explicitly contradict each other about the same
+  flow component. Set it to false when information is simply not yet provided (missing, not contradicted).
 or
 {{"verdict": "question"}}"""
 

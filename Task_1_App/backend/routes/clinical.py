@@ -39,6 +39,27 @@ def _already_asked(history: list[dict], marker: str) -> bool:
     return False
 
 
+def _sufficiency_gate_already_answered(history: list[dict]) -> bool:
+    """
+    Return True if the assistant already sent a sufficiency-gate message
+    (saved with metadata response_type='sufficiency_gate') AND the user
+    replied at least once after it, since the last [Analysis] message.
+    Used to prevent repeating Q1-Q4 sufficiency questions.
+    """
+    asked = False
+    for msg in history:
+        role = msg.get("role", "")
+        content = msg.get("content", "") or ""
+        meta = msg.get("metadata") or {}
+        if role == "assistant" and content.startswith("[Analysis]"):
+            asked = False  # new classification attempt — reset
+        elif role == "assistant" and meta.get("response_type") == "sufficiency_gate":
+            asked = True
+        elif role == "user" and asked:
+            return True
+    return False
+
+
 @bp.route("/api/chat", methods=["POST"])
 @login_required
 def api_chat():
@@ -80,28 +101,43 @@ def api_chat():
     is_clinical = interpretation.get("is_clinical", False)
     sufficient = interpretation.get("sufficient_information", True)
     missing_info = interpretation.get("missing_information") or ""
+    is_contradiction = interpretation.get("is_contradiction", False)
     clips = interpretation.get("clips", [])
     interp_text = interpretation.get("interpretation") or ""
 
     if is_clinical and not sufficient:
-        decline_msg = (
-            missing_info
-            if missing_info
-            else (
-                "To classify this case I need a complete flow path description from your duplex scan. "
-                "Please describe: (1) where blood enters the superficial system (e.g. SFJ incompetent, perforator entry, direct deep-to-tributary), "
-                "(2) how it travels (e.g. forward along GSV, escapes into tributary), and "
-                "(3) whether and where reflux occurs (e.g. GSV refluxes backward, tributary drains back, no reflux anywhere)."
+        # Only ask if: (1) it is a genuine contradiction between the user's own messages, OR
+        # (2) this is the very first time a sufficiency question is being asked in this attempt.
+        # Never repeat a sufficiency question the user already answered — that is the tape-recorder bug.
+        if is_contradiction or not _sufficiency_gate_already_answered(history):
+            decline_msg = (
+                missing_info
+                if missing_info
+                else (
+                    "To classify this case I need a complete flow path description from your duplex scan. "
+                    "Please describe: (1) where blood enters the superficial system (e.g. SFJ incompetent, perforator entry, direct deep-to-tributary), "
+                    "(2) how it travels (e.g. forward along GSV, escapes into tributary), and "
+                    "(3) whether and where reflux occurs (e.g. GSV refluxes backward, tributary drains back, no reflux anywhere)."
+                )
             )
+            save_message(session_id, "assistant", decline_msg,
+                         metadata={"response_type": "sufficiency_gate"})
+            return jsonify({
+                "type": "insufficient",
+                "missing_info": decline_msg,
+                "conversational_response": decline_msg,
+                "message_id": user_msg_id,
+                "session_title": new_title,
+            })
+        # The sufficiency gate was already asked and answered — the model is failing to recognise
+        # the user's prior reply. Bypass the gate and attempt classification with what we have.
+        logger.info(
+            "[clinical] Sufficiency gate fired again after prior answer — bypassing and "
+            "re-running NL interpreter with skip_sufficiency=True."
         )
-        save_message(session_id, "assistant", decline_msg)
-        return jsonify({
-            "type": "insufficient",
-            "missing_info": decline_msg,
-            "conversational_response": decline_msg,
-            "message_id": user_msg_id,
-            "session_title": new_title,
-        })
+        interpretation = parse_nl_to_clips(user_message, history=history, skip_sufficiency=True)
+        clips = interpretation.get("clips", [])
+        interp_text = interpretation.get("interpretation") or interp_text
 
     if is_clinical and sufficient:
         try:

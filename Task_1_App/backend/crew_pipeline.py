@@ -133,52 +133,60 @@ def parse_nl_to_clips(
     user_message: str,
     call_llm_fn: Callable = None,
     history: list[dict] | None = None,
+    skip_sufficiency: bool = False,
 ) -> dict:
     """
     CrewAI equivalent of nl_interpreter.parse_nl_to_clips.
     Two-stage: sufficiency check → (if sufficient) CHIVA interpretation.
+
+    skip_sufficiency — when True, bypass the sufficiency gate and go straight
+    to CHIVA interpretation. Used when the route layer has already determined
+    that the same sufficiency question was asked and answered in this session.
     """
     accumulated = _build_accumulated_description(history, user_message)
     agent = make_clinical_interpreter()
 
-    # Stage 1: sufficiency check
-    try:
-        raw = _run_task(
-            agent,
-            description=_SUFFICIENCY_PROMPT.format(description=accumulated),
-            expected_output='Valid JSON only: {"verdict": "sufficient"|"insufficient"|"question", "missing": "..."}',
-        )
-        check = json.loads(_extract_json(raw))
-        verdict = check.get("verdict", "sufficient")
-    except Exception as e:
-        logger.error(f"[CrewAI] Sufficiency check failed: {e}. Falling through to CHIVA call.")
-        verdict = "sufficient"
-        check = {}
+    # Stage 1: sufficiency check (skipped when route layer signals bypass)
+    if not skip_sufficiency:
+        try:
+            raw = _run_task(
+                agent,
+                description=_SUFFICIENCY_PROMPT.format(description=accumulated),
+                expected_output='Valid JSON only: {"verdict": "sufficient"|"insufficient"|"question", "missing": "...", "is_contradiction": false}',
+            )
+            check = json.loads(_extract_json(raw))
+            verdict = check.get("verdict", "sufficient")
+        except Exception as e:
+            logger.error(f"[CrewAI] Sufficiency check failed: {e}. Falling through to CHIVA call.")
+            verdict = "sufficient"
+            check = {}
 
-    if verdict == "question":
-        return {
-            "is_clinical": False,
-            "sufficient_information": False,
-            "missing_information": None,
-            "interpretation": None,
-            "clips": [],
-        }
+        if verdict == "question":
+            return {
+                "is_clinical": False,
+                "sufficient_information": False,
+                "missing_information": None,
+                "is_contradiction": False,
+                "interpretation": None,
+                "clips": [],
+            }
 
-    if verdict == "insufficient":
-        missing = check.get("missing") or (
-            "Still need to know whether blood refluxes backward through the GSV trunk, "
-            "whether it escapes into any tributary, and if so whether it also refluxes "
-            "backward through that tributary."
-        )
-        return {
-            "is_clinical": True,
-            "sufficient_information": False,
-            "missing_information": missing,
-            "interpretation": None,
-            "clips": [],
-        }
+        if verdict == "insufficient":
+            missing = check.get("missing") or (
+                "Still need to know whether blood refluxes backward through the GSV trunk, "
+                "whether it escapes into any tributary, and if so whether it also refluxes "
+                "backward through that tributary."
+            )
+            return {
+                "is_clinical": True,
+                "sufficient_information": False,
+                "missing_information": missing,
+                "is_contradiction": bool(check.get("is_contradiction", False)),
+                "interpretation": None,
+                "clips": [],
+            }
 
-    # Stage 2: CHIVA interpretation (only if verdict == "sufficient")
+    # Stage 2: CHIVA interpretation
     try:
         raw = _run_task(
             agent,
@@ -191,6 +199,7 @@ def parse_nl_to_clips(
                 "is_clinical": True,
                 "sufficient_information": True,
                 "missing_information": None,
+                "is_contradiction": False,
                 "interpretation": result.get("interpretation"),
                 "clips": result.get("clips", []),
             }
@@ -201,6 +210,7 @@ def parse_nl_to_clips(
         "is_clinical": False,
         "sufficient_information": False,
         "missing_information": None,
+        "is_contradiction": False,
         "interpretation": None,
         "clips": [],
     }
