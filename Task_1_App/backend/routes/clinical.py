@@ -21,6 +21,24 @@ def set_classification_fn(loaded: bool, fn) -> None:
     pass
 
 
+def _already_asked(history: list[dict], marker: str) -> bool:
+    """
+    Return True if the assistant already sent a message containing *marker*
+    AND the user replied at least once after that. Used to prevent repeating
+    the same follow-up question when the NL interpreter failed to capture the
+    answer in the clips despite the user having already provided it.
+    """
+    asked = False
+    for msg in history:
+        role = msg.get("role", "")
+        content = msg.get("content", "") or ""
+        if role == "assistant" and marker in content:
+            asked = True
+        elif role == "user" and asked:
+            return True
+    return False
+
+
 @bp.route("/api/chat", methods=["POST"])
 @login_required
 def api_chat():
@@ -100,21 +118,21 @@ def api_chat():
             save_message(session_id, "assistant", error_msg)
             return jsonify({"type": "error", "conversational_response": error_msg, "session_title": new_title}), 500
 
-        # Safety net: if any clip already has eliminationTest, the NL interpreter captured it
-        # (possibly on the wrong clip type). Override needs_elim_test so we don't re-ask.
+        # Safety net: if eliminationTest is present on any clip (possibly the wrong clip type),
+        # the NL interpreter captured it — override needs_elim_test so we never re-ask.
         elim_value_in_clips = next(
             (c.get("eliminationTest") for c in clips if c.get("eliminationTest")),
             None,
         )
         if elim_value_in_clips and result.get("needs_elim_test"):
             result["needs_elim_test"] = False
-            if elim_value_in_clips.strip() == "Reflux":
-                result["shunt_type"] = "Type 1+2"
-            else:
-                result["shunt_type"] = "Type 3"
+            result["shunt_type"] = "Type 1+2" if elim_value_in_clips.strip() == "Reflux" else "Type 3"
 
-        # If the elimination test is still needed, route back to dialogue — do not show classification card
-        if result.get("needs_elim_test"):
+        # ── Elimination test ──────────────────────────────────────────────────
+        # Ask only if genuinely needed AND never asked before in this session.
+        if result.get("needs_elim_test") and not _already_asked(
+            history, "To distinguish Type 1+2 from Type 3"
+        ):
             elim_msg = (
                 f"Interpreted so far: {interp_text}\n\n"
                 "To distinguish Type 1+2 from Type 3 I need the elimination test result. "
@@ -142,14 +160,17 @@ def api_chat():
                 "session_title": new_title,
             })
 
-        # For Type 1+2: RP N2→N1 calibre determines CHIVA 1 vs CHIVA 2 — ask before showing card
+        # ── Type 1+2: RP N2→N1 calibre ───────────────────────────────────────
+        # Ask only if calibre genuinely absent AND never asked before in this session.
         if result.get("shunt_type") == "Type 1+2":
             rp_n2n1_clips = [
                 c for c in clips
                 if c.get("flow") == "RP" and c.get("fromType") == "N2" and c.get("toType") == "N1"
             ]
             has_rp_calibre = any(c.get("calibre") for c in rp_n2n1_clips)
-            if rp_n2n1_clips and not has_rp_calibre:
+            if rp_n2n1_clips and not has_rp_calibre and not _already_asked(
+                history, "perforating vein is where the GSV trunk drains"
+            ):
                 calibre_msg = (
                     f"Interpreted so far: {interp_text}\n\n"
                     "To determine the correct ligation strategy for Type 1+2, I need to know how significant "
@@ -173,14 +194,17 @@ def api_chat():
                     "session_title": new_title,
                 })
 
-        # For Type 4: pelvic vs perforating subtype determines surgical approach — ask if unknown
+        # ── Type 4: pelvic vs perforating subtype ─────────────────────────────
+        # Ask only if source unknown AND never asked before in this session.
         if result.get("shunt_type") == "Type 4":
             ep_n1n3_clips = [
                 c for c in clips
                 if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"
             ]
             has_source = any(c.get("source") for c in ep_n1n3_clips)
-            if ep_n1n3_clips and not has_source:
+            if ep_n1n3_clips and not has_source and not _already_asked(
+                history, "origin of the entry point (EP N1→N3)"
+            ):
                 source_msg = (
                     f"Interpreted so far: {interp_text}\n\n"
                     "To plan the correct Type 4 ligation approach, I need to know the origin of the "
@@ -204,14 +228,17 @@ def api_chat():
                     "session_title": new_title,
                 })
 
-        # If multiple tributary branches need detail for ligation planning, ask before showing card
+        # ── Branching tributaries ─────────────────────────────────────────────
+        # Ask only if branching detail absent AND never asked before in this session.
         if result.get("ask_branching"):
             has_branching_details = any(
                 c.get("calibre") or c.get("notes")
                 for c in clips
                 if c.get("fromType") == "N3" or c.get("toType") == "N3"
             )
-            if not has_branching_details:
+            if not has_branching_details and not _already_asked(
+                history, "Multiple tributary branches are present"
+            ):
                 branch_msg = (
                     f"Interpreted so far: {interp_text}\n\n"
                     "Multiple tributary branches are present. To determine the optimal ligation sequence "
