@@ -100,6 +100,19 @@ def api_chat():
             save_message(session_id, "assistant", error_msg)
             return jsonify({"type": "error", "conversational_response": error_msg, "session_title": new_title}), 500
 
+        # Safety net: if any clip already has eliminationTest, the NL interpreter captured it
+        # (possibly on the wrong clip type). Override needs_elim_test so we don't re-ask.
+        elim_value_in_clips = next(
+            (c.get("eliminationTest") for c in clips if c.get("eliminationTest")),
+            None,
+        )
+        if elim_value_in_clips and result.get("needs_elim_test"):
+            result["needs_elim_test"] = False
+            if elim_value_in_clips.strip() == "Reflux":
+                result["shunt_type"] = "Type 1+2"
+            else:
+                result["shunt_type"] = "Type 3"
+
         # If the elimination test is still needed, route back to dialogue — do not show classification card
         if result.get("needs_elim_test"):
             elim_msg = (

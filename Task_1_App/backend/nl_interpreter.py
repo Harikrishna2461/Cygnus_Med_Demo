@@ -510,6 +510,15 @@ If you answered YES to D, you must have clips for both D AND E (assuming E is al
 The most common error is generating A + C but omitting D and E. Do not do this.
 
 OPTIONAL CLIP FIELDS — add ONLY when the description explicitly provides this information:
+  eliminationTest — compression/elimination test result. Values: "Reflux" or "No Reflux".
+             Add to the EP N2→N3 clip (or RP N3 clip if no EP N2→N3 exists) when the
+             clinician describes performing a compression test AND states its result.
+             "Reflux" = compressing the tributary did NOT stop GSV reflux, OR compressing
+               the GSV/SFJ did NOT stop tributary reflux → indicates Type 1+2.
+             "No Reflux" = compressing abolished the reflux → indicates Type 3.
+             NEVER add eliminationTest to EP N1→N2 or RP N2→N1 clips — those are not the
+             right clips for this field. It must go on EP N2→N3 or RP N3→N1 or RP N3→N2.
+             If no compression test is mentioned → do NOT add this field to any clip.
   calibre  — vein diameter or relative size of this specific vessel.
              Values: "large", "small", "equal", or a specific measurement (e.g. "6mm", "4mm").
              Add when the clinician describes the size of:
@@ -539,6 +548,22 @@ Output ONLY valid JSON — no markdown, no explanation:
             "toType": "N2",
             "posYRatio": 0.06,
             "step": "SFJ",
+            "legSide": "Unspecified"
+        }},
+        {{
+            "flow": "EP",
+            "fromType": "N2",
+            "toType": "N3",
+            "posYRatio": 0.45,
+            "eliminationTest": "Reflux",
+            "legSide": "Unspecified"
+        }},
+        {{
+            "flow": "RP",
+            "fromType": "N2",
+            "toType": "N1",
+            "posYRatio": 0.30,
+            "calibre": "small",
             "legSide": "Unspecified"
         }}
     ]
