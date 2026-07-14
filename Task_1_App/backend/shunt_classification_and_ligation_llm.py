@@ -135,7 +135,6 @@ Case B — EP N1→N2 EXISTS (SFJ or Hunterian) AND EP N2→N3 EXISTS
             CHIVA 2 staged (treat as Type 3 per Franceschi).
             Stage 1: Ligate EP N2→N3 (flush tie at GSV-to-tributary junction). Wait 6–12 months.
             Stage 2: If SFJ/trunk reflux persists at follow-up duplex → high tie / flush SFJ ligation.
-            Alternative Stage 1: Ligate SFJ + all tributaries except one; once GSV normalises, ligate the last tributary.
             CHIVA 2 contraindication: GSV calibre >10 mm → must use CHIVA 1 simultaneous instead.
         Large / multiple RP N2→N1 (large-calibre re-entry perforator — high shunt volume):
             CHIVA 1 simultaneous.
@@ -484,7 +483,7 @@ def _compute_primary_step(shunt_type: str, clips: list[dict]) -> str:
         )
         if ep:
             loc = _loc(ep)
-            return f"Ligate N1→N3 perforator entry (Stage 1)" + (f" at {loc}" if loc else "")
+            return f"Ligate N1→N3 perforator entry" + (f" at {loc}" if loc else "")
 
     elif shunt_type == "Type 6":
         ep = _pick_ligation_clip(
@@ -615,34 +614,27 @@ def _compute_ligation_hints(shunt_type: str, clips: list[dict]) -> str:
                 hints.append(f"LIGATION POINT 2 — GSV-to-tributary junction at [{loc}]: flush tie (same session as SFJ)")
         for i, rc in enumerate(rp_n2n1[:-1], start=3):
             loc = _loc_label(rc)
-            hints.append(f"LIGATION POINT {i} — GSV trunk RP N2→N1 segment at [{loc}]: ligate below this reflux point")
+            hints.append(
+                f"LIGATION POINT {i} — GSV trunk segment just DISTAL TO the RP N2→N1 re-entry perforator at [{loc}]: "
+                f"divide the GSV trunk below this perforator. Do NOT ligate the perforator itself."
+            )
+        hints.append(
+            "RP N3 CLIPS IN THIS CASE ARE NOT LIGATION TARGETS — the tributary re-entry perforator "
+            "(RP N3→N1 or RP N3→N2) normalises spontaneously once the SFJ and N2→N3 are disconnected. "
+            "NEVER add a ligation step for an RP N3 clip. The total ligation targets are: "
+            "(1) SFJ, (2) each N2→N3 junction, (3) GSV trunk below each RP N2→N1 except most distal — nothing else."
+        )
 
     elif shunt_type == "Type 4":
         ep_n1n3 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"]
         c = _pick_ligation_clip(ep_n1n3)
         if c:
             loc = _loc_label(c)
-            hints.append(f"LIGATION POINT 1 — N1→N3 perforator/pelvic entry at [{loc}]: divide flush at this level")
-        # RP N3→N2 = tributary-to-GSV junction (intermediate step in pelvic and perforating subtypes)
-        rp_n3n2 = sorted(
-            [c for c in clips if c.get("flow") == "RP" and c.get("fromType") == "N3" and c.get("toType") == "N2"],
-            key=lambda c: c.get("posYRatio") or 0.0,
-        )
-        for i, rc in enumerate(rp_n3n2, start=2):
-            loc = _loc_label(rc)
             hints.append(
-                f"LIGATION POINT {i} — Tributary-to-GSV junction (RP N3→N2) at [{loc}]: "
-                f"flush tie at this tributary-GSV connection (intermediate escape point)"
+                f"LIGATION POINT 1 — N1→N3 perforator/pelvic entry at [{loc}]: divide flush at this level. "
+                f"Per Franceschi 2009: disconnect ONLY at the EP. "
+                f"After EP disconnection, RP N3→N2 and RP N2→N1 paths normalise — do NOT ligate them."
             )
-        # RP N2→N1 = GSV trunk return segments — ligate all except most distal
-        rp_n2n1 = sorted(
-            [c for c in clips if c.get("flow") == "RP" and c.get("fromType") == "N2" and c.get("toType") == "N1"],
-            key=lambda c: c.get("posYRatio") or 0.0,
-        )
-        base_i = 2 + len(rp_n3n2)
-        for i, rc in enumerate(rp_n2n1[:-1], start=base_i):
-            loc = _loc_label(rc)
-            hints.append(f"LIGATION POINT {i} — GSV trunk RP N2→N1 segment at [{loc}]: ligate below this reflux point")
 
     elif shunt_type == "Type 5":
         ep_n1n3 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N1" and c.get("toType") == "N3"]
@@ -650,17 +642,19 @@ def _compute_ligation_hints(shunt_type: str, clips: list[dict]) -> str:
         if c:
             loc = _loc_label(c)
             hints.append(
-                f"LIGATION POINT 1 (Stage 1) — N1→N3 perforator entry at [{loc}]: "
-                f"divide flush at deep-to-superficial entry. Stage 1 only."
+                f"LIGATION POINT 1 — N1→N3 perforator entry at [{loc}]: "
+                f"divide flush at deep-to-superficial entry (CHIVA 1 simultaneous, same session as Point 2)."
             )
         # EP N2→N3 = GSV-to-tributary junction (the exit from GSV into the 2nd tributary)
+        # Per Franceschi 2009: "Disconnection must be performed not only at the N1-N3 EP, but also at
+        # the N2-N3 in order not to leave a shunt 2." Both points ligated in ONE session (CHIVA 1).
         ep_n2n3 = [c for c in clips if c.get("flow") == "EP" and c.get("fromType") == "N2" and c.get("toType") == "N3"]
         c2 = _pick_ligation_clip(ep_n2n3)
         if c2:
             loc = _loc_label(c2)
             hints.append(
-                f"LIGATION POINT 2 (Stage 2 if EP N2→N3 persists at follow-up) — "
-                f"GSV-to-tributary junction at [{loc}]: flush tie to eliminate residual Type 2 shunt."
+                f"LIGATION POINT 2 — GSV-to-tributary junction (EP N2→N3) at [{loc}]: "
+                f"flush tie to prevent a residual Type 2 shunt (same session as Point 1, CHIVA 1 simultaneous)."
             )
 
     elif shunt_type == "Type 6":
@@ -996,10 +990,9 @@ LIGATION_QUERIES = {
         "Type 4 CHIVA shunt two subtypes pelvic and perforating. SFJ competent in both. "
         "Perforating subtype: incompetent perforator N1→N3 deep blood directly into tributary. "
         "Pelvic subtype: pelvic pudendal gluteal labial vein enters groin tributary N3 bypassing SFJ. "
-        "Both subtypes: tributary may drain into GSV via RP N3→N2 junction, then GSV returns to deep via RP N2→N1. "
-        "Circuit N1/P → N3 → N2 → N1. SFJ NOT ligated. "
-        "Ligation targets: N1→N3 entry flush divide, N3→N2 tributary-GSV junction flush tie if present, "
-        "GSV trunk segments below each RP N2→N1 except most distal. "
+        "Circuit N1/P → N3 → (N2) → N1. SFJ NOT ligated. "
+        "CHIVA 1 single stage: disconnect ONLY at the EP (N1→N3 entry). "
+        "After EP disconnection, downstream RP N3→N2 and RP N2→N1 normalise spontaneously — do not ligate them. "
         "Pelvic origin: groin incision for pudendal or labial vein ligation; consider coil embolisation if residual reflux."
     ),
     "Type 5": (
@@ -1007,9 +1000,9 @@ LIGATION_QUERIES = {
         "Blood enters tributary via perforator N1→N3, tributary drains into GSV RP N3→N2, "
         "GSV delivers to second tributary EP N2→N3, second tributary re-enters deep RP N3→N1. "
         "GSV is intermediate conduit not return limb. No RP N2→N1. "
-        "Staged CHIVA 2: Stage 1 ligate N1→N3 perforator entry. "
-        "Stage 2 at 4-6 weeks: if EP N2→N3 GSV-to-tributary junction persists, ligate it to prevent residual Type 2 shunt. "
-        "SEPS approach or subfascial mini-open. Compression 10 weeks."
+        "CHIVA 1 simultaneous single session: ligate BOTH N1→N3 perforator entry AND N2→N3 GSV-to-tributary junction. "
+        "Franceschi 2009: must disconnect at both N1-N3 EP and N2-N3 junction to avoid leaving a residual Type 2 shunt. "
+        "SEPS or subfascial mini-open for perforator. Selective flush tie at N2→N3. Compression 4-6 weeks."
     ),
     "Type 6": (
         "Type 6 CHIVA shunt pure perforator-to-perforator circuit N1→N3→N1. "
@@ -1017,7 +1010,7 @@ LIGATION_QUERIES = {
         "No GSV involvement whatsoever — no RP N3→N2, no EP N2→N3, no RP N2→N1. "
         "Occurs in varicose recurrences post-stripping and venous malformations. "
         "CHIVA 1 single-stage: ligate N1→N3 perforator entry only. RP N3→N1 re-entry resolves spontaneously. "
-        "Subfascial perforator ligation or SEPS. Compression 8 weeks."
+        "Subfascial perforator ligation or SEPS. Compression 4-6 weeks."
     ),
     "Type 1+2": (
         "Type 1+2 CHIVA shunt dual entry SFJ incompetent N1→N2 plus tributary escape N2→N3. "
@@ -1045,7 +1038,7 @@ def build_ligation_prompt(shunt_type: str, clips: list[dict], rag_context: str, 
         if primary_step else ""
     )
 
-    return f"""You are an expert CHIVA vascular surgeon writing a detailed operative plan for a colleague. Be specific about technique names, procedure stages, and follow-up.
+    return f"""You are a CHIVA ligation planning assistant. Apply the CHIVA principles below to the specific anatomy provided. Draw ALL operative technique detail from the ligation knowledge base above. Do not add any surgical step, complication, anatomical approach, or technique detail that is not present in the retrieved knowledge base or the CHIVA framework below.
 
 === LIGATION KNOWLEDGE BASE ===
 {rag_context}
@@ -1058,13 +1051,13 @@ def build_ligation_prompt(shunt_type: str, clips: list[dict], rag_context: str, 
 
 CHIVA 1 (single-stage simultaneous):
   All escape/entry points ligated in one operative session.
-  Indicated when: Type 1, Type 2A/2B/2C with single tributary, Type 1+2 with large-calibre RP N2→N1, Type 6.
+  Indicated when: Type 1, Type 2A/2B/2C, Type 4, Type 5, Type 6, Type 1+2 with large-calibre RP N2→N1.
   Technique: under local or tumescent anaesthesia, expose target junction, divide and double-ligate with flush tie.
 
 CHIVA 2 (two-stage sequential):
   Stage 1: Ligate primary escape point only. Wait 6–12 months for venous haemodynamic adaptation.
   Stage 2: Reassess duplex. Ligate remaining refluxing points if still present.
-  Indicated when: Type 3, Type 1+2 with small-calibre RP N2→N1, Type 5, complex multi-tributary cases.
+  Indicated when: Type 3, Type 1+2 with small-calibre RP N2→N1, complex multi-tributary cases.
   CONTRAINDICATION — GSV calibre >10 mm: CHIVA 2 is contraindicated when the GSV diameter exceeds 10 mm.
   A thick, hypertrophied GSV left with an open SFJ (Stage 1 of CHIVA 2) carries a significant risk of
   thrombosis and deep vein thrombosis. In such cases convert to CHIVA 1 simultaneous ligation.
@@ -1073,149 +1066,131 @@ CHIVA 2 (two-stage sequential):
 
 Flush ligation: divide the vessel at its junction with no residual stump — mandatory at SFJ/SPJ to prevent recurrence from reflux into a residual stump.
 High tie (Trendelenburg ligation): ligate the GSV at the SFJ level with all inguinal tributaries divided flush, leaving no cribriform stump. Standard for SFJ incompetence.
-SPJ ligation (posterior approach): patient prone or lateral; incision in popliteal fossa; expose SSV at its junction with popliteal vein; flush-divide with no stump. Sural nerve at risk — identify and preserve.
+SPJ ligation (posterior approach): posterior popliteal fossa exposure; expose SSV at its junction with popliteal vein; flush-divide with no stump.
 Selective tributary ligation: isolate and double-ligate only the refluxing tributary at its junction with the GSV/SSV; saphenous trunk preserved.
-Perforator ligation: expose and divide the incompetent perforator (EP N2→N2) through a targeted sub-fascial or open mini-incision. For Hunterian perforators: medial thigh approach through a 2 cm incision.
+Perforator ligation: expose and divide the incompetent perforator (EP N2→N2) at its deep-to-superficial entry through a sub-fascial incision.
 Flush tie at N2→N3: divide and double-ligate the EP N2→N3 branch at the point it exits the GSV trunk.
 CHIVA rationale: preserve the saphenous trunk as a draining conduit — a draining GSV/SSV reduces recurrence rates and preserves the vein for future cardiac or peripheral bypass use.
+FUNDAMENTAL CHIVA RULE — RE-ENTRY POINTS (RP) ARE NEVER LIGATED: RP clips in the finding list (RP N2→N1, RP N3→N2, RP N3→N1) identify where the shunt circuit closes back to deep, but the re-entry perforators themselves are NOT surgical targets. Only EP clips mark ligation points. When a plan says "ligate the GSV below RP N2→N1," that means divide the GSV trunk distal to the perforator, NOT the perforator itself. RP N3 re-entry perforators on tributaries (including the "good perforating vein" scenario in Type 1+2 and Type 3) normalise spontaneously after EP disconnection and must never appear as ligation steps.
 
 === PER-TYPE PLAN REQUIREMENTS ===
 
 TYPE 1 (GSV/SFJ system):
   Procedure: CHIVA 1 (single stage).
-  Technique: High tie / flush ligation at the SFJ (groin) or Hunterian perforator (mid-thigh).
-  Steps: (1) Groin incision (SFJ) or medial thigh incision (Hunterian). (2) Expose the GSV at SFJ or Hunterian level. (3) At SFJ: divide all inguinal tributaries (superficial epigastric, superficial circumflex iliac, pudendal) flush — no cribriform stump. (4) Flush ligation of the EP N1→N2 entry point. (5) If RP N2→N1 segments present along GSV trunk: ligate GSV below each refluxing segment except the most distal (preserve distal drainage outflow).
-  Follow-up: Duplex at 6 weeks (check for short-term diastolic retrograde flow — this is normal post-SFJ ligation and not recurrence), then 6 months.
-  Complications: SFJ recurrence from retained cribriform stump, lymphocele (groin dissection), saphenous nerve injury (Hunterian approach), haematoma.
+  Ligation target: EP N1→N2 — the SFJ (high tie / flush ligation). If a Hunterian perforator is the primary entry: EP N1→N2 at the Hunterian level.
+  GSV trunk segments: If RP N2→N1 perforators are present along the GSV, ligate the GSV trunk just distal to each refluxing segment except the most distal — the most distal RP and all GSV below it is preserved as the drainage outflow.
+  Never ligate: RP N2→N1 perforators themselves.
+  Follow-up: Duplex at 6 weeks, then 6 months.
 
 TYPE 1 (SSV/SPJ system):
   Procedure: CHIVA 1 (single stage).
-  Technique: SPJ flush ligation via posterior popliteal fossa approach.
-  Steps: (1) Patient prone or lateral decubitus. (2) Popliteal fossa incision over SPJ. (3) Identify and preserve the sural nerve (runs adjacent to SSV). (4) Expose SSV at its junction with popliteal vein. (5) Flush ligation of SPJ — no residual stump. (6) If RP N2→N1 segments in SSV trunk: ligate below each except most distal.
-  Follow-up: Duplex at 6 weeks and 6 months.
-  Complications: Sural nerve injury (lateral foot numbness), SPJ stump recurrence, popliteal vein injury, deep vein thrombosis.
+  Ligation target: EP N1→N2 — the SPJ (flush ligation, no residual stump).
+  If RP N2→N1 segments present in SSV trunk: ligate SSV below each refluxing segment except the most distal.
+  Never ligate: RP N2→N1 perforators themselves.
+  Follow-up: Duplex at 6 weeks, then 6 months.
 
 TYPE 2A:
   Procedure: CHIVA 1 (single stage).
-  Technique: Selective tributary ligation / flush tie at N2→N3 junction.
-  Steps: (1) Identify highest EP N2→N3 junction under duplex guidance. (2) Targeted incision over junction. (3) Flush tie at N2→N3 — divide branch flush with GSV trunk, double-ligate. (4) GSV trunk NOT ligated or stripped. (5) If multiple branches: ligate each at GSV junction; for branching anatomy, choose branch with larger calibre, longer perforator distance, or independent drainage.
-  Follow-up: Duplex at 6 weeks and 6–12 months to check for late N2 reflux development.
-  Complications: Incomplete ligation if branching missed, haematoma, skin numbness at incision.
+  Ligation target: EP N2→N3 — flush tie at the tributary branch junction with the GSV trunk. If multiple branches: flush tie at each N2→N3 junction. The GSV trunk is NOT ligated.
+  Never ligate: SFJ (competent in Type 2A) or the GSV trunk.
+  Follow-up: Duplex at 6 weeks and 6–12 months to check for late N2 trunk reflux.
 
 TYPE 2B:
   Procedure: CHIVA 1 (single stage).
-  Technique: Perforator ligation (EP N2→N2 entry point).
-  Steps: (1) Identify highest EP N2→N2 perforator entry on duplex. (2) Sub-fascial or mini-open incision at perforator level. (3) Expose and divide perforator flush — double-ligate. (4) Do NOT ligate SFJ — it is competent. (5) GSV trunk preserved; aim is to remove the perforator-driven inflow only.
-  Follow-up: Duplex at 6 weeks and 6 months; if GSV fails to normalise, reassess for secondary ligation.
-  Complications: Perforator injury, deep venous thrombosis risk (sub-fascial approach), wound infection.
+  Ligation target: EP N2→N2 — the incompetent perforator that delivers deep blood into the GSV trunk. The SFJ is NOT ligated (competent). GSV trunk preserved.
+  Never ligate: SFJ.
+  Follow-up: Duplex at 6 weeks and 6 months.
 
 TYPE 2C:
-  Procedure: CHIVA 1 (single stage) — combined perforator + GSV segment ligation.
-  Technique: Perforator ligation + selective GSV trunk ligation at each RP N2→N1 site.
-  Steps: (1) Ligate highest EP N2→N2 perforator (as per 2B). (2) For each RP N2→N1 segment: ligate the GSV below the refluxing segment except the most distal. (3) SFJ NOT ligated. (4) GSV competent segments preserved.
+  Procedure: CHIVA 1 (single stage) — combined perforator plus selective trunk ligation.
+  Ligation targets: (1) EP N2→N2 — the incompetent perforator entry (as per Type 2B). (2) For each RP N2→N1 segment along the GSV: ligate the GSV trunk below the refluxing segment except the most distal. The SFJ is NOT ligated.
+  Never ligate: SFJ (competent in Type 2C) or RP N2→N1 perforators themselves.
   Follow-up: Duplex at 6 weeks and 6–12 months.
-  Complications: Multiple incision sites, saphenous nerve risk, incomplete decompression if GSV trunk segments missed.
 
 TYPE 3:
-  Procedure: CHIVA 2 (staged) — UNLESS GSV calibre >10 mm (see contraindication below).
-  Stage 1 technique: Selective tributary ligation (flush tie at N2→N3). Do NOT ligate SFJ at this stage.
-  Stage 2 technique: If N2 (GSV trunk) reflux develops after follow-up → high tie / flush ligation at SFJ.
-  Stage 2 mechanism: After Stage 1 (N2→N3 tributary ligation), the shunt loop is broken. The SFJ entry
-    (EP N1→N2) is now isolated — blood that enters via the SFJ can no longer escape via the tributary.
-    Over time this isolated circuit converts to a Type 1 pattern with GSV trunk reflux (RP N2→N1).
-    Stage 2 is triggered ONLY IF this trunk reflux develops and persists at the 6–12 month duplex.
-    If trunk reflux does NOT develop, no further surgery is needed.
-  Steps (Stage 1): (1) Expose and flush-ligate each refluxing tributary at its N2→N3 junction. (2) Avoid SFJ. (3) Document tributary positions for follow-up duplex.
-  Steps (Stage 2 — only if N2 reflux confirmed): (1) Groin incision. (2) High tie with flush SFJ ligation. (3) Divide all SFJ tributaries.
-  CONTRAINDICATION: GSV calibre >10 mm → convert to CHIVA 1 simultaneous (SFJ high tie + flush N2→N3 ligation
-    in one session) because leaving a hypertrophied GSV with an open SFJ risks thrombosis.
+  Procedure: CHIVA 2 (staged) — UNLESS GSV calibre >10 mm.
+  Stage 1 ligation target: EP N2→N3 — flush tie at each refluxing tributary junction. Do NOT ligate the SFJ at Stage 1.
+  Stage 2 trigger: If GSV trunk reflux develops at the 6–12 month duplex, proceed to SFJ ligation (high tie).
+  Stage 2 rationale: After Stage 1 disconnects the tributary (EP N2→N3), the SFJ entry (EP N1→N2) is isolated. If this isolated SFJ continues to drive trunk reflux (now a Type 1 pattern), Stage 2 high tie is performed. If trunk reflux does NOT develop, Stage 2 is not needed.
+  CONTRAINDICATION — GSV >10 mm: Convert to CHIVA 1 simultaneous (SFJ high tie + tributary junction ligation in one session). A hypertrophied GSV left with an open SFJ carries thrombosis risk.
+  Never ligate: RP N3→N1 or RP N3→N2 (tributary re-entry perforators) — these normalise spontaneously after Stage 1 EP disconnection and must not appear in any ligation step.
   Follow-up: Duplex at 6 weeks (Stage 1 outcome), then 6–12 months (Stage 2 trigger).
-  Complications: Stage 1 — tributary recurrence. Stage 2 — lymphocele, groin wound, nerve injury. GSV thrombosis if >10 mm calibre and CHIVA 2 used despite contraindication.
 
 TYPE 1+2 (small-calibre RP N2→N1):
-  Procedure: CHIVA 2 (staged) — UNLESS GSV calibre >10 mm (see contraindication below).
-  Rationale: Small-calibre RP N2→N1 means the shunt can be treated as equivalent to Type 3 (Franceschi:
-    "when in a shunt 1+2, the REP in shunt 1 is not obviously efficient, this composite shunt can be
-    assimilated to a shunt 3 and treated by CHIVA 2").
-  Stage 1 technique: Flush tie at N2→N3 (cut tributary supply from GSV). Wait for GSV to normalise.
-  Stage 1 steps: (1) Identify each refluxing N2→N3 tributary junction on pre-op duplex. (2) Targeted incision over junction. (3) Flush tie at N2→N3 — divide branch flush with GSV trunk, double-ligate. (4) Do NOT ligate SFJ at this stage. (5) Post-op compression 6–8 weeks.
-  Stage 2 (triggered if SFJ/trunk reflux persists at 6–12 month duplex): (1) Groin incision. (2) High tie with flush SFJ ligation. (3) Divide all inguinal tributaries flush — no cribriform stump.
-  Alternative Stage 1 approach: Ligate SFJ + all tributaries except one; once N2 normalises, ligate last tributary.
-  CONTRAINDICATION: GSV calibre >10 mm → convert to CHIVA 1 simultaneous regardless of RP N2→N1 calibre.
-    Leaving a hypertrophied GSV with an open SFJ risks thrombosis. Use Type 1+2 large-calibre plan instead.
+  Procedure: CHIVA 2 (staged) — UNLESS GSV calibre >10 mm.
+  Rationale (Franceschi): "When in a shunt 1+2, the REP in shunt 1 is not obviously efficient, this composite shunt can be assimilated to a shunt 3 and treated by CHIVA 2."
+  Stage 1 ligation target: EP N2→N3 — flush tie at each refluxing tributary junction. Do NOT ligate SFJ at Stage 1.
+  Stage 2 trigger: If SFJ or GSV trunk reflux persists at the 6–12 month duplex → proceed to SFJ high tie.
+  CONTRAINDICATION — GSV >10 mm: Convert to CHIVA 1 simultaneous regardless of RP N2→N1 calibre. A hypertrophied GSV left with an open SFJ carries thrombosis risk.
+  Never ligate: RP N3→N1 or RP N3→N2 (tributary re-entry perforators) at any stage — these normalise after Stage 1.
   Follow-up: Duplex at 6 weeks (Stage 1 outcome), then 6–12 months (Stage 2 trigger).
-  Complications: Stage 1 — tributary recurrence if stump retained. Stage 2 — lymphocele, groin wound, saphenous nerve injury. GSV thrombosis if >10 mm calibre and CHIVA 2 used despite contraindication.
 
 TYPE 1+2 (large-calibre RP N2→N1):
-  Procedure: CHIVA 1 (simultaneous). RP N2→N1 has large calibre — high shunt volume requires simultaneous closure of all entry points.
-  Technique: Simultaneous high-tie SFJ ligation + flush tie at every refluxing N2→N3 junction.
-  Steps: (1) Groin incision — high tie with flush SFJ ligation; divide all inguinal tributaries flush — no cribriform stump. (2) Expose each refluxing N2→N3 tributary junction; flush tie at each junction — double-ligate. (3) For any GSV trunk RP N2→N1 segments: ligate the GSV below each refluxing segment except the most distal (preserve distal drainage outflow). (4) All steps performed in the same operative session under local or tumescent anaesthesia.
+  Procedure: CHIVA 1 (simultaneous).
+  Rationale (Franceschi): Large RP N2→N1 calibre means the perforator is "obviously efficient" — the Type 1 component is too active to defer; both entry points must be closed in one session.
+  Ligation targets (all in same session): (1) EP N1→N2 — high tie at the SFJ. (2) EP N2→N3 — flush tie at every refluxing tributary junction. (3) If GSV trunk RP N2→N1 segments are present: ligate the GSV trunk just distal to each re-entry perforator except the most distal.
+  Never ligate: RP N3→N1 or RP N3→N2 (tributary re-entry perforators) — these normalise once SFJ and N2→N3 entry points are disconnected.
   Follow-up: Duplex at 6 weeks and 6 months to confirm shunt resolution.
-  Complications: Lymphocele (groin dissection), groin wound infection, saphenous nerve injury, SFJ recurrence from retained cribriform stump, incomplete ligation if a refluxing N2→N3 junction is missed at pre-op mapping.
 
 TYPE 4:
-  Procedure: CHIVA 1 (single stage). Two anatomical subtypes — identify which applies from the clinical history and duplex findings.
-  NOTE: SFJ is COMPETENT in both Type 4 subtypes. Do NOT ligate the SFJ.
+  Procedure: CHIVA 1 (single stage). SFJ is COMPETENT — do NOT ligate it.
+  CRITICAL RULE (Franceschi 2009 p88): "Disconnection must be performed ONLY at the EP." Only the N1→N3 entry point is ligated. The downstream RP N3→N2 and RP N2→N1 paths carry physiologic drainage and normalise spontaneously after EP disconnection — do NOT ligate them.
 
-  TYPE 4 — Perforating subtype (N1 → N3 → [N2] → N1):
-  Source: Incompetent perforator (Hunterian, calf, or posterior tibial perforator) delivers deep blood directly into a tributary.
-  Technique: Sub-fascial perforator ligation at N1→N3 entry + flush tie at RP N3→N2 tributary-GSV junction if present + selective GSV ligation at RP N2→N1 sites.
-  Steps: (1) Mark the N1→N3 perforator on pre-op duplex (standing, with Valsalva). (2) Sub-fascial or mini-open incision over the perforator; expose and divide flush at the deep-to-superficial entry point. (3) If RP N3→N2 is present (tributary draining into GSV): expose and flush-tie at the tributary-to-GSV junction. (4) For each RP N2→N1 reflux segment along the GSV: ligate the GSV below that segment; preserve the most distal RP N2→N1 for distal venous drainage. (5) Do NOT ligate the SFJ — it is competent.
-  Complications: Perforator not identifiable without pre-op duplex marking; deep vein thrombosis risk from sub-fascial dissection; incomplete decompression if RP N3→N2 tributary-GSV junction is missed; GSV trunk injury.
+  TYPE 4 — Perforating subtype:
+  Source: Incompetent perforator at a specific body level delivers deep blood (N1) directly into a tributary (N3).
+  Ligation target: EP N1→N3 — the incompetent perforator entry point only.
+  Never ligate: RP N3→N2 (tributary-to-GSV junction), RP N2→N1 (GSV-to-deep perforators), or SFJ.
 
-  TYPE 4 — Pelvic subtype (P → N3 → N2 → N1  or  P → N2 → N1):
-  Source: Pelvic vein, pudendal vein, labial vein, or gluteal vein delivers blood into a groin tributary (N3) that connects to the GSV (N2), or directly into the GSV at groin level — bypassing the SFJ.
-  Technique: Ligation of pelvic/pudendal vein at groin tributary-GSV entry + selective GSV ligation at RP N2→N1 sites.
-  Steps: (1) Confirm pelvic origin on duplex in standing position with Valsalva: flow reversal from pelvis into a groin tributary or directly into the GSV proximal segment. (2) Groin incision over the entry tributary at the inguinal level. (3) Identify and flush-ligate the pelvic/pudendal/labial vein as it connects to the groin tributary (EP N1→N3 entry) — this is the primary ligation target. (4) If RP N3→N2 is present: flush tie at the tributary-to-GSV junction. (5) Ligate GSV below each RP N2→N1 segment except the most distal. (6) SFJ NOT ligated — SFJ is competent; ligating it would be an error. (7) If reflux persists at 6-month follow-up duplex: consider coil embolisation or laparoscopic ligation of the pelvic vein source (ovarian, internal iliac, or pudendal vein).
-  Complications: Pelvic vein not visible on standard supine duplex — must scan standing; multiple pelvic tributaries may be present requiring bilateral assessment; residual reflux if pelvic source not fully ablated; pudendal nerve proximity in groin dissection; lymphocele; second-look procedure (laparoscopy or embolisation) required in refractory cases.
+  TYPE 4 — Pelvic subtype:
+  Source: Pelvic vein (pudendal, labial, gluteal, or ovarian) delivers blood into a groin tributary (N3) — bypassing the SFJ.
+  Ligation target: The pelvic/pudendal/labial vein at its entry into the groin tributary (EP N1→N3) — SOLE ligation target.
+  Never ligate: RP N3→N2, RP N2→N1, or SFJ.
+  If reflux persists at 6-month follow-up: consider coil embolisation or laparoscopic ligation of the pelvic vein source (Franceschi 2009 p88).
 
-  Follow-up (both subtypes): Duplex at 6 weeks post-op. Full reassessment at 6 months — if pelvic origin confirmed and reflux persists, refer for pelvic venous imaging (MR venography or catheter venography) and consider ovarian/iliac vein coil embolisation.
+  Follow-up (both subtypes): Duplex at 6 weeks. If pelvic origin confirmed and reflux persists at 6 months: pelvic venous imaging and consider embolisation.
 
 TYPE 5:
-  Procedure: CHIVA 2 (staged). Circuit: N1→N3→N2→N3→N1. The GSV acts as an intermediate conduit between two tributary segments.
-  Technique: Stage 1 — ligate N1→N3 perforator entry. Stage 2 — ligate EP N2→N3 GSV-to-tributary junction if it persists.
-  Stage 1 Steps: (1) Mark the N1→N3 perforator entry on pre-op duplex (standing, Valsalva). (2) Sub-fascial or endoscopic (SEPS) approach; divide flush at deep-to-superficial entry. (3) Do NOT ligate the GSV or SFJ at this stage. (4) Post-op compression 10 weeks at 20–30 mmHg.
-  Stage 2 (triggered if EP N2→N3 persists at 4–6 week duplex): (1) Identify the GSV-to-tributary junction (EP N2→N3). (2) Flush tie at this junction to eliminate the residual tributary escape and prevent a secondary Type 2 shunt developing. (3) Do NOT ligate the SFJ.
-  Rationale: Cutting only the N1→N3 perforator removes the driving pressure from the circuit. If the GSV-to-tributary escape persists after the perforator is ligated, the shunt has converted to a Type 2 pattern and requires the EP N2→N3 ligation as Stage 2.
-  Follow-up: Duplex at 4–6 weeks (Stage 2 trigger assessment), then 6 months.
-  Complications: Residual Type 2 shunt if EP N2→N3 junction not ligated at Stage 2; sural or superficial peroneal nerve injury (SEPS approach); DVT risk post-subfascial dissection; wound infection.
+  Procedure: CHIVA 1 (single stage simultaneous). Circuit: N1→N3→N2→N3→N1 — the GSV acts as an intermediate conduit between two tributary segments.
+  Rationale (Franceschi 2009): "Disconnection must be performed not only at the N1-N3 EP, but also at the N2-N3 in order not to leave a shunt 2." Delfrate 2023 confirms: "Shunts 1, 2, 4, 5, 6 are disconnected in one stage."
+  Ligation targets (both in same session): (1) EP N1→N3 — the perforator entry into the first tributary. (2) EP N2→N3 — the GSV-to-second-tributary junction.
+  Never ligate: SFJ (competent in Type 5) or the GSV trunk.
+  Follow-up: Duplex at 6 weeks and 6 months to confirm circuit resolution.
 
 TYPE 6:
-  Procedure: CHIVA 1 (single stage). Circuit: N1→N3→N1. Pure perforator-to-perforator circuit — the GSV trunk (N2) is not involved.
-  Technique: Ligation of N1→N3 incompetent perforator entry point only. The RP N3→N1 re-entry perforator resolves spontaneously once inflow is eliminated.
-  Steps: (1) Mark N1→N3 entry perforator on pre-op duplex. (2) Sub-fascial mini-open incision or SEPS at the perforator entry level. (3) Divide flush at the deep-to-superficial entry point. (4) Do NOT ligate the GSV, SFJ, or tributaries — the circuit is entirely contained within the perforator-tributary loop. (5) Post-op compression 8 weeks at 20–30 mmHg.
-  Rationale: Eliminating the inflow perforator (N1→N3) collapses the entire circuit. The RP N3→N1 re-entry is passive and will normalise without direct ligation.
-  Follow-up: Duplex at 6 weeks and 3 months to confirm RP N3→N1 has resolved. If it persists, consider additional perforator ligation.
-  Complications: Incomplete ligation if multiple entry perforators not mapped; neo-angiogenesis in recurrent post-stripping cases; sural or peroneal nerve proximity; DVT risk; residual RP N3→N1 if secondary perforators missed.
+  Procedure: CHIVA 1 (single stage). Circuit: N1→N3→N1 — pure perforator-to-perforator circuit; GSV (N2) not involved.
+  Ligation target: EP N1→N3 — the incompetent perforator entry into the tributary only.
+  Never ligate: GSV trunk, SFJ, or RP N3→N1 (tributary re-entry perforator) — the RP normalises spontaneously once the inflow EP is disconnected.
+  Rationale: Eliminating the inflow perforator (N1→N3) collapses the entire circuit; the RP N3→N1 re-entry normalises without direct ligation.
+  Follow-up: Duplex at 6 weeks and 3 months to confirm RP N3→N1 has resolved.
 
 NO SHUNT DETECTED:
   No pathological shunt identified. No surgical intervention required.
   ligation_steps: [] (empty — no ligation indicated)
   clinical_rationale: Venous system haemodynamically normal. No entry point, reflux, or re-entry circuit present.
   chiva_approach: None — no shunt, no procedure.
-  followup_schedule: Routine clinical review if symptoms persist. Repeat duplex in 12 months if clinically indicated.
+  followup_schedule: Routine clinical review if symptoms persist.
   complications_contraindications: Not applicable — no intervention planned.
   confidence: 0.95
 
 UNDETERMINED:
   Shunt type cannot be classified without the elimination (compression) test result.
   Type 3 and Type 1+2 share identical clip patterns — only the elimination test distinguishes them.
-  ligation_steps: ["Perform elimination test before ligation planning can proceed — compress the EP at the SFJ or Hunterian level and observe whether tributary reflux persists (→ Type 1+2: bidirectional RP N2→N1 maintains tributary independently) or is abolished (→ Type 3: tributary was fully dependent on SFJ inflow)."]
-  clinical_rationale: Cannot safely plan ligation without knowing whether the tributary is a dependent loop (Type 1+2) or independently fed (Type 3) — the procedures are different.
+  ligation_steps: ["Perform elimination test before ligation planning can proceed."]
+  clinical_rationale: Cannot safely plan ligation without knowing whether the tributary is a dependent loop (Type 1+2) or independently fed (Type 3) — the procedures differ.
   chiva_approach: Deferred pending elimination test result.
   followup_schedule: Resubmit with elimination test result to proceed with classification and ligation planning.
   complications_contraindications: Not applicable — no procedure planned until classification is confirmed.
-  additional_info_needed: ["Elimination test result required: compress GSV/SFJ and report whether tributary reflux is abolished or persists."]
+  additional_info_needed: ["Elimination test result required: compress the tributary or GSV/SFJ and report whether retrograde GSV flow or tributary reflux is abolished or persists."]
   confidence: 0.0
 
 === OUTPUT REQUIREMENTS ===
-- ligation_steps: REQUIRED. Short, direct surgical statements — one action per step.
+- ligation_steps: REQUIRED. Short, direct statements of CHIVA ligation targets — one action per step, drawn from the per-type requirements above and the ligation knowledge base.
   ligation_steps[0] MUST be exactly the string from "STEP 1 OF LIGATION PLAN" above.
-  Steps 2 onwards: add procedural detail — technique, further ligation points, follow-up trigger for staged plans.
+  Steps 2 onwards: state further ligation points, what NOT to ligate, and the follow-up trigger for staged plans. Do not add surgical detail not present in the ligation knowledge base or the CHIVA framework above.
 - chiva_approach: REQUIRED. State "CHIVA 1" or "CHIVA 2". For CHIVA 2: describe what happens in Stage 1 and Stage 2 and the trigger for Stage 2.
 - followup_schedule: REQUIRED. Always specify timing (e.g. "Duplex at 6 weeks post-op, then 6–12 months to assess for N2 reflux development.").
-- complications_contraindications: REQUIRED. At least 2 type-specific items. Do not list generic surgical risks.
-- clinical_rationale: 1-2 sentences explaining WHY this plan suits this specific anatomy.
+- complications_contraindications: Include ONLY contraindications and complications explicitly present in the ligation knowledge base context above or in the per-type CONTRAINDICATION notes above (e.g. GSV >10 mm). Do not generate complications not mentioned in the retrieved knowledge base. If the knowledge base provides no complication details for this type, write: ["Refer to CHIVA operative references for complication profile"].
+- clinical_rationale: 1-2 sentences explaining WHY this plan suits this specific anatomy, using only CHIVA haemodynamic reasoning.
 - additional_info_needed: leave [] unless something genuinely prevents completing the plan.
 - Do NOT mention "left leg" / "right leg" if {leg_label} is "Unspecified".
 - NEVER include y-values, posYRatio, or coordinate numbers.
@@ -1231,7 +1206,7 @@ Output ONLY valid JSON — no markdown, no extra text:
     "ligation_steps": ["<step 1 — include technique name>", "<step 2>", "<step 3>", "<step 4 if needed>"],
     "clinical_rationale": "<1-2 sentences — why this plan suits this anatomy>",
     "additional_info_needed": [],
-    "complications_contraindications": ["<complication 1>", "<complication 2>"],
+    "complications_contraindications": ["<from knowledge base or CHIVA contraindication notes only>"],
     "followup_schedule": "<timing and what to assess>",
     "chiva_approach": "<CHIVA 1 or CHIVA 2 — describe stages and decision triggers>",
     "confidence": <0.7-1.0>

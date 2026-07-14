@@ -737,8 +737,11 @@ VENOUS NETWORK HIERARCHY:
        Includes AASV (anterior accessory saphenous vein), reticular veins, and all named tributaries.
 
 FLOW NOTATION:
-  EP (Entry Point / antegrade) — physiological forward flow toward the heart; valve-directed normal flow
-  RP (Re-entry Point / retrograde) — pathological backward reflux away from the heart; valve failure
+  EP (Entry Point) — pathological escape: blood crosses FROM the deep system (N1) INTO the superficial system
+       through a failed valve junction. The segment that fills from this escape is pathologically pressure-loaded.
+  RP (Re-entry Point) — superficial→deep return via a perforator. The RP perforator itself carries blood in the
+       physiologically correct direction (back to deep). What refluxes is the superficial segment ABOVE the RP —
+       the RP is not a reflux point; it is the closure of the shunt circuit.
 
 KEY JUNCTIONS:
   SFJ (Saphenofemoral Junction) — GSV drains into common femoral vein at the groin crease.
@@ -763,21 +766,30 @@ SHUNT HEMODYNAMICS SUMMARY:
              reflux (RP N3 back to deep). GSV trunk itself does NOT reflux backward.
              Staged CHIVA 2 approach: ligate tributary first, reassess SFJ at 6–12 months.
   Type 1+2 — Both SFJ entry and tributary escape active; both trunk reflux and tributary reflux
-             present. Elimination test required to distinguish from Type 3. If GSV compression
-             abolishes tributary reflux → tributary is a dependent loop → Type 1+2.
+             present. Elimination test required to distinguish from Type 3.
+             If tributary reflux PERSISTS despite GSV/SFJ compression → independent RP N2→N1 is present → Type 1+2.
+             If tributary reflux is ABOLISHED by GSV/SFJ compression → tributary was entirely dependent on SFJ inflow → Type 3 (not 1+2).
   Type 4   — Deep blood bypasses GSV entirely, entering a tributary directly (EP N1→N3);
              returns via GSV trunk (RP N2→N1). Pelvic or gluteal perforator origin common.
-  Type 5   — Same direct deep-to-tributary entry (EP N1→N3) but return stays within
-             tributaries (RP N3), never using the GSV trunk.
+  Type 5   — Direct deep-to-tributary entry (EP N1→N3); the GSV (N2) acts as INTERMEDIATE CONDUIT
+             between two N3 segments: perforator → 1st tributary (EP N1→N3) → 1st tributary drains into
+             GSV (RP N3→N2) → GSV drains to 2nd tributary (EP N2→N3) → 2nd tributary re-enters deep
+             (RP N3→N1). The GSV IS used — it is a conduit, not the return limb. NO RP N2→N1.
 
 CHIVA TREATMENT PHILOSOPHY:
   The CHIVA principle is haemodynamic correction with minimal invasion, NOT ablation.
-  - Ligate only the entry point (EP) and exit point (RP/perforator) of the shunt circuit.
+  - Target ONLY the escape point (EP) of the shunt circuit. Re-entry points (RPs) carry
+    blood in the physiologically correct direction (back to deep) and must NOT be ligated;
+    they normalise spontaneously once the EP is disconnected (Franceschi fundamental rule).
+    In Type 1 the GSV trunk segment below each RP N2→N1 is ligated except the most distal
+    (the most distal RP and everything below it is preserved as the drainage outflow); the RP
+    perforator itself is never ligated.
   - Preserve the saphenous vein as a draining conduit — a draining GSV reduces recurrence and
     maintains the vein for future coronary or peripheral bypass surgery.
   - A non-draining (occluded/stripped) saphenous vein drives neo-angiogenesis and recurrence.
-  - Crossectomy (ligation of all SFJ tributaries) historically had 22% recurrence at 10 years;
-    selective CHIVA ligation of only the pathological circuit has lower recurrence rates.
+  - Vein stripping (non-saphenous-sparing) leads to 22% neo-angiogenic recurrence at 10 years
+    (new varicosities without identifiable reflux point, caused by loss of saphenous drainage —
+    Franceschi/Zamboni 2009); CHIVA showed 0% neo-angiogenic recurrence at the same follow-up.
   - CHIVA 1 = single-stage simultaneous ligation of all identified escape/entry points.
   - CHIVA 2 = staged: ligate primary escape point first, then reassess with duplex at 6–12 months;
     ligate remaining refluxing points only if haemodynamic normalisation has not occurred.
@@ -786,11 +798,12 @@ POST-CHIVA HAEMODYNAMIC EXPECTATIONS:
   - Transient retrograde flow in the GSV trunk during calf diastole after SFJ ligation is normal:
     it represents drainage of tributary blood via the saphenous into the deep system above the scar.
     This is NOT a sign of recurrence or failed ligation.
-  - GSV diameter and common femoral vein diameter typically reduce after successful CHIVA
-    as haemodynamic load falls; monitor on postoperative duplex.
-  - Up to 20% of patients need a supplementary operative intervention at the 6–12 week review.
-    Postoperative duplex at 6 weeks is therefore mandatory, not optional.
-  - Full haemodynamic normalisation of the venous system takes 3–6 months.
+  - GSV diameter and common femoral vein (CFV) diameter both typically reduce after successful
+    CHIVA as haemodynamic load normalises; monitor on postoperative duplex (Section 10.3.2,
+    Saphenous Vein Sparing 2018: GSV from ~6.5 mm to ~4.8 mm and CFV from ~15 mm to ~14.9 mm).
+  - Postoperative duplex at 6 weeks assesses early haemodynamic response and identifies
+    residual or newly emerging reflux; in staged (CHIVA 2) cases, the 6–12 month duplex
+    is the trigger for deciding whether Stage 2 ligation is needed.
 
 DUPLEX SCAN CONTEXT:
   - Reflux is defined as sustained retrograde flow >500 ms (some centres use >1000 ms for specificity).

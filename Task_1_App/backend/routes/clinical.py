@@ -105,12 +105,20 @@ def api_chat():
             elim_msg = (
                 f"Interpreted so far: {interp_text}\n\n"
                 "To distinguish Type 1+2 from Type 3 I need the elimination test result. "
-                "Perform the compression test on duplex:\n\n"
-                "Manually compress the tributary and observe the GSV reflux:\n"
-                "  • GSV reflux stops when tributary is compressed → tributary was the only return path → Type 3\n"
-                "  • GSV reflux continues despite tributary compression → GSV has its own independent re-entry perforator → Type 1+2\n\n"
-                "For example: 'Compressing the tributary abolished the GSV reflux' or "
-                "'Compressing the tributary did not stop the GSV reflux — it persisted.'"
+                "Two methods — perform whichever is easier on duplex:\n\n"
+                "Method 1 — Compress the tributary, observe the GSV:\n"
+                "  Place the duplex probe on the proximal GSV (SFJ level) and get a waveform showing "
+                "retrograde flow. Ask an assistant to manually compress the tributary.\n"
+                "  • Retrograde flow in the GSV disappears when the tributary is compressed "
+                "→ the tributary was the only drainage path for the shunt circuit → Type 3\n"
+                "  • Retrograde flow in the GSV continues unchanged despite tributary compression "
+                "→ the GSV has its own independent perforator draining it back to the deep system → Type 1+2\n\n"
+                "Method 2 — Compress the GSV/SFJ, observe the tributary:\n"
+                "  Place the probe on the tributary. Compress the GSV firmly at the groin with your fingers.\n"
+                "  • Tributary reflux disappears when the GSV is compressed → Type 3\n"
+                "  • Tributary reflux persists despite GSV compression → Type 1+2\n\n"
+                "For example: 'Compressing the tributary abolished the retrograde GSV flow' or "
+                "'Compressing the tributary made no difference — the backward flow in the GSV persisted.'"
             )
             save_message(session_id, "assistant", elim_msg)
             return jsonify({
@@ -131,16 +139,17 @@ def api_chat():
             if rp_n2n1_clips and not has_rp_calibre:
                 calibre_msg = (
                     f"Interpreted so far: {interp_text}\n\n"
-                    "To determine the correct ligation strategy for Type 1+2, I need to know the calibre "
-                    "of the RP N2→N1 re-entry perforator — the point where the GSV trunk returns blood to "
-                    "the deep system.\n\n"
-                    "Small calibre → CHIVA 2 staged (ligate the tributary junction first, reassess SFJ at "
-                    "6–12 months).\n"
-                    "Large calibre → CHIVA 1 simultaneous (ligate SFJ and all tributary junctions in the "
-                    "same session).\n\n"
-                    "Please describe the calibre of the RP N2→N1 perforator — for example: "
-                    "'The re-entry perforator at the calf is small calibre' or "
-                    "'The RP N2→N1 perforator has large calibre.'"
+                    "To determine the correct ligation strategy for Type 1+2, I need to know how significant "
+                    "the perforating vein is where the GSV trunk drains back into the deep venous system. "
+                    "On duplex, follow the refluxing GSV trunk distally until you find the perforating vein "
+                    "where blood exits from the GSV into the deep vein — then assess its size.\n\n"
+                    "Small or narrow perforator (low-volume drainage back to deep) "
+                    "→ CHIVA 2 staged: ligate the tributary junction first, reassess SFJ at 6–12 months.\n"
+                    "Large or prominent perforator (high-volume drainage back to deep) "
+                    "→ CHIVA 1 simultaneous: ligate SFJ and all tributary junctions in the same session.\n\n"
+                    "Please describe what you see on duplex — for example: "
+                    "'The GSV drains into the femoral vein via a small perforator at mid-thigh' or "
+                    "'There is a large, prominent perforating vein at the calf where the GSV returns to the deep system.'"
                 )
                 save_message(session_id, "assistant", calibre_msg)
                 return jsonify({
