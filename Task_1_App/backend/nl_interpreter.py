@@ -512,9 +512,16 @@ The most common error is generating A + C but omitting D and E. Do not do this.
 OPTIONAL CLIP FIELDS — add ONLY when the description explicitly provides this information:
   calibre  — vein diameter or relative size of this specific vessel.
              Values: "large", "small", "equal", or a specific measurement (e.g. "6mm", "4mm").
-             Add when the clinician describes size of a tributary or branch (e.g. "larger tributary",
-             "dominant branch", "5mm calibre", "both branches are equal calibre").
+             Add when the clinician describes the size of:
+               • A tributary, branch, or vein segment (e.g. "larger tributary", "dominant branch",
+                 "5mm calibre", "both branches are equal calibre")
+               • A re-entry perforator (RP clip) — e.g. "small perforator at mid-thigh",
+                 "the GSV drains via a small perforator", "large re-entry perforator at the calf",
+                 "prominent perforating vein where the GSV returns to the deep system",
+                 "narrow/prominent perforator where blood exits the GSV into the deep vein"
              Apply to the specific clip(s) the size description refers to.
+             IMPORTANT: When the clinician describes the size of the perforator where the GSV
+             drains back into the deep system, add calibre to the RP N2→N1 clip at that level.
   source   — for EP N1→N3 clips ONLY. Use "pelvic" when the origin is a pudendal, labial,
              gluteal, or ovarian vein from the pelvis. Use "perforating" when the origin is an
              incompetent perforator at a specific body level (thigh, calf).
