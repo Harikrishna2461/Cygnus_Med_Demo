@@ -1,7 +1,15 @@
 """
+DEPRECATED — legacy single-LLM REST guidance endpoints.
+
 /api/guidance           — generate active guidance for current probe + context
 /api/guidance-regions   — list all guidance regions
 /api/guidance-clips/<region> — get passive clips for a region
+
+These endpoints use active_guidance_engine (single-LLM) and bypass the
+CrewAI 5-agent crew. The live streaming path uses SocketIO events in
+routes/stream.py + streaming_guidance_engine.py instead.
+Do not add new features here; consider removing once streaming mode is
+fully validated.
 """
 
 from __future__ import annotations

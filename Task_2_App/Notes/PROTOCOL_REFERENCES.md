@@ -13,6 +13,7 @@ Integrated into `backend/agents/protocol_agent.py` and `backend/agents/guidance_
 | Gianesini et al. 2014 | `CHIVA STRATEGY Gianesini014.pdf` |
 | Delfrate 2023 | `DelfrateR CHIVA article.pdf` |
 | AVF 2023 guidelines | Referenced in Delfrate 2023 |
+| **Mendoza et al. 2014** | `0-duplex-ultrasound-of-superficial-leg-veins-2014.pdf` — Sections 7.2 (GSV), 8.2 (SSV), 9.2 (Perforators), 10.2 (Tributaries), Ch. 14 (Deep veins) |
 
 ---
 
@@ -128,3 +129,17 @@ Integrated into `backend/agents/protocol_agent.py` and `backend/agents/guidance_
 | Paranà vs squeezing clarification | guidance_agent SYSTEM_PROMPT |
 | Saphenous eye transverse confirmation | guidance_agent SYSTEM_PROMPT |
 | Patient positioning (Reverse Trendelenburg) | guidance_agent SYSTEM_PROMPT |
+| **Vein-specific exam objectives (Mendoza 2014)** | `backend/agents/protocol_agent.py` → `_VEIN_EXAM_OBJECTIVES` dict + `get_vein_examination_protocol()` |
+| **Vein scan mode state** | `backend/streaming_session.py` → `StreamSession.scan_vein` field |
+| **Vein scan mode socket event** | `backend/routes/stream.py` → `set_scan_vein` / `scan_vein_ack` events |
+
+### Vein Mode — How It Works
+
+When the operator emits `set_scan_vein` with `{"session_id": "...", "vein": "GSV"}`,
+`StreamSession.scan_vein` is set to `"GSV"`. On every subsequent `probe_move`, the
+guidance engine calls `protocol_agent.get_protocol(region, pos_y, vein_mode="GSV")`,
+which appends the full GSV examination checklist (27 questions from Ch. 7.2) to the
+zone-specific protocol. The LLM then navigates the probe within the zone context AND
+reminds the examiner which clinical questions still need answering.
+
+Valid `vein` values: `"GSV"`, `"SSV"`, `"PERFORATORS"`, `"TRIBUTARIES"`, `"DEEP_VEINS"`, `""` (clear mode).

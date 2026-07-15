@@ -33,6 +33,7 @@ from agents.crew_agents import (
     make_navigation_planner,
     make_shunt_analyst,
 )
+from agents.crew_tools import CIRCUIT_ANALYST_TOOLS, NAVIGATION_PLANNER_TOOLS
 
 logger = logging.getLogger(__name__)
 
@@ -117,8 +118,8 @@ def run_guidance_crew(
     # ── Create all 5 agents ───────────────────────────────────────────────────
     interpreter = make_clinical_interpreter()
     analyst     = make_shunt_analyst()
-    circuit     = make_circuit_analyst()
-    planner     = make_navigation_planner()
+    circuit     = make_circuit_analyst(tools=CIRCUIT_ANALYST_TOOLS)
+    planner     = make_navigation_planner(tools=NAVIGATION_PLANNER_TOOLS)
     specialist  = make_guidance_specialist()
 
     # ── Task 1: Clinical Interpreter ──────────────────────────────────────────
@@ -193,15 +194,27 @@ def run_guidance_crew(
     _in_q1_corridor = 0.04 <= pos_y <= 0.57
     _corridor_fact = (
         f"PROBE IS INSIDE Q1 CORRIDOR (posY {pos_y:.2f} is between 0.04 and 0.57): YES. "
-        f"The probe is physically at {current_zone}. Examine HERE — do not route to SFJ/groin."
+        f"The probe is physically at {current_zone}. "
+        f"NOTE — this corridor fact applies ONLY during STATE A (Q1 open, no EP clip yet). "
+        f"During States B–F, the open Q-state determines where the probe should go next; "
+        f"the probe may need to move to a different zone (e.g. calf to find EP N2→N3)."
         if _in_q1_corridor else
         f"PROBE IS INSIDE Q1 CORRIDOR (posY {pos_y:.2f} is between 0.04 and 0.57): NO. "
         f"Probe is at {current_zone} (past all Q1 zones). "
         "If Q1 is still open, route to the nearest unvisited Q1 zone."
     )
 
+    # Q1 answered when any EP from N1 (entry point into superficial system) is confirmed.
+    _q1_answered = any(
+        c.get("flow") == "EP" and c.get("from_type") == "N1"
+        for c in clips
+    )
+
     # Zone-level anti-repetition — count how many times each anatomical zone has
     # appeared in recent_guidance, regardless of exact phrasing.
+    # ONLY applied during Q1 search. Once an entry point is confirmed (Q1 answered),
+    # the diagnostic path is deterministic (B→C→D→E) and zone anti-repetition
+    # would incorrectly block the zone the surgeon must remain in.
     _zone_keywords = {
         "sfj": "SFJ/groin", "groin": "SFJ/groin",
         "upper thigh": "upper thigh",
@@ -218,7 +231,10 @@ def run_guidance_crew(
             if _kw in _g_lo:
                 _zone_hits[_cz] += 1
                 break
-    _overused_zones = [z for z, c in _zone_hits.items() if c >= 2]
+    _overused_zones = (
+        [] if _q1_answered
+        else [z for z, c in _zone_hits.items() if c >= 2]
+    )
     _overused_zones_str = ", ".join(_overused_zones) if _overused_zones else "none"
 
     # ── Task 3: Circuit Analyst (sees task1 + task2) ──────────────────────────
@@ -231,6 +247,11 @@ def run_guidance_crew(
             f"{_corridor_fact}\n\n"
             f"Q-STATE:\n{q_state}\n\n"
             f"SCAN HISTORY:\n{history_summary}\n\n"
+            "ROUTING RULE: Your routing is determined ONLY by the Q-STATE clip analysis above. "
+            "Accepted shunts (if any) only affect the Shunt Analyst's classification — "
+            "they do NOT change which Q is currently open or where the probe should go next. "
+            "A previously accepted shunt means the surgeon is continuing to scan; "
+            "the Q-state tells you exactly where.\n\n"
             "STEP 1 — Identify which examination state we are in:\n"
             "  A: Q1 OPEN — no entry point (EP) clip found yet; surgeon seeking entry\n"
             "  B: Q1 confirmed, Q2 open — entry found; trace GSV trunk distally for RP N2→N1\n"
@@ -242,17 +263,43 @@ def run_guidance_crew(
             f"  FOR STATE A:\n"
             f"  • If corridor = YES (probe posY 0.04–0.57): probe is at {current_zone}. "
             f"  The surgeon is already examining a Q1-relevant zone. "
-            f"  Describe the specific anatomical structure to find at {current_zone} "
-            "  and the surface/direction to locate it (medial, posterior, anterior-medial, etc.).\n"
+            f"  Output: 'STATE A. Probe at {current_zone}. Examine [anatomy] by moving [direction].' "
+            f"  HARD RULE: Do NOT mention any other zone (thigh, calf, SPJ, ankle). "
+            f"  Do NOT say 'proceed distally' or 'then go to upper thigh'. "
+            f"  Q1 has not been confirmed yet — the probe must examine HERE. "
+            f"  Name ONLY the anatomy at {current_zone} and the direction (medial, anterior, etc.).\n"
             "  • If corridor = NO (probe posY > 0.57): the three Q1 candidate zones are "
             "  SFJ/groin (0.04–0.07), Hunterian (proximal thigh) (0.21–0.33), popliteal/SPJ (0.48–0.57). "
             f"  Already routed to recently (do NOT suggest again): {_overused_zones_str}. "
             "  Pick the nearest Q1 candidate NOT in that list. "
             "  If all three are in the list, route to SFJ/groin for re-examination anyway.\n\n"
-            "  FOR STATES B–F:\n"
-            "  What does the open diagnostic question require at the current probe position? "
-            "  Name the specific structure to locate and the direction to find it, "
-            "  OR if the probe is in the wrong zone, name the destination zone and why.\n\n"
+            "  FOR STATE B (Q2 open — trace trunk reflux):\n"
+            "  The probe must move distally along the anteromedial thigh to confirm RP N2→N1. "
+            "  If probe is at SFJ/groin, move to upper thigh first; if already in thigh, "
+            "  continue to the Hunterian/Dodd zone. Do NOT go to calf or SPJ yet.\n\n"
+            "  FOR STATE C (Q3 open — find escape point EP N2→N3):\n"
+            "  Q1 and Q2 are already confirmed. The probe must scan the MEDIAL CALF "
+            "  to find where the GSV trunk gives off a tributary above the fascia. "
+            "  If probe is above the calf (thigh/Dodd), route to the upper medial calf. "
+            "  If probe is already in the calf, continue scanning DISTALLY along the medial calf — "
+            "  the escape is typically between posY 0.60 and 0.75. "
+            "  NEVER route to SPJ or back to thigh during STATE C. The escape is in the calf. "
+            "  IMPORTANT: The target is the GSV trunk in the MEDIAL CALF, NOT the re-entry "
+            "  perforator — re-entry is STATE D territory and must not be mentioned yet.\n\n"
+            "  FOR STATE D (Q4 open — track tributary to re-entry RP N3→N1):\n"
+            "  EP N2→N3 is already confirmed. Follow the N3 tributary toward the "
+            "  lower calf (posY 0.75–0.88) to find where it dives back into the deep system. "
+            "  If probe posY < 0.75, move distally toward the lower medial calf. "
+            "  If probe is already in the lower calf (posY >= 0.75), instruct the surgeon to "
+            "  examine the medial lower calf perforator at the current level — do NOT continue "
+            "  further distally to the ankle. The re-entry is in the LOWER CALF, not the ankle.\n\n"
+            "  FOR STATE E (Q1-Q4 confirmed, no elimTest):\n"
+            "  All four circuit clips are present. Output ONLY: "
+            f"'STATE E. Probe at {current_zone}. No routing needed — elimination test pending.' "
+            "  Do NOT suggest routing to any zone. Do NOT call any tool. "
+            "  The GuidanceSpecialist will override the guidance to 'Perform elimination test'.\n\n"
+            "  FOR STATE F (EP N1→N3 found):\n"
+            "  Trace the N3 tributary distally to find its re-entry perforator.\n\n"
             "Output ≤80 words. Use ONLY these zone names:\n"
             "SFJ/groin · upper thigh · Hunterian (proximal thigh) · Dodd (distal thigh) · "
             "popliteal/SPJ · calf · ankle"
@@ -284,20 +331,31 @@ def run_guidance_crew(
                f"{_recent_counts.most_common(1)[0][1]}× — find different wording.\n\n"
                if _banned else "") +
             f"OVERUSED ZONES (suggested 2+ times already — route elsewhere): {_overused_zones_str}\n\n"
+            "STEP 1 — Read the Circuit Analyst output and identify the target anatomy and zone.\n"
+            "  Use the routing instruction from the Circuit Analyst — it tells you exactly "
+            "  what to examine or where to route the probe.\n\n"
+            "STEP 2 — Compose the movement command.\n"
             "FORBIDDEN TERMS — must NOT appear anywhere in your output: "
             "Q1, Q2, Q3, Q4, corridor, EP, RP, N1, N2, N3, elimTest, elim, "
             "shunt, circuit, 'State A', 'State B', 'State C', 'State D', 'State E', 'State F'.\n\n"
             "A surgical navigation command has TWO components:\n"
             "  MOVEMENT — a direction word: proximally / distally / medially / laterally / "
             "posteriorly / anteriorly\n"
+            "  MOVEMENT RULES:\n"
+            f"    - Current zone is {current_zone}.\n"
+            "    - 'Proximally' means toward the heart (upward). NEVER say 'proximally' at SFJ/groin "
+            "      — there is no proximal direction from the groin. Use 'medially' or 'anteriorly' instead.\n"
+            "    - 'Distally' means toward the foot (downward). In the calf, do NOT say 'distally' "
+            "      past the lower calf if the target is a perforator in the lower calf — say 'medially' "
+            "      or 'toward the perforator on medial lower calf' instead.\n"
             "  TARGET — ALWAYS includes BOTH the anatomical structure AND its zone location:\n"
-            f"    Current zone is {current_zone}. Examples of correct TARGET phrasing:\n"
+            "    Examples of correct TARGET phrasing:\n"
             "    'GSV in saphenous compartment at upper thigh'\n"
-            "    'SFJ junction at groin crease'\n"
+            "    'GSV at SFJ junction in groin crease'\n"
             "    'Hunterian perforator on medial proximal thigh'\n"
             "    'SPJ junction in popliteal fossa'\n"
             "    'Dodd perforator on medial distal thigh'\n"
-            "    'GSV at medial malleolus (ankle)'\n"
+            "    're-entry perforator on medial lower calf'\n"
             "    NEVER say just 'GSV' or just 'SPJ junction' without naming where on the leg.\n\n"
             "≤15 words. Start with a movement verb."
         ),

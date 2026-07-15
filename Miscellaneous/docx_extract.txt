@@ -1,0 +1,206 @@
+CHIVA Streaming Guidance — 29 June Scenario Test Report
+Date: 2026-06-29  17:05:06    |    API: http://localhost:7861    |    Scenarios: 6
+Literature: Franceschi & Zamboni 2009 · Gianesini 2014 · Delfrate 2023 · Adler 2022
+Covers: SPJ Type 1+2 · Type 2B (Dodd) · Type 2C adversarial · Type 4 (Giacomini) · Left-leg Type 2B · Left-leg Type 5 looping
+
+Overall Summary
+
+OVERALL: FAILURES PRESENT
+
+Scenario: SPJ_TYPE1_PLUS2_REFLUX
+SPJ entry (EP N1→N2 SPJ) → SSV escape (EP N2→N3) → RP N3→N1 → RP N2→N1 → Rule 1 maneuver → Reflux persists → Rule 3 complete (Type 1+2). SPJ-pathway complement to v2 scenario 13 (which ends No Reflux → Type 3). Source: Franceschi 2009 p.114. 21 steps.
+Checked: 20   |   Passed: 16   |   Failed: 4   |   Timeouts: 6
+
+
+Scenario: TYPE2B_DODD_PERFORATOR
+Type 2B: EP N2→N2 (Dodd mid-thigh N2→N2 communicating vein, diam 4.1 mm) + RP N3→N1 calf. NO EP N1→N2; NO RP N2→N1. SFJ/SPJ both competent. First Type 2B scenario (not in v1/v2). Source: Franceschi 2009 p.118, AVF/Delfrate 2023 perf criteria. 15 steps.
+Checked: 14   |   Passed: 9   |   Failed: 5   |   Timeouts: 3
+
+
+Scenario: TYPE2C_NO_ELIMINATION_NEEDED
+ADVERSARIAL — Type 2C: EP N2→N3 (Hunterian) + RP N3→N1 (calf) + RP N2→N1 (Hunterian) WITHOUT EP N1→N2. Crew must return complete (Type 2C), NOT maneuver — Rule 1 ambiguity only applies when ep_n1_n2 is present. Source: Franceschi 2009 p.119, Type IIc. 15 steps.
+Checked: 15   |   Passed: 12   |   Failed: 3   |   Timeouts: 3
+
+
+Scenario: TYPE4_GIACOMINI_CIRCUIT
+Type 4: EP N1→N3 (femoral perf → Giacomini N3, posY=0.33 posterior) + RP N2→N1 (GSV trunk return path to deep, posY=0.09). Trunk is in the RETURN path only. Rule 4 fires. Distinct from Type VI (no RP N3→N1 here; N2 involved in return). Source: Franceschi 2009 p.119. 14 steps.
+Checked: 11   |   Passed: 7   |   Failed: 4   |   Timeouts: 5
+
+
+Scenario: LEFT_LEG_TYPE2B
+LEFT leg Type 2B: EP N2→N2 (left Dodd, posY=0.26, diam 3.9 mm) + RP N3→N1 (left calf posY=0.70). Left SFJ/SPJ competent. Tests left-leg coordinate routing AND Type 2B on left. Neither left-leg nor Type 2B combination tested in v1/v2. 13 steps.
+Checked: 11   |   Passed: 8   |   Failed: 3   |   Timeouts: 4
+
+
+Scenario: LEFT_LEG_TYPE5_LOOPING
+LEFT leg Type 5: EP N1→N3 (left Giacomini, posY=0.30) + RP N3→N2 (Giacomini-GSV junction posY=0.18) + EP N2→N3 (left Dodd escape, posY=0.28) + RP N3→N1 (left calf, posY=0.70). NO RP N2→N1. Rule 5b fires. N1→N3→N2→N3→N1 looping on left. Source: Franceschi 2009 p.121. 18 steps.
+Checked: 17   |   Passed: 9   |   Failed: 8   |   Timeouts: 5
+
+=== TABLES ===
+--- Table 0 ---
+Scenario || Description || Passed || Failed || Timeouts
+spj_type1_plus2_reflux || SPJ entry (EP N1→N2 SPJ) → SSV escape (EP N2→N3) → RP N3→N1 → RP N2→N1 → Rule 1 maneuver → Reflux persists → Rule 3 comp… || 16 || 4 || 6
+type2b_dodd_perforator || Type 2B: EP N2→N2 (Dodd mid-thigh N2→N2 communicating vein, diam 4.1 mm) + RP N3→N1 calf. NO EP N1→N2; NO RP N2→N1. SFJ/… || 9 || 5 || 3
+type2c_no_elimination_needed || ADVERSARIAL — Type 2C: EP N2→N3 (Hunterian) + RP N3→N1 (calf) + RP N2→N1 (Hunterian) WITHOUT EP N1→N2. Crew must return … || 12 || 3 || 3
+type4_giacomini_circuit || Type 4: EP N1→N3 (femoral perf → Giacomini N3, posY=0.33 posterior) + RP N2→N1 (GSV trunk return path to deep, posY=0.09… || 7 || 4 || 5
+left_leg_type2b || LEFT leg Type 2B: EP N2→N2 (left Dodd, posY=0.26, diam 3.9 mm) + RP N3→N1 (left calf posY=0.70). Left SFJ/SPJ competent.… || 8 || 3 || 4
+left_leg_type5_looping || LEFT leg Type 5: EP N1→N3 (left Giacomini, posY=0.30) + RP N3→N2 (Giacomini-GSV junction posY=0.18) + EP N2→N3 (left Dod… || 9 || 8 || 5
+--- Table 1 ---
+# || Surgeon Action || Expected || LLM Guidance || Action || Status
+1 || Start session  (id: sA_spj_12rf) || session_ready event || -- || -- || SKIP
+2 || Move → SFJ [right leg] | posY=0.05  anterior-medial || Action = "move" | Guidance contains any of: SFJ, groin, femoral, junction, saphenofemoral || Move probe distally to SFJ || move || PASS
+3 || Move → SFJ [right leg] | posY=0.07  anterior-medial || Action = "move" | Must NOT = "complete" || -- || -- || TIMEOUT
+4 || Move → Upper Thigh [right leg] | posY=0.12  medial || Action = "move" || Move probe distally to SFJ || move || PASS
+5 || Move → Hunterian [right leg] | posY=0.43  medial || Action = "move" || Move probe distally to SFJ || move || PASS
+6 || Move → SPJ [right leg] | posY=0.48  posterior || Action = "move" | Guidance contains any of: popliteal, SPJ, posterior, junction || -- || -- || TIMEOUT
+7 || Move → SPJ [right leg] | posY=0.51  posterior || Action = "move" || Move probe distally to SPJ || move || PASS
+8 || Move → SPJ [right leg] | posY=0.55  posterior || Action = "move" || -- || -- || TIMEOUT
+9 || Mark: EP N1→N2  posY=0.51  SPJ  right leg || Action = "move" | Guidance contains any of: SSV, calf, posterior, trunk, distal || Move probe distally to SPJ || move || PASS
+10 || Move → SSV [right leg] | posY=0.59  posterior || Action = "move" || Move probe distally to popliteal || move || PASS
+11 || Move → SSV [right leg] | posY=0.63  posterior || Action = "move" || -- || -- || TIMEOUT
+12 || Move → SSV [right leg] | posY=0.66  posterior || Action = "move" || Move probe distally to popliteal || move || PASS
+13 || Mark: EP N2→N3  posY=0.65  SSV  right leg || Action = "move" | Must NOT = "complete" || Move probe distally to popliteal || move || PASS
+14 || Move → SSV [right leg] | posY=0.73  posterior || Action = "move" || Move probe distally to GSV || move || PASS
+15 || Move → Ankle [right leg] | posY=0.90  posterior || Action = "move" || Move probe distally to GSV || move || PASS
+16 || Move → Ankle [right leg] | posY=0.93  lateral || Action = "move" || -- || -- || TIMEOUT
+17 || Mark: RP N3→N1  posY=0.91  Ankle  right leg || Action = "move" | Must NOT = "maneuver" || Move probe distally to GSV || move || PASS
+18 || Move → SSV [right leg] | posY=0.79  posterior || Action = "move" || Move probe distally to popliteal || move || PASS
+19 || Move → SSV [right leg] | posY=0.66  posterior || Action = "move" || Move probe distally to GSV || move || PASS
+20 || Move → SSV [right leg] | posY=0.60  posterior || Action = "move" || Move probe distally to popliteal || move || PASS
+21 || Mark: RP N2→N1  posY=0.60  SSV  right leg || Action = "maneuver" | Guidance contains any of: compress, tributary, Doppler, record || Move probe distally to calf || move || FAIL
+ |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary, Doppler, record ||  |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary, Doppler, record ||  |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary, Doppler, record ||  |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary, Doppler, record ||  |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary, Doppler, record ||  |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary, Doppler, record
+22 || Move → SSV [right leg] | posY=0.65  posterior || Action = "maneuver" | Guidance contains any of: compress, tributary || -- || move || FAIL
+ |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary ||  |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary ||  |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary ||  |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary ||  |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary ||  |   x  Action: got "move", expected "maneuver" |   x  Guidance missing any of: compress, tributary
+23 || Move → SSV [right leg] | posY=0.61  posterior || Action = "maneuver" || -- || -- || TIMEOUT
+24 || Mark: EP N2→N3  posY=0.65  SSV  right leg | Elim: Reflux || Action = "complete" | Guidance contains any of: circuit, classification, complete, mapped || Move probe distally to SFJ || move || FAIL
+ |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped
+25 || Move → SPJ [right leg] | posY=0.51  posterior || Action = "complete" | Guidance contains any of: circuit, classification || Move probe distally to SPJ || complete || FAIL
+ |   x  Guidance missing any of: circuit, classification ||  |   x  Guidance missing any of: circuit, classification ||  |   x  Guidance missing any of: circuit, classification ||  |   x  Guidance missing any of: circuit, classification ||  |   x  Guidance missing any of: circuit, classification ||  |   x  Guidance missing any of: circuit, classification
+26 || Move → SSV [right leg] | posY=0.65  posterior || Action = "complete" || Move probe distally to perforator || complete || PASS
+27 || Move → SFJ [right leg] | posY=0.06  anterior-medial || Action = "complete" || Move probe distally to SFJ || complete || PASS
+--- Table 2 ---
+# || Surgeon Action || Expected || LLM Guidance || Action || Status
+1 || Start session  (id: sB_2b_dodd) || session_ready event || -- || -- || SKIP
+2 || Move → SFJ [right leg] | posY=0.05  anterior-medial || Action = "move" | Guidance contains any of: SFJ, groin, femoral, junction || Move probe distally to SFJ || move || PASS
+3 || Move → SFJ [right leg] | posY=0.07  anterior-medial || Action = "move" | Must NOT = "complete" || -- || -- || TIMEOUT
+4 || Move → Upper Thigh [right leg] | posY=0.11  medial || Action = "move" || Move probe distally to SFJ || move || PASS
+5 || Move → Dodd [right leg] | posY=0.22  medial || Action = "move" | Guidance contains any of: Dodd, thigh, perforator, mid || Move probe distally to mid-thigh GSV || move || PASS
+6 || Move → Dodd [right leg] | posY=0.27  medial || Action = "move" || -- || move || PASS
+7 || Move → Dodd [right leg] | posY=0.29  medial || Action = "move" || Move probe distally to mid-thigh GSV || move || PASS
+8 || Mark: EP N2→N2  posY=0.28  Dodd  right leg || Action = "move" | Guidance contains any of: distal, calf, tributary, escape || Move probe distally to GSV || move || PASS
+9 || Move → Hunterian [right leg] | posY=0.39  medial || Action = "move" | Must NOT = "complete" || Move probe distally to Hunterian perforators || move || PASS
+10 || Move → SPJ [right leg] | posY=0.49  posterior || Action = "move" | Guidance contains any of: popliteal, SPJ, posterior || Move probe distally to GSV || move || FAIL
+ |   x  Guidance missing any of: popliteal, SPJ, posterior ||  |   x  Guidance missing any of: popliteal, SPJ, posterior ||  |   x  Guidance missing any of: popliteal, SPJ, posterior ||  |   x  Guidance missing any of: popliteal, SPJ, posterior ||  |   x  Guidance missing any of: popliteal, SPJ, posterior ||  |   x  Guidance missing any of: popliteal, SPJ, posterior
+11 || Move → SPJ [right leg] | posY=0.53  posterior || Action = "move" || -- || -- || TIMEOUT
+12 || Move → Calf [right leg] | posY=0.62  medial || Action = "move" || Move probe distally to GSV || move || PASS
+13 || Move → Calf [right leg] | posY=0.68  medial || Action = "move" || Move probe distally to GSV || move || PASS
+14 || Move → Calf [right leg] | posY=0.73  medial || Action = "move" || -- || -- || TIMEOUT
+15 || Mark: RP N3→N1  posY=0.71  Calf  right leg || Action = "complete" | Guidance contains any of: circuit, classification, complete, mapped || Move probe distally to GSV || move || FAIL
+ |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped
+16 || Move → Dodd [right leg] | posY=0.28  medial || Action = "complete" | Guidance contains any of: circuit, classification || Move probe distally to GSV || move || FAIL
+ |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification
+17 || Move → SFJ [right leg] | posY=0.06  anterior-medial || Action = "complete" || Move probe distally to GSV || move || FAIL
+ |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete"
+18 || Move → SPJ [right leg] | posY=0.51  posterior || Action = "complete" || Move probe distally to GSV || move || FAIL
+ |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete"
+--- Table 3 ---
+# || Surgeon Action || Expected || LLM Guidance || Action || Status
+1 || Start session  (id: sC_2c_noel) || session_ready event || -- || -- || SKIP
+2 || Move → SFJ [right leg] | posY=0.05  anterior-medial || Action = "move" | Guidance contains any of: SFJ, groin, femoral, junction || Move probe distally to SFJ || move || PASS
+3 || Move → SFJ [right leg] | posY=0.07  anterior-medial || Action = "move" || -- || -- || TIMEOUT
+4 || Move → Upper Thigh [right leg] | posY=0.14  medial || Action = "move" || Move probe proximally to GSV || move || PASS
+5 || Move → Dodd [right leg] | posY=0.25  medial || Action = "move" || Move probe distally to mid-thigh GSV || move || PASS
+6 || Move → Hunterian [right leg] | posY=0.37  medial || Action = "move" || Move probe distally to SFJ || move || PASS
+7 || Move → Hunterian [right leg] | posY=0.41  medial || Action = "move" || -- || -- || TIMEOUT
+8 || Mark: EP N2→N3  posY=0.41  Hunterian  right leg || Action = "move" | Must NOT = "complete" || Move probe distally to Hunterian perforators || move || PASS
+9 || Move → SPJ [right leg] | posY=0.49  posterior || Action = "move" | Guidance contains any of: popliteal, SPJ, posterior || Move probe distally to SPJ || move || PASS
+10 || Move → SPJ [right leg] | posY=0.53  posterior || Action = "move" || -- || -- || TIMEOUT
+11 || Move → Calf [right leg] | posY=0.60  medial || Action = "move" || Move probe distally to posterior tibial perforator || move || PASS
+12 || Move → Calf [right leg] | posY=0.67  medial || Action = "move" || Move probe distally to posterior tibial perforator || move || PASS
+13 || Move → Calf [right leg] | posY=0.73  medial || Action = "move" || -- || move || PASS
+14 || Mark: RP N3→N1  posY=0.71  Calf  right leg || Action = "move" | Must NOT = "maneuver" || Move probe distally to posterior tibial perforator || move || PASS
+15 || Move → Calf [right leg] | posY=0.60  medial || Action = "move" || Move probe distally to posterior tibial perforator || move || PASS
+16 || Move → Hunterian [right leg] | posY=0.45  medial || Action = "move" || Move probe distally to Hunterian perforators || move || PASS
+17 || Mark: RP N2→N1  posY=0.47  Hunterian  right leg || Action = "complete" | Must NOT = "maneuver" | Guidance contains any of: circuit, classification, complete, mapped || Move probe distally to SFJ || maneuver || FAIL
+ |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped |   x  Action "maneuver" must NOT fire here ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped |   x  Action "maneuver" must NOT fire here ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped |   x  Action "maneuver" must NOT fire here ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped |   x  Action "maneuver" must NOT fire here ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped |   x  Action "maneuver" must NOT fire here ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped |   x  Action "maneuver" must NOT fire here
+18 || Move → Hunterian [right leg] | posY=0.41  medial || Action = "complete" | Guidance contains any of: circuit, classification || Move probe distally to Hunterian perforators || move || FAIL
+ |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification
+19 || Move → SFJ [right leg] | posY=0.06  anterior-medial || Action = "complete" || Move probe proximally to SFJ || maneuver || FAIL
+ |   x  Action: got "maneuver", expected "complete" ||  |   x  Action: got "maneuver", expected "complete" ||  |   x  Action: got "maneuver", expected "complete" ||  |   x  Action: got "maneuver", expected "complete" ||  |   x  Action: got "maneuver", expected "complete" ||  |   x  Action: got "maneuver", expected "complete"
+--- Table 4 ---
+# || Surgeon Action || Expected || LLM Guidance || Action || Status
+1 || Start session  (id: sD_t4_giac) || session_ready event || -- || -- || SKIP
+2 || Move → SFJ [right leg] | posY=0.05  anterior-medial || Action = "move" | Guidance contains any of: SFJ, groin, femoral, junction || Move probe distally to SFJ || move || PASS
+3 || Move → SFJ [right leg] | posY=0.07  anterior-medial || Action = "move" || -- || -- || TIMEOUT
+4 || Move → Upper Thigh [right leg] | posY=0.11  medial || Action = "move" || Move probe distally to SFJ || move || PASS
+5 || Move → Giacomini [right leg] | posY=0.10  posterior || Action = "move" | Guidance contains any of: posterior, thigh, Giacomini, tributary || -- || -- || TIMEOUT
+6 || Move → Giacomini [right leg] | posY=0.18  posterior || Action = "move" || Move probe distally to SFJ || move || PASS
+7 || Move → Giacomini [right leg] | posY=0.24  posterior || Action = "move" || Move probe distally to mid-thigh GSV || move || PASS
+8 || Move → Giacomini [right leg] | posY=0.31  posterior || Action = "move" || Move probe distally to mid-thigh GSV || move || PASS
+9 || Move → Giacomini [right leg] | posY=0.33  posterior || Action = "move" || -- || -- || TIMEOUT
+10 || Mark: EP N1→N3  posY=0.33  Giacomini  right leg || Action = "move" | Must NOT = "complete" | Guidance contains any of: trunk, GSV, thigh, medial, proximal || Move probe distally to mid-thigh GSV || move || PASS
+11 || Move → Giacomini [right leg] | posY=0.15  posterior || Action = "move" || Move probe distally to calf || maneuver || FAIL
+ |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move"
+12 || Move → Upper Thigh [right leg] | posY=0.12  medial || Action = "move" || -- || -- || TIMEOUT
+13 || Move → Upper Thigh [right leg] | posY=0.09  medial || Action = "move" || Move probe distally to mid-thigh GSV || move || PASS
+14 || Mark: RP N2→N1  posY=0.09  Upper Thigh  right leg || Action = "complete" | Guidance contains any of: circuit, classification, complete, mapped || Move probe distally to calf || move || FAIL
+ |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped
+15 || Move → Giacomini [right leg] | posY=0.33  posterior || Action = "complete" | Guidance contains any of: circuit, classification || Move probe distally to calf || maneuver || FAIL
+ |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification
+16 || Move → Upper Thigh [right leg] | posY=0.09  medial || Action = "complete" || Move probe distally to GSV || maneuver || FAIL
+ |   x  Action: got "maneuver", expected "complete" ||  |   x  Action: got "maneuver", expected "complete" ||  |   x  Action: got "maneuver", expected "complete" ||  |   x  Action: got "maneuver", expected "complete" ||  |   x  Action: got "maneuver", expected "complete" ||  |   x  Action: got "maneuver", expected "complete"
+17 || Move → SFJ [right leg] | posY=0.06  anterior-medial || Action = "complete" || -- || -- || TIMEOUT
+--- Table 5 ---
+# || Surgeon Action || Expected || LLM Guidance || Action || Status
+1 || Start session  (id: sE_ll_2b) || session_ready event || -- || -- || SKIP
+2 || Move → SFJ [left leg] | posY=0.05  anterior-medial || Action = "move" | Guidance contains any of: SFJ, groin, femoral, junction || Move probe distally to SFJ || move || PASS
+3 || Move → SFJ [left leg] | posY=0.07  anterior-medial || Action = "move" | Must NOT = "complete" || -- || -- || TIMEOUT
+4 || Move → Upper Thigh [left leg] | posY=0.12  medial || Action = "move" || Move probe distally to SFJ || move || PASS
+5 || Move → Dodd [left leg] | posY=0.22  medial || Action = "move" || Move probe distally to mid-thigh GSV || move || PASS
+6 || Move → Dodd [left leg] | posY=0.26  medial || Action = "move" || -- || -- || TIMEOUT
+7 || Mark: EP N2→N2  posY=0.26  Dodd  left leg || Action = "move" | Guidance contains any of: calf, distal, tributary, left || Move probe distally to mid-thigh GSV || move || PASS
+8 || Move → Hunterian [left leg] | posY=0.40  medial || Action = "move" || Move probe distally to GSV || move || PASS
+9 || Move → SPJ [left leg] | posY=0.49  posterior || Action = "move" || Move probe distally to GSV || move || PASS
+10 || Move → SPJ [left leg] | posY=0.52  posterior || Action = "move" || -- || -- || TIMEOUT
+11 || Move → Calf [left leg] | posY=0.61  medial || Action = "move" || Move probe distally to GSV || move || PASS
+12 || Move → Calf [left leg] | posY=0.67  medial || Action = "move" || Move probe distally to GSV || move || PASS
+13 || Move → Calf [left leg] | posY=0.72  medial || Action = "move" || -- || -- || TIMEOUT
+14 || Mark: RP N3→N1  posY=0.70  Calf  left leg || Action = "complete" | Guidance contains any of: circuit, classification, complete, mapped || Move probe distally to posterior tibial perforator || move || FAIL
+ |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped
+15 || Move → Dodd [left leg] | posY=0.26  medial || Action = "complete" | Guidance contains any of: circuit, classification || Move probe distally to GSV || move || FAIL
+ |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification
+16 || Move → SFJ [left leg] | posY=0.06  anterior-medial || Action = "complete" || Move probe distally to mid-thigh GSV || move || FAIL
+ |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete"
+--- Table 6 ---
+# || Surgeon Action || Expected || LLM Guidance || Action || Status
+1 || Start session  (id: sF_ll_t5) || session_ready event || -- || -- || SKIP
+2 || Move → SFJ [left leg] | posY=0.05  anterior-medial || Action = "move" | Guidance contains any of: SFJ, groin, femoral, junction || Move probe distally to SFJ || move || PASS
+3 || Move → SFJ [left leg] | posY=0.07  anterior-medial || Action = "move" || -- || -- || TIMEOUT
+4 || Move → Upper Thigh [left leg] | posY=0.12  medial || Action = "move" || Move probe distally to SFJ || move || PASS
+5 || Move → SPJ [left leg] | posY=0.49  posterior || Action = "move" | Guidance contains any of: popliteal, SPJ, posterior || Move probe distally to SPJ || move || PASS
+6 || Move → SPJ [left leg] | posY=0.52  posterior || Action = "move" || -- || -- || TIMEOUT
+7 || Move → Giacomini [left leg] | posY=0.14  posterior || Action = "move" | Guidance contains any of: posterior, thigh, Giacomini, tributary || Move probe distally to SFJ || move || FAIL
+ |   x  Guidance missing any of: posterior, thigh, Giacomini, tributary ||  |   x  Guidance missing any of: posterior, thigh, Giacomini, tributary ||  |   x  Guidance missing any of: posterior, thigh, Giacomini, tributary ||  |   x  Guidance missing any of: posterior, thigh, Giacomini, tributary ||  |   x  Guidance missing any of: posterior, thigh, Giacomini, tributary ||  |   x  Guidance missing any of: posterior, thigh, Giacomini, tributary
+8 || Move → Giacomini [left leg] | posY=0.22  posterior || Action = "move" || Move probe distally to mid-thigh GSV || move || PASS
+9 || Move → Giacomini [left leg] | posY=0.30  posterior || Action = "move" || Move probe distally to mid-thigh GSV || move || PASS
+10 || Mark: EP N1→N3  posY=0.30  Giacomini  left leg || Action = "move" | Must NOT = "complete" | Guidance contains any of: GSV, trunk, thigh, proximal, medial || Move probe distally to calf || maneuver || FAIL
+ |   x  Action: got "maneuver", expected "move" |   x  Guidance missing any of: GSV, trunk, thigh, proximal, medial ||  |   x  Action: got "maneuver", expected "move" |   x  Guidance missing any of: GSV, trunk, thigh, proximal, medial ||  |   x  Action: got "maneuver", expected "move" |   x  Guidance missing any of: GSV, trunk, thigh, proximal, medial ||  |   x  Action: got "maneuver", expected "move" |   x  Guidance missing any of: GSV, trunk, thigh, proximal, medial ||  |   x  Action: got "maneuver", expected "move" |   x  Guidance missing any of: GSV, trunk, thigh, proximal, medial ||  |   x  Action: got "maneuver", expected "move" |   x  Guidance missing any of: GSV, trunk, thigh, proximal, medial
+11 || Move → Giacomini [left leg] | posY=0.18  posterior || Action = "move" || Move probe distally to mid-thigh GSV || move || PASS
+12 || Mark: RP N3→N2  posY=0.18  Giacomini  left leg || Action = "move" | Must NOT = "complete" || Move probe distally to mid-thigh GSV || maneuver || FAIL
+ |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move"
+13 || Move → Upper Thigh [left leg] | posY=0.17  medial || Action = "move" || -- || -- || TIMEOUT
+14 || Move → Dodd [left leg] | posY=0.24  medial || Action = "move" || Move probe distally to mid-thigh GSV || move || PASS
+15 || Move → Dodd [left leg] | posY=0.28  medial || Action = "move" || -- || -- || TIMEOUT
+16 || Mark: EP N2→N3  posY=0.28  Dodd  left leg || Action = "move" | Must NOT = "complete" || Move probe distally to mid-thigh GSV || maneuver || FAIL
+ |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move"
+17 || Move → Hunterian [left leg] | posY=0.40  medial || Action = "move" || Move probe distally to Hunterian perforators || move || PASS
+18 || Move → Calf [left leg] | posY=0.60  medial || Action = "move" || Move probe distally to perforator || move || PASS
+19 || Move → Calf [left leg] | posY=0.68  medial || Action = "move" || Move probe distally to calf || maneuver || FAIL
+ |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move" ||  |   x  Action: got "maneuver", expected "move"
+20 || Mark: RP N3→N1  posY=0.70  Calf  left leg || Action = "complete" | Guidance contains any of: circuit, classification, complete, mapped || Move probe distally to perforator || move || FAIL
+ |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped ||  |   x  Action: got "move", expected "complete" |   x  Guidance missing any of: circuit, classification, complete, mapped
+21 || Move → Giacomini [left leg] | posY=0.30  posterior || Action = "complete" | Guidance contains any of: circuit, classification || Move probe distally to mid-thigh GSV || maneuver || FAIL
+ |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification ||  |   x  Action: got "maneuver", expected "complete" |   x  Guidance missing any of: circuit, classification
+22 || Move → Dodd [left leg] | posY=0.28  medial || Action = "complete" || -- || -- || TIMEOUT
+23 || Move → SFJ [left leg] | posY=0.06  anterior-medial || Action = "complete" || Move probe distally to mid-thigh GSV || move || FAIL
+ |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete" ||  |   x  Action: got "move", expected "complete"

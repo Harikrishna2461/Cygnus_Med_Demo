@@ -1,0 +1,51 @@
+Python pre-processing
+  protocol_agent  → protocol_text (current zone only)
+  q_state_agent   → q_state
+  history_agent   → hist_summary
+        ↓
+ All 3 concatenated into one big text dump → state_message
+        ↓
+  Task1 ClinicalInterpreter (just reads the dump)
+  Task2 ShuntAnalyst
+  Task3 CircuitAnalyst   ← decides to go to SPJ
+  Task4 NavigationPlanner ← but still has the CALF protocol in context
+  Task5 GuidanceSpecialist
+I now have a complete picture across all files. Here are the issues ranked by impact:
+
+Critical
+1. guidance_agent.py SYSTEM_PROMPT — Hunterian/Dodd posY bands swapped (line 34)
+The SYSTEM_PROMPT says posY 0.21–0.33 → Dodd zone. posY 0.34–0.47 → Hunterian zone. Every other file has it correctly reversed (Hunterian=0.21–0.33, Dodd=0.34–0.47: protocol_agent, crew_pipeline, crew_agents backstory). This SYSTEM_PROMPT is currently dead code (see issue 4) so it doesn't cause runtime errors now — but if call_llm is ever revived, it would give wrong zone routing.
+
+2. guidance_agent.py call_llm() and SYSTEM_PROMPT are dead code
+The entire carefully-written 7-signal reasoning framework, anatomy landmark table, signal weighting instructions, and protocol knowledge in SYSTEM_PROMPT are never read by any live LLM. call_llm() was replaced by the CrewAI crew but was never removed. The agents instead work from fragmented individual backstories. The synthesis instructions — "reason across all seven signals with equal weight", "a zone visited with no clip is likely competent" — exist nowhere in the live agent context.
+
+3. session.history grows unboundedly
+push_exchange() says "window param reserved for future use" — the window=8 argument is silently ignored. Every LLM call appends two entries (state_msg + guidance) and nothing ever trims it. In a 45-minute session with 200+ LLM triggers this becomes several MB of growing state per session. The recent_guidance extraction still works (takes last 3 assistant messages), but the list itself is never pruned.
+
+Significant
+4. clip_mark doesn't pass pos_x or is_front to the forced LLM call
+In routes/stream.py handle_clip_mark(), the process_probe_state call omits pos_x and is_front. This matters most immediately after a clip is marked — which is precisely when the guidance is most clinically relevant — and the state message will have blank lateral position and surface orientation.
+
+5. CircuitAnalyst has get_zone_protocol tool but no instruction to call it
+The tool is assigned in CIRCUIT_ANALYST_TOOLS and passed to the agent, but Task3's description never tells it when or why to use it. An LLM won't call a tool unprompted. Either remove the tool from CircuitAnalyst (it doesn't need it — NavigationPlanner does), or add explicit instruction in task3's description.
+
+6. Double vein content injection when scan_vein is active
+When session.scan_vein = "GSV", protocol_agent.get_protocol() already appends the full 27-question GSV checklist to protocol_text, which lands in the state message and Task1's context. Then NavigationPlanner, following its new tool instruction, may also call get_vein_examination_objectives("GSV"). The same ~600-word checklist appears twice in the LLM's context window.
+
+7. NavigationPlanner max_iter raised to 5 unnecessarily
+I raised it to allow one tool round-trip. But one tool call = one iteration: reasoning → call tool → read result → final output = 3 iterations total. max_iter=5 means the agent can spin 2 extra LLM round-trips with no benefit. At 3–5s per round-trip on Groq, worst case adds 6–10s to Task4.
+
+Minor
+8. API key hardcoded as fallback in config.py line 9
+GROQ_API_KEY = os.getenv("GROQ_API_KEY") or "gsk_OrD12jThCfK..." — if .env is missing, the production key is silently used. Should raise an error instead of falling back.
+
+9. GROQ_FAST_MODEL comment wrong
+config.py says # GuidanceSpecialist — JSON packaging only but make_guidance_specialist() uses _make_llm("heavy"). GROQ_FAST_MODEL is defined but used by no agent in crew_agents.py.
+
+10. Legacy routes/guidance.py is still live and uses active_guidance_engine
+The /api/guidance REST endpoint (registered in app.py) calls the old single-LLM system via active_guidance_engine.generate_guidance() — completely bypassing CrewAI. If the frontend calls this endpoint it gets different, lower-quality guidance from a different pipeline. If it's not called, it's dead weight.
+
+11. "Giocomini" typo in streaming_guidance_engine.py line 106
+The region key is "Giacomini" but it maps to vein directory "Giocomini". If the actual folder on disk is correctly named Giacomini, frames for that region would silently not load.
+
+Want me to fix all of these in order? The most impactful one to fix first is issue 2 (dead SYSTEM_PROMPT) — the knowledge it contains should be distributed into the live agent backstories where it will actually be read.

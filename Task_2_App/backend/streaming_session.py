@@ -53,6 +53,12 @@ class StreamSession:
     last_guidance: Optional[str] = None
     last_action: Optional[str] = None
 
+    # Active vein scan mode — set when operator declares which vein is being examined.
+    # Valid values: "GSV", "SSV", "PERFORATORS", "TRIBUTARIES", "DEEP_VEINS", or "".
+    # Causes vein-specific examination objectives (Mendoza 2014) to be appended
+    # to the zone protocol so the LLM gives comprehensive vein-examination guidance.
+    scan_vein: str = ""
+
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
     # ── generation counter ────────────────────────────────────────────────────
@@ -97,9 +103,12 @@ class StreamSession:
     # ── history management ────────────────────────────────────────────────────
 
     def push_exchange(self, user_msg: str, assistant_msg: str, window: int = 8) -> None:
-        """Append one (user, assistant) pair. window param reserved for future use."""
+        """Append one (user, assistant) pair and trim history to the last `window` exchanges."""
         self.history.append({"role": "user",      "content": user_msg})
         self.history.append({"role": "assistant", "content": assistant_msg})
+        max_msgs = window * 2
+        if len(self.history) > max_msgs:
+            self.history = self.history[-max_msgs:]
 
     def push_thinking(self, pos_y: float, region: str, state_msg: str, raw, guidance: str) -> None:
         self.thinking_log.append({

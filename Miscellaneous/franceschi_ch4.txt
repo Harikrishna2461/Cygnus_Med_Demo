@@ -1,0 +1,463 @@
+42
+
+Claude Franceschi
+
+right heart filling. Light and/or beginning forms of insufficiency are often asymptomatic and can be detected only through instrumental testing.
+Acute venous insufficiency is related to a major obstacle to blood flow, such as thrombosis. The most common form is represented by the phlegmatia cerulea, in which the absence of vicarious return stops arterial flow and induces an ischaemia.
+Chronic venous insufficiency is generally related to the incapacity of the valvulomuscular pumps to correct the negative effects of standing. Other causes (e.g., chronic venous occlusion, arterio-venous fistula, and congenital venous hypoplasia) are less frequent.
+Haemodynamic physiopathology explains most mechanisms of venous insufficiency, clarifies the interpretation of instrumental investigations, and allows coherent therapeutic choices.
+
+2. HAEMODYNAMIC PHYSIOPATHOLOGY OF VENOUS DRAINAGE
+2.1. Tissue Drainage
+Drainage of tissues is achieved by both venous and lymphatic systems. Venous drainage depends primarily on a major haemodynamic parameter called transmural pressure (TMP) [33,181,272]. TMP regulation is essential to tissue life. It eliminates catabolites that are toxic to cells and indirectly allows the surge of arterial blood. It plays a role in balancing the liquid compartments. Venous insufficiency owing to lack of drainage is due to an excess of TMP. It leads to cellular suffering from accumulation of toxic metabolites and ischemia from circulatory slowdown. It also increases the volume of the interstitial and cellular liquid compartment. Clinically, it results in such objective symptoms as oedema, hypodermitis, necrosis, and ulcer. There are multiple causes of excessive TMP, but they can be classified into two main groups: 1) too high venous pressure, and 2) too low external pressure.
+
+2.2. Transmural Pressure (TMP)
+Transmural pressure (Figures. 4.1) is the key to the haemodynamic drainage mechanism. It is the differential value between two opposite pressures [272]. One is the so-called external pressure (EP) that presses on the external side of the vessel wall. The other is the so-called internal pressure or lateral pressure (IP) that presses the internal side of the vessel wall. TMP, oncotic pressure, and permeability of the capillaries constitute the triad that determines the exchanges between the intra- and extra-vascular compartments. When IP of the capillary is low and/or extra-capillary pressure is high, TMP is low and favourable to drainage, and vice versa. The venous system cannot modify EP, but it can modify IP. Thus, the venous system must continually ensure an optimal TMP for drainage by maintaining a low venous pressure.
+
+Chronic Venous Insufficiency
+
+43
+
+Figure 4.1. Trans mural pressure TMP. aP: atmospheric pressure. tP: tissue pressure. eP: external pressure. iP: internal pressure ( lateral pressure). hsP: hydrostatic pressure. sP: static pressure. oP: oncotic pressure (capillary vessel). TMP = iP-eP. TMP is the crucial parameter for tissue drainage and venous caliber and varies according to iP and eP modulators.
+
+Figure 4.2. Microcirculation MC. a: arteriole v: veinule c: capillaries ms: micro-shunts aP: arterial pressure rP: residual pressure pcs: pre-capillary sphincter. rP=aP-MC Resistance. A: Normal status .B: Venous pressure rise increases PTM which opens pcs and ms with steal effect on the capillary flow and rP increase. That leads to tissue drainage impairment, flow capillary reduction until ischemia, tissue necrosis and hypodermitis. So the venous ulcer shows a paradoxal mix of necrotic tissue with red blood.
+2.3. Oedema, Hypodermitis, and Ulcer from Venous Insufficiency (Figure 4.2)
+When venous pressure increases, TMP increases so that liquids and metabolic wastes from the tissues cannot pass into circulation. Obstacles to the passage of liquids can cause
+
+44
+
+Claude Franceschi
+
+oedemas. Intra-tissue accumulation of toxic metabolites associated with capillary flow slowdown are the key haemodynamic mechanisms possibly leading to trophic disorders [33,186]. The reactive vasodilation of arterioles and the opening of micro-shunts worsen tissue ischaemia in two ways: TMP increases because of residual pressure (RP) enhancement, and micro-shunts reduce capillary flow, thereby worsening cellular necrosis. The latter phenomenon explains the coexistence of oxygenated blood (red) with necroses in venous ulcers. Infection occurs because of the ideal culture medium that this type of ulcer represents. Recently, genetic and molecular mechanisms related to the inflammatory cascade explain individual differences in response to the above described mechanisms [264,279].
+
+2.4. Correcting Excessive TMP
+Because these drainage disorders due to venous insufficiency are related to excessive TMP, the logical solution is either to reduce IP or to increase EP.
+
+2.5. Regulating Extra-Vascular Pressure to Correct Venous Insufficiency
+Low EP is usually related to low atmospheric pressure (e.g., high altitude, air travel) and can be compensated by compression (bandage or stockings) [59,251]. Excessive IP can also be compensated by an increase in EP, but necessarily lower than the blood pressure in order not to cause ischemia. For this reason, external compression can be sufficient when IP is moderately high, but it cannot restore a completely satisfactory TMP when IP is very high. Thus, the beneficial effect of compression on drainage does not seem to result from the acceleration of venous return, which is negligible, but rather from the reduction in TMP.
+
+2.6. Regulating Venous Pressure to Correct Venous Insufficiency
+Venous pressure is made up of hydrostatic pressure (HSP), static pressure (SP), and dynamic pressure (DP). Reductions in HSP and SP decrease TMP. This effect can be obtained by acting on some or all of these components.
+2.6.1. Components of Venous Pressure (Figure 4.3) Total venous pressure is the sum of HSP, SP, and DP. HSP is the pressure generated by
+the force of gravity. It is proportional to the acceleration of gravity (g), the density of blood (), and the height of the blood column (h). Expressed mathematically, HSP  gh. In other terms, the venous pressure at the level of the calf is proportional to the vertical distance from the calf to the top of the head. Therefore, HSP varies according to the posture. It is maximal in the standing position, close to zero in the lying position, and negative (lower than atmospheric pressure) when the feet are positioned above the level of the head. SP and DP are generated by the pumps of the venous system. DP is the dynamic energy 1/2 v2 (v = velocity of flow). The sum SP + DP is constant. So when SP increases, DP decreases, and vice versa.
+
+Chronic Venous Insufficiency
+
+45
+
+This is in accordance with the law of Bernoulli P = HSP+SP+DP = Constant. DP and SP change inversely according to flow resistance. The more flow resistance increases, the more circulatory speed decreases, and so SP increases and DP decreases. Thus, when a liquid is immobilized by high flow resistance, SP= SP+DP because DP is null (v=0). Conversely, when flow resistance decreases, DP increases with the flow velocity (v) and SP decreases (SP+DP=Constant). This drop in SP can be so significant (possibly to lower than atmospheric pressure) that it aspires the blood of the tributary veins (Venturi effect on drainage). However, HSP and SP play the major roles in tissue drainage [34,68,78,102-105,135,183].
+
+Figure 4.3, Pitot's tubes. Parameters of pressure. F: flow P: pressure. 1: P= Static pressure + dynamic pressure. 2: P= Static pressure.3: P= Static pressure - dynamic pressure ( Venturi effect). If 1,2 and 3, are catheters, one can see that for the same Total Pressure TP, the pressure values are different and depend on the orientation of their tip according to the flow F direction and velocity. The flow velocity in this case depends on the resistances to the flow. A: Flow velocity = 0, Resistance > or = TP, so all the TP is converted in Static pressure. B: Flow velocity = medium value, moderate Resistance <TP, so TP is converted. In tube 1 , were the tip is oriented in the opposite direction but parallel to the flow, the pressure value is related to the total pressure ie. dynamic pressure + lateral(static) pressure + hydrostatic (gravity) pressure where hydrostatic pressure is negligible because the tube is horizontal. In tube 2, where the tip is perpendicular to the flow, the pressure value is total pressure ­ dynamic pressure ie. represents the pressure applied against the wall of the tube. Venturi effect is shown in tube 3 were the tip is oriented in the same direction and parallel to the flow. This drawing up effect can be efficient for tributaries drainage but as far as the velocity is high enough. C: Flow velocity = high value, low Resistance <TP. TP converted in the same way as B, but lateral pressure is lower and Venturi effect more pronounced.
+2.6.2. Regulating Lateral Pressure to Correct Venous Insufficiency IP is the sum of HSP+SP. It is the effective part of internal venous pressure that
+contributes to TMP. TMP = IP­EP. The modulation of IP can be achieved by modifications in HSP and/or SP.
+2.6.3. Regulating Hydrostatic Pressure to Correct Venous Insufficiency (Figures 4.4a,b,c)
+HSP is usually the major variable in venous haemodynamics due to its strong influence on TMP. This explains the occurrence and aggravation of venous insufficiency in the standing position, that is, when HSP is maximal. Improvements in drainage through reductions in TMP can be achieved by either reducing or fractionating the height of the liquid
+
+46
+
+Claude Franceschi
+
+column. Reductions in the height of the liquid column are obtained by changing the posture. HSP is maximum (around 90 mmHg) at the level of the ankle when the subject is in the standing position, close to null in the lying position, and negative (lower than atmospheric pressure), when the feet are higher than the head, as above reported.
+
+Figure 4.4. A)Physiological Dynamic Fractionation of Hydrostatic Pressure DFHP: alternate valve closure reduces hydrostatic pressure HSP by fractioning the height of the venous blood column. Effect of the valvulo-muscular pump VMP of the calf when walking HSP: Hydrostatic pressure. h: Height of venous blood column m: calf VMP muscles. Dv : distal calf VMP valve pv: proximal calf VMP valve. a: Standing immobile. No DFPH :VMP at rest. Open VMP valves. h1: maximum height. b :Walking. DFHP: distal VMP valve closed by VMP systole. h2 : reduced eight at the dv level c: :Walking. DFHP: proximal VMP valve closed by VMP diastole. h3 : reduced eight at the pv level.
+
+Figure 4.4. B) Impaired Dynamic Fractionation of Hydrostatic Pressure DFHP in case of deep venous incompetence DVI. Due to deep valves incompetence, valvulo-muscular pump VMP valve alternate
+
+Chronic Venous Insufficiency
+
+47
+
+closure is no more waterproof and does not achieve a complete fractionation of the venous blood column. h: Height of venous blood column m: calf VMP muscles. Dv : incompetent distal calf VMP valve pv: incompetent proximal calf VMP valve. a: Standing immobile. No DFPH :VMP at rest. Open VMP valves. h1: maximum height. b :Walking. DFHP: distal VMP valve remains open despite the VMP systole. h2 : no HSP reduction at the dv level c: :Walking. DFHP: proximal VMP valve remains open despite the VMP diastole. h3 : no HSP reduction at the pv level.
+
+Figure 4.4. C) Impaired Dynamic Fractionation of Hydrostatic Pressure DFHP in case of superficial venous incompetence SVI. Despite deep valves waterproof closure, correct DFHP is not achieved in case of superficial valves incompetence, when the incompetent superficial vein shunts the deep fractionation. h: Height of venous blood column m: calf VMP muscles. Dv : competent distal calf VMP valve pv: competent proximal calf VMP valve. sv: incompetent superficial valves. a: Standing immobile. No DFPH :VMP at rest. Open VMP valves. h1: maximum height. b,c :Walking. DFHP: distal and proximal alternately closed by VMP systole and diastole but h2 and h3 are not fractionated because of the liquid continuity through the incompetent superficial venous shunt.
+This constitutes a simple and effective method for controlling TMP, proved by its evident healing effect in everyday clinical practice. Fractionation of the liquid column takes place physiologically due to the so-called dynamic fractionation of hydrostatic pressure (DFHSP), as occurs when walking. When the subject is motionless in the standing position, the valves are open, and the column of venous blood remains in continuity, so that the HSP at the level of the ankle is maximal [102-105,193]. For this reason, standing motionless and sitting for prolonged periods compromise drainage and can lead to clinical consequences, as proved by clinical evidence, particularly in prolonged, motionless standing work conditions. Such conditions lead to a typical postural venous insufficiency. Fortunately, as soon as the subject moves or walks, the valvulo-muscular pump (VMP) of the lower limbs is activated. Alternating watertight closure of the distal valves (during the systole of the VMP) and proximal valves (during the diastole) dynamically fractionates the liquid column, and thus the HSP
+
+48
+
+Claude Franceschi
+
+Insufficient DFHSP represents the most frequent cause of chronic venous insufficiency (CVI) and is related to a defect in one or more of the VMP components, usually valvular incompetence [4,19,31,46,58,77,80,85,138,159,162,168,196,215,218,219,231,243,256]. In this case, CVI is proportional to the degree of valvular incompetence, which may affect deep and/or superficial veins, but in the large majority of cases affects superficial ones. Another defect of the VMP is deficit and/or lack of muscular contraction (muscular paralysis, joint ankylosis). Surgical correction of DFHSP impairment can be achieved either by valve repair [142,143,168,190,196], or by permitting permanent HSP fractionation [6,9,45,47,56,9092,96,103,106,251,254,283].
+
+2.6.4. Regulating Static Pressure to Correct Venous Insufficiency: SP is part of IP, and thus of TMP. SP is maximal when flow is stopped by proximal
+resistance that obstructs it. On the contrary, SP is minimal when resistance is low. This is in accordance with the law of Bernoulli. At rest, SP depends on residual pressure (RP). RP is the arterial pressure transmitted to the venous bed through the micro-circulation. RP is equal to the arterial pressure (AP) value decreased by the loss of energy in micro-circulatory resistance (MCR). RP = AP-MCR = SP+DP. SP = RP-DP. DP = 1/2 v2 SP = AP-MCR-1/2 v2. Therefore, TMP increases when MCR decreases and/or when proximal resistance to flow increases, and vice versa.
+During muscular exercise, such as walking and running, venous pressure and venous flow increase through three mechanisms: increased cardiac output, decreased MCR, and VMP action. If the proximal resistance is low, TMP remains low and drainage remains good. For this reason, the athlete could develop varicose veins from excessive pressure and flow during training [237]. On the other hand, if the distal venous network does not manage to absorb correctly the energy of flow and pressures because of stenosis or occlusion, the subject may limp because of painful hypertension of the calf.
+Correcting excessive SP can be achieved by two means: reducing venous flow resistance and reducing RP by increasing MCR. Flow resistance can be reduced by removing obstructions or bridging (by-pass) them. MCR can be increased by cooling the limb.
+
+2.6.5. Draining Flow Draining flow is central to venous function. It is indispensable to the economy of the
+drained organs. An acute or chronic obstacle in the venous path impairs drainage proportionally to the increase in SP. It appears clinically by restrictive syndrome. In phlegmatia cerulea, the venous obstacle is so resistant that it stops the incoming arterial flow as well. Proximal flow resistance increases venous pressure because the energy of RP is not consumed in blood motion (DP). It forces and dilates gradually the collateral veins that circumvent the obstacle [197]. This opening of collaterals decreases flow resistance and, therefore, the component SP of RP. Thus, RP explains not only the development of collateral varicose veins that circumvent the deep venous obstacles of post-thrombotic diseases, but also the development of superficial varicose veins after "therapeutic" occlusion or destruction of varicose or nonvaricose superficial veins [22,44,63,66,84,239,246,248].
+
+Chronic Venous Insufficiency
+
+49
+
+2.6.6. Combined Correction of Drainage Defects The various methods of TMP control can be combined to support drainage by optimizing
+the conditions. These methods include compression, posture, correction of the DFHSP, and removal of obstacles to the flow.
+
+2.6.7. Flow Direction Significance Flow direction is anterograde when it is physiological, that is, generally in the direction
+of valve action. Flow direction is retrograde when it is reversed as compared to the usual physiological direction. The term retrograde is not univocal in that does not necessarily mean backward flow, or from the deep veins towards the superficial system. It may mean flow of normal drainage derived between two competent valves towards a normal entry into the deep system. This aspect will be clarified in the next chapters. The normal content of flow, anterograde or retrograde, consists of the blood draining the tissues that depend on it. This physiological flow may be overloaded by flows coming from other tissues, or venous compartments. These additional contents come from the deep network in the event venous blood deviation, due to open shunt (OS) or closed shunt (CS), as described in the next paragraph. It may also come from other superficial territories by pathways of derivation.
+
+2.7. Concept of Shunt
+A venous shunt (VS) is a pathway for venous blood deviation. A VS carries two different flows, the draining flow and the deviated (derived) flow. The significance of the shunt depends on the flow that is deviated, the starting point and the end point of the deviation. The starting point is called the leak point and/or reflux point (RP) and the end point is called the re-entry point (usually a re-entry perforating vein) [14,26,27,102-105,234].
+2.7.1. Vicarious Open Shunt (VOS)(Figure 4.5) When the flow is deviated to by-pass an obstacle [44,102-105,197], there exists what is
+called a vicarious open shunt (VOS). This type of shunt is desirable because it by-pass blocked veins and thereby reduce resistance to drainage. It is made of shunting veins that bypass an obstacle without blood re-circulation. It flows permanently under the effects of distal draining residual pressure and proximal cardiac and thoraco-abdominal aspiration. Its flow increases during valvular-muscular pump systole. It may be antegrade or retrograde.
+For example, a supra-pubic varicose vein that by-passes an occlusion in an iliac vein is an VOS [197]. The flow can be deviated because valve incompetence does not stop the flow inversion when the pressure gradient is physiologically inverted. This occurrence leads to two kinds of shunts according to the presence or absence of re-circulation.
+2.7.2. Closed Shunt (CS)(Figures 4.6 a, 4.6 b) When, in addition to the draining flow, the deviated flow re-circulates at each inversion
+of pressure gradient, as in a closed circuit, we call it closed shunt (CS) [26,30,49,53,105,234,238].
+
+50
+
+Claude Franceschi
+
+Figure 4.5. Superficial open vicarious shunts for superficial venous obstacles : Any venous draining flow suppression a ( phlebectomy, sclerosis, Laser...) raises the residual pressure in the previously drained territory, so that micro shunts are opened (matting) b , collaterals veins are forced and dilated c ( induced varicose recurrence). If the draining entry is suppressed f, the high residual pressure flow forces any collateral and reaches any perforating vein through which it drains g. In some cases, more than one perforating vein is reached and a closed shunt can be activated h. That is the key point of varicose recurrence after non haemodynamic therapy and explains why recurrent non haemodynamic therapies fail.
+Figure 4.6 a. CS: Closed superficial-deep shunt by superficial incompetent collateral vein are activated by the valvulo-muscular pump diastole. E is the escape point where the retrograde flow refluxes from N1 into N2 or N3. R is the reentry point where the CS flow reenters into N1 where it comes from (Recirculation). CHIVA procedure disconnects the CS at E and/or another place with or without devalvulation according to the type of CS. a: 2 CS type 1 (N1-N2-N1). Up: N2=GSV. Down:N2=SSV. In both, CHIVA disconnects the CS at E point. b: CS type 3a (N1-N2-N3-N1).E disconnection leaves a DOS. Simultaneous deconnexion at D would cure the DOS but permit not any draining of proximal great saphena and tributaries. So both disconnections can be done only if a devalvulation (arrow) in V is feasible to permit a draining flow to R. Otherwise, disconnection is done only at D (N3-N2 connection) which disconnects the DOS and impeaches the retrograde flow in the proximal GSV that drains its flow in an antegrade direction into the common femoral, despite its valve incompetence. In a
+
+Chronic Venous Insufficiency
+
+51
+
+second step, E shall be disconnected if a reentry point is developed and reflux reappears. That procedure is called CHIVA 2 ( 2nd step). c: CS type 3 (N1-N2-N3-N1).CHIVA procedure is equal to b. d: CS type 4 (N1-N3-N2-N1).E is one escape point out of the six pelvic escape points from the pelvic N1.( Perineal, Inguinal, Clitoris, Obturator, Superior and Inferior Gluteal points). CHIVA disconnects E. e: CS type 5 (N1-N3-N2-N3-N1).Similar to e, but the terminal superficial pathway is N3. So, E disconnection alone would leave in place a DOS. That is why it has to be completed by a disconnection at D. f: CS type C (N1-N3-N1). Escape and reentry points are connected with N3. CHIVA disconnects only at E.
+
+Figure 4.6 b. CS: Closed shunt by deep incompetent collateral vein. A deep CS is made of two collateral veins that drain the same territory and in which one of them is incompetent that lead to a retrograde refluxing flow in valvulo-muscular pump diastole. The escape point E is proximal and reentry point R distal. CHIVA consists in disconnection at D of the incompetent collateral so that DFHP is again efficient and the recirculation is suppressed.
+Blood flow can be deviated because incompentent valves fail to stop the reverse flow. The flow inversion is elicited by reversed pressure gradient, usually during VMP diastole. This occurrence leads to two types of shunts, depending on the presence or absence of recirculation. When, in addition to the draining flow, the deviated flow re-circulates at each inversion of pressure gradient, as in a closed circuit, a closed shunt (CS) is formed.
+For example, an incompetent saphenous vein becomes a CS when it generates a closed circuit for deep venous blood. As a matter of fact, an incompetent GSV carries back the femoral blood from the sapheno-femoral junction to the deep veins of the calf through a perforating vein during the diastole, and continues to do so at each diastole. Thus, part of the deep venous blood remains "excluded" from the general circulation in a "private circulation." CS is activated by VMP diastole, as when walking. CS impairs drainage because it impairs the effect of the VMP on DFHSP.
+The greater the efficiency of the VMP, the greater the diastolic flow. On the contrary, the lower the VMP efficiency, the less the diastolic flow. For this reason, in the case of totally inefficient VMP, as in rare case in which deep veins are totally incompetent, a dynamic test of VMP will not show any diastolic flow in the superficial veins, even if they are very large and varicose. Actually, during the diastole, total vein incompetence does not allow activation of the VMP and reduces venous pressure so that the gradient of the re-entry perforating vein is
+
+52
+
+Claude Franceschi
+
+not favourable to inflow [19,58,252,258,260,262]. This phenomenon is illustrated by the Perthes test, which shows in the supposed case no reduction of varices when walking despite a tourniquet at the hip. It is also demonstrated by an unexpected lack of reflux duplex detection in superficial varicose veins during such dynamic tests as Paranà's manoeuvre [102].
+2.7.3. Open Derived Shunt (ODS)(Figure 4.7) As previously noted, venous flow can be deviated into an incompetent vein because
+incompetence allows for flow inversion elicited by a reversed pressure gradient, usually during VMP diastole. This occurrence leads to two types of shunts, depending on the presence of re-circulation (CS) or its absence (ODS). When an incompetent vein carries draining blood from other territories in addition to its own territories during VMP diastole, without re-circulation or vicarious by-pass effect, an ODS is formed.
+For example, an incompetent superficial vein generates an ODS when its retrograde flow toward the deep veins through a distal perforating vein consists of draining flow belonging not only to its own territory, but also to other territories. This is the case when an incompetent tributary of the GSV carries out the flow of the other competent tributaries, as seen in shunt type II [105,152].
+
+Figure 4.7. DOS: Derivated open shunt by superficial incompetent vein connecting with pumping out reentry. Retrograde flow in DOS is overloaded by the flow of the confluent superficial normal veins thanks to DOS incompetent valves that allow the diastolic pumping up of the valvulo-muscular pump connected with the reentry point R. No re-circulation because E and R points are connected with different networks. In CHIVA treatment, disconnection is done on DOS at E point excepted in shunt 2D (d) where it can be done at N2-N3 junction (D) . Examples: a- Shunt 0: N3-N2-N1. b- Shunt 2 a: N2-N3-N1 Shunt c- N2-N4-N2-N1 d- Shunt 2d: N2-N3-N1.
+2.7.4. Mixed Shunts (MS) (Figure 4.8) which are VOS and CS that share the same escape point and part of their shunting veins. However, their re-entry points are in different locations, the CS re-entry being distal to the reflux point, and the VOS re-entry being proximal. An example is when an iliac venous occlusion is associated with homolateral great saphenous incompetence. The escape point at the sapheno-femoral junction acts as a VOS in systole, draining femoral flow towards the opposite femoral vein (re-entry point)
+
+Chronic Venous Insufficiency
+
+53
+
+through right and left arch tributaries (spontaneous Palma). The same escape point acts as a CS in diastole, spilling femoral flow into distal deep veins through retrograde saphenous flow and perforator re-entry. This is also the case in haemodynamic block of a superficial femoral vein. Popliteal flow may escape into the SSV, and then into Giacomini's vein, and re-enter the deep network through the sapheno-femoral junction in systole; it escapes also in diastole when great saphena incompetence distal to the Giacomini-great saphena junction allows retrograde flow until a distal re-entry [80,91,111].
+
+Figure 4.8. Mixed shunts (MS) and haemodynamic management. MS by association of vicarious open shunt VOS with closed shunt CS where initial venous pathways and the escape point E are common and terminal venous pathways and reentry point R are different (R1 for VOS and R2 for CS). VOS activation is enhanced by the valvulo-muscular pump systole VMP and CS is activated only by VMP diastole. The CHIVA treatment aims to spear the VOS and disconnect the CS. So the disconnection D has not to be done at E point, but beyond, where CS and VOS pathways diverge, at the beginning terminal CS pathway. A: MS due to association of incompetent great saphenous trunk and superficial femoral vein obstacle. 1: VOS systolic activation . 2: Closed shunt diastolic activation. They share sapheno-popliteal reflux, small saphenous arch retrograde flow and Giacomini vein antegrade (physiologic direction but pathologic flow). Beyond they flow in different directions. VOS flows proximally according to physiologic antegrade direction but abnormal content through the great saphenous arch then sapheno-femoral junction (R1). CS flows distally through the great saphenous trunk then antegrade through the perforating vein of the leg R2.CHIVA consists in disconnection not at E because of a mandatory spear of VOS but at D, i.e. on the CS pathway beyond its diversion from VOS. B: MS due to association of incompetent great saphenous arch and trunk and iliac vein obstacle. 1: VOS systolic activation . 2: Closed shunt diastolic activation. They share sapheno-femoral reflux and great saphenous arch retrograde flow. Beyond, VOS flow is retrograde through the great saphenous trunk then antegrade through a perforating vein of the leg R2.CHIVA consists in disconnection not at E because of a mandatory spear of VOS but at D, i.e. on the CS pathway beyond its diversion from VOS.
+2.8. Non-Haemodynamic Causes of Venous Drainage Impairment
+Permanent or transitory abnormalities of capillary permeability and/or oncotic pressure may be responsible for symptoms of venous insufficiency that are generally limited to oedema. They may be added to haemodynamic causes, particularly during pregnancy.
+
+54
+
+Claude Franceschi
+
+3. PATHOPHYSIOLOGIC SIGNIFICANCE OF SHUNTS
+Some types of venous shunts can involve drainage impairment and/or varicose veins, while others can improve both.
+Analysing the varicose phenomenon, all types of shunts involve venous dilatation because they are veins overloaded by a pathologic flow in addition to physiologic. This dilatation is roughly proportional to the charge of the added flow, especially if significant turbulence occurs.
+VOS and ODS are overloaded proportionally to the drained territory. Theoretically, total flow cannot exceed the amount delivered by the territory.
+CS. drains excessive flow that is not proportional to the flow of the drained territory, but rather to the activity of the VMP to which it is connected. The more the patient walks and runs, the more the flow and the greater the varicose dilatation.
+Analysing the drainage of tissues we know that it depends on trans-mural pressure (TMP), and thus on resistance to flow and hydrostatic pressure.
+VOS is opened by residual pressure (RP), and so it is directly related to tissue drainage. It is necessary for drainage because it by-passes an obstacle, thereby reducing resistance to flow. The larger the VOS veins, the better the drainage. Thus, VOS represents a natural correction of drainage impairments and must be preserved.
+ODS does not interfere directly with drainage, but does so indirectly by disrupting DFHSP. The longer the incompetent vein, the worse the DFHSP.
+CS disrupts TMP regulation through DFHSP impairment and excess volume/pressure due to VMP re-circulation charge.
+
+Figure 4.9. Venous Shunts: Closed Shunt (CS) and Derivated open shunt DOS activated in diastole. E:Escape point. R:reentry point. a: re-circullating circuit, part of blood returns to its source through E.. b: no re-circullating circuit, no blood returns to its source.
+
+Chronic Venous Insufficiency
+
+55
+
+Figure 4.10. VENOUS SHUNTS PRINCIPLES: 1,2,3: Competent interconnected veins draining their own territory without shunts. E: escape point. R: reentry point. P: valvulo-muscular pump at diastolic phase. A venous shunt is made of a vein overloaded by any flow depending on other territories. OVS: Open vicarious shunt: vein 2 by-passes an obstacle in a collateral vein 1 and so carries out two flows: its physiologic draining flow and an overloading flow from the vein 1 territory distal to the obstacle. The escape point E is distal to reentry R. VOS flow is permanent but enhanced by P systole. No recirculation. CS: Closed shunt: during P diastolic aspiration, incompetent vein 2 allows a retrograde flow so that vein 2 drains properly its own physiologic flow despite its retrograde direction plus vein 1 flow refluxing through E that is proximal to R. So, vein 1 flow re-circulates at each P diastole. DOS: Derivated open shunt: during P diastolic aspiration, incompetent vein 3 allows a retrograde flow so that vein 3 drains properly its own physiologic flow despite its retrograde direction plus vein 2 flow refluxing through E. There is no recirculation because the distal reentry R is not connected with vein 2 but vein 1.
+4. HAEMODYNAMIC PHYSIOPATHOLOGY OF DEEP VEINS
+Total occlusion of the deep veins of the lower limbs by thrombosis is exceptional (phlegmatia cerulea). Most of the time, occlusion is partial. Clinical manifestations depend on the severity of the restrictive syndrome. Usually, the restrictive syndrome decreases thanks to the recanalisation of thromboses and development of collateral veins (e.g., VOS) brought about by residual pressure [78,135,168,197]. Unfortunately, the recanalisation of thromboses often destroys the valves. Coexistence of competent and incompetent parallel deep veins may constitute a deep closed shunt (CS). This occurrence is more frequent in cases of double superficial femoral veins. Valvular incompetence leads to a lack of DFHSP and its consequences on TMP, and therefore on drainage. An obstacle may be dynamic without thrombosis. This occurs, for example, when the calibre of a superficial femoral vein is too narrow to absorb the flow ejected by the calf when the subject is walking. In this case, the superficial femoral vein is "naturally" by-passed from the popliteal vein to the common femoral vein thanks to a collateral pathway. This pathway is made up of a succession of short saphenous vein, Giacomini veins, and proximal great saphenous vein that absorbs the excess flow during the systole of the calf's VMP (figure 4.11). These vicarious veins are often
+
+56
+
+Claude Franceschi
+
+tortuous and dilated and are called varicose veins. Klippel-Trenaunay Syndrome is another example of when a large varicose vein compensates for an aplasic deep vein, such as aplasic popliteal and superficial femoral veins.
+
+Figure 4.11 A) Deep open vicarious shunts for deep venous obstacles :Flow enhanced in systole: examples: spontaneous deep by-pass for vein obstruction or agenesis: a: peroneal vein by-passing tibial veins. b: superficial femoral collateral vein by-passing superficial femoral vein c: deep femoral vein bypassing superficial femoral vein.d: hypogastic and deep femoral veins connection by-passing external iliac vein. e: hypogastric veins connection by-passing common iliac vein. Those spontaneous by-pass improve the bad haemodynamic condition due to venous obstacles. So they have to be recognized to be speared especially in venous malformations where inappropriate embolization or avulsion can worsen the venous condition.
+
+Figure 4.11 B) Superficial open vicarious shunts for deep venous obstacles : Flow enhanced in systole: examples: spontaneous superficial by-pass for vein obstruction or agenesis: a: great saphena vein bypassing tibial veins. b: Giacomini vein by-passing superficial femoral vein c: proximal great saphena vein by-passing superficial femoral vein. d: great sahenous arch and superficial epigastric vein bypassing iliac vein. e: external pudendal veins connection by-passing by-passing common iliac vein (spontaneous Palma operation). Those spontaneous by-pass improve the bad haemodynamic condition due to venous obstacles. So they have to be recognized to be speared especially in venous malformations where inappropriate embolization, sclerosis, laser or avulsion can worsen the venous condition.
+
+Chronic Venous Insufficiency
+
+57
+
+5. HAEMODYNAMIC PHYSIOPATHOLOGY OF SUPERFICIAL VEINS
+5.1. Calibre of Superficial Veins and Varices
+The calibre of the superficial veins depends on TMP and compliance [1,10,12,74,75,275277]. The external pressure (EP) that limits dilation varies according to the topography of the superficial veins. The trunk of short and great saphenous and Giacomini veins (network N2) are located in a fascia duplication that limits dilation. The superficial veins (epifascial) located between the skin and the fascia (networks N3 and N4) dilate more easily, having a lower EP due to the smooth surrounding tissue [8,57].
+Superficial veins (N2, N3, N4) drain all the superficial tissues of the lower limbs. At rest this drainage is provided by cardiac and thoraco-abdominal pumps. In addition the superficial network also drain the majority of the foot tissues, especially when the plantar pump (PP) of Lejars is activated [18]. When the subject is walking, most of the flow is aspirated by deep VMP diastole; much less is aspirated during deep VMP systole by the Venturi effect. These pumps also drain deep venous blood by the dynamic vicarious effect when the major venous network is saturated (VOS). This saturation may be due to a significant but physiological flow (varices of the athlete) or to a pathological flow (arteriovenous fistulas).
+When superficial veins by-bass deep vein occlusion, vicarious open shunts are formed. These shunts may dilate proportionally to the vicarious flow until they become varicose. They may also be the pathway of a closed shunt (CS) when they allow re-circulation of deep venous blood by the closed circuit effect. A CS dilates superficial veins until they become varicose due to DFHSP impairment and/or shunt flow excess. When the subject is walking, HSP remains too high and the flow energy delivered into the CS by the VMP action of the calf is partially converted into turbulence that stresses the wall and increases lateral pressure. Turbulence occurs when the shunt flow is too high for the calibre of the vein. According to Reynolds' law related to viscous liquids, when velocity reaches a critical value, laminar flow becomes turbulent. When the varicose calibre reaches a value such that velocity is lower than the critical Reynolds' value, turbulence disappears and flow becomes laminar again; the varicose calibre does not increase further but remains stable. This means that, contrary to common belief, walking increases varicose veins, especially when due to CS, and also explains why varicosity progresses for a while and then remains stable for a long period. Superficial veins are necessary for the drainage of superficial tissues related to their physiological territory, even if they carry a supplementary flow, as in VOS, CS and ODS. An accurate therapy for varices has to consider draining flow and focus on the causes of excessive flow and pressure, based on the above described haemodynamic mechanisms. Systematic vein destruction may lead to recurrences because of drainage necessity (RP) of surrounding tissues, either by vein re-opening in the case of closure (ligation, sclerosis, laser, closure, etc) or by varicose by-pass (iatrogenic VOS). The most frequent varices of lower limbs are related to CS.
+
+58
+
+Claude Franceschi
+
+6. HAEMODYNAMIC PHYSIOPATHOLOGY OF PERFORATING VEINS
+
+Perforating veins (PV) and crosses drain the superficial tissues by connecting the superficial networks (N2, N3, N4 and N5) to the deep network (N1) by piercing the muscular fascia. The physiological direction of the superficial venous flow is from superficial networks to the deep network. This direction is determined by the orientation of the valves and the gradient of pressure. When deep pressure is lower than superficial pressure, the valves remain open and the superficial blood is drained into the deep network. When this gradient is inverted because deep pressure is higher than superficial pressure, the valves shut and prevent flow inversion [79,89,107,113,125,137,138,150,177,178,195,212,256,278]. In other words, PV valves do not interfere directly with physiological drainage. This gradient is oriented in the physiological direction during the diastole of the various venous pumps, cardiac pump (CP), thoraco-abdominal pump (TAP), and VMP. It may also be oriented in this direction during the systole of the VMP when deep blood reaches a sufficient speed to aspire blood from PV by the Venturi effect. However, during the systole, the pressure gradient is generally inverted, and flow in tributaries is stopped if the valves are competent. If the valves are incompetent, flow direction is inverted. This backward flow can be the reflux point (RP) of either an open or closed shunt. The diameter of junction and PV depends on the same haemodynamic conditions as previously described for superficial veins. Most of the time, a large-calibre junction or PV is not due to systolic outflow from deep veins, as generally thought, but rather to the combination of DFHSP impairment and excessive CS flow. For example, in a CS such as a saphena that is incompetent from the sapheno-femoral junction to a distal PV of the leg, the large calibre of the RP (junction) and re-entry point (distal PV) depends on the energy of the diastolic flow of the VMP of the calf; an ulcer or hypodermitis may be centred by a large PV at the re-entry point. A dynamic test of VMP shows an inflow during the diastole. This means that the large PV is not responsible for trophic disease, as is commonly believed, even if a dynamic test sometimes shows an outflow during the systole, because usually the outflow is much less than the inflow (compensated outflow). Evidence of this is the complete healing of ulcer and hypodermitis after cross-ligation without ligation of the PV. A PV is pathogenic when its diastolic flow is retrograde during a dynamic test. This demonstrates that PV calibre depends on flow, independent of its direction or pathogenic responsibility. The haemodynamic significance of a PV depends on its function according to the type of shunt. In fact, regardless of its calibre, a PV may be the leak point or the re-entry point of a CS or VOS. Haemodynamic analysis is indispensable to any therapeutic strategy. For example, ligation would be erroneous at the PV (leak point and re-entry point) of an open shunt, at the re-entry point of a VOS, or at the re-entry point of a CS or ODS. In addition, PV are necessary to drainage of the superficial tissues related to their physiological territories, even if they carry a supplementary flow, as in VOS, CS and ODS.
+
+Chronic Venous Insufficiency
+
+59
+
+7. HAEMODYNAMIC PHYSIOPATHOLOGY OF THE CARDIAC PUMP
+
+The heart is the principal pump of the venous system [34]. The venous system supplies the cardiac pump in volume and pressure according to physiological needs due to the heart's active and passive capacities. The cardiac pump increases volume, flow and pressure in the venous system through the action of the left ventricle during the systole, and decreases them through the action of the right ventricle during the diastole. This suffices for the various functions of the venous system in the lying down position because HSP is almost null. On the other hand, it is not sufficient in the motionless standing position, i.e., when HSP is maximal and the VMP is not active. Moreover, the progressive sequestration of blood in the venous system may cause an "intravenous haemorrhage" draining of the cardiac pump (falls of the sentinel). One can deduce that prolonged standing in a motionless position is not physiologically correct. One can also say that the great majority of venous pathologies affect the subject in the standing position and disappear when he or she lies down.
+On the other hand, when the right cardiac pump is defective, right ventricle diastolic pressure increases. Thus, TMP in the lower limbs increases with cardiac resistance to the venous flow, causing venous oedemas of cardiac origin.
+
+8. HAEMODYNAMIC PHYSIOPATHOLOGY OF THE THORACOABDOMINAL PUMP
+The thoraco-abdominal pump (TAP) modulates intrathoracic and intra-abdominal pressure during breathing [34]. This pressure is communicated to the right auricle and the retro-peritoneal veins and transmitted to the veins of the lower limbs. Usually, during inspiration, diaphragm contraction is simultaneous with relaxation of the abdominal muscles, and vice versa during expiration.
+The Valsalva manoeuvre (VM) is different from respiratory movements [46,48,241]. It is equivalent to defecation or to holding a heavy weight while standing. It consists of blocking the TAP in the proto-systolic position by simultaneous contraction of diaphragm and muscles of the abdomen. VM reverses the pressure gradient, thereby causing reverse flow in incompetent veins. Valsalva manoeuvre is positive when it reverses the flow in any vein, and negative when it does not. It may involve a reverse flow in a venous segment of a lower limb even if the venous flow proximal to the abdomen is normal thanks to competent valves. The reason is that a pressure wave is transmitted even in the absence of flow motion. For example, a VM may be positive in the safeno-femoral or safeno-popliteal junction even if iliac or femoral valves are competent. Normally, VM stops all flow during contraction, and flow reappears during relaxation. This is important to note, particularly when investigating tributaries of the saphena magna cross. The normal flow of junctional tributaries is anterograde, descending to the junction, but it has to stop during VM contraction and reappear at the following relaxation. It is VM negative. When the tributary is fed by a leak
+
+60
+
+Claude Franceschi
+
+point related to a CS, VM also evolves an anterograde flow, descending to the cross, but it is pathological because it occurs during contraction. It is VM positive. This Valsalva effect explains how constipation and heavy weight handling may interfere with CVI.
+Intra-abdominal hyperpression may be chronic, particularly in obese patients, and responsible for venous insufficiency of the lower limbs.
+
+9. HAEMODYNAMIC PHYSIOPATHOLOGY OF THE VALVULOMUSCULAR PUMP
+9.1. The Valvulo-Muscular Pump (VMP)
+The VMP acts by volume and pressure variations of the venous blood. These variations are due to skeletal contraction (systole) and relaxation (diastole) of the muscles that surround the deep veins (N1) of the lower limbs. Venous valves complete the VMP. They determine flow direction. Proximal valves open in systole and close in diastole, which permits systolic blood expulsion and prevents diastolic reflux. Distal valves close in systole and open in diastole, which permits distal blood diastolic aspiration and prevents systolic reflux. Therefore, flow direction of the VMP depends on the valvular competence.
+Epifascial and intrafascial veins of the superficial network (N2, N3, N4) are not surrounded by muscle, and therefore do not participate in VMP systo-diastolic action. However, their drainage depends for largely on VMP. The VMP receives systolic flow from the foot when the plantar pump is activated. Most of its flow is aspirated by deep VMP diastole. Much less is aspirated during deep VMP systole by the Venturi effect. The VMP not only heIps the venous system to evacuate excessive blood flow brought in by the arteriolocapillary vasodilation that accompanies muscular effort, but it also dynamically fractionates the hydrostatic column of pressure (DFHSP), thanks to the alternating closing of distal and proximal valves. This fractionation makes possible standing for a long time with a normal TMP in the lower limbs, provided that the muscles are activated.
+It is included that DFHSP work will be the more effective as muscular activity will be important, because DFHSP increases as muscular activity increases.
+It is also understandable that any degradation of the various elements of the VMP, such as valvular incompetence and/or muscular inactivity (paralysis, ankylosis), may be responsible for a lack of DFHSP and the clinical consequences thereof.
+
+9.2. Concept of Shunt and VMP
+A shunt is a venous pathway that deviates and carries all or part of a venous flow that is not intended to drain. These shunts are known as vicarious and open (VOS) when they compensate for an obstacle. Since VOS are activated by cardiac and thoraco-abdominal pumps, they are permanently activated. VOS are overloaded by extra flow when the systole of the VMP is activated. In contrast, closed shunts (CS) are not permanently activated. They cause venous blood recirculation in closed loop only when the VMP diastole back-aspirates
+
+Chronic Venous Insufficiency
+
+61
+
+blood from the leak point to the re-entry point. In short, VOS is a spontaneous and permanent healing by-pass of the venous network, and CS is a temporary spontaneous pathogenic bypass activated only when the subject is walking.
+
+Figure 4.12 A) Schematic normal valvulo-muscular (VMP) behaviour when walking. Rest: relaxed VMP pump, veins dilated, slow cardiopete flow due to heart pump, thoraco-abdominal pump and residual pressure. Systole: cardipete VMP ejection. Diastole: cardipete VMP admission.
+
+Figure 4.12 B) Schematic normal Dynamic Fractionation of the Hydrostatic Pressure by the valvulomuscular pump (VMP) when walking. Rest :Maximal Hydrostatic pressure (HP) ,relaxed VMP pump , veins dilated, opened valves, slow cardiopete flow due to heart pump, thoraco-abdominal pump and residual l pressure. Systole: Fractionation of HP at the distal valves level (a) ,cardipete VMP ejection. distal valves closure and proximal valves opening Diastole: Fractionation of HP at the proximal valves level (b), cardipete VMP admission.
+
+62
+
+Claude Franceschi
+
+Figure 4.12 C) Schematic impaired Dynamic Fractionation of the Hydrostatic Pressure by the valvulomuscular pump (VMP) when walking in case of closed shunt (CS) by incompetent great saphenous vein (GSV) and competent deep veins (N1). Rest :Maximal Hydrostatic pressure (HP) like normal ,relaxed VMP pump , veins dilated, opened valves, slow cardiopete flow due to heart pump, thoracoabdominal pump and residual l pressure. Systole and diastole : despite a correct closure of distal valves (a) and proximal valves (b) ,cardipete VMP ejection and admission at N1, the HP fractionation fails because the deep column is shunted by an incompetent GSV.
+9.3. DFHSP and the VMP (Figure 4.12)
+The VMP is essential to the DFHSP that ensures a low TMP in the standing position. This effect is proportional to VMP action [19,23,78,135,183]. When the body is in the standing position and "totally motionless," VMP is at rest and HSP is not fractionated. This condition is only theoretical (except in artificial situations, as the body hanged by the neck or in the Tilt test manoeuvre) because in practice, even in a stiff standing position, muscles move to maintain the equilibrium and a low, but not null, DFHSP. The DFHSP effect increases with increasing movement, as walking and than running. Conversely, DFHSP is impaired proportionally to muscular inactivity (paralysis, ankylosis) and/or valvular incompetence that alters VMP efficiency.
+9.4. CVI, Varices, Posture, and the VMP
+HSP at the ankle is lower in the sitting position than in the standing position because the height of the liquid column is less. Thus, the incidence of HSP should be less when sitting. In reality, sitting for a long period is as bad for drainage as standing immobile for the following reasons: standing in an immobile position is usually not as prolonged as sitting, and DFHSP is active, though weak, during standing, while it is null while sitting. On the other hand, the sitting position does not increase varices in the case of CS, thanks to VMP inactivity.
+
+Chronic Venous Insufficiency
+
+63
+
+9.5. Varices and the VMP
+
+When active, the VMP adds flow and pressure to the venous network, so it overloads not only normal veins, but also venous pathways of shunts (VOS, ODS, and CS) that become varicose with time.
+The relationship between varicose veins and the VMP in the presence of CS is spectacularly demonstrated in patients in whom varicosity disappears in a limb when affected by paralysis. Venous incompetence without CS may cause severe drainage disorders in the absence of varices. In other conditions, such as dilated saphenous vein, in which the valves are necessarily incompetent, no diastolic back flow will be detected upon Doppler testing if the VMP is totally impaired because VMP efficacy is necessary to activate CS. The more efficient the VMP is, the more reverse diastolic flow will occur.
+
+9.6. Claudication (Limping), Restrictive Syndrome, Capacitive Syndrome, and the VMP
+In the case of a severe occlusion of the proximal veins of the lower limbs, patients may complain about limping because of calf pain. This is due to an excess of pressure, the energy of which cannot be consumed because of flow resistance. This pressure has two components: residual pressure (RP), which is increased by microvascular dilation due to muscular stress reflex, and pressure delivered by the VMP. In cases of severe incompetence without any significant occlusion, patients may not bear compression (bandage or stockings) well because calf tissues are squeezed between the excessive venous pressure (which is not corrected in the absence of DFHSP) and the external compression.
+
+10. HAEMODYNAMIC PHYSIOPATHOLOGY OF THE PLANTAR PUMP
+The plantar pump consists of the venous volume of the sole modulated when walking by compression against the ground (systole) then relaxation (diastole). It drains superficial tissues and partially the deep tissues because perforating veins of the foot are constitutionally incompetent and allow the passage of deep blood into the superficial network. It represents the most important part of the flow carried by saphenas throughout walking periods. Its physiological importance seems to be limited to the drainage of the foot [18].
+
+11. HAEMODYNAMIC PHYSIOPATHOLOGY OF VENOUS CALIBRE AND VARICES (FIGURE 4.13, FIGURE 4.14)
+Varices are defined as tortuous and dilated veins. They are not the cause of CVI, as is still believed by most phlebologists, but rather the consequence of flow and pressure perturbations
+
+64
+
+Claude Franceschi
+
+in the venous system [69,94,95,268]. In short, they are a symptom, not the cause, of venous insufficiency. They involve four haemodynamic causes. The first is tortuous dilation due to vicariousness of one or more occluded veins, such as the occlusion of deep and/or superficial veins in so-called vicarious open shunts (VOS). The second cause is varicose veins related to a diverted open shunt (DOS). The third is hyperflow induced by arterio-venous fistula. The fourth and most frequent cause are varices of superficial veins induced by closed-shunt hyperflow.
+Dilation depends on flow and pressure. The more compliant the vein, the greater the dilation will be. Venous dilation regresses totally or partially when the responsible flow and pressure are reduced.
+
+Figure 4.13. Varicosities: tortuous, visible and dilate vein. It is not the disease but the symptom of various causes. Here, four similar varices for 4 different etiologies i.e four different diagnosis and therapy.
+11.1. Process of Venous Dilation
+There are two processes of vascular dilation. The first depends on TMP and compliance. The second is related to the change from laminar to turbulent flow.
+11.2. Dilation, Varices, TMP and Compliance (Figure 4.15)
+The calibre of veins depends on the TMP value and on the active or passive resistance of the walls to the parietal tension (T). T = TMP . r, where r is the radius of the vessel (Laplace law). The parietal factors that determine the distensibility or compliance are made of different components, either passive such as elastin and collagen, or regulated such as smooth muscular cells. The muscular fibres of the media are subjected to neuro-humoral control, ensuring changes in tone, vasoconstriction or vasodilation according to the body's requirements for thermoregulation and cardiac haemodynamics.
+
+Chronic Venous Insufficiency
+
+65
+
+Compliance is not constant, but varies with the degree of extension. Compliance (C) is the ratio of volume and pressure [1,10,12,34,73-75,187,261,276,277]. This function is described in deep in the chapter 3.
+
+Figure 4.14. Haemodynamic physiopathology of the varices. a: high velocity changes laminar flow into turbulent flow according to Reynolds law .The resulting turbulences hit the wall of the vessel and so enlarges it. 1: laminar flow 2: when the flow velocity increases turbulences appear. Turbulences hit the walls and increase the diameter of the vessel. 3: Vessel enlargement does not reduce the flow volume but decreases the flow velocity until low values so that the flow comes back to laminar and the enlargement stops. b: in case of obstacle o, high velocity in vicarious vein vv causes varices. c: high velocity and high pressure in arterio-venous av fistulae causes varices. d: high velocity in closed shunts cs when walking causes varices. e: congenital varicose veins cv ( venous malformation) is not due to haemodynamic but structural cause.
+11.3. Dilation, Varicose Veins, and Turbulence (Figure 1.5)
+Independent of TMP, i.e. of the pressure, circulatory turbulence itself, typical of venous reflux, may cause tortuous dilation. According to Reynolds' law, the circulatory mode of viscous liquids, such as blood, changes from laminar to turbulent when the flow exceeds a critical velocity. As long as the flow is adapted to the calibre of the vein, velocity is less than critical. If the flow increases for any reason and surpasses the critical velocity, it becomes turbulent. Turbulence disperses part of the blood's kinetic energy against the vessel wall. With time, the stressed wall loses its viscoelastic resistance, widens, lengthens and becomes tortuous (varicose veins). The degree of dilation is proportional to increased velocity and turbulence. When the varice reaches such a calibre that flow velocity drops below critical despite the unchanged high flow, the circulatory mode becomes laminar again and the calibre is stabilized as long as high flow remains the same. This theoretical process is illustrated by clinical findings and explains why varicosity can remain stable for many years after a period of progression.
+
+66
+
+Claude Franceschi
+
+11.4. Dilation, Varicose Veins, Tissue Pressure, and Fascias
+
+Dilation of the deep and superficial veins depends on TMP, circulatory mode and compliance, but it can be limited by the surrounding tissues that contribute to extra-vascular pressure. Dilation of the deep veins (N1 network) is limited by the muscular masses contained in a closed aponeurotic bag. The saphenous trunk and Giacomini's vein are protected from excessive dilations because they are located in a fascial compartment, composed by the deep and the superficial fascia. The veins located above the muscular fascia (N3 and N4 networks) dilate more easily because they are contained by low extra-vascular pressure (subcutaneous tissues, skin and the atmospheric pressure).
+
+12. VENOUS PHYSIOPATHOLOGY AND CARDIAC HAEMODYNAMICS
+The venous system is able to respond to the variable flow volume needed for cardiac preload while venous pressure remains steady thanks to its blood volume (four times greater than arterial), great compliance, and a remarkable viscoelasticity. A prolonged motionless standing position may cause accumulation of excessive blood volume in the venous sector (intravenous haemorrhage), such that cardiac preload is impaired and fainting with vagal reaction may be induced. This is favoured by excessive volume in the venous sector (varices) and potentiated by neuro-vegetative dystonia. Fainting occurs frequently during phlebologic examinations in which the patient remains standing and motionless for a long time. Prevention consists of blood volume reduction, either by the pumping action of the VMP or by leg compression.
+
+13. HAEMODYNAMIC PHYSIOPATHOLOGY AND THERMOREGULATION
+The venous system interferes with the thermoregulatory function by controlling the exchange of calories between the superficial venous blood and the environment. In order to reduce the core temperature, superficial veins dilate and superficial venous flow increases due to the reduction of micro-circulatory resistance. A reverse process is activated to increase core temperature. This regulation may induce negative side effects.
+Actually, when microcirculatory resistance (MCR) decreases, TMP in the superficial venous system increases with the flow and the residual pressure. For this reason, thermoregulation can worsen an already diagnosed venous insufficiency. Some typical clinical examples can be seen in the haemodynamic venous conditions of professional cooks exposed to high temperatures in prolonged motionless standing posture and aggravation of CVI symptoms in summer.
+
+In: Principles of Venous Hemodynamics Authors: Claude Franceschi and Paolo Zamboni
+
+ISBN 978-1-60692-485-3 © 2009 Nova Science Publishers, Inc.
+
+Chapter 5
+SHUNT'S CLASSIFICATION
+Claude Franceschi
+Saint Joseph and Pitié-Salpétrière Hospitals, Paris, France.
+1. SUMING UP THE CONCEPTS EXPRESSED SO FAR
+We have seen, as stated in chapter 3 and 4, that there is a hierarchical order of emptying in the venous networks, based on physical laws and levels of kinetic energy; in addiction, in the same chapters, we illustrated the mechanisms leading to the DFHSP, which is at the end the most important factor in determining the lower limb venous drainage.
+Venous shunts and primary CVD generally speaking involve abnormal flows that, with their different pathway, are just the consequences of an impairment of the DFHSP and of venous compartments order of emptying.
+Furthermore, we have classified the venous networks into five categories, N1 to N5, according to their anatomo-functional significance. Network N1 represents deep veins located in the AC1 compartment. Network N2 represents sub- and intra-fascial superficial veins located in the AC2 compartment, i.e., saphenous trunks and Giacomini's vein. Network N3 represents supra-fascial superficial veins located in the AC3 compartment, i.e., saphenous and extra-saphenous tributaries. Network N4 represents superficial veins located in the AC3 compartment that link different regions of the saphenous network. N4 Longitudinal (N4L) vertically links two regions of the same saphenous network, such as GSV or SSV. N4 transversal (N4T) transversally links the GSV network to SSV. N5 represents the microcirculatory venous network.
+Normally, superficial venous blood flows from superficial into deeper veins. Thus, superficial venous blood leaves the micro-circulation N5, flows into the superficial network N3, then into N2 and finally N1, according to the direction of the valves as well as to the levels of the energy gradient produced by muscular contraction; sometimes, directly from N3 into N1.The majority of shunts inverts this normal direction, that is, blood flows from deeper to more superficial veins.
+
+68
+
+Claude Franceschi
+
+We have highlighted in chapter 4 as venous shunts are those veins that deviate venous blood from its normal pathway, more often during muscular relaxation. VS have in common the fact that they carry two different flows: physiologic draining flow and abnormal flow, or shunt flow (SF). They differ not only in blood origin abnormal venous pathway, and destination of the deviated flow, but also in their systolic or diastolic activation by the valvulo-muscular pump (VMP).
+Shunting veins may be any deep and/or superficial vein. A shunt may be made of a venous segment and/or a succession of different segments of different veins. The shunting flow direction may be partially or totally normal (antegrade) or reverse (retrograde). The content of shunting flow may be re-circulating blood or not.
+Moreover we have identified four main types of shunt: VOS, CS, ODS and MS. ODS and CS can be classified according to the venous segments that usually constitute the venous shunting pathways, in order to standardize the anatomical-functional venous cartographies, mappings and consequent therapeutic strategies. It is possible to consider a first operative classification and a more recent one, coming from an evolution of the same previous one. For educational purposes we suggest to approach the first following classification, leaving the new shunt description to the reader interested in approaching the deepest aspects of this.
+
+1.1. First Classification
+The vast majority (90%) of `private circulations' or veno-venous shunts that involve the saphenous trunks [39,77-80] are included in one of the following types [105]:
+a) Type 1 Shunts (constituting about 30% of varicosity networks): N1 > N2 reflux; the superficial segment of the `private circulation', from reflux point to reentry, is represented exclusively by the incompetent saphenous trunk. The reentry perforator, detectable on Doppler, is located on this saphenous trunk. Therefore, the `private circulation' follows a N1 > N2 > N1 route.
+The principal variants of type 1 shunts (SH 1) may be represented as SH 1 + 1 and SH 1 + N3 shunts. In Figure 5.1, first diagram, we find a superimposed SH 1; in the second a N3 collateral is draining part of the refluxing blood while the saphenous perforator is emptying only a part. The characteristic feature is the reduction in saphenous diameter (detectable on sonogram) below the origin of N3. If this did not occur, then we would have a simple SH 1 with emergence of a collateral at the level of the reentry. b) Type 3 Shunts (constituting about 60% of varicosity networks): N1 > N2 reflux; the superficial segment of the `private circulation', from reflux point to reentry, is not represented exclusively by the incompetent saphenous trunk. Instead, part of the `private circulation' is constituted by a N2 (N3 or N4T or N4L) collateral located distally from the origin where the saphenous has at least one competent segment. The intervening saphenous segment between the reflux point and the origin of the collateral should not have any reentry perforator that is detectable on Doppler. Different hemodynamic models of type 3 `private circulation' are possible.
+
+Shunt's Classification
+
+69
+
+SHUNT I
+
+N1
+
+N1
+
+N2
+
+N1-N2-N1
+
+N1
+
+N2
+
+N2
+
+SHUNT II
+N1 N2
+
+N1 N2
+
+N4L
+
+N3
+
+N3
+
+SHUNT III
+N1 N2
+
+1a N2-N4L-N2
+
+N2-N3-N2
+
+1b
+
+N1 N2
+
+N1 N2
+
+1c,d
+N1 N2
+
+N3
+A N1-N2-N3-N1
+
+N4L
+
+N4L
+
+N4T
+
+N2
+
+B N1-N2-N4L-N2-N1
+
+C
+
+N3
+
+N1-N2-N4L-N2-N3-N1
+
+D N1-N2-N4T-N2-N1
+
+N3
+
+SHUNT IV
+
+SHUNT N3
+
+N2 N3
+N3
+
+N1 N1-N3-N2-N3-N1
+
+1e 1f
+
+N2
+
+N2
+
+N1
+
+Figure 5.1. a-b-c-d-e-f. Types of `private circulation' or veno-venous shunts; 1a: type 1 shunt with reentry on the saphenous trunk, and variations; 1b: type 2 shunt without reflux from the deep circulation, with compartmental regurgitation N2>N4>N2 or N2>N3>N2; 1c-d: type 3 shunt with reentry located on an extrasaphenous perforator, and variations; 1e: type 4 shunt with reflux from the pelvic circulation; 1 f: N3 shunt with reflux from an incompetent perforator and reentry on an extrasaphenous perforator. Reflux from an incompetent perforator does not necessarily give rise to a `private circulation'.
+As Figure 5.1c, Example A shows, refluxing blood starts from the N3 collateral and reenters through a perforator located on the collateral (N1 > N2 > N3 > N1).
+
+70
+
+Claude Franceschi
+
+In Example B, blood emerges from a N4L collateral, flows back again into the saphenous and reenters through a perforator located on the saphenous (N1 > N2 > N4L > N2 > N1). In Example C the reflux abandons the saphenous for a N4L route before reentering and discharging the reflux along a N3 branch (N1 > N2 > N4L > N2 > N3 > N1). In Example D the refluxing blood follows a route from a N4T collateral to another saphenous trunk before reentering through a perforator from this trunk (N1 > N2 > N4T > a different N2 > N1). In the remaining cases (10%) the `private circulations' that involve the saphenous trunks are represented by: c) Type 2 Shunt: reflux N2 > N4L or N2 > N3, with the `private circulation' entirely accounted for by the superficial network. In these cases, reflux from the deep circulation is absent. There is however a `private circulation': N2 > N4L > N2 or N2 > N3 > N2 (Figure 5.1b). d) Type 4 Shunt: reflux N1 > N3, or a reflux from the deep circulation along a pelvic shunt to empty into the saphenous vein. A basic prerequisite is that at least the terminal valve of the saphenofemoral junction be competent. Lastly, there are `private circulations' that involve solely the saphenous collaterals: e) "N3" Shunt: reflux N1 > N3, or directly from an incompetent perforator, with reentry through a perforator located on the collateral (P/N3). The saphenous trunks are not affected by the `private circulation'. In some types of veno-venous shunt, such as overlapping type 1 shunts or type 3 shunts, in addition to the primary `private circulation' supplied by the primary reflux point, there are also secondary `private circulations' supplied by secondary reflux points, which are of significant hemodynamic importance. In type 3 shunts the secondary `private circulation' is initiated by the N2 > N4L reflux, i.e., the reflux at the origin of the collateral. Of course, if the reflux is a N2 > N3 type, there is no secondary `private circulation' since reentry into the saphenous is absent. In superimposed type 1 shunts it is the incompetent perforators that start the secondary `private circulation'.
+
+1.2. Revised Classification
+The European CHIVA study group proposed in 2002 a more detailed and revised classification [179]. This offers the possibility to recognize the wide majority of pattern that can be easily recognized under duplex investigation. However, most of the CHIVA group in Europe still continue to adopt the above described classification for superficial venous insufficiency.
+
+2. DEEP SHUNTS
+Deep shunts are CS or VOS but never ODS.
+
+Shunt's Classification
+
+71
+
+3. SUPERFICIAL SHUNTS
+
+Superficial shunts are superficial shunting veins that deviate only superficial venous flows when ODS is activated. They can deviate deep or superficial flows if VOS or CS.
+
+3.1. Shunt 0:
+Shunt 0 is an ODS or a VOS where, contrary to shunt 2 (N2-N3-N1), the drainage direction is normal (N3-N2-N1), even if flow in the N2 segment is retrograde. For example, when only the sapheno-femoral junction valve is competent and distal valves are incompetent, tributaries of the arch are drained during the diastole in a distal perforator of the saphenous trunk through a retrograde flow, by ODS effect. The same drainage direction is carried out not only in diastole, but permanently through the distal perforator by VOS effect after the sapheno-femoral junction is disconnected in shunt 1.
+The retrograde flow in N2 is fed by antegrade N3 draining tributaries with distal reentry R into N1 activated by the valvulo-muscular pump diastole without re-circulation. The haemodynamic condition are very good even if not properly normal and so doesn't any therapy. In the figure above, N2 is the great saphenous upper trunk and arch is incompetent except in the terminal sapheno-femoral junction valve that is competent. The same type 0 can be described when any superficial draining flow is oriented from N2 to N1 or N3 to N1 or N3-N2-N1 without any flow oriented N1-N2.
+
+Legend- CS: Closed shunts. E: Escape points. R: reentry points. D: Disconnection point. V: Devalvulation point.
+Resuming, shunt 0 is a reflux in the GSV trunk with re-entry and no re-circulation because there is no EP from N1. It is a VOS or an ODS N3-N2-N1.The more frequent cases of observation are:
+
+72
+
+Claude Franceschi
+
+1. Reflux in GSV with competent terminal valve, and thus without change of compartment. The reverse flow detectable in the GSV is due to a gravitational gradient of the column ending in a RPV located distally in the saphenous trunk.
+2. Reflux in the GSV after SFJ disconnection. Again, the reverse flow is a draining and asymptomatic flow without change of compartment. This is the normal outcome following CHIVA 1 procedure.
+Shunt 0 can be often detected at duplex examination, in normal and/or asymptomatic subjects. This pattern may usually be detected at the end of a busy day in standing or sitting position in individuals like surgeons, hairdresser, waiter, etc...during summer.
+Pathophysiologic explanation should include increased volume in the GSV with opening of distal perforators located on the trunk in order to favour inward flow to the deep veins. This creates a segmental retrograde flow for a recruitment effect.
+Thus, Shunt 0 can be considered a physiologic pattern due to functional reasons of drainage.
+It is noteworthy that Shunt 0 is the desirable outcome of the so-called CHIVA 1 surgical procedure.
+
+3.2. Shunt 1:
+Shunt 1 is a saphenous CS made of N1-N2-N1 succession. The retrograde flow in N2 is fed by reflux from N1 through E and antegrade N3 draining tributaries with distal reentry into N1 activated by the valvulo-muscular pump diastole with re-circulation. CHIVA disconnects E, which results as Shunt 0. E is the sapheno-femoral junction in shunt 1a, sapheno-popliteal junction in shunt 1b, any perorating vein connected with N2 in shunt 1c. Therefore shunt 1 is a reflux in an incompetent segment of the GSV trunk with a distal re-entry perforator connected to the trunk, similar to shunt 0 but with re-circulation caused by a proximal EP connected with N1, either at the SFJ or at any incompetent perforator connected with the trunk.
+
+

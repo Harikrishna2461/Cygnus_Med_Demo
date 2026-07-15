@@ -1,0 +1,2374 @@
+2022 No. 038
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for
+Physicians
+Final Report
+
+Prepared Sarah Pelter for: Director of Psychometric Services, Inteleos 1401 Rockville Pike, Suite 600 Rockville, MD 20852-1402 Phone: 240.599.0024 Email: Sarah.Pelter@Inteleos.org
+
+Prepared Inteleos MSA dated February 23, 2021 under: WO3
+
+Authors: Brittany F. Crawford Maggie May Joseph P. Caramagno
+
+Date: April 6, 2022
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+Contents
+Introduction ................................................................................................................................... 1 Practice Analysis...........................................................................................................................1 Background Research .................................................................................................................. 1
+Review of CHIVA Method Literature ......................................................................................... 2 Physician Interviews ................................................................................................................. 3 Validation of the Task and KSR Frameworks ............................................................................... 4 Task Framework Validation ...................................................................................................... 4 KSR Framework Validation ....................................................................................................... 5 Establishing Blueprint Weights ..................................................................................................... 6 Stakeholder Survey...................................................................................................................7 Linkage Exercise.......................................................................................................................9 Summary and Recommendations...............................................................................................10 Reference ................................................................................................................................... 12 Appendix A. CHIVA Research Literature and Documentation .................................................... 13 Appendix B. CHIVA Subject Matter Experts ............................................................................... 15 Appendix C. Interview Protocol ................................................................................................... 16 CHIVA Technique Physician Interview Information Sheet ...................................................... 16 CHIVA Technique Physician Interview Protocol ..................................................................... 17 Appendix D. Final Task List ........................................................................................................ 18 Appendix E. Final KSR List ......................................................................................................... 21 Appendix F. Stakeholder Survey ................................................................................................ 23 Appendix G. Stakeholder Survey Results ................................................................................... 29 Appendix H. Linkage Exercise Results ....................................................................................... 32 Appendix I. Final CHIVA Exam Certification Blueprint ................................................................ 35
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+i
+
+List of Tables
+Table 1. Task Content Areas and Examples ................................................................................ 2 Table 2. KSR Content Areas and Examples ................................................................................. 3 Table 3. Stakeholder Survey Knowledge and Skills Rating Scales ..............................................7 Table 4. Stakeholder Survey Background Items...........................................................................7 Table 5. Final Content Area Weights .......................................................................................... 10
+List of Figures Figure 1. Overview of the Linkage Exercise Knowledge Rating Sheet ......................................... 9
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+ii
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+Introduction
+Inteleos--in partnership with the Shanghai Dr. Smile Medical Technologies Co. Ltd. (Dr. Smile Medical Group)--contracted with Human Resources Research Organization (HumRRO) to conduct a practice analysis of the Cure Conservatrice et Hemodynamique de l'Insufficience Veineuse en Ambulatoire (CHIVA) method--a minimally invasive, ultrasound-guided surgical procedure for addressing varicose veins and restoring hemodynamics for insufficient veins on an outpatient basis. This study is the first step to establish a pilot credentialing program that promotes global standards for CHIVA method practitioners and offers a professional certification for physicians performing the CHIVA method. The practice analysis results will form the basis for the development of a certification exam as well as instructional courses and materials. The purpose of this technical report is to describe the practice analysis methodology and results. In addition, we present the final certification exam blueprint specifying tasks, associated knowledge and skills requirements (KSRs) by content area, and content area weights.
+
+Practice Analysis
+Practice analysis, as the name implies, is a rigorous, systematic, analytic procedure for evaluating a domain of practice, such as an occupation or profession (Raymond, 2015). The focus is on identifying the essential tasks or duties that comprise the practice domain and the knowledge, skills, abilities, and other characteristics needed to conduct those tasks and/or duties effectively. Practice analysis is part of a family of work analysis procedures that includes job analysis, competency modeling, and role delineation. For more than a century, these procedures have been researched, applied, and refined (primarily by industrial-organizational psychologists) within a diverse array of professional and academic settings.
+
+The results from a practice analysis are used to develop materials that form the basis for standardized assessments that measure the tasks, duties, knowledge, skills, or abilities associated with one or more performance-based or competence-based criteria (e.g., safe and effective practice).
+
+For the present analysis, we were guided by the following research questions:
+
+1. Which tasks must be performed with skill/correctly to ensure the safe and effective application of the CHIVA method to treat varicosities of the lower limbs?
+
+2. Which KSRs must be mastered by practitioners to perform the tasks safely and effectively to treat varicosities of the lower limbs under a variety of situations and conditions (e.g., patients' needs, clinical settings)?
+
+We began by conducting background research on the CHIVA method to generate a list of tasks and KSRs. We engaged with groups of subject matter experts (SMEs) to review and refine these lists and identify the critical components. Through this work, we identified 49 tasks and 41 KSRs that are essential for the safe and effective application of the CHIVA method. The remainder of this report describes the procedures we followed and the results of the analysis.
+
+Background Research
+HumRRO began the practice analysis by conducting background research on the CHIVA method. This included a review of the CHIVA research literature and other relevant
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+1
+
+documentation provided by Inteleos. Using information curated from the review, we compiled lists of tasks and KSRs related to the CHIVA method. We then completed multiple interviews with physicians who practice the CHIVA method to review the lists, provide contextual information about the tasks and KSRs, and identify additional tasks and KSRs that should be included.
+
+Review of CHIVA Method Literature
+
+The principal goals of the literature review were to compile lists of tasks and KSRs pertaining to the CHIVA method and orient the HumRRO project team members to the subject matter. Inteleos provided an extensive list of materials, including books, journal articles, presentations, videos, and images (see Appendix A for a complete list of all materials). One HumRRO researcher reviewed the materials and extracted text strings that resembled tasks or KSRs. Two additional researchers reviewed the extracted information, formulated statements describing tasks or KSRs, and organized the statements into tentative classification frameworks based on features of the information (e.g., common themes, similar terminology).
+
+While developing and reviewing the classification frameworks, the HumRRO research team identified content areas that reflect a logical partitioning of the tasks and KSRs. For the tasks, the content areas aligned with the principal steps involved in the implementation of the CHIVA method. Table 1 provides the task list content areas along with example tasks.
+
+Table 1. Task Content Areas and Examples
+
+Content Area
+
+Example
+
+Clinical Examination
+
+Interview patient to determine patient's treatment goals and determine whether the patient is suitable for haemodynamic surgery
+
+Pre-Operative Haemodynamic Mapping
+During the Procedure
+
+Perform duplex ultrasound to check for pelvic leaks
+Perform ligation of the great saphenous vein close to the femoral vein to reduce chance of recurrences
+
+After the Procedure Follow Up Visits
+Education and Preparation Documentation
+
+Place a compression wrap on the calf after closing the incisions Perform a visual scan of the wound for any sign of infection
+Integrate current best evidence, clinical experience, and patient values in clinical practice (e.g., clinical prediction rules, patient preference Document examination results
+
+For the KSR framework, we evaluated the utility of several designs for (a) describing the method concisely and accurately, and (b) supporting the development of a certification exam. It is worth noting that there are numerous approaches one can take to classify knowledge and skills, with the optimal design being one that supports the intended use of the classification. For example, one can apply an academic (i.e., theoretical) framework that aligns with how knowledge or skills are taught or used in research, or one can organize knowledge or skills in relation to a set of procedures that reflects how the knowledge/skills are used in practice. Because the focus of the practice analysis is a method (which involves an application of knowledge under a defined set of conditions), we adopted the same content areas for the KSRs as we used for the tasks, with a few minor adjustments. Table 2 provides the KSR content areas along with example KSRs.
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+2
+
+Table 2. KSR Content Areas and Examples
+
+Content Areas Venous Structure and Anatomy Ultrasound Knowledge and Technique Performance of Clinical Exam
+Patient Care
+Surgical Procedure
+
+Example
+Knowledge of haemodynamic principles
+Knowledge of applications of ultrasound for assessing blood flow Skill in determining the location, competency and diameter of the saphenous junctions from duplex ultrasound Skill in listening to a patient's concerns and their desired outcome Knowledge of the procedures and techniques for performing flush ligation
+
+Pain Management/Aftercare
+
+Knowledge of the impact of co-morbidities/co-existing conditions on patient/client management (e.g., diabetes and hypertension; obesity and arthritis; dementia and hip fracture)
+
+Because the CHIVA method requires a deep understanding of venous structure and anatomy, it was also necessary to include several KSR statements under an additional content area pertaining to foundational knowledge. In addition, we included a content area covering KSRs related to patient care because this is a ubiquitous component of healthcare professions. Our initial lists included 90 tasks and 49 KSRs.
+
+Physician Interviews
+The purpose of the physician interviews was to expand upon the list of tasks and KSRs and develop a clear understanding of the principal steps involved in performing the CHIVA method safely and effectively. HumRRO conducted separate interviews with six physicians (two from Italy and one each from France, China, Germany, and Brazil) who are highly trained and skilled in performing the CHIVA method (See Appendix B for the list of subject matter experts). Two HumRRO staff participated in each interview: one to facilitate and one to take notes. In addition, HumRRO and Inteleos enlisted an interpreter to provide translation and interpretation services for the physicians, as needed.
+HumRRO developed an information sheet to provide the physicians with an overview of the current research, the type of information HumRRO planned to collect during the interview, the time commitment required from the physicians, and to remind the physicians that their participation was voluntary. HumRRO also developed an interview protocol to help facilitate the discussion and ensure that the interviews were standardized from one physician to another. The interview protocol included a brief set of background questions, followed by questions regarding the main activities performed, the knowledge and skills required to perform the technique safely and effectively, the current gaps in training, the challenges in assessment, and so forth. The full interview protocol is available for review in Appendix C.
+During the interviews, the physicians (a) provided contextual information on how they learned about the CHIVA method and how and where they perform it, and (b) identified factors that impact the application of the method (e.g., healthcare laws, patient population, types of practitioners). For example, in some countries physicians are allowed to perform the preoperative ultrasound and hemodynamic mapping as well as the surgery itself. In contrast, other countries have enacted rules and regulations that require certain steps or tasks to be performed
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+3
+
+by different practitioners (e.g., specialists). In addition, culture and/or personal preferences might influence patients' decisions to seek treatment (e.g., alleviate pain, improve cosmetic appearance). We note that although this information did not warrant editing the tasks and KSRs (because doing so could have made them less universally applicable), it provided insights pertaining to the challenges/opportunities that might need to be addressed at subsequent stages of the credential development process (e.g., creating case studies for training).
+Based on the information we obtained during the interviews, we added eight tasks and 13 KSRs to the lists. The revised lists included 98 tasks and 62 KSRs that served as the foundation for the subsequent steps in the practice analysis.
+Validation of the Task and KSR Frameworks
+The next step in the practice analysis served as a means of confirming (or validating) the task and KSR frameworks to ensure they are accurate, logical, and complete. This step involved multiple focus groups and asynchronous activities conducted with SMEs to review, refine, and resolve issues related to the frameworks' contents and structures.
+Task Framework Validation
+The purpose of the task framework validation was to gather feedback from SMEs on the individual task statements and the organization/sequencing of the statements within the framework. This step served as a way of confirming (or refuting) the tasks compiled during the literature review and structured interviews. To initiate the validation, HumRRO facilitated a series of synchronous focus group sessions with SMEs. The synchronous focus group sessions were held on September 16th and September 17th, 2021 (both taking place from 8:00 AM ­ 11:00 AM EST) via the Microsoft Teams videoconferencing platform. Each focus group session was attended by one facilitator and one notetaker from HumRRO, two representatives from Inteleos, and one Chinese translator/interpreter. SMEs included three physicians, two from Italy and one from China (See Appendix B for the list of subject matter experts).1
+Prior to attending the focus group sessions, the SMEs completed a pre-work activity that involved independently evaluating the task framework and each of its 98 tasks. The purpose of the pre-work activity was to identify tasks that might require extended debate during the focus group sessions (e.g., tasks that are confusing, controversial tasks, tasks that vary by region of practice). While reviewing each of the tasks, SMEs were instructed to provide one of the following ratings:
+· Y: Yes, this is a task that physicians should be doing when performing the CHIVA method.
+· N: No, this is not a task that physicians should be doing when performing the CHIVA
+method.
+· ?: I'm not sure whether this is a task that physicians should be doing when performing
+the CHIVA method.
+While making their ratings, SMEs were instructed to adopt an aspirational mindset (i.e., what physicians should "ideally" be doing versus what physicians are actually doing). In addition, they were asked to identify and add tasks they believed were missing from the list. We referred to these additions as write-in tasks. Three SMEs completed the pre-work activity: one from Italy,
+
+1 One of the SMEs attended only the second day of the synchronous focus group sessions (September 17).
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+4
+
+one from China, and one from Spain.2 HumRRO analyzed the ratings and flagged 40 tasks based on the SMEs' feedback. This included 37 existing tasks, and three write-in tasks.
+The focus group sessions began with an overview of the current project followed by goals for the synchronous sessions. The HumRRO facilitator then led the group in a review of the same task statements that were included in the pre-work activity to identify which tasks must be performed by physicians to ensure the CHIVA method is safe and effective. The SMEs read and evaluated the individual task statements while considering how the statements were clustered and sequenced. SMEs then engaged in group discussion to try to reach consensus on which tasks are relevant to the CHIVA method. The task review was guided by the following questions:
+Tasks:
+· Are the task statements clear and accurate? · Do any task statements need to be separated into multiple distinct tasks? · Do the task statements contain sufficient detail to be understood by different practitioners?
+Content Areas:
+· Should changes be made to the content areas? · Should additional content areas be included?
+Write-In Tasks:
+· Which write-in tasks should we include and where do they belong?
+Based on the feedback provided during the pre-work activity and the focus group sessions, HumRRO adjusted the initial task list from 98 to 68 tasks grouped within the same content areas.3 See Appendix D for the final task list.
+KSR Framework Validation
+Following the synchronous focus group sessions, two SMEs independently completed an asynchronous activity to evaluate the 62 KSRs included in the KSR framework. The SMEs were instructed to indicate which KSRs they considered critical for practicing the 68 tasks resulting from the focus groups noted above. While rating each KSR, SMEs were instructed to envision a physician who is highly knowledgeable and possesses the skills necessary to perform the CHIVA method safely and effectively and use this as a point of reference. SMEs were also asked to identify any KSRs that were not currently on the list but should be included.
+
+The SMEs provided the following ratings for each KSR:
+· Y: Yes, this is knowledge or a skill that physicians should have related to performing the
+CHIVA method.
+
+2 The SME from Spain did not attend the focus group synchronous sessions. 3 The original content area "Clinical Examination" was renamed as "Intake".
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+5
+
+· N: No, this is not knowledge or a skill that physicians should have related to performing
+the CHIVA method.
+· ?: I'm not sure whether this is knowledge or a skill that physicians should have related to
+performing the CHIVA method.
+Of the 62 KSRs, 32 received a "Y" rating from both SMEs and four received an "N" or "?" rating from both SMEs.
+Due to the limited number of SMEs who completed the asynchronous evaluation, we coordinated with Inteleos to repeat the asynchronous activity with additional SMEs and conduct another focus group session to further refine the list of KSRs. The second asynchronous activity involved eight SMEs: three from Italy and one each from China, France, Brazil, Ukraine, and Vietnam. The synchronous focus group session took place on October 21st, 2021 (from 8:00 ­ 11:00 AM EST) via the Microsoft Teams video conferencing platform. Participants included two facilitators and one notetaker from HumRRO, three representatives from Inteleos, one Chinese and one Italian interpreter, and six SMEs: two from Italy, two from China, one from Brazil, and one from Vietnam (See Appendix B for the list of subject matter experts).4
+Prior to the focus group, HumRRO researchers reviewed the asynchronous evaluation data to identify KSRs that require extended discussion (i.e., KSRs that received at least one "N" or "?" rating). This subset included 29 out of 62 KSRs.
+During the focus group, each KSR was displayed on the screen along with two discussion questions:
+· Is this something that a physician should know or a skill they should possess to perform
+the CHIVA method safely and effectively?
+· Does the wording of the competency need to be changed?
+SMEs discussed each KSR as a group while the HumRRO notetaker captured notes that were visible to the SMEs. This allowed the SMEs to correct any feedback that we may have incorrectly interpreted. Based on the feedback we received, we revised the KSR list from 62 to 41 statements. See Appendix E for the final KSR list.
+Establishing Blueprint Weights
+The final step in the practice analysis was to establish blueprint "weights" that reflect the percentage of the certification exam that will be allocated to each content area. The weights should reflect a balance between the importance of the content (i.e., knowledge, skills) as well as the amount of "testable" material associated with it. All else being equal, content areas that are more important should receive more weight than those considered less important, and content areas that are wider in scope (i.e., more to test) should receive more weight than those that are narrow.
+To establish the blueprint weights, HumRRO conducted (a) a stakeholder survey to determine the average level of mastery for each KSR and (b) a linkage exercise to determine which of the 41 KSRs were linked to each of the 68 tasks. Results from the stakeholder survey and linkage exercise were combined to compute a criticality index as the sum of the average level of
+
+4 The six SMEs who attended the KSR validation focus group session were among the eight SMEs who completed the second administration of the asynchronous evaluation.
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+6
+
+mastery ratings across the linked KSRs. We computed content area weights for the final certification blueprint by summing the task-level criticality indices within each content area and dividing by the total sum of all indices.
+
+Stakeholder Survey
+
+The purpose of the stakeholder survey was to collect input from a larger pool of experts on the level of mastery CHIVA practitioners require for safe and effective practice. HumRRO and Inteleos developed the stakeholder survey in Qualtrics and Inteleos distributed the survey link to SMEs. Responses were collected between January 18th - February 8th, 2022. The survey began with a brief set of background questions that asked about respondents' medical specialties, if they teach other medical professionals the CHIVA method, how many patients they treat using the CHIVA method, and whether they or someone else perform certain steps, such as referring patients for the surgical procedure, discussing the procedure with the patient, performing the ultrasound, and so forth. Finally, respondents were asked to rate the level of mastery for each KSR using similar four-point scales shown in Table 3. The full stakeholder survey is provided in Appendix F.
+
+Table 3. Stakeholder Survey Knowledge and Skills Rating Scales
+
+Rating Scale Group
+Label Point
+
+Description
+
+None
+
+1 This knowledge is not required
+
+Low
+
+2 Ability to understand a few basic (or core) concepts and information
+
+Knowledge Medium
+
+3
+
+Ability to use and apply a variety of basic concepts to conventional practice situations
+
+High None
+
+4
+
+Ability to use and apply a variety of basic and complex concepts to conventional or unique practice situations
+
+1 This skill is not required
+
+Low
+
+2 Ability to perform a few basic actions
+
+Skills
+
+Medium
+
+3
+
+Ability to perform a variety of basic actions in conventional practice situations
+
+High
+
+4
+
+Ability to perform a variety of basic and complex actions in conventional or unique practice situations
+
+Twenty-eight respondents started the stakeholder survey and, of these, 25 respondents provided valid (i.e., usable) response data.5 When asked about their medical specialties, 69.57% indicated that they specialized in Angiology and Vascular Medicine/Surgery, 17.39% indicated General Surgery, and 13.04% indicated Vascular Sonography/Sonography.6 Results from the multiple response demographic items are provided in Table 4.
+
+Table 4. Stakeholder Survey Background Items
+
+Question
+
+Response
+
+Percentage
+
+Yes
+
+73.91
+
+5 The other three respondents did not provide level of mastery ratings for the any of the knowledge or skills. 6 "What is your medical specialty?" was an open-ended item. Reponses were coded and grouped into similar specialty titles. Additionally, only 23 of the 25 respondents completed the background items; thus, percentages were computed using the valid n count (n = 23).
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+7
+
+Question
+
+Response
+
+Percentage
+
+Do you teach other medical professionals the CHIVA method?
+
+No
+
+26.09
+
+More than 20 patients in a month
+
+30.43
+
+How many patients do you treat using the CHIVA method?
+
+Between 10 and 20 patients in a month Between 1 and 10 patients a month Between 1 and 10 patients in a year
+
+34.78 30.43
+0.00
+
+I do not treat patients using the CHIVA method
+
+4.35
+
+Who refers patients to get the CHIVA procedure?
+
+I do Someone else
+
+65.22 34.78
+
+Who discusses the procedure with I do
+
+the patient?
+
+Someone else
+
+86.97 13.04
+
+Who performs the ultrasound?
+
+I do Someone else
+
+100.00 0.00
+
+Who performs the mapping for the I do
+
+procedure?
+
+Someone else
+
+100.00 0.00
+
+Who performs the CHIVA procedure?
+
+I do Someone else
+
+65.22 34.78
+
+Who discusses how to recover with the patient?
+
+I do Someone else
+
+82.61 17.39
+
+Note. 23 of the 25 respondents completed the background items; percentages above are based on the valid responses (n = 23). "Who refers patients to get the CHIVA procedure?" was included as an open-ended item; responses were recoded into "I do" vs. "Someone else" to remain consistent with the other background items.
+
+We computed the valid sample size (n), mean, standard deviation, minimum and maximum ratings, and the percentage of respondents selecting 3 or 4 (i.e., medium or high mastery, respectively) for each knowledge and skill. We set the exclusion threshold for an individual knowledge or skill at a minimum average rating of 3 (Results for each KSR are provided in Appendix G). This led to the removal of two KSRs including:
+· Knowledge of psychological and psychiatric conditions that impact patient management
+(e.g., grief, depression, anxiety) (Average rating = 2.88, SD = 0.60). Of the respondents who provided a rating of 4/High, two did not perform the surgical procedure.
+· Knowledge of quality of life questionnaires for evaluating patients (Average rating = 2.88,
+SD = 0.83; our largest SD across all KSRs). Of the six respondents who provided a rating of 4/High, four did not perform the surgical procedure.
+It is worth mentioning that both KSRs sparked debate during the second focus group, especially among the SMEs who perform the surgical procedure themselves. The SMEs described these KSRs as basic knowledge for physicians and not specific or essential to a CHIVA pilot program or certification.
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+8
+
+Linkage Exercise
+The final step in the practice analysis was a linkage exercise to determine which of the 41 KSRs are linked to each of the 68 tasks. The purpose of the exercise was to generate empirical evidence of the relationship between the tasks and KSRs, screen out KSRs that do not link to any tasks, and specify which tasks should receive greater and lesser weight on the exam blueprint.
+HumRRO developed the linkage exercise using Google Sheets. The exercise was presented in a grid format with KSRs listed in columns and tasks listed in rows. Inteleos recruited two physicians (one from China and one from Brazil) to complete the linkage exercise between March 2nd ­ March 24th, 2022. HumRRO provided a unique link for each SME to access their own Google Sheets file where they could complete the linkage exercise, and these links were distributed via email.
+SMEs indicated a link between a task and a KSR by placing a checkmark in a box that appeared in the intersection between the KSR's column and task's row. If a box was not checked, this suggested that there was not a link between the corresponding task and KSR. Figure 1 provides a snapshot of the rating sheet from the linkage exercise.
+
+Figure 1. Overview of the Linkage Exercise Knowledge Rating Sheet
+
+It is important to note that the SMEs found it challenging to complete the linkage exercise for two content areas: Education and Preparation and Documentation. The SMEs provided narrative feedback indicating that these tasks vary significantly by region of training and practice. In addition, upon further review of the KSRs linked to the tasks in these areas, we noted that (a) the tasks in these areas are not unique to the CHIVA method and (b) it might be difficult to develop exam materials that accurately and reliably measure the associated knowledge or skills. Thus, the Education and Preparation and Documentation tasks were not included in the final exam blueprint.
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+9
+
+We aggregated the SMEs' ratings by calculating the frequency that each KSR was linked to each task. Each KSR could be linked to a given task zero, one, or two times, depending on the sum of the SME ratings. We then computed a criticality index for each task to identify which tasks should be given more (or less) weight on the exam blueprint. To compute the criticality index, we first computed a weighted average of the level of mastery for each KSR linked to a given task.7 The weighted average is each KSR's average level of mastery multiplied by the number of linkages between the KSR and the task. For example, if both SMEs indicated a link between a given task and KSR, the average level of mastery for that KSR was multiplied by two. We then summed the weighted average level of mastery of all KSRs that were linked to each task. The criticality indices could range from 0 (no KSRs linked, or only KSRs with average mastery ratings of 0 are linked) to 246 (all KSRs linked and viewed as requiring a high level of mastery). The actual indices ranged from 0 to 169.
+
+To develop the content area weights, we summed these task-level criticality indices within each content area and divided by the total sum of all indices.8 These values were then converted to percentages to reflect the weight for each content area on the final certification exam blueprint. The weighted average level of mastery, total number of unique linked KSRs, and total number of links across SMEs for each task are provided in Appendix H. Table 5 provides an overview of the final content area weights for the certification exam blueprint. The Pre-Operative Haemodynamic Mapping content area has the greatest number of associated tasks (12) and received the greatest weight (38%). This is followed by Follow Up Visits (20%). Intake, During the Procedure, and After the Procedure were weighted similarly (ranging from 12% - 16%).
+
+Table 5. Final Content Area Weights Content Area
+Intake Pre-Operative Haemodynamic Mapping During the Procedure After the Procedure Follow Up Visits
+
+Weight 14% 38% 16% 12% 20%
+
+The final CHIVA method global certification exam blueprint, or content outline is provided in Appendix I. This includes the final task list and associated KSRs by content area in addition to the overall content area weights.
+The content outline was approved by the APCA council on June 20, 2022 (Resolution 22504).
+Summary and Recommendations
+Inteleos partnered with HumRRO to conduct a practice analysis of the CHIVA method and develop an exam blueprint for a certification that will be offered to practitioners around the world. Because the focus of the certification is a medical procedure, versus job or occupation, the resulting blueprint is task-based (rather than KSR-based). This will ensure Inteleos has detailed information on (a) the components of the procedure that are necessary for practitioners
+
+7 Level of mastery was computed from the previous stakeholder survey responses. See the `Stakeholder Survey' section or Appendix F. 8 The total sum does not include the criticality indices for the Education and Preparation and Documentation content areas.
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+10
+
+to provide safe and effective care and (b) the tasks or behaviors that must be included in the exam to enable observation and evaluation of the essential knowledge and skills. The final blueprint includes 49 tasks that cover the entire patient experience from intake to follow-up visits.
+A limitation of this study was the availability of SMEs to participate in the data collection activities. This is most likely a result of (a) the number of professionals who are currently practicing the method with their patients, with some estimates being as small as 50 individuals worldwide, (b) the distribution of professionals across multiple time zones, and (c) cultural or linguistic barriers that interfere with the exchange and comprehension of information. Because the small number of participants in this study might not be representative of the population of professionals who will participate in the certification program (in the near- and long-term), we encourage Inteleos to continue collecting feedback on the exam blueprint from practitioners as well as individuals involved in the design of instructional materials related to the CHIVA method.
+Through this research, we learned that although the CHIVA method is practiced around the world, there might be stark differences in its application, whereby certain laws, regulations, education, cultural values, or individual differences influence (or even control) how the method is carried out and who performs the various steps. Additionally, patients' needs vary from one individual to another with some of a more medical nature (i.e., pain management) while others are more cosmetic (e.g., the desire to reduce the visibility of varicose veins in the legs). These differences add to the challenge of developing a blueprint that is generalizable to a heterogenous group of physicians, but also specific enough to measure physicians' readiness to apply to CHIVA method safely and effectively under a variety of conditions.
+Given the opportunities to expand the pool of experts involved in the development of the blueprint, and the potential for regional differences to impact the global applicability of the credential, we recommend Inteleos and Dr. Smile Medical Group evaluate how the exam blueprint "performs" during the implementation of the pilot certification program across different regions of study and practice. The information gathered from the pilot program will help inform whether adjustments are needed to the blueprint content areas and/or weights.
+We are grateful to have had the opportunity to support Inteleos in this research. Should the need arise, HumRRO would be happy to offer consultation, advice, and/or recommendations pertaining to the development of examination materials, psychometric evaluation of the exam, and positioning of the exam for national or global accreditation.
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+11
+
+Reference
+Raymond, M. R. (2015). Job analysis, practice analysis and the content of credentialing examinations. In Handbook of test development (pp. 160-180). Routledge.
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+12
+
+Appendix A. CHIVA Research Literature and Documentation
+Bellmunt-Montoya, S., Escribano, J. M., Dilme, J., & Martinez-Zapata, M. J. (2013). CHIVA method for the treatment of chronic venous insufficiency. Cochrane Database of Systematic Reviews. https://doi.org/10.1002/14651858.cd009648.pub2
+Criado, E., Juan, J., Fontcuberta, J., & Escribano, J. M. (2003). Haemodynamic surgery for varicose veins: Rationale, and anatomic and haemodynamic basis. Phlebology: The Journal of Venous Disease, 18(4), 158­166. https://doi.org/10.1258/026835503322597974
+Delfrate, R. (n.d.). Hemodynamic mapping. [Video]
+Delfrate, R., Bricchi, M., & Franceschi, C. (n.d.). CHIVA shunt III one step with devalvulation. [Video]
+Delfrate, R., & Grilli, N. (2014). A new diagnostic approach to varicose veins: Haemodynamic evaluation and treatment. Lorena Dioni Editore.
+Escribano, J. M., Juan, J., Bofill, R., Maeso, J., Rodríguez-Mori, A., & Matas, M. (2003). Durability of reflux-elimination by a minimal invasive CHIVA procedure on patients with varicose veins. A three-year prospective case study. European Journal of Vascular and Endovascular Surgery, 25(2), 159­163. https://doi.org/10.1053/ejvs.2002.1825
+Ermini, S. (n.d.). Perthes test: Expectation of CHIVA outcomes. [Video]
+Ermini, S. (n.d.). Shunt type III treated with CHIVA 1 and 2 and devalvulation. [Video]
+Faccini, F. P., Ermini, S., & Franceschi, C. (2019). CHIVA to treat saphenous vein insufficiency in chronic venous disease: Characteristics and results. Jornal Vascular Brasileiro, 18. https://doi.org/10.1590/1677-5449.009918
+Faccini, F. P., Arendt, A. L., Pereira, R. Q., & Oliveira, A. R. (2019). CHIVA to spare the small and great saphenous veins after wrong-site surgery on a normal saphenous vein: A case report. Jornal Vascular Brasileiro, 18. https://doi.org/10.1590/1677-5449.007718
+Franceschi, C. (1988). Theorie et pratique de la cure conservatrice et hemodynamique de l'insuffisance veineuse en Ambulatoire Chiva. Ed. de l'Armancon.
+Franceschi, C. (2018). Third international haemodynamic symposium on venous disorders. [Video]
+Franceschi, C., & Canepa, P. (2018, November 8-9). Hemodynamic and conservative treatment of Venous Insufficiency in Outpatients CHIVA [PowerPoint slides]. XVI Réunion de l'Association Européenne de CHIVA, Tarragona, Spain.
+Franceschi, C., Delfrate, R., & Bricchi, M. (n.d.). Deep CHIVA 2 post phlebitis cases: Diagnosis and treatment. [Video]
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+13
+
+Juan, J., Escribano, J. M., Criado, E., & Fontcuberta, J. (2005). Haemodynamic surgery for varicose veins: Surgical strategy. Phlebology: The Journal of Venous Disease, 20(1), 2­ 13. https://doi.org/10.1258/0268355053300884
+Lutz, H., & Buscarini, E. (2011). Manual of Diagnostic Ultrasound. World Health Organization.
+Mendoza, E., Lattimer, C. R., & Morrison, N. (2014). Duplex ultrasound of superficial leg veins. Springer.
+Mowatt-Larssen, E., & Shortell, C. (2010). CHIVA. Seminars in Vascular Surgery, 23(2), 118­ 122. https://doi.org/10.1053/j.semvascsurg.2010.01.008
+Passariello, F., & Gammuto, P. (2014). Office based CHIVA: A conceptual variation of CHIVA. the OB CHIVA survey. Reviews in Vascular Medicine, 2(4), 123­126. https://doi.org/10.1016/j.rvm.2014.07.003
+Rogers, A. P., & Caramagno, J. P. (2020). Analysis of practice for the physical therapy profession: Report memo 2020 (2020 No. 092). Human Resources Research Organization.
+Zmudzinski, M., Malo, P., Hall, C., & Hayashi, A. (2017). CHIVA ­ a prospective study of a vein sparing technique for the management of varicose vein disease. The American Journal of Surgery, 213(5), 967­969. https://doi.org/10.1016/j.amjsurg.2017.03.025
+Zmudzinski, M., Malo, P., Hall, C., & Hayashi, A. (n.d.). A novel minimally invasive vein sparing technique for the treatment of varicose veins. [Video]
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+14
+
+Appendix B. CHIVA Subject Matter Experts
+Practitioner Interview Group: Pr. Massimo Cappelli, Italy
+
+Practice Analysis Panel Dr. Maria Caminati, Italy Pr. Massimo Cappelli, Italy
+
+Dr. Roberto Delfrate, Italy Dr. Felipe Puricelli Faccini, Brazil Dr. Claude Franceschi, France
+Dr. Erika Mendoza, Germany Dr. Qiang (Dr. Smile) Zhang, China
+
+Dr. Roberto Delfrate, Italy Dr. Xin Du, China
+Pr. Stefano Ermini, Italy Dr. Felipe Puricelli Faccini, Brazil
+
+Task Framework Validation Group: Dr. Xin Du, China
+Pr. Stefano Ermini, Italy Dr. Fausto Passariello, Italy Dr. Xiaoyin (Sophie) Zhu, China
+
+Dr. Claude Franceschi, France Dr. Gelfrido Galizi, Italy
+Dr. Thanh-Phong Le, Vietnam Dr. Erika Mendoza, Germany Dr. Fausto Passariello, Italy
+
+KSR Framework Validation Group: Dr. Maria Caminati, Italy
+Dr. Felipe Puricelli Faccini, Brazil Dr. Gelfrido Galizi, Italy
+Dr. Thanh-Phong Le, Vietnam Dr. Qiang (Dr. Smile) Zhang, China
+Dr. Xiaoyin (Sophie) Zhu, China
+
+Dr. Qiang (Dr. Smile) Zhang, China Dr. Xiaoyin (Sophie) Zhu, China
+
+Linkage Exercise Group Dr. Felipe Puricelli Faccini, Brazil
+Dr. Erika Mendoza, Germany Dr. Xiaoyin (Sophie) Zhu, China
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+15
+
+Appendix C. Interview Protocol
+CHIVA Technique Physician Interview Information Sheet
+Who is conducting the interviews for this research study?
+Maggie May of Human Resources Research Organization (HumRRO), an independent
+nonprofit corporation.
+What is this research about?
+Inteleos is partnering with the Dr. Smile Medical Group to create an educational and assessment program for the Cure Conservatrice et Hemodynamique de l'Insufficience Veineuse en Ambulatoire (or CHIVA) technique. As part of this partnership, Inteleos and the Dr. Smile Medical Group will pilot a program aimed at establishing global standards for the practice of CHIVA in addition to offering a professional certification for performing the technique.
+Inteleos is partnering with HumRRO to conduct a practice analysis to develop the certification exam which will assess the knowledge and skills needed by physicians to perform the CHIVA ultrasound-guided technique safely and effectively. The exam will cover common practice standards that apply across roles, knowledge domains, and geographic areas.
+What will I be asked to do?
+You will be asked questions about the CHIVA technique including the type, sequencing, and purpose of work activities and their component tasks. You will also be asked to share your perspectives on the knowledge and skills required to perform these activities safely and effectively
+Time required: The interview will last approximately 60 minutes.
+Location: The interview will take place virtually via Microsoft Teams.
+Participation is voluntary.
+Participating in this interview is voluntary, and there is no penalty for refusing to participate. If you decide to participate, you can end the interview at any time.
+Disclosure: The information collected during this interview will be used for research purposes only. It will not be used to evaluate you or any other individual at your organization.
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+16
+
+CHIVA Technique Physician Interview Protocol
+Introduction
+Welcome and thank you for making time to participate in this interview. Is now still a good time to talk?
+This interview is part of a study to develop a certification exam that assesses the knowledge and skills needed by physicians to perform the CHIVA ultrasound-guided technique safely and effectively. My name is [facilitator name], and I am the facilitator of this interview. I am from the
+Human Resources Research Organization, or HumRRO [Give some background on HumRRO
+and yourself.]
+I would like to remind you that your participation in this interview is voluntary; there are no penalties for refusing to participate, and you can end the interview at any time. Additionally, the information collected during this interview will be used for research purposes only. It will not be used to evaluate you or any other individual at your organization. [Include any other important reminders here.]
+Do you have any questions before we begin?
+Questions
+1. How many years have you been practicing the CHIVA technique? a. When and where did you learn the technique? b. Where have you practiced?
+2. How has your practice changed since you were trained? What lessons have you learned from practicing the technique over the course of your career?
+3. What do you consider to be the important knowledge and skills required to perform the CHIVA technique safely and effectively?
+4. What are the main activities you conduct when performing the technique? Please provide some examples of specific steps in each activity.
+5. Are there knowledge or skills that are not currently being taught but are necessary for safely and effectively performing the technique?
+6. Are there specific knowledge, skills, or work activities you believe will be difficult to assess on a certification exam? If so, which ones and why?
+7. What are the implications of failing to perform the technique safely and effectively?
+8. How have healthcare laws impacted your practice of the technique?
+9. Have you had to modify your practice of the technique to work with different patient populations? If so, how?
+10. Do you feel that vascular surgeons will remain the target population for this type of exam, or do you think it will event?
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+17
+
+Appendix D. Final Task List
+Table C 1. Final CHIVA Task List
+Tasks
+Intake
+1. Interview the patient to determine the patient's treatment goals and determine whether the patient is suitable for haemodynamic surgery
+2. Interview patients to understand their medical history and obtain relevant information (e.g., current medications, language preference, insurance)
+3. Review medical records (e.g., lab values, diagnostic tests, imaging, specialty reports, narrative, consults)
+4. Perform a physical examination of the arterial system to detect signs/symptoms of obstructive arterial disease
+5. Classify the patient's symptoms according to the Clinical-Etiology-Anatomy-Pathophysiology (CEAP) classification system and reporting standards
+6. Educate the patient about the CHIVA method
+7. Document disclosure and consent (e.g., disclosure of medical information, consent for treatment)
+Pre-Operative Haemodynamic Mapping
+8. Instruct the patient to avoid the use of lotions or creams that prevent skin marking
+9. Perform duplex ultrasound with pulsed doppler to identify the re-entry points
+10. Examine the venous axes using the pulse doppler and color doppler
+11. Create a diagram detailing the location of venous interruption and other anatomical detail on paper
+12. Mark the incision sites on the patient's limb
+13. Position the patient for the ultrasound evaluation (e.g., standing, supine, Trendelenburg) depending on the ultrasound examination applied and the anatomy being examined
+14. Select and instruct the patient to perform the ultrasound evaluation maneuvers (e.g., Perthes, Valsalva, Parana)
+15. Perform duplex ultrasound to identify all escape points and confirm re-entry points while the patient performs the selected maneuver(s) (e.g., Perthes, Valsalva).
+16. Perform the Perthes maneuver to identify perforating veins that allow for adequate draining of vein clusters and ensure that the veins are draining properly
+17. Determine which CHIVA strategy to perform based on the type of shunts
+18. Educate the patient about the patient's current condition and health status (e.g., nature of the condition, prognosis, potential benefits of interventions, potential treatment outcomes)
+19. Discuss with patient whether clinical examination indicates a need for the CHIVA method
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+18
+
+Tasks
+
+During the Procedure 20. Compare the skin mapping diagram with the surgical plan 21. Apply local anesthetics to numb the incision sites 22. Observe patient's reaction during the procedure to monitor for agitation of the sural and saphenous nerves 23. Make incisions over the escape points to enable visualization of the underlying tissue 24. Evaluate the underlying tissue to determine where to disconnect the saphenous vein from the femoral vein. 25. Perform flush ligation of the great saphenous vein close to the femoral vein 26. Ligate the stumps of the disconnected vessel using non-absorbable suture 27. Ablate the residual saphenous stump using clips, threads, or other devices. 28. Cut up the remaining part of the sutures before closing making sure to leave enough of the stump over the suture to prevent bleeding 29. Close the incision site with a dissolvable suture
+After the Procedure 30. Perform duplex ultrasound to identify the target escape point 31. Perform duplex ultrasound to evaluate drainage 32. Observe patient's limb to compare pre-op and post-op venous action 33. Apply concentric compression (e.g., stocking, bandage) around the circumference of the limb immediately following the procedure 34. Instruct the patient to walk in the office and check for bleeding 35. Prescribe anticoagulant medicine in prophylactic doses 36. Prescribe compression devices (e.g., stockings, bandages) 37. Instruct the patient to avoid prolonged immobility in the upright position 38. Instruct the patient to avoid localized heat (e.g., central heating, hot vehicles, clothing) 39. Instruct the patient to leave the operating room on foot/walking
+Follow Up Visits 40. Remove skin stitches applied during surgical procedure 41. Perform duplex ultrasound to assess patency, diameter, and flow at the great saphenous vein 42. Examine the patient's limb for signs of recurrence and/or emergence of new escape points 43. Assess arch recanalization occurrence and process 44. Check for clots when performing duplex ultrasound using gentle probe compression to avoid rupturing the vein 45. Perform a visual inspection of the wound for any signs of infection 46. Prescribe antibiotics to treat infection 47. Prescribe medication and/or compression and adjust based on the patient's other medications
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+19
+
+Tasks
+48. Administer standardized questionnaires to assess patient's pain level
+49. Assess the need for additional follow-up evaluations
+Education and Preparation
+50. Educate the patient on lifestyle and behavioral changes to promote wellness (e.g., nutrition, physical activity, tobacco cessation)
+51. Prepare and maintain a safe working environment for performing interventions (e.g., unobstructed walkways, equipment availability)
+52. Perform regular equipment inspections and/or maintenance (e.g., modalities, assistive devices)
+53. Implement emergency procedures (e.g., CPR, AED, calling a code)
+54. Perform first aid
+55. Search the literature for current best evidence
+56. Evaluate the quality of published data on the CHIVA method
+57. Integrate current best evidence, clinical experience, and patient preferences in clinical practice (e.g., clinical prediction rules, patient preference)
+58. Compare intervention outcomes with normative data
+Documentation
+59. Document examination results
+60. Document intervention(s) and patient response(s) to intervention
+61. Document outcomes (e.g., discharge summary, reassessments)
+62. Discuss evaluation findings, interventions, goals, prognosis, discharge planning, and plan of care with the patient and/or caregiver
+63. Provide written, oral, and electronic information to the patient and/or caregiver
+64. Document rationale for billing and reimbursement
+65. Discuss evaluation findings, interventions, goals, prognosis, discharge planning, and plan of care with interprofessional/interdisciplinary team members
+66. Document communication with the interdisciplinary/interprofessional team related to the patient's care
+67. Document examination results
+68. Document intervention(s) and patient response(s) to intervention Note. Tasks within the Education and Preparation and Documentation sections were not included in the final certification exam blueprint. These are recommended tasks for individuals developing training and educational materials for physicians; however, these tasks are not necessarily specific to physicians performing the CHIVA method.
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+20
+
+Appendix E. Final KSR List
+Table E 1. Final CHIVA KSR List
+Knowledge Requirements
+Knowledge of: 1. patient requirements for haemodynamic surgery (e.g., candidate for phlebo-extraction; capable of ambulating after surgery) 2. diseases and conditions of the cardiovascular system (e.g., fistulous angiodysplasia; obstructive arterial disease; varicose veins; venous insufficiency) 3. differential diagnoses related to diseases and conditions of the venous system 4. differential diagnoses of deep venous hypertension from superficial cases 5. differential diagnoses related to diseases and conditions of the lymphatic system 6. differential diagnoses related to diseases and conditions where the primary impact is on more than one system 7. the impact of co-morbidities and co-existing conditions on patient management (e.g., diabetes and hypertension; obesity and arthritis; dementia and hip fracture) 8. haemodynamic principles 9. the effects of posture and gravity on hydrostatic pressure 10. lower extremity venous anatomy 11. principles and applications of ultrasound for assessing blood flow 12. techniques to accelerate blood flow and test valvular function (e.g., manual compression; Valsalva maneuver; Parana maneuver; Wunstorf maneuver) 13. ultrasound wave characteristics (e.g., frequency; phase; amplitude) 14. factors that affect the sensitivity of ultrasound measurements 15. techniques to optimize ultrasound image resolution (e.g., sound wave focusing; penetration depth; measurement window; pulse repetition frequency; filtering; position/angle of probe/transducer heads) 16. ultrasound transducer heads, including type, purpose, and application 17. the procedures for performing a B-MODE ultrasound examination 18. the procedures for identifying escape points on collaterals or possible competitive refluxes between deep venous and superficial systems 19. systolic and diastolic reflux and flow in the devalved and valved saphena 20. the procedures for conducting a haemodynamic topography 21. techniques for inspecting trophic abnormalities and oedema 22. tests and measures for analyzing blood flow (e.g., direction; rate; volume) 23. procedures and techniques for performing flush ligation 24. applications, indications, and contraindications of anesthetics 25. procedures and techniques for performing crossotomies and crossectomies 26. procedures and techniques for performing vascular drainage to prevent thrombosis
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+21
+
+Knowledge Requirements
+27. types and applications of sutures 28. applicable surgical equipment/tools 29. pharmacological treatments of perioperative conditions (e.g., infection control; pain
+management) 30. signs and symptoms of blood clots/thrombosis 31. ulcer management 32. compression therapy principles and techniques Skill in: 33. listening to patients' concerns and their desired treatment outcomes 34. determining the location, competency and diameter of the saphenous junctions from duplex
+ultrasound 35. determining the distal extent of reflux in the saphenous veins in the thighs and legs from duplex
+ultrasound 36. determining the function, role, and location of the perforating veins 37. determining veins that show reflux or are varicose from duplex ultrasound 38. determining the source of venous hypertension in varices from duplex ultrasound 39. detecting and noting when saphenous veins are absent 40. analyzing the state of the deep venous system from duplex ultrasound 41. determining the optimal number of incisions needed to achieve treatment objectives
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+22
+
+Appendix F. Stakeholder Survey
+CHIVA Practice Analysis
+Thank you for your interest in completing this survey. The survey is part of a study being conducted by Inteleos and the Dr. Smile Medical Group to establish global standards for the practice of the Cure Conservatrice et Hemodynamique de l'Insufficience Veineuse en Ambulatoire (CHIVA) method. Your answers will help determine the content of a certification exam for those who perform the CHIVA method.
+After completing a brief set of background questions, you will review a list of statements that describe the knowledge and skills that physicians need to perform the CHIVA method. For each statement, you will rate the level of mastery required to perform the CHIVA method safely and effectively.
+Due to the importance of the responses you will provide, we suggest you allocate at least 30 minutes to complete the survey.
+1. Although initially the examination will be offered in English, we are considering offering support in other languages in the future. What is your preferred language?
+2. What is your name?
+3. What is your email?
+4. What is your job title?
+5. What is your medical specialty? (Example: Surgery, Vascular Medicine, Sonography, Nuclear Medicine, Diagnostic Radiology, etc.)
+6. Do you teach other medical professionals the CHIVA method? o Yes (1) o No (2)
+7. How many patients do you treat using the CHIVA method? o More than 20 patients in a month (1) o Between 10 and 20 patients in a month (2) o Between 1 and 10 patients a month (3) o Between 1 and 10 patients in a year (4) o I do not treat patients using the CHIVA method (5)
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+23
+
+We would like to know if you do the whole procedure or if different people do different parts of the procedure:
+8. Who refers patients to get the CHIVA procedure? ________________________________________________________________
+9. Who discusses the procedure with the patient? o I do (1) o Someone else (2)
+[If Who discusses the procedure with the patient? = Someone else]
+10. What is the job title of the person who does this? ________________________________________________________________
+11. Who performs the ultrasound? o I do (1) o Someone else (2) [If Who performs the ultrasound? = Someone else]
+12. What is the job title of the person who does this? ________________________________________________________________
+13. Who performs the mapping for the procedure? o I do (1) o Someone else (2)
+[If Who performs the mapping for the procedure? = Someone else]
+14. What is the job title of the person who does this? ________________________________________________________________
+
+15. Who performs the CHIVA procedure?
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+24
+
+o I do (1) o Someone else (2)
+[If Who performs the CHIVA procedure? = Someone else]
+16. What is the job title of the person who does this? ________________________________________________________________
+17. Who discusses how to recover with the patient? o I do (1) o Someone else (2)
+[If Who discusses how to recover with the patient? = Someone else]
+18. What is the job title of the person who does this? ________________________________________________________________
+19. What level of mastery should CHIVA practitioners have in relation to this knowledge? None: This knowledge is not required Low: Ability to understand a few basic (or core) concepts and information Medium: Ability to use and apply a variety of basic concepts to conventional practice situations High: Ability to use and apply a variety of basic and complex concepts to conventional or unique practice situations
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+25
+
+Knowledge of patient requirements for haemodynamic surgery (e.g., candidate for phlebo-extraction, capable of ambulating after surgery) (1)
+Knowledge of diseases and conditions of the cardiovascular system (e.g., fistulous angiodysplasia, obstructive arterial disease, varicose veins, venous insufficiency) (2)
+Knowledge of differential diagnoses related to diseases and conditions of the venous system (3)
+Knowledge of differential diagnoses of deep venous hypertension from superficial cases (4)
+Knowledge of differential diagnoses related to diseases and conditions of the lymphatic system (5)
+Knowledge of differential diagnoses related to diseases and conditions where the primary impact is on more than one system (6)
+Knowledge of the impact of co-morbidities and co-existing conditions on patient management (e.g., diabetes and hypertension; obesity and arthritis; dementia and hip fracture) (7)
+Knowledge of psychological and psychiatric conditions that impact patient management (e.g., grief, depression, anxiety) (8)
+
+None (1)
+o
+o o o o o o o
+
+Low Medium
+
+(2)
+
+(3)
+
+oo
+
+oo oo oo oo oo oo oo
+
+Knowledge of quality of life questionnaires for evaluating patients (9)
+
+o
+
+oo
+
+Knowledge of haemodynamic principles (10)
+Knowledge of the effects of posture and gravity on hydrostatic pressure (11)
+
+o oo o oo
+
+Knowledge of lower extremity venous anatomy (12)
+
+o oo
+
+Knowledge of principles and applications of ultrasound for assessing blood flow (13)
+
+o oo
+
+Knowledge of techniques to accelerate blood flow and test valvular function (e.g., manual compression, Valsalva maneuver, Parana maneuver, Wunstorf maneuver) (14)
+
+o oo
+
+Knowledge of ultrasound wave characteristics (e.g., frequency, phase, and amplitude) (15)
+
+o oo
+
+Knowledge of factors that affect the sensitivity of ultrasound measurements (16)
+
+o oo
+
+Knowledge of techniques to optimize ultrasound image resolution (e.g., sound wave focusing, penetration depth, measurement window, pulse repetition frequency, filtering, position and angle of probe and transducer heads) (17)
+
+o oo
+
+Knowledge of ultrasound transducer heads, including type, purpose, and application (18)
+
+o oo
+
+Knowledge of the procedures for performing a B-MODE ultrasound examination (19)
+
+o oo
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+High (4)
+o
+o o o o o o o o o o o o o o o
+o
+o o
+26
+
+Knowledge of the procedures for identifying escape points on collaterals or possible competitive refluxes between deep venous and superficial systems (20)
+Knowledge of systolic and diastolic reflux and flow in the devalved and valved saphena (21)
+Knowledge of the procedures for conducting a haemodynamic topography (22)
+Knowledge of techniques for inspecting trophic abnormalities and oedema (23)
+Knowledge of tests and measures for analyzing blood flow (e.g., direction, rate, volume) (24)
+Knowledge of procedures and techniques for performing flush ligation (25)
+Knowledge of applications, indications, and contraindications of anesthetics (26)
+Knowledge of procedures and techniques for performing crossotomies and crossectomies (27)
+Knowledge of procedures and techniques for performing vascular drainage to prevent thrombosis (28)
+
+None (1)
+
+Low Medium
+
+(2)
+
+(3)
+
+o oo
+
+o oo o oo o oo o oo o oo o oo o oo o oo
+
+Knowledge of types and applications of sutures (29)
+
+o oo
+
+Knowledge of applicable surgical equipment/tools (30)
+
+o oo
+
+Knowledge of pharmacological treatments of diseases and conditions of the venous system (e.g., infection control, pain management) (31)
+
+o
+
+oo
+
+Knowledge of signs and symptoms of blood clots (32)
+
+o oo
+
+Knowledge of signs and symptoms of thrombosis (33)
+
+o oo
+
+Knowledge of ulcer management (34)
+
+o oo
+
+Knowledge of compression therapy principles and techniques (35)
+
+o oo
+
+High (4)
+o
+o o o o o o o o o o o o o o o
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+27
+
+20. What level of mastery should CHIVA practitioners have in relation to this skill? None: This skill is not required Low: Ability to perform a few basic actions Medium: Ability to perform a variety of basic actions in conventional practice situations High: Ability to perform a variety of basic and complex actions in conventional or unique practice situations
+
+None (1)
+
+Skill in listening to patients' concerns and their desired treatment outcomes (1)
+
+o
+
+Skill in determining the location, competency and diameter of the saphenous junctions from duplex ultrasound (2)
+
+o
+
+Skill in determining the distal extent of reflux in the
+
+saphenous veins in the thighs and legs from duplex ultrasound (3)
+
+o
+
+Skill in determining the function, role, and location of the perforating veins (4)
+
+o
+
+Skill in determining veins that show reflux or are varicose from duplex ultrasound (5)
+
+o
+
+Skill in determining the source of venous hypertension in varices from duplex ultrasound (6)
+
+o
+
+Skill in detecting and noting when saphenous veins are absent (7)
+
+o
+
+Skill in analyzing the state of the deep venous system from duplex ultrasound (8)
+
+o
+
+Skill in determining the optimal number of incisions needed to achieve treatment objectives (9)
+
+o
+
+Low Medium
+
+(2)
+
+(3)
+
+oo
+
+oo
+
+oo
+
+oo
+
+oo
+
+oo
+
+oo
+
+oo
+
+oo
+
+High (4)
+o o o o o o o o o
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+28
+
+Appendix G. Stakeholder Survey Results
+Table G 1. Stakeholder Survey Results
+
+Knowledge Requirements
+
+N
+
+Mean
+
+SD
+
+Knowledge of:
+
+patient requirements for haemodynamic surgery (e.g.,
+
+25
+
+candidate for phlebo-extraction; capable of ambulating
+
+after surgery)
+
+diseases and conditions of the cardiovascular system
+
+25
+
+(e.g., fistulous angiodysplasia; obstructive arterial
+
+disease; varicose veins; venous insufficiency)
+
+differential diagnoses related to diseases and
+
+25
+
+conditions of the venous system
+
+differential diagnoses of deep venous hypertension
+
+25
+
+from superficial cases
+
+differential diagnoses related to diseases and
+
+25
+
+conditions of the lymphatic system
+
+differential diagnoses related to diseases and
+
+23
+
+conditions where the primary impact is on more than
+
+one system
+
+the impact of co-morbidities and co-existing conditions
+
+25
+
+on patient management (e.g., diabetes and
+
+hypertension; obesity and arthritis; dementia and hip
+
+fracture)
+
+psychological and psychiatric conditions that impact
+
+25
+
+patient management (e.g., grief, depression, anxiety)
+
+quality of life questionnaires for evaluating patients
+
+25
+
+haemodynamic principles
+
+25
+
+the effects of posture and gravity on hydrostatic
+
+24
+
+pressure
+
+lower extremity venous anatomy
+
+25
+
+principles and applications of ultrasound for assessing
+
+25
+
+blood flow
+
+techniques to accelerate blood flow and test valvular
+
+25
+
+function (e.g., manual compression; Valsalva
+
+maneuver; Parana maneuver; Wunstorf maneuver)
+
+ultrasound wave characteristics (e.g., frequency;
+
+25
+
+phase; amplitude)
+
+factors that affect the sensitivity of ultrasound
+
+25
+
+measurements
+
+3.60
+
+0.65
+
+3.72
+
+0.54
+
+3.84
+
+0.37
+
+3.92
+
+0.28
+
+3.56
+
+0.65
+
+3.43
+
+0.73
+
+3.32
+
+0.69
+
+2.88
+
+0.60
+
+2.88
+
+0.83
+
+3.88
+
+0.33
+
+3.67
+
+0.48
+
+3.96
+
+0.20
+
+3.92
+
+0.28
+
+3.92
+
+0.28
+
+3.64
+
+0.49
+
+3.72
+
+0.46
+
+% 3 or 4
+92.00
+96.00
+100.00 100.00 92.00 86.96
+88.00
+76.00 68.00 100.00 100.00 100.00 100.00 100.00
+100.00 100.00
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+29
+
+Knowledge Requirements
+
+N
+
+techniques to optimize ultrasound image resolution
+
+25
+
+(e.g., sound wave focusing; penetration depth;
+
+measurement window; pulse repetition frequency;
+
+filtering; position/angle of probe/transducer heads)
+
+ultrasound transducer heads, including type, purpose,
+
+25
+
+and application
+
+the procedures for performing a B-MODE ultrasound
+
+25
+
+examination
+
+the procedures for identifying escape points on
+
+25
+
+collaterals or possible competitive refluxes between
+
+deep venous and superficial systems
+
+systolic and diastolic reflux and flow in the devalved
+
+25
+
+and valved saphena
+
+the procedures for conducting a haemodynamic
+
+25
+
+topography
+
+techniques for inspecting trophic abnormalities and
+
+24
+
+oedema
+
+tests and measures for analyzing blood flow (e.g.,
+
+24
+
+direction; rate; volume)
+
+procedures and techniques for performing flush
+
+24
+
+ligation
+
+applications, indications, and contraindications of
+
+25
+
+anesthetics
+
+procedures and techniques for performing
+
+25
+
+crossotomies and crossectomies
+
+procedures and techniques for performing vascular
+
+25
+
+drainage to prevent thrombosis
+
+types and applications of sutures
+
+25
+
+applicable surgical equipment/tools
+
+25
+
+pharmacological treatments of perioperative conditions 25 (e.g., infection control; pain management)
+
+signs and symptoms of blood clots/thrombosis
+
+25
+
+ulcer management
+
+25
+
+compression therapy principles and techniques
+
+25
+
+Skill in:
+
+listening to patients' concerns and their desired
+
+25
+
+treatment outcomes
+
+determining the location, competency and diameter of
+
+25
+
+the saphenous junctions from duplex ultrasound
+
+determining the distal extent of reflux in the saphenous 25 veins in the thighs and legs from duplex ultrasound
+
+Mean 3.60
+
+SD
+
+% 3 or 4
+
+0.58
+
+96.00
+
+3.52
+
+0.59
+
+96.00
+
+3.84
+
+0.37
+
+100.00
+
+3.92
+
+0.28
+
+100.00
+
+3.96
+
+0.20
+
+100.00
+
+3.96
+
+0.20
+
+100.00
+
+3.54
+
+0.59
+
+95.83
+
+3.83
+
+0.48
+
+95.83
+
+3.88
+
+0.34
+
+100.00
+
+3.32
+
+0.48
+
+100.00
+
+3.96
+
+0.20
+
+100.00
+
+3.88
+
+0.33
+
+100.00
+
+3.72
+
+0.68
+
+96.00
+
+3.60
+
+0.58
+
+96.00
+
+3.32
+
+0.69
+
+96.00
+
+3.82
+
+0.39
+
+100.00
+
+3.76
+
+0.44
+
+100.00
+
+3.80
+
+0.41
+
+100.00
+
+3.52
+
+0.71
+
+88.00
+
+3.96
+
+0.20
+
+100.00
+
+3.96
+
+0.20
+
+100.00
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+30
+
+Knowledge Requirements
+
+N
+
+Mean
+
+SD
+
+% 3 or 4
+
+determining the function, role, and location of the perforating veins
+
+24
+
+4.00
+
+0.00
+
+100.00
+
+determining veins that show reflux or are varicose from 25 duplex ultrasound
+
+3.88
+
+0.44
+
+96.00
+
+determining the source of venous hypertension in varices from duplex ultrasound
+
+25
+
+3.96
+
+0.20
+
+100.00
+
+detecting and noting when saphenous veins are absent
+
+25
+
+3.80
+
+0.50
+
+96.00
+
+analyzing the state of the deep venous system from duplex ultrasound
+
+25
+
+3.96
+
+0.20
+
+100.00
+
+determining the optimal number of incisions needed to
+
+25
+
+achieve treatment objectives
+
+3.92
+
+0.28
+
+100.00
+
+Note. KSRs shaded in light green were eliminated from the final KSR list because their mean level of mastery ratings fell below the minimum inclusion threshold.
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+31
+
+Appendix H. Linkage Exercise Results
+
+Table H 1. Linkage Exercise Results
+
+Intake
+
+Tasks
+
+Weighted Average Level of Mastery of Linked KSRs
+445.35
+
+Total Number of
+Unique Linked KSRs
+
+Total Links Across
+Both SMEs
+
+Interview the patient to determine the patient's treatment
+
+goals and determine whether the patient is suitable for
+
+haemodynamic surgery
+
+70.43
+
+13
+
+19
+
+Interview patients to understand their medical history and
+
+obtain relevant information (e.g., current medications,
+
+language preference, insurance)
+
+50.71
+
+8
+
+14
+
+Review medical records (e.g., lab values, diagnostic
+
+tests, imaging, specialty reports, narrative, consults)
+
+32.23
+
+8
+
+9
+
+Perform a physical examination of the arterial system to
+
+detect signs/symptoms of obstructive arterial disease
+
+50.90
+
+11
+
+14
+
+Classify the patient's symptoms according to the Clinical-
+
+Etiology-Anatomy-Pathophysiology (CEAP) classification
+
+system and reporting standards
+
+44.34
+
+12
+
+12
+
+Educate the patient about the CHIVA method
+
+89.78
+
+19
+
+24
+
+Document disclosure and consent (e.g., disclosure of
+
+medical information, consent for treatment)
+
+106.95
+
+19
+
+29
+
+Pre-Operative Haemodynamic Mapping
+
+1207.40
+
+Instruct the patient to avoid the use of lotions or creams
+
+that prevent skin marking
+
+10.80
+
+3
+
+3
+
+Perform duplex ultrasound with pulsed doppler to identify
+
+the re-entry points
+
+146.00
+
+22
+
+38
+
+Examine the venous axes using the pulse doppler and
+
+color doppler
+
+161.64
+
+22
+
+42
+
+Create a diagram detailing the location of venous interruption and other anatomical detail on paper
+
+100.63
+
+21
+
+26
+
+Mark the incision sites on the patient's limb
+
+85.03
+
+19
+
+22
+
+Position the patient for the ultrasound evaluation (e.g.,
+
+standing, supine, Trendelenburg) depending on the
+
+ultrasound examination applied and the anatomy being
+
+examined
+
+115.13
+
+25
+
+30
+
+Select and instruct the patient to perform the ultrasound
+
+evaluation maneuvers (e.g., Perthes, Valsalva, Parana)
+
+119.72
+
+23
+
+31
+
+Perform duplex ultrasound to identify all escape points
+
+and confirm re-entry points while the patient performs the
+
+selected maneuver(s) (e.g., Perthes, Valsalva).
+
+158.04
+
+21
+
+41
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+32
+
+Tasks
+Perform the Perthes maneuver to identify perforating veins that allow for adequate draining of vein clusters and ensure that the veins are draining properly
+
+Weighted Average Level of Mastery of Linked KSRs
+87.89
+
+Total Number of
+Unique Linked KSRs
+21
+
+Total Links Across
+Both SMEs
+23
+
+Determine which CHIVA strategy to perform based on the
+
+type of shunts
+
+88.95
+
+20
+
+23
+
+Educate the patient about the patient's current condition
+
+and health status (e.g., nature of the condition, prognosis,
+
+potential benefits of interventions, potential treatment
+
+outcomes)
+
+58.99
+
+15
+
+16
+
+Discuss with patient whether clinical examination indicates a need for the CHIVA method
+
+74.59
+
+15
+
+20
+
+During the Procedure
+
+516.69
+
+Compare the skin mapping diagram with the surgical plan
+
+76.56
+
+19
+
+20
+
+Apply local anesthetics to numb the incision sites
+
+21.96
+
+5
+
+6
+
+Observe patient's reaction during the procedure to
+
+monitor for agitation of the sural and saphenous nerves
+
+33.96
+
+8
+
+9
+
+Make incisions over the escape points to enable visualization of the underlying tissue
+
+50.79
+
+11
+
+13
+
+Evaluate the underlying tissue to determine where to
+
+disconnect the saphenous vein from the femoral vein.
+
+62.39
+
+12
+
+16
+
+Perform flush ligation of the great saphenous vein close
+
+to the femoral vein
+
+58.19
+
+12
+
+15
+
+Ligate the stumps of the disconnected vessel using non-
+
+absorbable suture
+
+58.19
+
+12
+
+15
+
+Ablate the residual saphenous stump using clips, threads,
+
+or other devices.
+
+57.83
+
+12
+
+15
+
+Cut up the remaining part of the sutures before closing
+
+making sure to leave enough of the stump over the suture
+
+to prevent bleeding
+
+50.36
+
+12
+
+13
+
+Close the incision site with a dissolvable suture
+
+46.48
+
+11
+
+12
+
+After the Procedure
+
+390.09
+
+Perform duplex ultrasound to identify the target escape
+
+point
+
+115.82
+
+21
+
+30
+
+Perform duplex ultrasound to evaluate drainage
+
+146.17
+
+22
+
+38
+
+Observe patient's limb to compare pre-op and post-op
+
+venous action
+
+15.03
+
+4
+
+4
+
+Apply concentric compression (e.g., stocking, bandage)
+
+around the circumference of the limb immediately
+
+following the procedure
+
+22.04
+
+5
+
+6
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+33
+
+Tasks
+Instruct the patient to walk in the office and check for bleeding
+Prescribe anticoagulant medicine in prophylactic doses
+Prescribe compression devices (e.g., stockings, bandages)
+Instruct the patient to avoid prolonged immobility in the upright position
+Instruct the patient to avoid localized heat (e.g., central heating, hot vehicles, clothing)
+Instruct the patient to leave the operating room on foot/walking
+Follow Up Visits
+Remove skin stitches applied during surgical procedure
+Perform duplex ultrasound to assess patency, diameter, and flow at the great saphenous vein
+Examine the patient's limb for signs of recurrence and/or emergence of new escape points
+Assess arch recanalization occurrence and process
+Check for clots when performing duplex ultrasound using gentle probe compression to avoid rupturing the vein
+Perform a visual inspection of the wound for any signs of infection
+Prescribe antibiotics to treat infection
+Prescribe medication and/or compression and adjust based on the patient's other medications
+Administer standardized questionnaires to assess patient's pain level
+Assess the need for additional follow-up evaluations
+
+Weighted Average Level of Mastery of Linked KSRs
+
+Total Number of
+Unique Linked KSRs
+
+10.66
+
+3
+
+11.14
+
+3
+
+18.22
+
+5
+
+18.30
+
+5
+
+18.30
+
+5
+
+14.42
+
+4
+
+627.59
+
+18.04
+
+5
+
+130.58
+
+21
+
+168.52
+
+27
+
+142.04
+
+23
+
+53.14
+
+12
+
+11.06
+
+2
+
+17.46
+
+4
+
+25.78
+
+5
+
+14.12
+
+3
+
+46.86
+
+12
+
+Total Links Across
+Both SMEs
+3 3 5 5 5 4
+5 34 44 37 14 3 5 7 4 13
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+34
+
+Appendix I. Final CHIVA Exam Certification Blueprint
+
+Table I 1. Final CHIVA Exam Certification Blueprint
+
+ID
+
+Intake (14%)
+
+I.
+
+Tasks
+
+Linked KSRs
+
+1.1 Interview the patient to determine the
+
+Knowledge of:
+
+patient's treatment goals and determine whether the patient is suitable for haemodynamic surgery
+
+· patient requirements for haemodynamic surgery
+
+· diseases and conditions of the cardiovascular
+
+1.2 Interview patients to understand their
+
+system
+
+medical history and obtain relevant information (e.g., current medications, language preference, insurance)
+
+· differential diagnoses related to diseases and conditions of the venous system
+
+· differential diagnoses of deep venous
+
+1.3 Review medical records (e.g., lab values,
+
+hypertension from superficial cases
+
+diagnostic tests, imaging, specialty
+
+reports, narrative, consults)
+
+· differential diagnoses related to diseases and
+
+conditions of the lymphatic system
+
+1.4
+
+Perform a physical examination of the arterial system to detect signs/symptoms of obstructive arterial disease
+
+· differential diagnoses related to diseases and conditions where the primary impact is on more than one system
+
+1.5 Classify the patient's symptoms according to the Clinical-EtiologyAnatomy-Pathophysiology (CEAP) classification system and reporting
+
+· the impact of co-morbidities and co-existing conditions on patient management
+· haemodynamic principles
+
+standards
+
+· the effects of posture and gravity on hydrostatic
+
+1.6 Educate the patient about the CHIVA method
+
+pressure · lower extremity venous anatomy
+
+1.7 Document disclosure and consent (e.g., · principles and applications of ultrasound for
+
+disclosure of medical information,
+
+assessing blood flow
+
+consent for treatment)
+
+· procedures and techniques for performing
+
+crossotomies and crossectomies
+
+· pharmacological treatments of perioperative conditions
+
+· ulcer management
+
+· compression therapy principles and techniques
+
+Skill in:
+· determining the source of venous hypertension in varices from duplex ultrasound
+· determining the optimal number of incisions needed to achieve treatment objectives
+
+ID
+
+Pre-Operative Haemodynamic Mapping (38%)
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+35
+
+II.
+
+Tasks
+
+Linked KSRs
+
+2.1 Instruct the patient to avoid the use of lotions or creams that prevent skin marking
+
+Knowledge of:
+· patient requirements for haemodynamic surgery
+
+2.2 Perform duplex ultrasound with pulsed doppler to identify the re-entry points
+
+· diseases and conditions of the cardiovascular system
+
+2.3 Examine the venous axes using the pulse doppler and color doppler
+
+· differential diagnoses related to diseases and conditions of the venous system
+
+2.4 Create a diagram detailing the location of · differential diagnoses of deep venous
+
+venous interruption and other anatomical
+
+hypertension from superficial cases
+
+detail on paper
+
+· differential diagnoses related to diseases and
+
+2.5 Mark the incision sites on the patient's
+
+conditions of the lymphatic system
+
+limb
+
+· differential diagnoses related to diseases and
+
+2.6 Position the patient for the ultrasound evaluation (e.g., standing, supine, Trendelenburg) depending on the ultrasound examination applied and the
+
+conditions where the primary impact is on more than one system
+· the impact of co-morbidities and co-existing conditions on patient management
+
+anatomy being examined
+
+· haemodynamic principles
+
+2.7 Select and instruct the patient to perform · the effects of posture and gravity on hydrostatic
+
+the ultrasound evaluation maneuvers
+
+pressure
+
+(e.g., Perthes, Valsalva, Parana)
+
+· lower extremity venous anatomy
+
+2.8 Perform duplex ultrasound to identify all · principles and applications of ultrasound for
+
+escape points and confirm re-entry
+
+assessing blood flow
+
+points while the patient performs the selected maneuver(s) (e.g., Perthes, Valsalva).
+
+· techniques to accelerate blood flow and test valvular function
+
+· ultrasound wave characteristics
+
+2.9
+
+Perform the Perthes maneuver to identify perforating veins that allow for adequate draining of vein clusters and ensure that
+
+·
+
+factors that affect the sensitivity of ultrasound measurements
+
+the veins are draining properly
+
+· techniques to optimize ultrasound image
+
+2.10 Determine which CHIVA strategy to perform based on the type of shunts
+
+resolution
+· ultrasound transducer heads, including type, purpose, and application
+
+2.11 Educate the patient about the patient's current condition and health status (e.g., nature of the condition, prognosis,
+
+· the procedures for performing a B-MODE ultrasound examination
+
+potential benefits of interventions,
+
+· the procedures for identifying escape points on
+
+potential treatment outcomes)
+
+collaterals or possible competitive refluxes
+
+2.12 Discuss with patient whether clinical examination indicates a need for the CHIVA method
+
+between deep venous and superficial systems
+· systolic and diastolic reflux and flow in the devalved and valved saphena
+
+· the procedures for conducting a haemodynamic
+
+topography
+
+· tests and measures for analyzing blood flow
+
+· procedures and techniques for performing flush ligation
+
+· applications, indications, and contraindications of anesthetics
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+36
+
+· procedures and techniques for performing crossotomies and crossectomies
+· pharmacological treatments of perioperative conditions
+· ulcer management
+· compression therapy principles and techniques
+Skill in:
+· listening to patients' concerns and their desired treatment outcomes
+· determining the location, competency and diameter of the saphenous junctions from duplex ultrasound
+· determining the distal extent of reflux in the saphenous veins in the thighs and legs from duplex ultrasound
+· determining the function, role, and location of the perforating veins
+· determining veins that show reflux or are varicose from duplex ultrasound
+· determining the source of venous hypertension in varices from duplex ultrasound
+· detecting and noting when saphenous veins are absent
+· analyzing the state of the deep venous system from duplex ultrasound
+· determining the optimal number of incisions needed to achieve treatment objectives
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+37
+
+ID
+
+During the Procedure (16%)
+
+III.
+
+Tasks
+
+Linked KSRs
+
+3.1 Compare the skin mapping diagram with Knowledge of:
+
+the surgical plan
+
+· haemodynamic principles
+
+3.2 Apply local anesthetics to numb the incision sites
+3.3 Observe patient's reaction during the procedure to monitor for agitation of the sural and saphenous nerves
+
+· lower extremity venous anatomy
+· principles and applications of ultrasound for assessing blood flow
+· factors that affect the sensitivity of ultrasound measurements
+
+3.4 Make incisions over the escape points to · techniques to optimize ultrasound image
+
+enable visualization of the underlying
+
+resolution
+
+tissue
+
+· ultrasound transducer heads, including type,
+
+3.5 Evaluate the underlying tissue to
+
+purpose, and application
+
+determine where to disconnect the saphenous vein from the femoral vein.
+
+· the procedures for performing a B-MODE ultrasound examination
+
+3.6 Perform flush ligation of the great
+
+· the procedures for conducting a haemodynamic
+
+saphenous vein close to the femoral vein
+
+topography
+
+3.7 Ligate the stumps of the disconnected vessel using non-absorbable suture
+3.8 Ablate the residual saphenous stump using clips, threads, or other devices.
+3.9 Cut up the remaining part of the sutures before closing making sure to leave enough of the stump over the suture to prevent bleeding
+3.10 Close the incision site with a dissolvable suture
+
+· procedures and techniques for performing flush ligation
+· applications, indications, and contraindications of anesthetics
+· procedures and techniques for performing crossotomies and crossectomies
+· procedures and techniques for performing vascular drainage to prevent thrombosis
+· types and applications of sutures
+· applicable surgical equipment/tools
+
+Skill in:
+· determining the location, competency and diameter of the saphenous junctions from duplex ultrasound
+· determining the distal extent of reflux in the saphenous veins in the thighs and legs from duplex ultrasound
+· determining the function, role, and location of the perforating veins
+· determining veins that show reflux or are varicose from duplex ultrasound
+· determining the source of venous hypertension in varices from duplex ultrasound
+· detecting and noting when saphenous veins are absent
+· determining the optimal number of incisions needed to achieve treatment objectives
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+38
+
+ID
+
+After the Procedure (12%)
+
+IV.
+
+Tasks
+
+Linked KSRs
+
+4.1 Perform duplex ultrasound to identify the Knowledge of:
+
+target escape point
+
+· diseases and conditions of the cardiovascular
+
+4.2 Perform duplex ultrasound to evaluate drainage
+
+system
+· the impact of co-morbidities and co-existing conditions on patient management
+
+4.3 Observe patient's limb to compare preop and post-op venous action
+
+· haemodynamic principles
+
+4.4 Apply concentric compression (e.g., stocking, bandage) around the circumference of the limb immediately
+
+· the effects of posture and gravity on hydrostatic pressure
+· lower extremity venous anatomy
+
+following the procedure
+
+· principles and applications of ultrasound for
+
+4.5 Instruct the patient to walk in the office
+
+assessing blood flow
+
+and check for bleeding
+
+· techniques to accelerate blood flow and test
+
+valvular function
+
+4.6 Prescribe anticoagulant medicine in prophylactic doses
+
+· ultrasound wave characteristics
+
+4.7 Prescribe compression devices (e.g., stockings, bandages)
+
+· factors that affect the sensitivity of ultrasound measurements
+· techniques to optimize ultrasound image
+
+4.8 Instruct the patient to avoid prolonged
+
+resolution
+
+immobility in the upright position
+
+· ultrasound transducer heads, including type,
+
+4.9 Instruct the patient to avoid localized
+
+purpose, and application
+
+heat (e.g., central heating, hot vehicles, clothing)
+
+· the procedures for performing a B-MODE ultrasound examination
+
+4.10 Instruct the patient to leave the operating · the procedures for identifying escape points on
+
+room on foot/walking
+
+collaterals or possible competitive refluxes
+
+between deep venous and superficial systems
+
+· systolic and diastolic reflux and flow in the devalved and valved saphena
+
+· the procedures for conducting a haemodynamic topography
+
+· tests and measures for analyzing blood flow
+
+· applications, indications, and contraindications of anesthetics
+
+· pharmacological treatments of perioperative conditions
+
+· signs and symptoms of blood clots/thrombosis
+
+· ulcer management
+
+· compression therapy principles and techniques
+
+Skill in:
+· listening to patients' concerns and their desired treatment outcomes
+· determining the location, competency and diameter of the saphenous junctions from duplex ultrasound
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+39
+
+· determining the distal extent of reflux in the saphenous veins in the thighs and legs from duplex ultrasound
+· determining the function, role, and location of the perforating veins
+· determining veins that show reflux or are varicose from duplex ultrasound
+· determining the source of venous hypertension in varices from duplex ultrasound
+· detecting and noting when saphenous veins are absent
+· analyzing the state of the deep venous system from duplex ultrasound
+· determining the optimal number of incisions needed to achieve treatment objectives
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+40
+
+ID
+
+Follow Up Visits (20%)
+
+V.
+
+Tasks
+
+Linked KSRs
+
+5.1 Remove skin stitches applied during
+
+Knowledge of:
+
+surgical procedure
+
+· patient requirements for haemodynamic
+
+5.2 Perform duplex ultrasound to assess
+
+surgery
+
+patency, diameter, and flow at the great saphenous vein
+
+· diseases and conditions of the cardiovascular system
+
+5.3 Examine the patient's limb for signs of
+
+· differential diagnoses related to diseases and
+
+recurrence and/or emergence of new
+
+conditions of the venous system
+
+escape points
+
+· differential diagnoses of deep venous
+
+5.4 Assess arch recanalization occurrence
+
+hypertension from superficial cases
+
+and process
+
+· differential diagnoses related to diseases and
+
+5.5 Check for clots when performing duplex
+
+conditions of the lymphatic system
+
+ultrasound using gentle probe
+
+· differential diagnoses related to diseases and
+
+compression to avoid rupturing the vein
+
+conditions where the primary impact is on more
+
+than one system
+
+5.6 Perform a visual inspection of the wound
+
+for any signs of infection
+
+· the impact of co-morbidities and co-existing
+
+conditions on patient management
+
+5.7 Prescribe antibiotics to treat infection
+
+· haemodynamic principles
+
+5.8 Prescribe medication and/or compression and adjust based on the patient's other medications
+5.9 Administer standardized questionnaires to assess patient's pain level
+
+· the effects of posture and gravity on hydrostatic pressure
+· lower extremity venous anatomy
+· principles and applications of ultrasound for assessing blood flow
+
+5.10 Assess the need for additional follow-up · techniques to accelerate blood flow and test
+
+evaluations
+
+valvular function
+
+· ultrasound wave characteristics
+
+· factors that affect the sensitivity of ultrasound measurements
+
+· techniques to optimize ultrasound image resolution
+
+· ultrasound transducer heads, including type, purpose, and application
+
+· the procedures for performing a B-MODE ultrasound examination
+
+· the procedures for identifying escape points on collaterals or possible competitive refluxes between deep venous and superficial systems
+
+· systolic and diastolic reflux and flow in the devalved and valved saphena
+
+· the procedures for conducting a haemodynamic topography
+
+· techniques for inspecting trophic abnormalities and oedema
+
+· tests and measures for analyzing blood flow
+
+· applicable surgical equipment/tools
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+41
+
+· pharmacological treatments of perioperative conditions
+· signs and symptoms of blood clots/thrombosis
+· ulcer management
+· compression therapy principles and techniques
+Skill in:
+· listening to patients' concerns and their desired treatment outcomes
+· determining the location, competency and diameter of the saphenous junctions from duplex ultrasound
+· determining the distal extent of reflux in the saphenous veins in the thighs and legs from duplex ultrasound
+· determining the function, role, and location of the perforating veins
+· determining veins that show reflux or are varicose from duplex ultrasound
+· determining the source of venous hypertension in varices from duplex ultrasound
+· detecting and noting when saphenous veins are absent
+· analyzing the state of the deep venous system from duplex ultrasound
+· determining the optimal number of incisions needed to achieve treatment objectives
+
+Practice Analysis of the CHIVA Method to Support a Global Certification Exam for Physicians
+
+42
+
+

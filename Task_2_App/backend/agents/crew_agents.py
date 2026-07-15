@@ -77,6 +77,8 @@ def make_clinical_interpreter() -> Agent:
             "and vein_types listing specific veins identified (e.g. GSV, FV, Tributary). "
             "Cross-reference the VLM annotation: does the visible anatomy support or conflict with the clip list? "
             "Do NOT infer or project what clips should be present — report only what is confirmed. "
+            "If the VLM annotation indicates poor image quality or an off-axis view, flag this "
+            "explicitly — probe repositioning should take priority over any clip assessment. "
             "Max 100 words."
         ),
         backstory=(
@@ -146,7 +148,7 @@ def make_shunt_analyst() -> Agent:
 
 # ── Agent 3 (new for Task-2) ──────────────────────────────────────────────────
 
-def make_circuit_analyst() -> Agent:
+def make_circuit_analyst(tools: list | None = None) -> Agent:
     """
     Reads the Q1-Q4 status and scan history to determine the current examination
     state and the specific next target zone — with full CHIVA progression awareness.
@@ -187,6 +189,7 @@ def make_circuit_analyst() -> Agent:
             "so guide it within the zone before suggesting it move."
         ),
         llm=_make_llm("heavy"),  # core navigation brain — zone routing + examination state reasoning
+        tools=tools or [],
         verbose=True,
         allow_delegation=False,
         max_iter=3,
@@ -195,10 +198,13 @@ def make_circuit_analyst() -> Agent:
 
 # ── Agent 4 (new for Task-2) ──────────────────────────────────────────────────
 
-def make_navigation_planner() -> Agent:
+def make_navigation_planner(tools: list | None = None) -> Agent:
     """
     Decides where to move the probe next or what zone to scan, based on the
     circuit analyst's open-Q output and the current probe position.
+    Has access to get_zone_protocol and get_vein_examination_objectives tools
+    so it can look up the correct protocol for the TARGET zone before issuing
+    its movement command.
     """
     return Agent(
         role="CHIVA Navigation Planner",
@@ -220,6 +226,11 @@ def make_navigation_planner() -> Agent:
         backstory=(
             "You are the probe navigator for a real-time CHIVA duplex examination. "
             "Your output is always a movement command: direction + destination. "
+            "You have access to get_zone_protocol — use it to look up the examination "
+            "protocol for the zone you are directing the probe to. This ensures your "
+            "command is grounded in the correct clinical protocol for the target zone, "
+            "not the current zone. Call get_zone_protocol with the target zone name "
+            "before composing your movement command whenever routing to a new zone.\n"
             "When the probe needs to stay in the current zone, give micro-navigation "
             "toward a specific structure (e.g. 'Move medially toward GSV trunk'). "
             "When the probe needs to change zones, give a routing command "
@@ -229,6 +240,7 @@ def make_navigation_planner() -> Agent:
             "re-entry perforator. You never refer to clinical maneuvers."
         ),
         llm=_make_llm("mid"),
+        tools=tools or [],
         verbose=True,
         allow_delegation=False,
         max_iter=3,
@@ -251,7 +263,7 @@ def make_guidance_specialist() -> Agent:
             "guidance is navigation only — where to move the probe or what zone to scan. "
             "action is determined by the Shunt Analyst: "
             "maneuver if elim_required=true, complete if confirmed=true, move otherwise. "
-            "Forbidden words in guidance: Paranà, Valsalva, Doppler, compress, squeeze, "
+            "some maneuver words in guidance: Paranà, Valsalva, Doppler, compress, squeeze, "
             "maneuver, apply, perform, EP, RP, N1, N2, N3, Q1, Q2, Q3, Q4, shunt."
         ),
         backstory=(

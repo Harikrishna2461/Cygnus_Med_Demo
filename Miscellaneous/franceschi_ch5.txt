@@ -1,0 +1,507 @@
+Shunt's Classification
+
+69
+
+SHUNT I
+
+N1
+
+N1
+
+N2
+
+N1-N2-N1
+
+N1
+
+N2
+
+N2
+
+SHUNT II
+N1 N2
+
+N1 N2
+
+N4L
+
+N3
+
+N3
+
+SHUNT III
+N1 N2
+
+1a N2-N4L-N2
+
+N2-N3-N2
+
+1b
+
+N1 N2
+
+N1 N2
+
+1c,d
+N1 N2
+
+N3
+A N1-N2-N3-N1
+
+N4L
+
+N4L
+
+N4T
+
+N2
+
+B N1-N2-N4L-N2-N1
+
+C
+
+N3
+
+N1-N2-N4L-N2-N3-N1
+
+D N1-N2-N4T-N2-N1
+
+N3
+
+SHUNT IV
+
+SHUNT N3
+
+N2 N3
+N3
+
+N1 N1-N3-N2-N3-N1
+
+1e 1f
+
+N2
+
+N2
+
+N1
+
+Figure 5.1. a-b-c-d-e-f. Types of `private circulation' or veno-venous shunts; 1a: type 1 shunt with reentry on the saphenous trunk, and variations; 1b: type 2 shunt without reflux from the deep circulation, with compartmental regurgitation N2>N4>N2 or N2>N3>N2; 1c-d: type 3 shunt with reentry located on an extrasaphenous perforator, and variations; 1e: type 4 shunt with reflux from the pelvic circulation; 1 f: N3 shunt with reflux from an incompetent perforator and reentry on an extrasaphenous perforator. Reflux from an incompetent perforator does not necessarily give rise to a `private circulation'.
+As Figure 5.1c, Example A shows, refluxing blood starts from the N3 collateral and reenters through a perforator located on the collateral (N1 > N2 > N3 > N1).
+
+70
+
+Claude Franceschi
+
+In Example B, blood emerges from a N4L collateral, flows back again into the saphenous and reenters through a perforator located on the saphenous (N1 > N2 > N4L > N2 > N1). In Example C the reflux abandons the saphenous for a N4L route before reentering and discharging the reflux along a N3 branch (N1 > N2 > N4L > N2 > N3 > N1). In Example D the refluxing blood follows a route from a N4T collateral to another saphenous trunk before reentering through a perforator from this trunk (N1 > N2 > N4T > a different N2 > N1). In the remaining cases (10%) the `private circulations' that involve the saphenous trunks are represented by: c) Type 2 Shunt: reflux N2 > N4L or N2 > N3, with the `private circulation' entirely accounted for by the superficial network. In these cases, reflux from the deep circulation is absent. There is however a `private circulation': N2 > N4L > N2 or N2 > N3 > N2 (Figure 5.1b). d) Type 4 Shunt: reflux N1 > N3, or a reflux from the deep circulation along a pelvic shunt to empty into the saphenous vein. A basic prerequisite is that at least the terminal valve of the saphenofemoral junction be competent. Lastly, there are `private circulations' that involve solely the saphenous collaterals: e) "N3" Shunt: reflux N1 > N3, or directly from an incompetent perforator, with reentry through a perforator located on the collateral (P/N3). The saphenous trunks are not affected by the `private circulation'. In some types of veno-venous shunt, such as overlapping type 1 shunts or type 3 shunts, in addition to the primary `private circulation' supplied by the primary reflux point, there are also secondary `private circulations' supplied by secondary reflux points, which are of significant hemodynamic importance. In type 3 shunts the secondary `private circulation' is initiated by the N2 > N4L reflux, i.e., the reflux at the origin of the collateral. Of course, if the reflux is a N2 > N3 type, there is no secondary `private circulation' since reentry into the saphenous is absent. In superimposed type 1 shunts it is the incompetent perforators that start the secondary `private circulation'.
+
+1.2. Revised Classification
+The European CHIVA study group proposed in 2002 a more detailed and revised classification [179]. This offers the possibility to recognize the wide majority of pattern that can be easily recognized under duplex investigation. However, most of the CHIVA group in Europe still continue to adopt the above described classification for superficial venous insufficiency.
+
+2. DEEP SHUNTS
+Deep shunts are CS or VOS but never ODS.
+
+Shunt's Classification
+
+71
+
+3. SUPERFICIAL SHUNTS
+
+Superficial shunts are superficial shunting veins that deviate only superficial venous flows when ODS is activated. They can deviate deep or superficial flows if VOS or CS.
+
+3.1. Shunt 0:
+Shunt 0 is an ODS or a VOS where, contrary to shunt 2 (N2-N3-N1), the drainage direction is normal (N3-N2-N1), even if flow in the N2 segment is retrograde. For example, when only the sapheno-femoral junction valve is competent and distal valves are incompetent, tributaries of the arch are drained during the diastole in a distal perforator of the saphenous trunk through a retrograde flow, by ODS effect. The same drainage direction is carried out not only in diastole, but permanently through the distal perforator by VOS effect after the sapheno-femoral junction is disconnected in shunt 1.
+The retrograde flow in N2 is fed by antegrade N3 draining tributaries with distal reentry R into N1 activated by the valvulo-muscular pump diastole without re-circulation. The haemodynamic condition are very good even if not properly normal and so doesn't any therapy. In the figure above, N2 is the great saphenous upper trunk and arch is incompetent except in the terminal sapheno-femoral junction valve that is competent. The same type 0 can be described when any superficial draining flow is oriented from N2 to N1 or N3 to N1 or N3-N2-N1 without any flow oriented N1-N2.
+
+Legend- CS: Closed shunts. E: Escape points. R: reentry points. D: Disconnection point. V: Devalvulation point.
+Resuming, shunt 0 is a reflux in the GSV trunk with re-entry and no re-circulation because there is no EP from N1. It is a VOS or an ODS N3-N2-N1.The more frequent cases of observation are:
+
+72
+
+Claude Franceschi
+
+1. Reflux in GSV with competent terminal valve, and thus without change of compartment. The reverse flow detectable in the GSV is due to a gravitational gradient of the column ending in a RPV located distally in the saphenous trunk.
+2. Reflux in the GSV after SFJ disconnection. Again, the reverse flow is a draining and asymptomatic flow without change of compartment. This is the normal outcome following CHIVA 1 procedure.
+Shunt 0 can be often detected at duplex examination, in normal and/or asymptomatic subjects. This pattern may usually be detected at the end of a busy day in standing or sitting position in individuals like surgeons, hairdresser, waiter, etc...during summer.
+Pathophysiologic explanation should include increased volume in the GSV with opening of distal perforators located on the trunk in order to favour inward flow to the deep veins. This creates a segmental retrograde flow for a recruitment effect.
+Thus, Shunt 0 can be considered a physiologic pattern due to functional reasons of drainage.
+It is noteworthy that Shunt 0 is the desirable outcome of the so-called CHIVA 1 surgical procedure.
+
+3.2. Shunt 1:
+Shunt 1 is a saphenous CS made of N1-N2-N1 succession. The retrograde flow in N2 is fed by reflux from N1 through E and antegrade N3 draining tributaries with distal reentry into N1 activated by the valvulo-muscular pump diastole with re-circulation. CHIVA disconnects E, which results as Shunt 0. E is the sapheno-femoral junction in shunt 1a, sapheno-popliteal junction in shunt 1b, any perorating vein connected with N2 in shunt 1c. Therefore shunt 1 is a reflux in an incompetent segment of the GSV trunk with a distal re-entry perforator connected to the trunk, similar to shunt 0 but with re-circulation caused by a proximal EP connected with N1, either at the SFJ or at any incompetent perforator connected with the trunk.
+
+Shunt's Classification
+
+73
+
+3.3. Shunt 2:
+
+Shunt 2 is a shunt made of N2-N3-N1 or N2-N4T-N2-N1 or N2-N4L-N2-N1 succession. The saphenous trunk proximal to the EP can be incompetent except at the SFJ.
+Shunt 2 are derivated open shunts DOS except shunt 2C that is a CS. Shunt 2a is any N3 incompetent tributary fed by N2 flow (E is the N3-N2 confluence) activated by VMP diastole through R connected with N1. Shunt 2b is an incompetent N4T tributary that connects the GSV trunk with the SSV trunk. Shunt 2C is an incompetent N4L tributary. Shunt 2d is an incompetent N2 segment that extend to N3 and then to extra troncular R. CHIVA procedure consists in disconnection at E except in shunt 2d where disconnection is done at N2-N3 junction (D).
+
+3.4. Shunt 3:
+Shunt 3 is a saphenous CS made of N1-N2-N3-N1 or N1-N2-N4L-N1 or N1-N2-N4LN2-N3-N1succession.
+Like shunt 1, it is CS except that its shunting veins are made not only of a GS trunk segment, but also of tributaries N3 and/or N4, and a re-entry perforator can be connected with N3.
+
+74
+
+Claude Franceschi
+
+The retrograde flow in N2 is fed by reflux from N1 through E and antegrade N3 draining tributaries then connected with incompetent distal reentry into N1 activated by the valvulomuscular pump VMP diastole with re-circulation.
+
+3.5. Shunt 4:
+Shunt 4 is a CS made of N1-N3-N2-N1 succession, where N3 is fed by an EP connected with N1, usually pelvic, and feeds N1 through N2.
+
+3.6. Shunt 5:
+Shunt 5 is a CS made of N1-N3-N2-N3-N1 succession, thus similar to a CS except that N2 is prolonged by another N3 before re-entering N1.
+
+Shunt's Classification
+
+75
+
+3.7. Shunt 6:
+
+Shunt 6 is a CS made of N1-N3 -N1 succession. Shunt 6 EPs may come out at any perforator location. They occur mostly in venous malformations and in varicose recurrences, particularly after stripping.
+
+3.8. Composite Shunts:
+Composite shunts are made of different connected shunts; for example, Shunt 1 + 2 and so on.
+
+3.9. Mixed Shunts:
+Mixed shunts (MS) are VOS and CS that share the same escape point (EP) and part of their shunting veins. Their re-entry points are located differently, that of CS being distal to the
+
+76
+
+Claude Franceschi
+
+EP, and that of VOS being proximal. An example is when an iliac venous occlusion is associated with a homolateral great saphenous incompetence. An EP at the saphenousfemoral junction (SFJ) acts as a VOS in systole, draining femoral flow towards the opposite femoral vein (re-entry point) through right and left arch tributaries (spontaneous Palma). The same EP acts as a CS in diastole, spilling femoral flow into distal deep veins through retrograde saphenous flow and perforator re-entry. This is also the case in hemodynamic block at a superficial femoral vein. Popliteal flow may escape into the small saphena arch, then into Giacomini's vein, and re-enter in the deep network through the SFJ in systole. Popliteal flow also escapes in diastole when great saphena incompetence distal to the Giacomini-great saphena junction allows retrograde flow until a distal re-entry.
+
+In: Principles of Venous Hemodynamics Authors: Claude Franceschi and Paolo Zamboni
+
+ISBN 978-1-60692-485-3 © 2009 Nova Science Publishers, Inc.
+
+Chapter 6
+PELVIC SHUNTS
+Claude Franceschi
+Saint Joseph and Pitié-Salpétrière Hospitals, Paris, France.
+1. PELVIC ESCAPE POINTS
+Pelvic escape points (PEP) represent an important source of varicose veins [161]. They are defined according to their location and the tributaries of the hypogastric veins that feed them. Superior and inferior gluteal veins feed the superior and inferior gluteal points (SGP and IGP) at the buttocks; the obturator vein feeds the obturatory point (OP) at the groin; the round ligament vein feeds the I point (IP) at the superficial inguinal orifice; and the internal pudendal vein feeds the P point (PP) at the perforator of perineal location. Pelvic veins on one side of the body communicate, vertically and horizontally, with the corresponding veins on the opposite side through numerous plexuses. That is why a closure of one or more pelvic veins cannot completely correct the refluxes at PEPs. In the same way, PEPs are connected to any vein at the same side and at the opposite side. Consequently, any varice of the lower limbs can be due to any escape point, at the same or the opposite side.
+1.1. I Point (IP) and P Point (PP)
+They come out much more specifically in women during and after pregnancy. The reasons are the excesses of venous pressure due to fistulae effect of the placenta, pelvic vein compression by the voluminous uterus, and the hormonal status that modifies venous compliance. Usually, they are associated with intra-pelvic varicose veins, such as varicocele of broad ligaments. This association is not necessarily one of cause and effect. On the one hand, pelvic varicose veins after pregnancy are virtually constant, but varices of the lower limbs are not. On the other hand, retrograde phlebography in pelvic varicese does not show IP or PP constantly, and the embolization of pelvic varices does not stop the escapes through IP
+
+78
+
+Claude Franceschi
+
+and PP [161]. These points are not precisely identified by phlebography but rather by duplexscan [106].
+
+1.2. I Point (IP)
+IP escape in women consists of the re-opening of the embryological duct of Nuck during pregnancy. This duct re-opening links the incompetent vein of the round ligament of the uterus (equivalent to sinus pampiniformis in males) with the tributaries of the saphenous arch and leads to closed shunts 4 and 5. As several anastomoses connect in particular the external pudendal vein not only with ipsilateral tributaries of the great saphenous arch, but also with controlateral tributaries, varices of the right limb can be due to left I point and vice versa. IP can also feed vulvar varices through connections with labial veins, which are tributaries of the perineal vein (Figure 6.2a,b). IP is located about 2cm above the arch of the great saphenous vein, medially to the the epigastric vein (Figure 6.1). The diagnosis is not constantly reliable with phlebography. Color Doppler in the standing position shows a characteristic backflow during VM. In males, reflux through the IP corresponds to varicocele outflow.
+
+Figure 6.1. IP and PP pre-operative mapping.
+1.3. P Point (PP)
+PP escape in the perineal vein of women receives labial veins than perforates the superficial perineal fascia at a P point that is located at the posterior edge of the transversal muscle of the perineum. PP skin projection is at the junction of the posterior fourth and the anterior fourth of the external edge of the labia major. PP can feed vulval varices, perineal varices, and closed shunts 4 and 5. Due to transversal anastomosis, it can also feed the same
+
+Pelvic Shunts
+
+79
+
+varices on the opposite side (Figure 6.3a,b). As for IP, PP is not always evident in retrograde pelvic phlebography, but can be diagnosed reliably by duplex-scan, which shows reflux at PP during VM [106]. The standing position is not easy for duplex-scan of PP. The best position is gynecologic. The investigation must be superficial and not intra-vaginal. A superficial probe, preferably equipped with a high resolution probe (10 Mhz or more), or with a water interface filing a surgical glove is simply put on the skin of the perineum.
+
+Figure 6.2a. Veins Anastomosis leading to IP. Figure 6.2b. Varices of the limb fed by pelvic shunts linked to IP.
+
+80
+
+Claude Franceschi
+
+Figure 6.3a. Veins Anastomosis leading to PP.
+Figure 6.3b. Varices of the limb fed by pelvic shunts linked to PP.
+1.4. Obturator Escape Point The oburator vein (OV) emerges in the thigh through the obturator orifice and usually
+connects with the common femoral vein. Thus, in the majority of cases, a possible reflux is absorbed by a competent deep network, with neither varices nor clinical symptoms in the limb. Sometimes, however, the OV connects with the arch of the great saphena, in which case reflux in OV can involve closed shunts 4 or 5.
+
+Pelvic Shunts
+
+81
+
+1.5. Superior Gluteal Escape Point (SGEP)
+
+SGEP usually comes out at the middle of the buttock and connects congenital varices of the persistent external vein and/or the arch of the small saphena. It sometimes causes a closed shunt 3 or 5 that involves the small saphena.
+
+1.6. Inferior Gluteal Escape Point (IGEP)
+IGEP also occurs, particularly in congenital venous malformations. It usually emerges either at the inferior edge of the buttock or at the popliteal fossa when it feeds varices of the sciatic nerve.
+
+1.7. Venous Shunts in Congenital Venous Malformations (CVM)
+Usually, CVM of lower limbs make different presentations under different hemodynamic conditions. Shunts are either VOS, in cases of more or less extended deep venous aplasia, or CS, particularly when embryologic veins persist after birth. In some cases, both VOS and CS can be associated in mixed shunts. These mixed shunts can be overloaded not only by the shunting flow, but also by cutaneous malformations, such as superficial angiomas.
+
+Figure 6.4 A) Visceral pelvic escape points and feeding veins. a: labium major. b:labium minor + clitoris. c: rectum. d: uterus. e: fallopian tube + tubo-ovarian vein. f: ovary. g:round ligament of uterus and its vein. h: hypogastric vein. i: uterine vein. j: great saphena h: hypogastric vein. k: ovarian vein. l: internal pudendal vein. Ip: Inguinal point: reflux location at the superficial inguinal ring is due to round ligament vein (g) incompetence fed by one more out of the visceral tributaries (I ,e) of the hypogastric vein( h) and/or ovarian vein ( k). This reflux can feed superficial varices anywhere in the ipsi-lateral limb but in the opposite too either in the labium major (a) through superficial connections with superficial tributaries of the internal pudendal vein (l). Pp: Perineal point: reflux location at the
+
+82
+
+Claude Franceschi
+
+superficial perineal fascia perforation at the posterior edge transversum muscle, in correspondence with the fourth posterior part of the external edge of the labium major, due to the perineal vein incompetence fed by the internal pudendal vein (I) of the hypogastric vein( h) and/or ovarian vein ( k). This reflux can feed superficial varices anywhere in the ipsi-lateral limb but in the opposite too either in the labium major (a) through its labial posterior tributary. Cp: Clitoris point: reflux location at the superficial perineal fascia perforatio next to the proximal clitoris, due to the incompetence of the superficial vein of the clitoris fed by the internal pudendal vein (I) of the hypogastric vein( h) through the incompetent bulbo-clitoridis vein. This reflux can feed superficial varices anywhere in the ipsi-lateral limb but in the opposite too either in the labium major (a) through its labial anterior tributary.
+
+Figure 6.4 B) Three parietal pelvic venous escape points and feeding hypogastric tributaries. a: bladder. b:vagina. c: rectum: uterus. e: fallopian tube + tubo-ovarian vein. f: ovary. g:round ligament of uterus and its vein. h: hypogastric vein. i: uterine vein. j: internal pudendal vein k: vesico-vaginal veins.l: fascia superficialis m: inferior gluteal vein. n:superior gluteal vein. o:obturator vein. P: bulbo-clitoridis vein. q: inferior haemorroidal vein r: labialis posterior vein. s: labialis anterior vein.t: superfificial perineal vein.SC: sciatic nerve and its varicose vein. SGP: Superior gluteal point: reflux location fed by the incompetent superior gluteal vein (n) into a superficial gluteal vein through a fascial perforation. This reflux can feed superficial varices anywhere in the ipsi-lateral limb and connect with any perineal tributary. IGP : Inferior gluteal point: reflux location at the middle of the buttock inferior fold fed by the incompetent inferior gluteal vein (m). This reflux can feed superficial varices anywhere in the ipsilateral limb and connect with any perineal tributary but frequently deep varices around the sciatic nerve and then surface in the popliteal region. Op: Obturator point: reflux location at the groin where the obturator vein connects distally with the great saphenous arch or the common femoral vein , fed by the incompetent obturator vein (o) connected proximally whith the hypogastric vein (h) or with the internal pudendal vein. This reflux can feed superficial varices anywhere in the ipsi-lateral limb, but particularly through its coonection with the great saphenous arch. Otherwise, if the distally connection is unique with the common femoral vein, superficial veins cannot be overloaded.
+
+In: Principles of Venous Hemodynamics Authors: Claude Franceschi and Paolo Zamboni
+
+ISBN 978-1-60692-485-3 © 2009 Nova Science Publishers, Inc.
+
+Chapter 7
+THE CHIVA STRATEGY AND OTHER CONSERVATIVE AND HEMODYNAMIC
+TREATMENTS
+Claude Franceschi
+Saint Joseph and Pitié-Salpétrière Hospitals, Paris, France.
+1. CHIVA DEFINITION
+CHIVA is a French acronym for a type of treatment: Conservatrice et Hemodynamique de l'Insuffisance Veineuse en Ambulatoire, which means conservative and hemodynamic treatment of venous insufficiency in ambulatory care [100-106]. The original goal of CHIVA was the preservation of the superficial venous capital for further possible arterial by-pass necessity, thus any aggressive treatment of the superficial venous network was avoided. However, the fact that varices and most other venous disorders are treated by lying down and, above all, by raising the legs suggests that any treatment that can control hydrostatic pressure, including positioning, deserves great medical interest. Most varices and venous insufficiencies are postural because they are triggered by positions in which hydrostatic pressure is too high and not physiologically corrected because of an impairment in dynamic fractionation of hydrostatic pressure (DFHSP). Such impairment is usually caused by superficial and deep closed shunts (CS) or superficial derived open shunts (DOS) due to venous incompetence that disrupts DFHSP control by the valvulo-muscular pump (VMP). Since valve repair or prosthesis is neither easy nor feasible to date, interruption at or immediately under escape points should repair the VMP and suppress pathologic shunt flow. At the same time, these interruptions fractionate permanently and dynamically the column of pressure. Furthermore, and in order to fragment better the hydrostatic column in long incompetent superficial veins, other interruptions immediately under possible competent perforators connected with those veins are performed. This means that CHIVA restores venous physiology in walking patients by maintaining a low distal venous pressure due to
+
+84
+
+Claude Franceschi
+
+renewed VMP efficiency and its effect on DFHSP and blood drainage. Ultimately, venous disorders and varices are supposed to heal. Venous disorders caused by excessive transmural pressure (TMP) should heal due to restoration of DFHSP and venous drainage repair. Varicose calibres should decrease to normal thanks to aggressive shunt flow suppression and efficient VMP blood aspiration. These theoretical hypotheses have been confirmed by numerous publications since their initial presentation at Precy-sous-thil France in October 1988, at which time a text was published entitled Theorie et pratique de la Cure Conservatrice et Hemodynamique de l'Insuffisance Veineuse en Ambulatoire [105].
+
+2. FUNDAMENTALS OF THE CHIVA STRATEGY
+2.1. Strategy, Tactics, and Definitions
+Strategy is the intellectual concept of the actions that have to be taken in order to reach a goal according to a theoretical model. Tactics are the material means selected to perform the actions according to the strategy. In this field, successful strategy relies on understanding venous pathophysiology, and the efficiency of the tactics depends on the quality of the material means. For example, an arterial by-pass can fail because of a mistaken strategy (wrong indication according to the arterial pathophysiology knowledge) or because of a bad tactic (faulty prosthetic material or surgical error). Many CHIVA failures are either due to disrespect or misunderstanding of the strategy or inadequate material means. For this reason, both a clear understanding of the theory and adequate training are necessary to perform CHIVA.
+
+2.2. Fundamental Rules of Strategy
+CHIVA strategy is conservative not only to preserve the venous capital for further arterial by-pass, but also because vein destruction involves hemodynamic disorders. Actually, venous destruction precludes the drainage that causes tissue suffering and varicose recurrence by vicarious effect. CHIVA strategy is hemodynamic because it restores proper distal venous pressure. As a matter of fact, CHIVA reduces lateral pressure and consequently transmural pressure (TMP) by restoring DFHSP through disconnection of closed shunts, suppressing pathogenic shunt flows, and preserving beneficial vicarious shunts. CHIVA strategy is focused on the re-entry quality, that is, on its ability to drain the venous network properly in order to avoid the effects of drainage preclusion. For this reason, limited venous interruptions are preferable to extensive ones, even if the immediate aesthetic outcomes are less satisfactory. Actually, aesthetic outcomes improve with time, long-term results are much better, and recurrences are much fewer with limited interventions. Clearly, however, any removal or occlusion of nondraining or redundant veins is not contrary to CHIVA strategy, which consists of the following principles:
+A Preservation of deep and superficial draining flows even in varicose veins.
+
+The Chiva Strategy and other Conservative and Hemodynamic Treatments
+
+85
+
+B Disconnection of deep and superficial CS and superficial DOS in a way that blocks the shunting flow WITHOUT precluding the draining flow.
+C Fractionation of the hydrostatic pressure column WITHOUT precluding the draining flow.
+D Adaptation of the re-entry efficiency to the needs of draining flow. E Minimization of venous interruptions. The less the veins are interrupted, even in
+extended varicose, the better the long-term results. The more the veins are destroyed, even if varicose, the better the short-term results but the worse the long-term [100106].
+
+2.2.1. Preservation of Deep and Superficial Draining Flows Even in Varicose Veins
+Any venous flow, even in varicose veins, is composed totally or partially of physiologic draining blood from tissues. Any blockage of that draining flow involves upstream tissue suffering including capillaro-venular overload (telangiectasias and micro-varicosities). Collateral veins, overloaded and dilated by the force of draining flow, act as natural venous by-passes that circumvent a blockage and allow for physiologic drainage of the upstream tissues. In this way, a vicarious open shunt (VOS) is formed. VOS can be elicited by a functional block, thrombosis, sclerosis, ligation or removal, the latter two being the reason for recurrent varices after disrespect of draining flows. There is no indication for VOS destruction, even if VOS is an unsightly varice. However, it is obvious that removal or occlusion of non-draining or redundant veins is compatible with CHIVA strategy.
+
+2.2.2. Disconnection of Deep and Superficial Closed Shunts (CS) and Superficial Derived open Shunts (DOS) in a way that Blocks Shunting flow WITHOUT Compromising Draining Flow
+2.2.2.1. Disconnection of deep closed shunts (CS). The principle of CHIVA in deep veins is disconnection of the shunting deep incompetent vein at its junction with the deep competent but shunted vein. Thus, during VMP systole, the distal flow is totally injected into the competent vein and does not flow back again during the diastole. Also, correct dynamic fractionation of hydrostatic pressure (DFHSP) is once again possible. The competent shunted vein can be close to or distant from the incompetent shunting. It is sufficient that the blood drained by the incompetent vein can be transported by the competent one. If it cannot be, disconnection of the incompetent deep vein is obviously contraindicated because it would be hazardous to physiologic drainage. For example, the incompetent collateral of a double superficial femoral vein can be successfully blocked if the other one is competent. An incompetent superficial femoral vein can be blocked only if the deep femoral vein is competent and participates to the drainage of the calf. The same reasoning applies to deep shunts of the calf. An incompetent posterior tibial vein, for example, can be interrupted if the competent fibular vein can drain the tibial territory and vice versa.
+
+2.2.2.2. Disconnection of superficial closed shunts (CS). Superficial veins can shunt other superficial or deep veins in closed circuit either open circuits.
+
+86
+
+Claude Franceschi
+
+2.2.2.2.1. Superficial veins shunting other superficial veins in closed circuit. This type of shunt is usually not much overloaded because it is not connected directly with the deep network, so it is not much activated by the VMP. However, its disconnection at the escape junction can reduce its calibre. Furthermore, this shunting vein can be destroyed when redundant. It corresponds to shunt type 2.
+2.2.2.2.2. Superficial veins shunting deep veins in closed circuit. These represent a major cause of chronic venous insufficiency and varicose veins. They are classified in shunts type 1, 3, 4, 5, and 6 according to the patterns of the superficial veins that shunt the deep veins. CHIVA strategy attempts to disconnect the closed shunts at the escape point without affecting the physiological blood drained by the shunting vein. Therefore, particularities of disconnections depend on the hemodynamic configuration of each CS. Disconnection at the escape point (i.e., at the N1-N2 junction) has to take into account the shunt's ability to provide for efficient re-entry for the proximal tributaries. If it can, N2 can be disconnected immediately beneath the junction. If not, N2 will be disconnected at the junction.
+2.2.2.2.2.1. Shunt 1 CHIVA strategy: Shunt 1 is N1-N2-N1. It can involve the great or small saphenous veins. One has to make sure that these shunts are not just the diastolic phase of a mixed shunt because the strategy would be different.
+
+Figure 7.1. Shunt type 1+N3 and associated CHIVA 1 procedure.
+2.2.2.2.2.1.a. Shunt 1 in great saphenous vein (GSV): When the sapheno-femoral junction (SFJ) is the escape point (EP), GSV is precisely disconnected at the GSV. This disconnection could be made immediately beneath the arch in order to drain the arch and its tributaries through the SFJ. This is not because of the risk of recurrence by the arch tributaries. As a matter of fact, at this point aspiration is weak (no VMP), and terminal valve incompetence does not prevent excessive pressure in the deep network (from coughing, defecating, lifting heavy loads, etc.). For these reasons, the arch and its tributaries are better drained by distal re-entry.
+
+The Chiva Strategy and other Conservative and Hemodynamic Treatments
+
+87
+
+When the escape point is an incompetent perforator connected to the saphenous trunk, it remains preferable to disconnect the perforator itself when the corresponding VMP is not efficient. This is the case in the thigh. On the contrary, in the lower region of the leg, disconnection can be performed at the saphenous trunk immediately beneath the incompetent perforator thanks to the efficiency of calf VMP. This efficiency can be assessed by Doppler, which shows whether or not there is an inflow during VMP diastole while N2 is compressed by a tourniquet or a finger.
+
+2.2.2.2.2.1.b. Shunt 1 in small saphenous vein (SSV): Usually the RP is at the saphenapopliteal junction (SPJ).Theoretically, the shunting SSV has to be disconnected at SPJ. In fact, Giacomini vein (GV) hemodynamics allow disconnecting of the SSV immediately beneath its junction with GV because GV can function as a vicarious pathway in case of flow-pressure excess in the popliteal vein, thereby preventing recurrences through forced perforators of popliteal fossa.
+
+2.2.2.2.2.2. Shunt 3 CHIVA strategy: Shunt 3 is N1-N2-N3-N1. It can involve the great or small saphenous veins. One has to make sure that these shunts are not just the diastolic phase of a mixed shunt because the strategy would be different. Shunt 3 differs from shunt 1 by N3 segment interposition between N2 and the re-entry point (REP). The strategies are also different. Actually, disconnection at the junction as in shunt 1 is problematic because it would disconnect a closed shunt at N1-N2 but leave a derived open shunt (DOS) N2-N3 called shunt 2. N3 would be less overloaded because CS shunting flow would have been interrupted and the pressure column would have been fractionated at the arch, but overload would still be excessive because of the remaining shunt 2. Disconnection at both N1-N2 and N2-N3 junctions would disconnect both shunts 1 and 2, but N2 draining flow would be precluded because there would be no available re-entry points (REP) on its track. Even if this approach is conservative, disconnects the shunts, and fractionates the hydrostatic pressure, double disconnection in shunt 3 is not CHIVA because it does not allow draining flow. In order to carry out a correct CHIVA in shunt 3, two different procedures are possible. The first is limited to one disconnection at N2-N3 that stops the shunt 1 and 2 shunt flows. In that case, N2 and N3 drain no more shunt flows. N3 is retrograde but drains only its territory, and hydrostatic pressure is fractionated at the N2-N3 junction. N2 is antegrade due to no efficient re-entry on its track, but it is still subjected to the previous nonfractioned column of hydrostatic pressure because of no N1-N2 fractioning. N2 segment submitted to excessive hydrostatic pressure explains two phenomena: 1) calibre is partially reduced due to shunt flow suppression but does not return completely to normal, and 2) in some cases a previously small and inefficient perforator located on this N2 segment can enlarge, so that N2 flow is reversed and the previous shunt 3 is converted to shunt 1. In the latter case, the induced shunt has to be corrected, like any shunt 1, by a disconnection at the N1-N2 junction. This procedure is called CHIVA 2 because it may need of two different procedures planned when the duplex investigation confirms the transformation of type 3 shunt into type 1. The latter consists of disconnections at both the N1-N2 and N2-N3 junctions associated with distal N2 devalvulation until an efficient re-entry is represented by one or more perforators.
+
+88
+
+Claude Franceschi
+
+2.2.2.2.2.3. Shunt 4 CHIVA strategy: Shunt 4 is a CS N1-N3-N2-N1. EP at the N1-N3 junction is usually a pelvic escape point, gluteal, obturatory, inguinal (I point) or perineal (P point). Disconnection must be performed only at the EP.
+
+Figure 7.2. CHIVA II first and second step for Shunt type III.
+
+Figure 7.3. Shunt type IV and associated CHIVA procedure.
+2.2.2.2.2.4. Shunt 5 CHIVA strategy: Shunt 5 is a CS N1-N3-N2-N3-N1. As in shunt 4, EP at the N1-N3 junction is usually a pelvic escape point, gluteal, obturatory, inguinal (I point) or perineal (P point). Disconnection must be performed not only at the N1-N3 EP, but also at the N2-N3 in order not to leave a shunt 2.
+
+The Chiva Strategy and other Conservative and Hemodynamic Treatments
+
+89
+
+2.2.2.2.2.5. Shunt 6 CHIVA strategy: Shunt 6 is a CS N1-N3-N1. EP can be a pelvic escape point or any other EP. This shunt can appear in congenital malformations but is more usually seen in recurrences following removal of varices and saphenas.
+
+2.2.2.3. Disconnection of a mixed shunt (MS): A mixed shunt is composed of two shunts: a vicarious open shunt (VOS) and a closed shunt (CS) that share the same EP and distal segments of the shunting veins. Their REP and proximal segments are different. REP of VOS is proximal to LP, and REP of CS is distal to LP. As VOS has to be preserved and CS disconnected, the disconnection cannot be at LP but only at the distal venous segment of CS where it diverges from the distal venous segment of VOS.
+
+2.2.2.4. Disconnection of superficial derived open shunts (DOS): DOS are shunts 2, N2-N3-N1. Disconnection of DOS is done simply on N3 at the N2-N3 junction.
+
+2.2.2.5. Disconnection of composite shunts: Practically speaking, most shunts are composite in that a shunt 1 can be connected to a shunt 2 and so on. Sometimes the REP of one shunt is not efficient enough, and drainage is also provided by the REP of an associated shunt. Therefore, any shunt can be disconnected as long as its disconnection does not preclude any draining flow in the associated shunt. For this reason, the proper REP of every associated shunt has to be assessed by dynamic tests. For example, when a composite shunt is shunt 1+2 (N1-N2-N1-N2-N3-N1), disconnection can be carried out at N1-N2 and N3-N1 as long as REP in N2 is efficient. If REP in shunt 1 is not obviously efficient, this composite shunt can be assimilated to a shunt 3 and treated by CHIVA 2 or CHIVA devalvulation. In another case, two EPs can be superimposed and be drained by the same distal REP (N1-N2N1-N2-N1). Fractionation can be done immediately at the upper EP. It may be also done beyond the lower EP even if refluxing during diastole, but only if testing shows it to be efficient enough as REP. Thus, under appropriate conditions, a previous EP can be transformed into REP.
+
+2.2.3. Static Fractionation of Hydrostatic Pressure Column WITHOUT Compromising Drainage
+Disconnection of CS and DOS shunts also allows for static fragmentation of the column of hydrostatic pressure. Sometimes the incompetent segment disconnected from the shunt is too long and high, so it needs a complementary fractionation. As this fractionation must not preclude drainage, every remaining subsegment of vein must have a REP.
+
+2.2.4. Adaptation of the Re-Entry Efficiency to the needs of Draining Flow Re-entry is the place where shunt flow rejoins its physiologic pathway. After CS or DOS
+disconnection, flow is limited to the draining flow but can be too great for the capacity of the REP, either because its calibre is too small or because downstream aspiration is too weak. REP is efficient when it allows a correct drainage of the network that converges on it, that is, when its calibre is sufficient and downstream aspiration is correct.
+When more than one REP drain a CS or DOS, hemodynamic assessment of each perforator is performed by diastolic flow velocity registration in the shunting vein while other
+
+90
+
+Claude Franceschi
+
+veins that carry the same flow to other re-entries are blocked. An inefficient re-entry leads to tissue suffering, telangiecstases, and vicarious varices.
+
+2.2.5. Superficial CS and Deep Venous Incompetence In cases of superficial CS or DOS, the greater the efficiency of the VMP, the more the
+diastolic flow. On the contrary, the lower the VMP efficiency, the less the diastolic flow. That is why, in cases of totally inefficient VMP, as when the deep veins are totally incompetent, dynamic tests of VMP will not show any diastolic flow in the superficial veins, even if they are very large and varicose. Actually, during the diastole, total incompetence does not allow the VMP to reduce venous pressure, so the gradient of the re-entry perforating vein is not favorable to inflow. This is illustrated by the Perth test, which shows no reduction of varices when walking despite a tourniquet at the hip. It is also demonstrated by an unexpected lack of reflux in superficial varicose veins during dynamic tests, such as Paranà maneuver. The CHIVA strategy is to correct before deep incompetence occurs, through disconnection in case of deep closed shunt or valve repair if there is total incompetence without any CS, followed by disconnection of superficial shunts.
+Superficial disconnection without deep incompetence correction makes no haemodynamic sense because no HDSFP cannot be achieved
+
+2.3. Post Chiva Controls
+After CHIVA, clinical and instrumental tests have to be interpreted according to CHIVA patterns.
+2.3.1. Regression of Clinical Symptoms: is favored by walking. All functional symptoms and oedemas related to venous insufficiency, such as postural pains and heaviness, should disappear or diminish during the first postoperative days. Ulcers should close within few weeks. Hypodermitis should disappear in the course of several weeks. Pigmentation should regress after several months, up to two years. The caliber of varicose veins should return to normal within a few days or weeks, depending upon their pre-operative size.Thus, clinical outcome cannot be definitely assessed until some weeks or months after the procedure.
+2.3.2. Post-CHIVA Echo-Doppler Assessments: Valsalva maneuver has to be negative at the operated shunts. Retrograde flow during dynamic tests does not necessarily signify a failure. Poor systolic but significant diastolic retrograde flow attests to shunt 0, thus a correct drainage [6,45,47,56,255].
+2.3.3. Air PLethysmography Assessments: The pressure-volume relationship in the leg has to normalize according to the efficiency of the procedure [251].
+
+The Chiva Strategy and other Conservative and Hemodynamic Treatments
+
+91
+
+2.4. Post-Chiva Iterative Procedures
+
+Except for CHIVA 2, no further procedures usually have to be performed. Actually, in complex cases such as multi-shunts in venous congenital malformations, it is better to spread the cure over two or more operations every six months in order to avoid excessive interruptions and to clarify the situation progressively.
+
+2.5. Short and Long Term Results
+The less the veins are interrupted, even in extended varicose, the better the long-term results [56]. The more the veins are destroyed, even if they are varicose, the better the shortterm results but the worse the long-term. It is preferable to spread CHIVA over two distant procedures, thereby delaying to the second operation those complementary interruptions that are not obviously safe for drainage. This is the case, for example, when in a shunt 1+2, the REP in shunt 1 is not obviously efficient. This composite shunt can be assimilated to a shunt 3 and treated by CHIVA 2. These iterative operations, when necessary, are not difficult because they are ambulatory, brief, and performed using local anaesthesia.
+Obviously, complete removal or closure of all varicose veins results in immediate aesthetic success. Telangiectases, micro-varicosities and vicarious varices that appear over time are not due to a "natural" evolution of the varicose disease, but rather to long-term complications of nonhemodynamic procedures. On the contrary, hemodynamic procedures like CHIVA preserve the veins, even if varicose, in order not only to spare the venous capital for further arterial by-pass, but also to restore correct venous function. The so-obtained correct venous function progressively cures varicose veins and trophic disorders and prevents further recurrence. The time necessary for healing ranges from several days to several weeks, and the varicose veins remain visible during that period. Patients accept this delay for a better final outcome.
+2.5.1. Chiva and Recurrence Varicose recurrence is usually imputed either to an incomplete destruction of superficial
+veins (especially incomplete resection of the arch of great saphena or small saphena and its tributaries) or to the natural evolution of varicose disease. Actually, thanks to pre- and postoperative echo-Doppler findings, the problem can be identified as one of four conditions.
+Same varices reappear: Varicose reappearance over time (of the same varices as before the therapy) constitutes true recurrence. An example is when an occluded or caliber- reduced varicose vein becomes permeable and dilated again. In this case, recurrence could be due to the forcing of veins by draining flow because of inefficient re-entry or an inefficient interruption. If the recurrence is due to an inefficient REP, it is better not to repeat any interruption at the same point, but rather check another one beyond a better REP. If the recurrence is due to a tactical (material) interruption failure, a more reliable technique is necessary.
+
+92
+
+Claude Franceschi
+
+Remaining varices: Some or all of the varices may be left untreated by the therapist e.g., when some or all of varices remain immediately after therapy. In this case, a complementary CHIVA can be performed.
+Varices in different territories: Varices different from those previous to therapy can be due to an independent varicose evolution, e.g., when new varices of previously normal small saphena occur after therapy of great saphena. Here, too, complementary CHIVA can be carried out.
+Iatrogenic varicose veins: Varices may be induced by previous therapy, so that one can call them long-term iatrogenic complications. For example, it is not rare to notice new varices without any leak point but made only of vicarious veins. This occurs because previous draining normal or varicose veins were destroyed. In the case of superficial VOS due to drainage preclusion, static fractionation is possible only if intermediate perforators (REP) are found on their track. In the case of CS created by anarchical VOS that open incompetent perforators, CHIVA has to disconnect them. Unfortunately, most cases of recurrence after venous removal are VOS without much intermediate REP, which reduces the therapeutic possibilities.
+
+3. PARTICULAR CHIVA STRATEGIES
+When venous pressure increases, transmural pressure (TMP) increases so that liquids and metabolic wastes from the tissues cannot pass into circulation. An obstacle to the passage of liquids involves the appearance of oedemas. Intra-tissue accumulation of toxic metabolites associated with capillary flow slowdown is responsible for trophic disorders. The reactive vasodilation of arterioles and the opening of micro-shunts worsen tissue ischemia in two ways: 1) TMP increases because of residual pressure (RP) enhancement; and 2) the opening of micro-shunts steals capillary flow, thereby worsening cellular necrosis. This explains the coexistence of oxygenated (red) blood with necroses in venous ulcers. Infection occurs because of the ideal culture medium that this type of ulcer represents. CHIVA has to reduce TMP through lateral pressure reduction. Disconnection of shunts and fractionation of pressure have to be done with the utmost attention to drainage of the damaged tissue. However, those sites that theoretically have to be interrupted but that involve inflamed tissues must not be touched at the first operation. The first procedure is performed only at sites having healthy tissues. A second procedure is performed at the remaining sites when their trophicity is improved by the first procedure. Actually, correct and long-term durable interruptions cannot be obtained in inflamed tissues.
+
+3.1. Congenital Venous Malformations
+Examination is necessary to identify which varicose and/or incompetent deep and/or superficial veins are CS, DOS, VOS, mixed shunts, or NON draining malformative vein. In these multiple and complex situations where, in addition to shunting flows, superficial "physiologic" flows are increased by superficial angiomas, interruptions must divided into
+
+The Chiva Strategy and other Conservative and Hemodynamic Treatments
+
+93
+
+multiple operations in order to correct hemodynamic disorders in the most efficient, accurate, and safe manner.
+
+4. CHIVA MAPPING
+Mapping is a schematic design that depicts the venous anatomo-functional configuration of each patient. Flow direction according to the systole-diastolic phase of dynamic tests and Valsalva maneuver is indicated by an arrow for each depicted vein. Data are obtained through echo-Doppler. In this way EP, shunting veins, REP, and occluded or removed veins can be identified and analyzed in order to plan an appropriate CHIVA strategy. Only echo-Doppler allows such mapping and thus a correct CHIVA strategy.
+Clinical examination is not sufficient to assess accurately different types of shunts. Use of an ultrasound duplex scanner is mandatory because it is the only noninvasive instrument able to show in real time the anatomy of the venous network and, contemporaneously, venous flow direction and velocity in any position and during any dynamic maneuver.
+
+4.1. Valsalva Manoeuver (VM)
+Positive VM, that is an antegrade or retrograde flow elicited by thoraco-abdominal and diaphragm contraction, evidences a deep incompetence when in deep veins and a closed shunt CS when in superficial veins. Escape point is checked upstream. Valsalva maneuver is negative in VOS and DOS [46,48,241].
+
+4.2. Manual or Pneumatic Squeezing of the Calf
+It can evidence reflux upon relaxation but can be false negative when squeezing is performed incorrectly or when the aspiring VMP sector is not involved by compression. Moreover, squeezing compresses superficial veins, which does not occur during physiologic VMP motion [102,148,150].
+
+4.3. Dynamic VMP Activation
+Paranà maneuver allows a "physiologic contraction" and, at the same time, facilitates ultrasound scanning in the standing immobile position due to an isometric reflex contraction of the muscles of the lower limbs to a slight push-pull at the patient's waist. Flow is activated by VMP systole and /or diastole [102].
+4.3.1. In the superficial network, diastolic flows are elicited by the VMP in CS and DOS. Systolic flows are elicited in CS, VOS and DOS. Diastolic velocity is proportional to the shunting flow. Diastolic and systolic flow directions are usually opposite in CS and
+
+94
+
+Claude Franceschi
+
+DOS but can be the same as CS that involve Giacomini vein. In the case of multiple REPs in CS or DOS, the efficiency of the REPs proximal to the terminal can be assessed by diastolic flow velocity while compressing the terminal re-entry. This assessment is useful to the hemodynamic therapeutic strategy. Reflux time, Psatakis index, or dynamic reflux index (DRI) measurement can evidence reflux only when systolic and diastolic flow directions are opposite. Flow directions remain pathologic even when pressure and velocity return to normal but remain inverted after shunt disconnection. In this case, flow direction is abnormal but no longer pathogenic. In some cases, the flow in great incompetent varicose saphena cannot be activated by diastole when the VMP is disabled because of total deep venous valve incompetence. That is why valve incompetence allows retrograde flow only if the pressure gradient is inverted, that is, when the VMP is efficient. In other cases, diastolic reflux occurs while deep venous veins are refluxing, too. This means that there remains an efficient valvulo-muscular portion connected to the shunt. In other words, the greater the superficial diastolic reflux, the better the VMP efficiency.
+
+4.3.2. In the deep network, systolic and diastolic flows are elicited by the VMP. Diastolic flow evidences a proximal valve incompetence without deep CS when diastolic flow volume is less than or equal to systolic, or when DRI >1. Deep CS is demonstrated when diastolic flow volume is greater than systolic, or DRI >1, because, as explained previously, CS carries deviated flow in addition to normal during diastole. Detection of deep CS is the central goal of deep venous incompetence investigation because it is determinant for hemodynanamic therapeutic strategy.
+
+5. OTHER CONSERVATIVE AND HEMODYNAMIC TREATMENTS
+CHIVA can be associated with other hemodynamic and conservative techniques but is incompatible with nonhemodynamic techniques [43,98,99,126-128,153,154]. In order to reduce transmural pressure (TMP), those methods affect lateral or external pressure. Surgical and medical treatments can be classified into two categories, according to whether they are in accordance with hemodynamic principles or not. TMP is the central parameter of the regulation of venous function. Consequently, treatments must restore a TMP that is favorable to drainage and an optimal venous capacity. The therapeutic action must consist of either increasing extra-venous pressure or decreasing intra-venous pressure.
+
+5.1. Increase in Extra Venous Pressure
+An increase in external pressure reduces TMP and thus supports drainage and the reduction of venous caliber. This can be obtained by an increase in atmospheric pressure, which is maximal at sea level. Generally, however, increases in EP are obtained through passive external compression with rigid or elastic bandages, but also by immersion in a water bath or even in a mercury bath. Sometimes active pneumatic compression is used. In all cases, the goal is reached when the TMP is corrected. Such applied external pressure cannot exceed
+
+The Chiva Strategy and other Conservative and Hemodynamic Treatments
+
+95
+
+the arterial blood pressure because of the risk of ischemia. Also, when intravenous pressure is very high, strong external compression can be painful due to the crushing of tissues between excessive intravenous and external pressures. Therefore, external compression is appropriate only when the intravenous pressure is not too high. The hemodynamic effects of rigid and elastic bandages differ in two ways. Rigid application increases VMP efficiency during systole because it confines the content of the pump in a rigid container, but it is less efficient at rest. Elastic application cushions the hemodynamic effects of the systole and is more efficient at rest. For these reasons, rigid application is preferred for subjects who walk. In any case, compression represents a logical and effective hemodynamic treatment for venous insufficiency. It is free of side effects except when overdone, and it can be applied alone or associated with other treatments. Because of its direct effect on TMP, compression also constitutes also a major preventive treatment under temporary physiological conditions, such as presence at high altitude, long-term standing or sitting, and pregnancy.
+
+5.2. Reduction of Venous Pressure
+Reduction of venous lateral pressure (LP) decreases TMP, thereby improving drainage, venous size, and venous caliber. LP depends on HSP and the lateral component of residual pressure (RP).
+5.2.1. Postural Therapy: At the ankle, HSP is maximal in the motionless standing position, low in the lying
+position, and negative (lower than the atmospheric pressure) when the foot is raised above head level. Therefore, posture can control TMP by action on the HSP. So, lying and, moreover, raising lower limbs support drainage and decrease venous caliber.
+5.2.2. Thermo-Therapy: Heat increases RP by reducing microcirculatory resistance and increases LP as well.
+Thus, cooling the legs reduces LP.
+5.2.3. Valve Repair or Valve Prosthesis: In cases of deep venous valvular incompetence without any shunt, the theoretical
+treatment consists of valvular repair or valvular prosthesis [142,168,265-267]. Unfortunately, these techniques have need of improvement. In most cases, only postural and compressive therapy can be applied.
+
+5.3. External and Lateral Pressure-Associated Correction
+Treatments for venous insufficiency by TMP correction often combine external pressure increase with LP reduction. This occurs when one walks into the sea because the external effects of compression by water are combined with maximal atmospheric pressure, with LP reduction caused by reduced superficial flow from thermoregulation, and with DFHSP
+
+96
+
+Claude Franceschi
+
+induced by walking. It is also the case when an imperfect correction of closed shunts is supplemented by compression.
+
+6. TACTIC MATERIAL MEANS IN CHIVA
+Which are the best procedures to achieve the strategic decisions? In other words, which are the most accurate, efficient and lasting material means to perform flow interruptions at the right places according to strategic needs? How not to confuse tactic failure with strategic error? Is a forced or by-passed interruption due to an inappropriate tactic or a mistaken strategy?
+
+6.1. Surgery
+First of all, a previous precise marking under duplex ultrasound by an operator aware of the surgical necessities is indispensable. Venous short resection (1 to 4 cm) associated with nonresorbable ligation and nonresorbable closure of the perforated fascia seems to be the most precise, efficient, and long-lasting material means to date. Simple nonresorbable ligations are seldom forced and reopened. Multiple ligations with nonresorbable thick thread seem to resist better. Resorbable venous ligation after section could favor a recanalisation due to inflammatory angiogenetic effects.
+
+6.2. Endovenous Procedures:
+Endovenous procedures, such as sclerotherapy, laser, and radiofrequency, are not yet appropriated for precise, limited, and lasting interruptions. Nevertheless, they are useful when surgery is not feasible, as for example in sciatic nerve varices where surgery is not suitable for the great risk of iatrogenic nerve damage [199].
+
+The Chiva Strategy and other Conservative and Hemodynamic Treatments
+
+97
+
+Figure 7.4. Sciatic nerve varices and its therapy by echo-guided sclerotherapy. The sciatic veins are deep veins and lay within the sciatic nerve The nerve was easily visible on ultrasound imaging because of thickening of the neural sheath and dissection of the nerve fibres by the dilated vessels (Fig. A transversal access, B longitudinal access. C varicose veins ot the lateral aspect of the leg fed by reflux coming from sciatic veins through a perforator Please note in D) the echo coming from the foam reaching its target in an area not so easily reachable by surgery.
+
+In: Principles of Venous Hemodynamics Authors: Claude Franceschi and Paolo Zamboni
+
+ISBN 978-1-60692-485-3 © 2009 Nova Science Publishers, Inc.
+
+Chapter 8
+HAEMODYNAMICS OF VENOUS INSUFFICIENCY: ASSESMENT TECHNIQUES
+Claude Franceschi1 and Paolo Zamboni2
+1Saint Joseph and Pitié-Salpétrière Hospitals, Paris, France; 2University of Ferrara, Italy.
+Functional investigations measure the various haemodynamic parameters of the venous system.
+1. VENOUS PRESSURE MEASUREMENT
+1.1. Invasive Pressure Measurement
+Invasive pressure measurement of distal venous pressure is independent of the orientation of the endovenous sensor when the subject is motionless. This is because circulatory velocities are too low to create sufficient dynamic energy, and total pressure is roughly equal to lateral pressure (LP). On the contrary, when the subject is moving, circulatory velocity is no longer negligible, and measurement has to take into account the angle of the sensor to the flow (tubes of Pitot). However, despite some overlaps, ambulatory venous pressure is widely considered the gold standard assessment of venous function [19,23,26,58,135,183].
+1.2. Non-Invasive Pressure Measurement
+1.2.1. Doppler and Sphygmomanometer: Measurement of venous pressure is performed at the ankle with a sphygmomanometer.
+Although this type of assessment is incapable of providing an accurate pressure value, it provides an indicative value for assessing the presence of venous disorders. The
+
+100
+
+Claude Franceschi and Paolo Zamboni
+
+sphygmomanometer is inflated to 120 mmHg and deflated immediately. Venous pressure is the pressure value when the posterior tibial venous flow is heard at the Doppler. The sphygmomanometer has to be deflated immediately in order to avoid any overevaluation of venous pressure. This pressure is normally lower than 30 mmHg in the supine position. It rises in the case of a proximal haemodynamic obstacle to the venous flow. A comparative measurement at both ankles prevents misleading due to artefacts. The Authors think that such a procedure may produce an additional parameter, i.e., the time of appearance of venous flow after sphygmomanometer deflation, which is probably related to refilling time. However, the significance of this parameter in clinical practice has not yet been assessed [13].
+
+1.2.2. Ultrasonographic Derived Venous Pressure (Zamboni Pressure): The relationship between vein volume and pressure (venous compliance) is known to be
+linear after completion of the filling phase, in which the vein is distended by the increase in blood volume. However, during the filling phase, the volume/pressure relationship is not linear. Rather, there is a significant increase in volume with little change in pressure. The volume/pressure relationship becomes linear starting at pressure values around 20 mmHg, that is, near the completion of the filling phase.
+Because of the particular anatomical and structural configuration of veins related to their function, vein diameter reflects vein volume. This assumption is confirmed by our demonstration of linearity in the filled saphenous vein, starting at a pressure value of 20 mm Hg, and also by the pressure/diameter relationship of the GSV in patients affected by primary venous insufficiency. This observation has allowed us to describe a new, ultrasonographic method of determination. We have experimented with a non-invasive method for extrapolation of saphenous AVP values from a diameter/pressure curve. This can be obtained by drawing a straight line from the point of initial venous distension (20 mmHg) that best approximates the two pressure/diameter values determined noninvasively and measured effectively under different hydrostatic conditions (sitting and standing).
+In clinical practice, if the venous system is able to empty with exercise, we can document reductions in both vein diameter (assessed by ultrasound) and vein volume (expressed by RVF), as in the clinical Perthes test. By contrast, if the system is unable to empty satisfactorily due to impaired muscle pump function or another cause, we cannot document a significant reduction in vein diameter and/or volume (and, of course, in AVP since these three parameters are linearly related after the filling phase).
+The ultrasonographic technique is simple, non-invasive and thus easily repeatable, and performed with equipment widely used for vascular investigations.
+Minor errors in diameter assessment could occur due to the fact that the probe is held manually, thus the accuracy of the ultrasonic measurement is strictly operator-dependent. However, this is a general limitation of ultrasound techniques [258,259,260,262,284].
+
+Haemodynamics of Venous Insufficiency: Assesment Techniques
+
+101
+
+Figure 8.1A. ULTRASONIC MEASUREMENT OF DIAMETER OF THE SAPHENOUS VEIN IN DIFFERENT CONDITIONS. ASSESSMENT OF THE HYDROSTATIC PRESSURE. Diameter and pressure were first measured in two different hydrostatic positions: sitting and standing. The two values of diameter (D1, D2) were measured by duplex scanning in a saphenous segment of the thigh. P1-2 is the pressure of the hydrostatic column, i.e. the distance between the heart level and the point of saphenous diameter measurement in quiet standing (P1) and in sitting position (P2) according to the formula P = x g x h. At 37 °C and with an ambient pressure of 1 atm,  x g can be considered a constant. Consequently, P1-2 (mm Hg) is equal to 0,7723 x h, where h is the distance (in cm) between the heart level and the point of measurement
+Figure 8.1B. EXTRAPOLATION OF AVP FROM A LINEAR DIAMETER-PRESSURE CURVE (ZAMBONI'S METHOD): Extrapolation of ultrasonic AVP values from a diameter/pressure curve of the saphenous vein. Zero point of the curve is arbitrarily considered a pressure value of 20 mmHg (P0). This is the lowest level of pressure from which the saphenous diameter/pressure relationship at the
+
+102
+
+Claude Franceschi and Paolo Zamboni
+
+thigh can be approximated to a straight line. Hence, the axes intersection was set to 20 mm Hg in order to shift the reference system to the minimum level from which the diameter/pressure relationship was demonstrated to be linear. By drawing a straight line from this zero to the middle point of the segment joining the two diameter/pressure values measured in sitting and in standing position (Fig 8.1A), a linear diameter/pressure curve can be drawn for each patient. This is the line that starts from the point of initial venous distension (20 mm Hg) and best approximates the two pressure/diameter values non invasively determined in different hydrostatic conditions. Subsequently it is necessary to assess the GSV diameter after 10 consecutive tip-toe movements, both with and without external tourniquet occlusion of the proximal saphenous vein. (Fig. 8.1A). The two values of GSV diameter after exercise are plotted on the diameter/pressure curve previously created, allowing the extrapolation of two AVP values, respectively with and without sapheno-femoral reflux elimination, as shown in Figure 8.1B.
+
+1.2.3. Postural Venous Cardiac Controlled Impairment Assessment, or Tilt Test:
+The subject lies on a table inclined close to vertical in order to test his vagal reaction to lower limb extreme venous stasis, given the totally motionless standing position, that is, without VMP support. The operator has to be careful not to elicit a malign vasovagal syndrome [5].
+1.2.4. Leg Oedema Volume Measurement (LEVM): assesses variations in edema of the lower limbs. Many means of measurement have been
+proposed: mercury volumetry, infrared volumetry, echo volumetry and water volumetry, magnetic resonance imaging (MRI), impedancemetry, and Leg-O-Meter. Volume varies with the causes of the edema [186,232].
+1.2.5. Plethysmography 1.2.5.1. Mercury gauge plethysmography: measures variations of volume in the limb,
+based on derived limb circumference without prejudging it to its value of the pressures [89]. 1.2.5.2. Air plethysmography: measures variations in pressure and volume of the calf
+during stress tests, and thus variations in transmural pressure (TMP). It divides the venous function according to change in posture and activation of the VMP, permitting the derivation of four useful parameters [19,59]:  total volume (TV), the amount of blood to be found in the venous reservoir; air
+plethysmography measures the change in volume (in ml air) produced by passage from the supine position with the leg raised at 45° to the standing position;  venous filling index (VFI), the volume variation produced in a limb in a defined time by passage from the supine to the standing position; VFI is related to the severity of the reflux and is expressed in ml air/sec;  ejected fraction (EF), the rate of reduction in TV after a single tiptoe movement; It reflects the calf muscular systole; and  residual volume fraction (RVF), the rate of reduction in TV obtainable after ten tiptoe movements; this index is related to ambulatory venous pressure measurement. We measured the changes in all of these parameters after CHIVA procedures (see chapter 12).
+
+

@@ -1,7 +1,2 @@
-# Extracted video frames and annotation masks (30k+ PNG files)
-output/fascia/frames*/
-output/fascia/masks*/
-output/vein/frames/
-output/vein/masks/
-# Keras model weight files
+# Keras model weight files (>100MB each)
 *.keras

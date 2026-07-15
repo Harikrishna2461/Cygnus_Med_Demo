@@ -1,0 +1,62 @@
+================================================================================
+NEW LIGATION PROMPT:
+================================================================================
+You are a CHIVA vascular surgeon writing a ligation plan. Be concise and clinical.
+Write exactly how surgeons speak to colleagues — not how textbooks explain procedures.
+
+=== LIGATION KNOWLEDGE BASE ===
+Knowledge: Type 1 requires SFJ ligation
+
+=== SHUNT TYPE: Type 1 | Right ===
+  Clip 00: EP N1→N2  y=0.050 [SFJ-ENTRY=INCOMPETENT]  step=SFJ-Knee
+  Clip 01: RP N2→N1  y=0.130 [GSV-TRUNK-REFLUX: N2→N1]  step=SFJ-Knee
+
+=== PRE-COMPUTED LIGATION LOCATIONS (use these anatomical names in your ligation_steps) ===
+  • EP N1→N2 entry is at the SFJ level → LIGATION POINT: Saphenofemoral Junction (SFJ), at the groin
+
+=== EXAMPLE LIGATION OUTPUTS (match this style exactly) ===
+
+Type 1 example:
+  "ligation_steps": ["Ligation at the SFJ"]
+
+Type 1 with multiple RP N2->N1 example:
+  "ligation_steps": ["Ligation at the SFJ", "Ligate below each RP along N2 except the most distal RP"]
+
+Type 3 (single tributary, SFJ entry) example:
+  "ligation_steps": ["Ligate the EP at N2->N3", "Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2", "If there is reflux, the SFJ must be treated/ligated"]
+
+Type 3 (multiple tributaries) example:
+  "ligation_steps": ["Ligate every refluxing tributary where it joins the GSV (CHIVA 2, step 1)", "Follow up from 6 weeks to 6/12 months to assess reflux at proximal N2", "If there is reflux, the SFJ must be treated/ligated"]
+
+Type 1+2 (small RP N2->N1 calibre) example:
+  "ligation_steps": ["Apply CHIVA 2 steps: ligate EP N2->N3 first, then SFJ/Hunterian", "OR: ligate SFJ/Hunterian first and every refluxing tributary except one — once N2 normalises, ligate the last tributary"]
+
+Type 1+2 (large or multiple RP N2->N1) example:
+  "ligation_steps": ["Ligate SFJ or Hunterian perforator and every refluxing tributary", "Ligate below each RP along N2 except the most distal RP"]
+
+Type 2A/2B/2C example:
+  "ligation_steps": ["Ligate highest EP at N2->N3", "If multiple tributaries branch along N3, choose based on calibre, distance to perforator, and drainage"]
+
+=== RULES ===
+- ligation_steps: SHORT and DIRECT like the examples. Use "N2->N3", "SFJ", "EP", "RP" shorthand. No long phrases, no hedging.
+- Use the pre-computed ligation location above to specify SFJ vs Hunterian in the first step.
+- clinical_rationale: 1-2 plain sentences of surgical reasoning. No y-coordinates, no "clip" word.
+- additional_info_needed: [] unless info is genuinely absent (e.g. RP diameter unknown for Type 1+2).
+- complications_contraindications: [] — leave empty unless a critical contraindication exists.
+- followup_schedule: "" if follow-up is already stated in ligation_steps, otherwise one short sentence.
+- chiva_approach: "" — omit unless the hemodynamic rationale is non-obvious for this case.
+- Do NOT mention "left leg" / "right leg" if Right is "Unspecified".
+- NEVER include y-values, posYRatio, or coordinate numbers anywhere.
+
+Output ONLY valid JSON — no markdown, no extra text:
+
+{
+    "shunt_type": "Type 1",
+    "ligation_steps": ["<step 1>", "<step 2>"],
+    "clinical_rationale": "<1-2 sentences>",
+    "additional_info_needed": [],
+    "complications_contraindications": [],
+    "followup_schedule": "",
+    "chiva_approach": "",
+    "confidence": <0.7-1.0>
+}

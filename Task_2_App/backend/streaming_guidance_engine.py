@@ -103,7 +103,7 @@ _REGION_TO_VEIN_DIRS = {
     "GSV-CAL":     ["GSV_Distal"],
     "SPJ":         ["SSV", "PV"],
     "SSV":         ["SSV", "PASV"],
-    "Giacomini":   ["Giocomini", "SSV", "Tributary", "AASV"],
+    "Giacomini":   ["Giocomini", "SSV", "Tributary", "AASV"],  # "Giocomini" matches the actual folder name on disk (Mendoza 2014 spelling variant)
     "Calf":        ["GSV_Distal", "Tributary", "Boyd_Perf", "Cockett_Perf"],
     "UNKNOWN":     ["GSV_Prox"],
 }
@@ -295,7 +295,7 @@ def process_probe_state(
         # ── 3a. Gather context from sub-agents ────────────────────────────────
         hist_summary  = history_agent.build_summary(session, pos_y)
         q_state       = q_state_agent.analyze(leg_clips)
-        protocol_text = protocol_agent.get_protocol(region, pos_y)
+        protocol_text = protocol_agent.get_protocol(region, pos_y, vein_mode=session.scan_vein)
 
         # Extract the last 3 guidance strings from history so Task 4 can avoid
         # repeating them (history stores assistant=guidance, user=state_msg pairs).

@@ -1,7 +1,19 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_2_App\\\\generate_supplement.py\")"
+      "Bash(python \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_2_App\\\\generate_supplement.py\")",
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\Krish\\\\Downloads\\\\pdf_extracts\\\\DuplexUS_2014.txt\" -Raw\\).Length)",
+      "Bash(python -c \"import docx; print\\('ok'\\)\")",
+      "Bash(python Notes/gen_protocol_doc.py)",
+      "Bash(python Notes/gen_manager_agent_plan.py)",
+      "Bash(python -c \"from agents.crew_tools import CIRCUIT_ANALYST_TOOLS, NAVIGATION_PLANNER_TOOLS; print\\('Tools:', [t.name for t in NAVIGATION_PLANNER_TOOLS + CIRCUIT_ANALYST_TOOLS]\\)\")",
+      "Bash(../.venv/Scripts/python -c \"from agents.crew_tools import CIRCUIT_ANALYST_TOOLS, NAVIGATION_PLANNER_TOOLS; print\\('Tools:', [t.name for t in NAVIGATION_PLANNER_TOOLS + CIRCUIT_ANALYST_TOOLS]\\)\")",
+      "Bash(python ..\\\\tests\\\\test_shunt_type1_2_llm_eval.py)",
+      "Bash(\"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_1_App\\\\.venv\\\\Scripts\\\\python.exe\" tests\\\\test_shunt_type1_2_llm_eval.py)",
+      "Bash(\"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_1_App\\\\.venv\\\\Scripts\\\\python.exe\" \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_2_App\\\\tests\\\\test_shunt_type1_2_llm_eval.py\")",
+      "Bash(\"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_2_App\\\\.venv\\\\Scripts\\\\python.exe\" \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_2_App\\\\tests\\\\test_shunt_type1_2_llm_eval.py\")",
+      "Bash(\"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_2_App\\\\.venv\\\\Scripts\\\\python.exe\" -c \"import anthropic; print\\(anthropic.__version__\\)\")",
+      "Bash(\"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\Task_2_App\\\\.venv\\\\Scripts\\\\pip.exe\" install *)"
     ]
   }
 }

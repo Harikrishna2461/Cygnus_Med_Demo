@@ -55,6 +55,7 @@ def register_stream_events(socketio) -> None:
         sess.accepted_shunts   = []
         sess.last_guidance     = None
         sess.last_action       = None
+        sess.scan_vein         = ""
         logger.info("Stream session started: %s", session_id)
         emit("session_ready", {"session_id": session_id})
 
@@ -158,11 +159,13 @@ def register_stream_events(socketio) -> None:
         emit("clips_updated", {"clips": sess.clips})
 
         # Force a new LLM call so guidance reflects the newly confirmed finding
-        region  = data.get("region", "UNKNOWN")
-        pos_y   = float(data.get("pos_y_ratio", 0.0))
-        surface = data.get("surface", "anterior-medial")
-        leg     = data.get("leg", "right")
-        req_gen = sess.bump()
+        region   = data.get("region", "UNKNOWN")
+        pos_y    = float(data.get("pos_y_ratio", 0.0))
+        pos_x    = float(data["pos_x_raw"]) if data.get("pos_x_raw") is not None else None
+        surface  = data.get("surface", "anterior-medial")
+        leg      = data.get("leg", "right")
+        is_front = bool(data["is_front"]) if data.get("is_front") is not None else None
+        req_gen  = sess.bump()
 
         def process_after_mark():
             try:
@@ -170,6 +173,8 @@ def register_stream_events(socketio) -> None:
                     session=sess,
                     region=region, pos_y=pos_y,
                     surface=surface, leg=leg,
+                    pos_x=pos_x,
+                    is_front=is_front,
                     force_llm=True,
                 )
             except Exception as exc:
@@ -255,3 +260,28 @@ def register_stream_events(socketio) -> None:
             sess.confirmed_shunts.remove(key)
         logger.info("Shunt rejected: type=%s leg=%s session=%s", s_type, leg, session_id)
         emit("shunt_rejection_ack", {"session_id": session_id, "shunt_type": s_type, "leg": leg})
+
+    # ── set_scan_vein ─────────────────────────────────────────────────────────
+    # Emitted when the operator declares which vein they are about to examine
+    # (e.g. user clicks "Scan GSV" in the UI).  Valid vein values:
+    #   "GSV", "SSV", "PERFORATORS", "TRIBUTARIES", "DEEP_VEINS", "" (clear).
+    # Once set, every subsequent protocol_agent call appends the comprehensive
+    # vein-specific examination objectives from Mendoza 2014 (Ch. 7-10, 14).
+
+    @socketio.on("set_scan_vein")
+    def handle_set_scan_vein(data: dict):
+        from flask_socketio import emit
+        session_id = str(data.get("session_id", "default"))
+        vein = str(data.get("vein", "")).upper().strip()
+        valid = {"GSV", "SSV", "PERFORATORS", "TRIBUTARIES", "DEEP_VEINS", ""}
+        if vein not in valid:
+            emit("scan_vein_ack", {"error": f"Unknown vein mode '{vein}'", "scan_vein": ""})
+            return
+        sess = sess_store.get_or_create(session_id)
+        sess.scan_vein = vein
+        # Force VLM + LLM re-run on next probe_move so guidance reflects the new mode
+        sess.last_vlm_pos_y  = -1.0
+        sess.last_llm_pos_y  = -1.0
+        sess.last_llm_region = ""
+        logger.info("Scan vein mode set: vein=%s session=%s", vein, session_id)
+        emit("scan_vein_ack", {"session_id": session_id, "scan_vein": vein})

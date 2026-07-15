@@ -1,0 +1,90 @@
+2026-07-10 18:07:11,025 [INFO] crewai_core.settings: Using config path: C:\Users\Krish\.config\crewai\settings.json
+2026-07-10 18:07:11,157 [INFO] __main__: Task-2 server starting on http://127.0.0.1:7861
+2026-07-10 18:07:11,158 [INFO] __main__:   Single-frame mode : http://127.0.0.1:7861/
+2026-07-10 18:07:11,158 [INFO] __main__:   Stream mode       : http://127.0.0.1:7861/stream
+2026-07-10 18:07:11,186 [WARNING] werkzeug: Werkzeug appears to be used in a production deployment. Consider switching to a production web server instead.
+ * Serving Flask app 'app'
+ * Debug mode: off
+2026-07-10 18:07:11,188 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:7861
+ * Running on http://10.21.200.208:7861
+2026-07-10 18:07:11,189 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-07-10 18:07:11,221 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:11] "[36mGET /stream HTTP/1.1[0m" 304 -
+2026-07-10 18:07:12,781 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:12] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:12,798 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:12] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:13,554 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:13] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:13,577 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:13] "POST /api/wrong-region HTTP/1.1" 200 -
+2026-07-10 18:07:13,594 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:13] "GET /api/vein-frame?region=SFJ&pos_y=0.050 HTTP/1.1" 200 -
+2026-07-10 18:07:13,608 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:13] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:13,624 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:13] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:14,377 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:14] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:14,400 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:14] "GET /api/vein-frame?region=SFJ&pos_y=0.070 HTTP/1.1" 200 -
+2026-07-10 18:07:14,414 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:14] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:14,429 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:14] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:15,039 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:15] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:15,072 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:15] "GET /api/vein-frame?region=SFJ&pos_y=0.060 HTTP/1.1" 200 -
+2026-07-10 18:07:15,083 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:15] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:15,099 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:15] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:16,049 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:16] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:16,065 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:16] "POST /api/wrong-region HTTP/1.1" 200 -
+2026-07-10 18:07:16,082 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:16] "GET /api/vein-frame?region=GSV-THI&pos_y=0.180 HTTP/1.1" 200 -
+2026-07-10 18:07:16,096 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:16] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:16,112 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:16] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:16,894 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:16] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:16,921 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:16] "GET /api/vein-frame?region=GSV-THI&pos_y=0.280 HTTP/1.1" 200 -
+2026-07-10 18:07:16,937 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:16] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:16,954 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:16] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:18,138 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:18] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:18,151 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:18] "POST /api/wrong-region HTTP/1.1" 200 -
+2026-07-10 18:07:18,168 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:18] "GET /api/vein-frame?region=GSV-THI&pos_y=0.400 HTTP/1.1" 200 -
+2026-07-10 18:07:18,182 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:18] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:18,197 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:18] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:19,092 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:19] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:19,117 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:19] "GET /api/vein-frame?region=GSV-THI&pos_y=0.520 HTTP/1.1" 200 -
+2026-07-10 18:07:19,128 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:19] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:19,145 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:19] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:20,423 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:20] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:20,440 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:20] "POST /api/wrong-region HTTP/1.1" 200 -
+2026-07-10 18:07:20,458 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:20] "GET /api/vein-frame?region=GSV-THI&pos_y=0.650 HTTP/1.1" 200 -
+2026-07-10 18:07:20,471 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:20] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:20,487 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:20] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:21,619 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:21] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:21,637 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:21] "POST /api/wrong-region HTTP/1.1" 200 -
+2026-07-10 18:07:21,654 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:21] "GET /api/vein-frame?region=GSV-CAL&pos_y=0.100 HTTP/1.1" 200 -
+2026-07-10 18:07:21,668 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:21] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:21,684 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:21] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:22,469 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:22] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:22,493 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:22] "GET /api/vein-frame?region=GSV-CAL&pos_y=0.350 HTTP/1.1" 200 -
+2026-07-10 18:07:22,507 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:22] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:22,522 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:22] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:23,259 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:23] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:23,286 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:23] "GET /api/vein-frame?region=GSV-CAL&pos_y=0.600 HTTP/1.1" 200 -
+2026-07-10 18:07:23,300 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:23] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:23,315 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:23] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:24,223 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:24] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:24,247 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:24] "POST /api/wrong-region HTTP/1.1" 200 -
+2026-07-10 18:07:24,264 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:24] "GET /api/vein-frame?region=GSV-CAL&pos_y=0.820 HTTP/1.1" 200 -
+2026-07-10 18:07:24,278 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:24] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:24,295 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:24] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:25,018 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:25] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:25,039 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:25] "POST /api/wrong-region HTTP/1.1" 200 -
+2026-07-10 18:07:25,055 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:25] "GET /api/vein-frame?region=SPJ&pos_y=0.870 HTTP/1.1" 200 -
+2026-07-10 18:07:25,070 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:25] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:25,085 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:25] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:26,011 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:26] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:26,035 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:26] "POST /api/wrong-region HTTP/1.1" 200 -
+2026-07-10 18:07:26,053 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:26] "GET /api/vein-frame?region=SPJ&pos_y=0.030 HTTP/1.1" 200 -
+2026-07-10 18:07:26,065 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:26] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:26,080 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:26] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:26,889 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:26] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:26,908 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:26] "GET /api/vein-frame?region=SPJ&pos_y=0.050 HTTP/1.1" 200 -
+2026-07-10 18:07:26,921 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:26] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:26,937 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:26] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:27,984 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:27] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:28,009 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:28] "POST /api/wrong-region HTTP/1.1" 200 -
+2026-07-10 18:07:28,028 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:28] "GET /api/vein-frame?region=SFJ&pos_y=0.050 HTTP/1.1" 200 -
+2026-07-10 18:07:28,042 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:28] "POST /api/localize/reset HTTP/1.1" 200 -
+2026-07-10 18:07:28,057 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:28] "POST /api/localize/batch HTTP/1.1" 200 -
+2026-07-10 18:07:28,835 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:28] "POST /api/guidance HTTP/1.1" 200 -
+2026-07-10 18:07:28,859 [INFO] werkzeug: 127.0.0.1 - - [10/Jul/2026 18:07:28] "GET /api/vein-frame?region=SFJ&pos_y=0.070 HTTP/1.1" 200 -

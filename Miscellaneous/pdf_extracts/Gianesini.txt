@@ -1,0 +1,569 @@
+
+===== PAGE 1 =====
+See discussions, st ats, and author pr ofiles f or this public ation at : https://www .researchgate.ne t/public ation/261801425
+CHIVA strategy in chronic venous disease treatment: instructions for users
+Article    in  Phlebolog y · April 2014
+DOI: 10.1177/0268355514531953  · Sour ce: PubMed
+CITATIONS
+32READS
+5,210
+8 author s, including:
+Sergio Gianesini
+24 PUBLICA TIONS    371 CITATIONS    
+SEE PROFILE
+Savino Oc chionor elli
+Univ ersity of F errara
+174 PUBLICA TIONS    3,152  CITATIONS    
+SEE PROFILE
+Eric a Mene gatti
+Univ ersity of F errara
+285 PUBLICA TIONS    6,614  CITATIONS    
+SEE PROFILE
+Mirk o Tessari
+Univ ersity of F errara
+66 PUBLICA TIONS    710 CITATIONS    
+SEE PROFILE
+All c ontent f ollo wing this p age was uplo aded b y Savino Oc chionor elli on 18 Januar y 2016.
+The user has r equest ed enhanc ement of the do wnlo aded file.
+===== PAGE 2 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+Review Article
+CHIVA strategy in chronic venous disease
+treatment: instructions for users
+S Gianesini, S Occhionorelli, E Menegatti, M Zuolo, M T essari,
+P Spath, S Ascanelli and P Zamboni
+Abstract
+Along the years, scientific clinical data have been collected concerning the possible saphenous flow restoration withoutany ablation and according with the CHIVA strategy. Moreover, in 2013 a Cochrane review highlighted the smallerrecurrence risk following a CHIVA strategy rather than a saphenous stripping. Nevertheless, the saphenous sparing
+strategy surely remains a not-so-worldwide-spread and accepted therapeutic option, also because considered not so
+immediate and easy to perform. Aim of this paper is to provide an easily accessible guide to an everyday use of asaphenous sparing strategy for chronic venous disease, highlighting how even apparently too complicated reflux patternsclassifications can be fastly and successfully managed and exploited for a hemodynamic correction.
+Keywords
+CHIVA, chronic venous disease, Doppler ultrasound, great saphenous vein, vascular surgery
+Introduction
+CHIVA is an acronym standing for Conservative andHemodynamic Correction of Venous Insuﬃciency in an
+oﬃce-based setting.
+This strategy was ﬁrst proposed by Franceschi in the
+late 1980s,
+1,2presenting a charming, though debated,
+saphenous sparing therapeutic approach to chronic
+venous disease (CVD).
+The rationale is to avoid a saphenous ablation
+because of the literature evidence, demonstrating thatmost of the time the reﬂux in this vessel is actually
+originated by both a kinetic and hydrostatic energy gra-
+dient that is not caused by a pathological alteration ofthe saphenous vein itself.
+1–7
+Along the years, scientiﬁc clinical data have been
+collected concerning the possible saphenous ﬂowrestoration without any ablation and according withthe CHIVA strategy.
+1–20Moreover, in 2013, a
+Cochrane review highlighted the smaller recurrence
+risk following a CHIVA strategy rather than a
+saphenous stripping.21
+Nevertheless, the saphenous sparing strategy surely
+remains a not-so-worldwide-spread and accepted thera-peutic option, mainly for three diﬀerent reasons: diag-nostic, evidence base and health economic issues.
+As demonstrated by Pares, an accurate sonographic
+assessment prior to whatever venous procedure is man-
+datory just in case of a vessel function restoration.If the therapeutic strategy is aimed to the vein aboli-
+tion, it is more than enough to know if there is a reﬂux-ing ﬂow or not: semeiology manoeuvers, like
+Trendelemburg and Perthes ones, together with a
+basic sonographic assessment, could be more thanenough in this case.
+15To the contrary, in order to per-
+form a hemodynamic restoration of a reﬂuxing venousnetwork, an advanced sonographic skill is required,together with a not-immediate learning curve, thatmust be addressed to develop an adequate experiencein the several possible reﬂux patterns identiﬁcation.
+The ‘‘evidence-based’’ issue constitutes the real
+Achille’s tendon of the strategy, together with a nomen-clature of the diﬀerent reﬂux patterns that was foundnot immediately worldwide understandable because oflinguistic misunderstandings.
+Randomized comparative trials have scientiﬁcally
+demonstrated how CHIVA is a therapeutic optionoﬀering a 10 years follow-up outcome superiority
+versus the stripping solution,
+14showing also a signiﬁ-
+cant impact in the venous ulcer management.11
+Vascular Disease Center, University of Ferrara, Italy
+Corresponding author:
+Sergio Gianesini, Vascular Disease Center, University of Ferrara, Via AldoMoro 8, Cona, 44124 Ferrara, Italy.Email: sergiogianesini@hotmail.comPhlebology
+0(0) 1–15
+!The Author(s) 2014
+Reprints and permissions:
+sagepub.co.uk/journalsPermissions.navDOI: 10.1177/0268355514531953phl.sagepub.com
+ Phlebology OnlineFirst, published on April 22, 2014 as doi:10.1177/0268355514531953
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 3 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+Moreover, the great saphenous vein conservation, com-
+petent or not, oﬀers the persistence of an excellentpotentially needed further by-pass conduit.
+Nevertheless, as reported by a recent Cochrane
+review,
+21objective measures, like the one provided by
+plethysmography for example, have been very rarely
+published in CHIVA support.18Moreover, the
+available RCTs are limited in number, consequently
+leading to a high risk of bias. For these reasons, newinvestigations are strongly encouraged on this topic,mainly focusing on the production of objectivemeasurements.
+At last, the health economic issue rises from a not-
+worldwide reimbursement interest in covering minim-
+ally invasive procedures that do not imply a saphenous
+trunk abolition. In the authors’ opinion, this aspectshould be corrected, considering that a disease treat-ment is not the mere manual act but rather a complexprocess that include a diagnostic eﬀort, that, in case ofa venous preservation, is considerably more time-con-suming and higher in required skills whenever com-pared with a simple vessel elimination.
+Aim of this paper is to provide an easily accessible
+guide to an everyday use of a saphenous sparing strat-egy for CVD, highlighting how even apparently toocomplicated reﬂux patterns classiﬁcations can befastly and successfully managed and exploited for ahemodynamic correction.
+According to the literature, this diagnostic and
+therapeutic approach is expected to provide better clin-
+ical outcomes.
+Applying the herein proposed diagnostic and thera-
+peutic protocol means to signiﬁcantly reduce the risk of
+clinical failure that could be potentially caused by anot-enough CHIVA expert phlebologist.
+16
+Moreover, it could encourage more physicians
+around the world to give CHIVA a try, collectingthose objective measures that could ﬁnally clarify the
+exact pathophysiological model of the lower limb
+venous hemodynamics, together with a health eco-nomic evaluation of the most convenient form ofreimbursement.
+Diagnostic assessment
+The shunt concept
+Since several reﬂuxing paths can be created along the
+superﬁcial venous system, a speciﬁc classiﬁcation ofthese anomalous patterns has been proposed andbased on the so-called ‘‘shunt concept.’’
+1,2
+A ‘‘shunt’’ is deﬁned as a venous pathway carrying
+not only the physiologically drainage but also thepathologically deviated blood. Anatomically and
+hemodynamically, it starts in a reﬂuxing (or escaping)point (EP) and terminates in the so-called re-entry
+point (RP).
+For example, an incompetent sapheno-femoral
+junction can be the EP of a reﬂux involving the saphe-nous trunk, so dilating it and making it incompetent.At the same time, a leg perforating vein that is focusedon the saphenous trunk could eventually drain the samereﬂuxing blood into the deep venous system, so re-establishing the physiological hierarchical order ofemptying from the most superﬁcial to the deepest com-
+partments, so constituting the shunt RP (Figure 1).
+Figure 1. Closed shunt: it is a refluxing pattern constituting a
+vicious re-circulation. In this example, an incompetent sapheno-
+femoral junction represents the EP , pathologically shunting theblood from the deep venous system (N1) to the saphenous
+system (N2). A leg perforating vein constitutes the RP , draining
+the reflux back into the deep venous system.2 Phlebology 0(0)
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 4 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+Three main shunt networks are described: closed
+(CS), open by-passing shunts (OBS) (also known as
+open vicarious shunts), open deviated (ODS) shunts.
+In CS (Figure 1), a vicious circle is created between
+the EP and the RP. The deviated ﬂow re-circulates ateach energy gradient inversion like in a close circuit.
+The energy gradient inversion is created every time a
+calf muscle systole is followed by the muscular relax-ation (diastole), which means at every footstep.
+A classical example is an incompetent sapheno-
+femoral junction (EP) shunting the deep venoussystem blood (so called N1 compartment) down alongthe saphenous trunk (N2 compartment).
+A leg perforating vein that is focused on the saphe-
+nous trunk can represent the shunt RP, draining thereﬂuxing blood back into the deep venous system.During the diastolic phase, the same vicious circle willstart again, so progressively overloading and enlargingthe involved saphenous trunk.
+In this way, a close shunt will be established and a
+certain amount of blood will be excluded by the sys-temic venous network, because entrapped into the
+above described ‘‘private circulation’’. It becomes evi-
+dent how a simple ligation of the EP will break thevicious recirculation, allowing the saphenous blood todrain into the RP, without being overloaded anymoreby the diastolic femoral reﬂux.
+An open by-passing shunt (OBS) (Figure 2) is a nat-
+ural bypass, exploited by the venous network to go overan obstacle.
+In this type of shunt, there is no re-circulation and it
+may be either antegrade or retrograde.
+The use of a collateral route to by-pass what is usu-
+ally a thrombotic occlusion is desirable, as it reducesthe drainage resistance. For this reason, CHIVA strat-egy does not surgically treat this type of shunts, sug-gesting just a short follow-up sonographic monitoring,in order to detect eventual changes in the reﬂux pattern.
+A typical OBS example can be found in the so-called
+‘‘spontaneous Palma,’’ where a deep venous systemocclusion at the inguinal region opens a collateralhypogastric network that is aimed to by-pass the obs-tacle draining into the contralateral limb.
+An open deviated shunt (ODS) (Figure 3) is a ﬂow
+diversion into an incompetent vein caused by a reversedenergy gradient, which is usually generated during a
+muscular pump diastole.
+The blood overload is directed to a re-entry perfor-
+ator which drains directly into a network not linked to
+the escape point one: no recirculation occurs.
+A typical example is an incompetent saphenous
+tributary endowed with a re-entry perforator draininginto the deep venous system: the blood overload will‘‘jump’’ from N2 to the saphenous tributary (N3 com-
+partment) and then will ﬂow down directly into N1.In the end, a combination of CS and OBS is a pos-
+sibility that is deﬁned as ‘‘mixed shunt.’’
+In this pattern, the two shunt types share the same
+EP and part of their reﬂuxing pattern toward the cor-responding diﬀerent RP.
+2
+The shunt classification
+Inside CS, ODS and OBS, CHIVA strategy identiﬁes
+diﬀerent type patterns, according both to the compart-ment jumps and to the location of the RP.
+To the best of our knowledge, there is a lack in the
+literature concerning the epidemiology of the diﬀerentshunt types. Only in Franceschi’s CHIVA textbook it isreported how more than 90% of the superﬁcial venoussystem reﬂuxes belong to the so-called type 1 or 3shunt.
+1,2
+In type 1 shunt (Figure 4a), the EP allows a reﬂux
+from N1 to N2 compartment, eventually interestingalso N3. The main characteristic of this shunt type is
+the presence of a RP focused on the saphenous trunk
+Figure 2. Open by-passing shunt: in case of a drainage obstacle,
+like a thrombosis of the femoral vein as herein depicted, the
+venous blood shunts in a ‘‘para-physiological’’ pattern aimed to
+preserve the same limb drainage. In this example, a perforating
+vein allows an inverted flow (from the deepest toward the moresuperficial compartment, from N1 toward N2), so overloading
+the saphenous trunk while by-passing the obstacle. The anom-
+alous pathway re-enter into N1 by means of the sapheno-femoraljunction, that, in this example, becomes the RP .Gianesini et al. 3
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 5 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+(N2), so aspirating the shunted blood back into the
+deep venous compartment.
+Being a close shunt, after the systolic push, the blood
+in a type 1 shunt will reﬂux again through the EPduring the diastolic phase.
+In case of a co-existing N3 reﬂuxing tributary, the
+reﬂuxing pattern is named Type 1 þN3 shunt.
+1,2
+Type 3 shunt (Figure 4b) is mainly characterized by
+the absence of an RP along the N2 compartment.
+The pathological ﬂow is directed from N1 to N2 and
+then to N3. The diﬀerence with the Type 1 (or with theType 1 þN3 shunt) is just the absence of an eﬃcient RP
+along the saphenous vein.
+The blood re-enters into the N1 compartment by an
+RP focused on the N3, then re-establishing the CS byescaping once again from the N1-N2 leaking point.
+As reported below, the presence/absence of an eﬃ-
+cient RP along the saphenous trunk is a main factor tobe taken into consideration whenever choosing the ade-quate CHIVA strategy. In case of a saphenous trunkRP absence, an interruption of the N1-N2 leaking pointwould lead to a not-draining venous system, because of
+the energy gradient suppression (see therapeutic strat-
+egy chapter).
+In type 2 shunt (Figure 5a), the leaking point is only
+from N2 to N3, with a re-entry perforator focused onthe same incompetent tributary and draining towardN1. In this pattern, no recirculation is created, so estab-lishing an ODS. Nevertheless, a more rare type 2 shunt
+Figure 4. (a) T ype 1 þN3 shunt (main RP focused on the saphenous vein). Differently from a type 1 shunt an incompetent N3
+tributary coexists, presenting its own RP that directly connect N3 to N1. (b )T ype 3 shunt (RP focused on the incompetent N3
+tributary).
+Figure 3. Open deviated shunt (ODS): this shunt type is
+generated whenever the refluxing blood shunts into the more
+superficial compartment (from N2 toward N3, the saphenous
+tributary compartment). The same saphenous tributary
+presents its own RP , in the form of a perforating veindirectly connecting N3 to N1. In this way, no re-circulation
+occurs.4 Phlebology 0(0)
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 6 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+variant is constituted by an N2 pathological
+jump toward a collateral which drains back into thesaphenous system again, so establishing a CS,running from N2 to N3 and then re-entering into N2(Figure 5b).
+In Type 2 shunts, a simple interruption of the leak-
+ing point is able to remove the hemodynamic overloadof the ODS or to avoid the CS recirculation.
+The shunt type classiﬁcation includes also other
+three kinds of compartment jumps, but them beingmore rare, both their hemodynamic and strategic cor-rection descriptions are left to more speciﬁcallyaddressed textbooks.
+2
+However, it must always be remembered that, most
+commonly in CS, the sapheno-femoral and thesapheno-popliteal junctions are the main escape point,but also any pelvic and/or thigh and/or leg leakingpoint can represent the compartment jump (N1-N2And/or N2-N3) site.
+22
+Therapeutic strategy
+CHIVA strategy is performed by means of minimallyinvasive ﬂush ligations and high ties that are addressedto restore the physiological order of emptying from themost superﬁcial to the deepest venous networks.
+The type of procedure is strictly dependent on the
+shunt type to be previously assessed at the hemo-dynamic echo-color-Doppler evaluation (ECD), soconstituting a tailored on the speciﬁc patient reﬂuxpattern. For this reason, the authors recommend toperform the ECD once again on the same proceduralday, possibly having the operating surgeon as theassessor.
+Two are the main surgical options: the so-called
+CHIVA 1 or CHIVA 2 procedures.
+CHIVA 1 is performed in case of a type 1 or 1 þN3
+shunt. It is addressed to the interruption of the N1-N2compartment jump, exploiting the RP that is focusedalong the saphenous trunk.
+An eventually present incompetent tributary (type
+1þN3 shunt) can be ﬂush ligated and let to be drained
+by its own RP.
+The name CHIVA 1 refers to the fact that the pro-
+cedure is designed with both the high ligation and theeventually incompetent collaterals disconnection to beperformed in one single shot (Figure 6).
+On the contrary, in type 3 shunts, the lacking of a
+valid RP focused on the saphenous trunk, prohibits thehigh ligation in the ﬁrst step approach. In fact, per-forming a CHIVA 1 procedure in a type 3 shunt
+would lead to a venous stasis, because of no energy
+gradient aspirating the saphenous blood column. Thehydrostatic and lateral pressure inside the saphenoustrunk would increase according to the BernoulliTheorem, dilation would raise rather than diminish.A high risk of saphenous thrombosis would occur(Figure 7).
+Figure 5. (a) T ype 2 shunt: it is characterized by an N2-N3 pathological compartment jump, with a RP that is focused along the same
+incompetent tributary, so draining into the N1 network. No recirculation occurs and an ODS is formed. (b )T ype 2 shunt can also
+create a CS, whenever exhibiting an N2-N3 jump, draining back into the same saphenous trunk. In this case, recirculation occurs.Gianesini et al. 5
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 7 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+The right strategy for this hemodynamic pattern is
+the CHIVA 2 procedure, so called because it is designed
+in two surgical steps.
+In CHIVA 2 ﬁrst step, a simple ﬂush ligation of the
+incompetent collaterals is performed (Figure 8).In case of an already consistent experience in
+CHIVA strategy, in speciﬁc cases, it is possible totreat also a type 3 shunt by means of a single shotprocedure (high ligation, ﬂush disconnection of the
+incompetent N3 tributaries and removing of the
+Figure 6. T ype 1 þN3 shunt and indicated hemodynamic correction strategy (CHIVA 1): under local anesthesia a high tie is per-
+formed to treat the N1-N2 leaking point. The previously refluxing saphenous trunk is still draining in a retrograde direction also after
+the procedure, but into the RP focused on the saphenous trunk. At the following muscular diastole, no recirculation will occur
+because of the EP interruption. In case of an incompetent saphenous tributary, this will be flush ligated during the same procedure and
+its flow will be aspirated by the same tributary RP directly into the N1 compartment.
+Figure 7. Incorrect indication to a CHIVA 1 procedure in a type 3 shunt. An inefficient re-entry perforator (IRP) along the
+saphenous trunk impedes a proper drainage, so leading to stasis and thus to a high thrombotic risk. On the contrary, the incompetentN3 tributary can efficiently drain into its own RP after its disconnection from the N2 network.6 Phlebology 0(0)
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 8 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+competent valves in the saphenous tract that separates
+a valid saphenous system RP from the incompetent N3branch where the other RP is focused on).
+Considering the type 2 shunt compartment jump
+(from N2 to N3), it becomes obvious how CHIVA 2ﬁrst step represents the correct indication also for thiskind of reﬂux treatment. No further procedures are to
+be planned in a type 2 shunt (Figures 9 and 10).On the contrary, after the ﬁrst step in a type 3 shunt,
+a pathological saphenous reﬂux can remain into the
+hemodynamic project, until it will enlarge a previouslyineﬃcient perforator focused on N2. Whenever theabove quoted perforator will reach a proper caliberand aspirating property, a closed shunt will be formedamong N1 and N2 networks, transforming the type 3
+shunt in a type 1 shunt, thus allowing the second step of
+Figure 9. First step of CHIVA 2 procedure for type 2 open deviated shunt.
+Figure 8. First step of CHIVA 2 procedure for type 3 shunt. A simple flush ligation of the incompetent N3 tributary is performed.
+IRP: inefficient re-entry perforator.Gianesini et al. 7
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 9 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+CHIVA 2 procedure, which simply coincides with a
+CHIVA 1 procedure (high ligation) (Figure 11).
+In case the saphenous reﬂux was fed just by a vessel
+dilation linked to the N3 aspiration, the N2 valves willrecover their functionality, thanks to the saphenouscalibre reduction, thus avoiding the necessity of a
+second step (Figure 12).A simple but really eﬀective sonographic test is able
+to identify the presence of a valid RP focused on the
+saphenous vein: the Reﬂux Elimination Test.
+2
+A digit compression of the incompetent
+tributaries will eliminate the aspiration eﬀectprovoked by the re-entry perforators focused on N3
+(Figure 13).
+Figure 11. T ype 3 shunt being transformed into a type 1 shunt by the first step of a CHIVA 2 procedure and then treated by a
+CHIVA 2 second step intervention (equal to CHIVA 1).
+Figure 10. First step of CHIVA 2 procedure for type 2 closed shunt.8 Phlebology 0(0)
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 10 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+The Doppler must be placed cranially to the
+investigated saphenous RP. If the evoked sapheonus
+reﬂux will be eliminated by the N3 escape pointscompression, the energy gradient addressed to theblood column aspiration through that RP must be con-sidered ineﬃcient. Consequently, it will be mandatoryto avoid the high ligation in a single step procedure
+(CHIVA 1), since dealing with a type 3 shunt.The correct indication will be a ﬁrst step of CHIVA 2
+procedure.
+Hybrid techniques
+In speciﬁc reﬂux patterns, the CHIVA strategy can bealso performed by means of hybrid techniques. This is
+the case for example of N1-N2 compartment jumps
+Figure 12. Saphenous vein caliber reduction following a CHIVA 2 first step, with consequent valve leaflets regained functionality and
+drainage restoration.
+Figure 13. Reflux elimination test. A simple digit compression of the incompetent tributary that is endowed with its own RP will
+permit to discriminate among a type 1 þN3 and a type 3 shunt. In case of saphenous reflux persistence at the digit compression, an RP
+must be keeping the energy gradient present, thus indicating the perforating vein along the not compressed saphenous trunk (type
+1þN3 shunt). In case of reflux disappearance at the finger compression, the RP must be expected along the same N3 tributary (thus a
+T ype 3 shunt), being excluded by the finger compression, so temporarily eliminating the energy gradient.Gianesini et al. 9
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 11 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+arising not from an incompetent sapheno-femoral
+junction but rather by an incompetent hunterian per-
+forating vein, feeding a Type 1 þN3 shunt (Figure 14).
+A ﬂush ligation of the incompetent Hunterian
+perforating vein would require a too big skin incision
+nowadays. A mini-access is herein proposed, aimed tothe saphenous trunk isolation at the perforating veinconﬂuence. Once the latter is ﬂush disconnected, theremaining perforating vein tract is easily treated by anintraluminal injection of foam sclerotherapy while
+twisting the same vessel. During the same procedure,a ﬂush ligation of the incompetent N3 tributary can be
+performed according to the traditional CHIVA
+strategy.
+CHIVA strategy in case of recurrences
+A very interesting CHIVA strategy feature is the chance
+to treat recurrences by means of the same strategy.
+A recurrence can originate from a reunion of the
+two previously separated stumps (the saphenous
+trunk and the femoral/popliteal vein in case of a
+Figure 14. T ype 1þN3 shunt, fed by an EP coming out from an incompetent hunterian perforating vein. In order to minimize the
+incision length, a mini skin access is performed in correspondence of the hunterian perforating vein confluence with the saphenous
+trunk. After its flush ligation, an intraoperative endovenous foam sclerotherapy is directly performed inside the perforating vein lumen,while twisting it. In this way, all the remaining leaking vein is treated, avoiding a deeper and wider dissection to obtain a flush ligation on
+the femoral vein. A traditional CHIVA strategy is then applied to treat the coexisting N3 incompetent tributary.
+Figure 15. Recurrent N2-N3 leaking point: (a) a previously flush ligated N2-N3 leaking point recurred. The previous ligature knot
+(K) is clearly detectable by echo-color-Doppler, together with the saphenous trunk (GSV) and the recurrent incompetent tributary(T). (b) Colour evidence of the recurrent leaking point, together with the appearance of a perforating vein (PV) not properly draining.10 Phlebology 0(0)
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 12 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+high ligation or of a sapheno-popliteal ligation, the
+saphenous trunk and its tributary in case of anincompetent N3 branch).
+A reﬂux re-appearance can come out also from a
+new N1-N2 or N2-N3 leaking point (Figure 15).
+In all these cases, a CHIVA strategy can be applied
+according to the indications that were above reported.
+The only technical diﬀerence in case of a high
+ligation in a recurrent sapheno-femoral reﬂux is theidentiﬁcation and isolation of the junction dissectingfrom the femoral vein downward, instead that
+from the saphenous trunk upward. In this way, it ispossible to avoid all the post-operative scars that
+were created following the ﬁrst high ligation, accordingto the procedure named Li’s operation (Figure 16).
+CHIVA strategy diagnostic and
+therapeutic technical notes
+Deep venous system assessment
+Following the ECD diagnostic protocol, the ﬁrst step is
+to verify that the deep venous system presents neither
+obstruction nor reﬂuxes.
+Figure 17. Iliac valve competence scanning: (a) longitudinal section of the iliac vein just above the SFJ. (b) Valsalva manoeuver release
+in a competent iliac valve case: the color (the flow) appears just during the release phase, not during the systolic push. This is an
+indirect sign of valve competence. In case of incompetence, the colour would appear also during the systolic Valsalva push, so pointingout an incompetence/agenesia of the iliac valve.
+Figure 16. Li’s procedure: (a) identification of the femoral artery that by the arterial pulse guide the identification and isolation of the
+femoral vein above the recurrent sapheno-femoral junction. (b) Isolation of the recurrent sapheno-femoral junction underneath thescar that was created following the previous high ligation. (c) High tie with a flush ligation on the femoral vein. FV: femoral vein; FA:femoral artery; GSV: great saphenous vein.Gianesini et al. 11
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 13 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+Subsequently, it is mandatory to test the iliac valve
+competence.
+To do so, a simple Valsalva manoeuver while
+scanning the femoral vein above the sapheno-femoral
+junction (SFJ) will be indicative of the hydrostaticcolumn overloading the same junction (Figure 17). Itis evident how an iliac valve absence/incompetence will
+increase the reﬂux risk along the SFJ.Sapheno-femoral and sapheno-popliteal junction
+competence assessment
+Both in CHIVA 1 and in CHIVA 2 second step, the
+indication to a junction ligation is a crucial moment
+in which an inadequate diagnostic assessment couldruin the entire hemodynamic correction.
+The SFJ must be evaluated placing the sample
+volume on the femoral side of the terminal valve, per-forming both a Valsalva (VAL) and a compression/relaxation (CR) manoeuver.
+7Only in case of both the
+manoeuvers’ positivity the junction can be considered
+incompetent (Figure 18).
+Figure 18. Sapheno-femoral junction incompetence. (a) Colour-mode evidence of a sapheno-femoral reflux during the diastolic
+phase. (b) PW reflux detection. According to the literature,7it is mandatory to place the sample volume on the femoral side of the
+terminal valve. FA, FV and GSV transverse section form the so-called Miky-mouse image, a correct point of assessment for SFJ
+competence assessment. FA: femoral artery; FV femoral vein; GSV: great saphenous vein; Sys: muscular systole; Dia: muscular diastole.
+Figure 19. Incompetent saphenous tributary scanning. Colour-
+mode reflux detection into a saphenous tributary showing tur-
+bulence (Korean flag sign). The incompetent tributary (T) lies
+above the fascia (N3 compartment), presenting a significantlybigger calibre than the saphenous trunk (GSV) (N2 compart-
+ment) that is located underneath the same tributary outlet.
+A colour sign points out the presence of a re-entryperforator (RP).
+Figure 20. Refluxing perforating vein: a Hunterian perforating
+vein (PV) became incompetent, so originating a reflux from thedeep venous system toward a saphenous vein (GSV) that waspreviously treated by a ligation. The consequent energy gradienthas led to a recurrence that is clearly identified both by PW and
+color Doppler analysis.12 Phlebology 0(0)
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 14 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+In the same way, the sapheno-popliteal junction
+must be assessed both by active (Parana `) and passive
+(CR) manoeuvers, whose positivity must be contempor-
+aneously present to diagnose a true junctional incom-petence (Figure 18).
+In order to minimize the risk of venous stasis, the
+sapheno-femoral junction tributaries (superﬁcial epi-gastric vein, external pudendal vein, superﬁcial circum-ﬂex vein) and the Giacomini’s vein should be sparedduring the sapheno-femoral and sapheno-popliteal dis-
+connection, respectively. Moreover, the maximum cure
+should be placed in performing ligations without longstumps on the femoral and popliteal side, in order toreduce the risk of recanalization and recurrence.
+Saphenous incompetent tributaries identification
+The ECD assessment proceeds with the B mode, color
+and PW mode identiﬁcation of the eventually present
+saphenous incompetent tributaries.
+These last ones sometimes are easily detected even
+only by the B-mode because of their bigger calibrewhenever compared with the saphenous trunk belowtheir origin (Figure 19): a phenomenon that is due toa shunting eﬀect regarding mainly the tributary itself,very probably endowed with a particularly eﬃcient RP.
+Color and PW mode will determine the real eventual
+reﬂux presence into the tributary. In case of pelvic leak,the direction of a reﬂuxing ﬂow through the upper archtributaries is not diﬀerent from the physiological direc-tion. Thus, it is assessed properly only whenever, con-versely from the physiology, it is triggered by a Valsalvamanoeuver.
+As for the N1-N2 compartment jumps, also in case
+of saphenoustributary ligation (N2-N3 compartment
+Figure 21. Physiological perforating vein: a perforating vein (PV) that is focused on the great saphenous vein (GSV) trunk. It is
+mandatory to consider the net flow direction and not just the flow time. In the case herein reported the in-ward diastolic flow is
+clearly prevalent, thus, independently from its flow time, it can be considered physiological because draining from the more superficial
+compartment (the saphenous network) to the deepest one.
+Figure 22. Reflux elimination test: PW assessment of the great
+saphenous vein (GSV) above the outlet of an incompetent GSV
+tributary. Thanks to the reflux elimination test a simple finger
+compression of the incompetent tributary allows the localizationof a valid re-entry perforator focused on the GSV or only on the
+incompetent tributary itself. In the herein reported specific case,
+during the finger compression of the incompetent tributary,carefully avoiding to compress also the GSV trunk, a flow is
+detected at the compression/relaxation manoeuver. This finding
+testifies the presence of a re-entry perforator also along the GSV.In fact, the re-entry perforator presence is responsible of thatenergy gradient maintenance that allows the detected flow. In
+case of an absence of re-entry perforators along the GSV , no
+energy gradient exists, thus no flow is detected. At the fingerrelease, the re-entry perforator focused on the incompetent
+tributary allow a bigger energy gradient, that is manifested by an
+increased flow appearance. According to the reflux eliminationtest, if a flow is detected at the compression/relaxation during
+the finger compression of the incompetent tributary, a valid re-
+entry perforator is focused on the GSV and thus a high ligationcan be performed (CHIVA 1 procedure). If no flow is detected,the correct indication is just for a flush ligation of the incompe-
+tent tributary (CHIVA 2 first step), because of the risk of creating
+a not-draining venous system, thus leading to possible throm-bosis and not following the CHIVA principles.Gianesini et al. 13
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 15 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+jump), maximum attention must be paid in not leaving
+long stumps during the disconnection, in order todiminish the recanalization risk.
+Re-entry point identification
+Perforating veins have always represented an intriguingtopic both in the diagnosis and in the treatment ofCVD.
+19,20
+Of course, they can constitute the reﬂux origin
+(pathological perforating veins) (Figure 20) or, con-versely, a re-entry point of the reﬂux itself (physio-logical function) (Figure 21).
+Once the leaking points have been identiﬁed (N1-N2
+and/or N2-N3 junctions), the RP must be found.Whenever there is a reﬂux, an RP must be expected:this is a consequence of the physical principle for whicha ﬂow, or a reﬂux, can exist only if an energetic gradientis present.
+2
+This diagnostic step is fundamental: a mistake in the
+RP selection invariably leads to a not draining treated
+saphenous trunk, thus to a therapy failure.The RP can be focused on the saphenous trunk and/
+or on the incompetent tributary. As above reported, a
+simple reﬂux elimination test is able to discriminateamong a type 1 (eventually þN3) and a type 3 shunt
+(Figures 13 and 22).
+Subsequently, a color-mode analysis of a B-mode
+visible perforating vein will show a prevalent inwardﬂow during calf muscle diastole, so indicating the eﬃ-cient RP (Figure 21).
+Melting together, the ECD information concerning
+the deep venous system, the iliac valve, the N1-N2 junc-tions competence, the eventually present incompetenttributary and the RP localization will easily provide
+the shunt type recognition, and thus the consequent
+therapeutic strategy (Figure 23).
+Conclusions
+CHIVA is a surgical strategy that is aimed to suppressthe reﬂux escape points, restoring a draining venoussystem, by means of selective leaking points interrup-
+tions. This saphenous-sparing procedure is minimally
+Figure 23. Shunt-type identification flow chart, with corresponding surgical indications.14 Phlebology 0(0)
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+===== PAGE 16 =====
+XML Template (2014) [10.4.2014–5:07pm] [1–15]
+//blrnas3/cenpro/ApplicationFiles/Journals/SAGE/3B2/PHLJ/Vol00000/140063/APPFile/SG-PHLJ140063.3d (PHL) [PREPRINTER stage]
+invasive, accessible under local anesthesia, in an oﬃce-
+based setting. It requires no particular devices, so rep-resenting also a highly cost-eﬀective option.
+The required surgical skills are minimal, as demon-
+strated by its successful use also by not-surgical phys-icians. To the contrary, the learning curve becomes
+consistent concerning the sonographic assessment, for
+which an adequate and meticulous training ismandatory.
+The consequent diagnostic eﬀort seems to be
+rewarded by a signiﬁcant reduction in varicose veinsrecurrences following a hemodynamic rather than anablative strategy.
+21
+Funding
+This research received no speciﬁc grant from any funding
+agency in the public, commercial, or not-for-proﬁt sectors.
+Conflict of interest
+None declared.
+References
+1. Franceschi C. Theory and practice of the conservative hae-
+modynamic cure of incompetent and varicose veins in
+ambulatory patients: conservative haemodynamic cure ofincompetent and varicose veins in ambulatory patients.
+Pre´cy-sous-Thil : Ed. de l’Armanc ¸ on (english version by
+Evans J., 1993), (original french version 1988).
+2. Franceschi C and Zamboni P. Principles of venous hemo-
+dynamics . New York: Nova Biomedical Books, 2009.
+3. Zamboni P, Cappelli M, Marcellino MG, et al. Does a
+saphenous varicose vein exist? Phlebology 1997; 12: 74–77.
+4. Zamboni P, Cisno C, Marchetti F, et al. Reflux elimin-
+ation without any ablation or disconnection of the saphe-
+nous vein. A haemodynamic model for surgery. Eur J Vasc
+Endovasc Surg 2001; 21: 361–369.
+5. Escribano JM, Juan J, Bofill R, et al. Durability of reflux-
+elimination by a minimal invasive CHIVA procedure onpatients with varicose veins. A 3-year prospective case
+study. Eur J Vasc Endovasc Surg 2003; 25: 159–163.
+6. Zamboni P and Escribano JM. Regarding ‘reflux elimin-
+ation without any ablation or disconnection of the saphe-nous vein. A haemodynamic model for surgery and
+‘durability of reflux-elimination by a minimal invasiveCHIVA procedure on patients with varicose veins. a 3-
+year prospective case study. Eur J Vasc Endovasc Surg
+2004; 28: 567–568.
+7. Zamboni P, Gianesini S, Menegatti E, et al. Great saphe-
+nous varicose vein surgery without saphenofemoral junc-
+tion disconnection. Br J Surg 2010; 97: 820–825.8. Franceschi C. La cure hemodynamique de l’Insuffisance
+veineuse en ambulatoire. Journal des Maladies
+Vasculaires 1997; 22: 91–95.
+9. Cappelli M, Lova RM and Ermini S. Ambulatory con-
+servative hemodynamic management of varicose veins:
+critical analysis of results at 3 years. Ann Vasc Surg
+2000; 14: 376–384.
+10. Maeso J, Juan JJ, Escribano JM, et al. Comparison of
+clinical outcome of stripping and CHIVA for treatmentof varicose veins in the lower extremities. Ann Vasc Surg
+2001; 15: 661–665.
+11. Zamboni P, Cisno C, Marchetti F, et al. Minimally inva-
+sive surgical management of primary venous ulcers vs.
+compression treatment: a randomized clinical trial. Eur
+J Vasc Endovasc Surg 2003; 25: 313–318.
+12. Mendoza E. CHIVA 1988-2008. Review of studies on the
+CHIVA method and its development in different coun-
+tries. Gefasschirurgie 2008; 13: 249–256.
+13. Iborra-Ortega E, Barajau-Urrea E, Vila-Coll R, et al.
+Comparative study of two surgical techniques in the
+treatment of varicose veins of the lower extremities:
+results after five years of follow up. Angiologia 2006;
+58: 459–468.
+14. Carandina S, Mari C, De Palma M, et al. Varicose vein
+stripping vs haemodynamic correction (CHIVA): a longterm randomised trial. Eur J Vasc Endovasc Surg 2008;
+35: 230–237.
+15. Pares JO, Juan J, tellez R, et al. Varicose vein surgery:
+stripping versus the CHIVA method: a randomized con-trolled trial. Ann Surg 2010; 251: 624–631.
+16. Milone M, Salvatore G, Maietta P, et al. Recurrent vari-
+cose veins of the lower limbs after surgery. Role of sur-gical technique (stripping vs CHIVA) and surgeon’s
+experience. G Chir 2001; 32: 460–463.
+17. Mendoza E, Berger V, Zollmann C, et al. Diameter-
+reduction of the great saphenous vein and common fem-oral vein after CHIVA. Phlebologie 2011; 40: 73–78.
+18. Zamboni P, Marcellino MG, Cappelli, et al. Saphenous
+vein sparing surgery: Principles, techniques and results. J
+Cardiovasc Surg 1998; 39: 151–162.
+19. Zamboni P. Pathophysiology of perforators in primary
+chronic venous insufficiency. World J Surg 2005; 29:
+S115–S118.
+20. Zamboni P. Photoplethysmography and calf muscle
+pump function after subfascial endoscopic perforator
+ligation. J Vasc Surg 2000; 32: 1039–1040.
+21. Bellmunt-Montoya
+S, Escribano JM, Dilme J, et al.
+CHIVA method for the treatment of varicose veins.Cochrane Database Syst Rev 2013; 7: CD 009648.
+22. Franceschi C and Bahnini A. Treatment of lower extrem-
+ity venous insufficiency due to pelvic leak points inwomen. Ann Vasc Surg 2005; 19: 1–6.Gianesini et al. 15
+ at Rip Biblioteche Archivi Musei on January 16, 2015 phl.sagepub.com Downloaded from 
+View publication stats

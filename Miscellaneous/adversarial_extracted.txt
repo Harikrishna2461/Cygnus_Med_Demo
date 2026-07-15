@@ -1,0 +1,303 @@
+=== TABLE 0 ===
+ROW 0: Scenario | Description | Passed | Failed | Timeouts
+ROW 1: sfj_bypass_calf_first | Surgeon skips SFJ and starts at calf/ankle (7 ignores). Eventually marks EP N1→N2 at SFJ. Chaotic path. RP N2→N1 at calf → Rule 6 complete (max_visited=0.91 from early ankle wander). | 22 | 0 | 0
+ROW 2: retrograde_multiple_jumps | After SFJ entry, surgeon scans retrograde 3x and makes 2 ankle jumps (6 ignores). RP N2→N1 at calf → Rule 6 complete (max_visited=0.90). | 22 | 0 | 0
+ROW 3: wrong_region_type4 | EP N1→N3 at ankle. Surgeon ignores trunk-reflux guidance 6x, visits SFJ/popliteal/lateral calf. RP N2→N1 at Hunterian → Rule 4 immediate complete. | 24 | 0 | 0
+ROW 4: systematic_ignore_type6 | EP N1→N3 at lateral calf. Surgeon ignores N3-trace guidance 6x, zigzags through SFJ/thigh/medial zones. Eventually lateral calf→ankle trace. RP N3→N1 → Rule 5 complete. | 24 | 0 | 0
+---TABLE END---
+=== TABLE 1 ===
+ROW 0: # | Surgeon Action | Expected | LLM Guidance | Action | Status
+ROW 1: 1 | Start session  (id: adv_sfj_bypass) | session_ready event | -- | -- | SKIP
+ROW 2: 2 | Move probe → CALF
+posY=0.63  medial  right leg | Action = "move"
+Must NOT = "complete" | Given the current state, we need to start by assessing the geometric position and the open diagnostic questions.
+
+The probe is currently at the calf region (posY 0.63), which is relevant for assessing the GSV (Great Saphenous Vein) and potential tributaries or perforators in this area.
+
+Since no confirmed findings are present, the first diagnostic question (Q1) | move | PASS
+ROW 3: 3 | Move probe → ANKLE
+posY=0.87  medial  right leg | Action = "move"
+Must NOT = "complete" | Given the current state, the probe is positioned at the ankle region (posY 0.87), which is a key area for assessing the termination of the GSV (Great Saphenous Vein) and its relationship with the deep venous system.
+
+With no confirmed findings, the primary goal is still to locate the entry point (Q1) of reflux into the superficial system. However | move | PASS
+ROW 4: 4 | Move probe → ANKLE
+posY=0.91  lateral  right leg | Action = "move"
+Must NOT = "complete" | Given the current state, the probe is now positioned at the ankle region (posY 0.91) on the lateral surface. This area is relevant for assessing the Small Saphenous Vein (SSV) and its junction with the deep system.
+
+Since no confirmed findings are present, the first diagnostic question (Q1) regarding the entry point of reflux into the superficial system remains open | move | PASS
+ROW 5: 5 | Move probe → CALF
+posY=0.80  lateral  right leg | Action = "move"
+Must NOT = "complete" | Given the current state, the probe is positioned at the calf region (posY 0.80) on the lateral surface. This area is relevant for assessing the Small Saphenous Vein (SSV) and its course in the calf.
+
+With no confirmed findings, the primary goal is to locate the entry point (Q1) of reflux into the superficial system. Considering the probe's | move | PASS
+ROW 6: 6 | Move probe → POPLITEAL
+posY=0.48  posterior  right leg | Action = "move"
+Must NOT = "complete" | Given the current state, the probe is positioned at the popliteal region (posY 0.48) on the posterior surface. This area is relevant for assessing the popliteal junction, where the Small Saphenous Vein (SSV) joins the deep system.
+
+Since no confirmed findings are present, the first diagnostic question (Q1) regarding the entry point of reflux into | move | PASS
+ROW 7: 7 | Move probe → POPLITEAL
+posY=0.52  posterior  right leg | Action = "move"
+Must NOT = "complete" | Given the current state, the probe is still positioned at the popliteal region (posY 0.52) on the posterior surface. This area is crucial for assessing the popliteal junction and the potential involvement of the Small Saphenous Vein (SSV) and the Giacomini vein.
+
+With no confirmed findings, the primary goal remains to locate the entry point (Q | move | PASS
+ROW 8: 8 | Move probe → UPPER_THIGH
+posY=0.15  medial  right leg | Action = "move"
+Must NOT = "complete" | Given the current state, the probe is positioned at the upper thigh region (posY 0.15) on the medial surface. This area is relevant for assessing the Great Saphenous Vein (GSV) and its course in the thigh.
+
+Since no confirmed findings are present, the first diagnostic question (Q1) regarding the entry point of reflux into the superficial system remains open. | move | PASS
+ROW 9: 9 | Move probe → SFJ
+posY=0.06  anterior-medial  right leg | Action = "move"
+Must NOT = "complete"
+Guidance contains any of: SFJ, groin, femoral, junction | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 10: 10 | Move probe → SFJ
+posY=0.09  anterior-medial  right leg | Action = "move"
+Must NOT = "complete" | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 11: 11 | Mark: EP N1→N2  posY=0.07  SFJ  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward mid-thigh | move | PASS
+ROW 12: 12 | Move probe → ANKLE
+posY=0.87  medial  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along medial calf toward popliteal region | move | PASS
+ROW 13: 13 | Move probe → CALF
+posY=0.79  medial  right leg | Action = "move"
+Must NOT = "complete" | Track medial calf distally following saphenous trunk | move | PASS
+ROW 14: 14 | Move probe → CALF
+posY=0.73  medial  right leg | Action = "move"
+Must NOT = "complete" | Track medial calf distally following saphenous trunk | move | PASS
+ROW 15: 15 | Move probe → HUNTERIAN
+posY=0.34  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward calf | move | PASS
+ROW 16: 16 | Move probe → HUNTERIAN
+posY=0.27  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward calf | move | PASS
+ROW 17: 17 | Move probe → UPPER_THIGH
+posY=0.19  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward mid-thigh | move | PASS
+ROW 18: 18 | Move probe → HUNTERIAN
+posY=0.29  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward calf | move | PASS
+ROW 19: 19 | Move probe → CALF
+posY=0.62  medial  right leg | Action = "move"
+Must NOT = "complete" | Track medial calf distally following saphenous trunk | move | PASS
+ROW 20: 20 | Move probe → CALF
+posY=0.68  medial  right leg | Action = "move"
+Must NOT = "complete" | Track medial calf distally following saphenous trunk | move | PASS
+ROW 21: 21 | Mark: RP N2→N1  posY=0.68  CALF  right leg | Action = "complete"
+Guidance contains any of: circuit, classification, complete, mapped | Circuit mapped — sufficient findings for classification | complete | PASS
+ROW 22: 22 | Move probe → POPLITEAL
+posY=0.49  posterior  right leg | Action = "complete"
+Guidance contains any of: circuit, classification | Circuit mapped — sufficient findings for classification | complete | PASS
+ROW 23: 23 | Move probe → SFJ
+posY=0.07  anterior-medial  right leg | Action = "complete" | Circuit mapped — sufficient findings for classification | complete | PASS
+---TABLE END---
+=== TABLE 2 ===
+ROW 0: # | Surgeon Action | Expected | LLM Guidance | Action | Status
+ROW 1: 1 | Start session  (id: adv_retro_jumps) | session_ready event | -- | -- | SKIP
+ROW 2: 2 | Move probe → SFJ
+posY=0.06  anterior-medial  right leg | Action = "move"
+Guidance contains any of: SFJ, groin, femoral, junction | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 3: 3 | Move probe → SFJ
+posY=0.09  anterior-medial  right leg | Action = "move" | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 4: 4 | Mark: EP N1→N2  posY=0.07  SFJ  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward mid-thigh | move | PASS
+ROW 5: 5 | Move probe → SFJ
+posY=0.04  anterior-medial  right leg | Action = "move"
+Must NOT = "complete" | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 6: 6 | Move probe → UPPER_THIGH
+posY=0.17  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward mid-thigh | move | PASS
+ROW 7: 7 | Move probe → SFJ
+posY=0.08  anterior-medial  right leg | Action = "move"
+Must NOT = "complete" | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 8: 8 | Move probe → ANKLE
+posY=0.85  medial  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along medial calf toward popliteal fossa | move | PASS
+ROW 9: 9 | Move probe → ANKLE
+posY=0.90  medial  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along medial calf toward popliteal fossa | move | PASS
+ROW 10: 10 | Move probe → UPPER_THIGH
+posY=0.14  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward mid-thigh | move | PASS
+ROW 11: 11 | Move probe → HUNTERIAN
+posY=0.25  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward popliteal fossa | move | PASS
+ROW 12: 12 | Move probe → SFJ
+posY=0.05  anterior-medial  right leg | Action = "move"
+Must NOT = "complete" | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 13: 13 | Move probe → CALF
+posY=0.63  medial  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along medial calf toward popliteal fossa | move | PASS
+ROW 14: 14 | Move probe → CALF
+posY=0.69  medial  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along medial calf toward popliteal fossa | move | PASS
+ROW 15: 15 | Move probe → POPLITEAL
+posY=0.48  posterior  right leg | Action = "move"
+Must NOT = "complete" | Scan posteriorly at knee level for popliteal junction | move | PASS
+ROW 16: 16 | Move probe → POPLITEAL
+posY=0.53  posterior  right leg | Action = "move"
+Must NOT = "complete" | Scan posteriorly at knee level for popliteal junction | move | PASS
+ROW 17: 17 | Move probe → CALF
+posY=0.60  posterior  right leg | Action = "move"
+Must NOT = "complete" | Track medial calf distally following saphenous trunk | move | PASS
+ROW 18: 18 | Move probe → CALF
+posY=0.67  medial  right leg | Action = "move"
+Must NOT = "complete" | Track medial calf distally following saphenous trunk | move | PASS
+ROW 19: 19 | Move probe → ANKLE
+posY=0.86  medial  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along medial ankle toward calf | move | PASS
+ROW 20: 20 | Move probe → CALF
+posY=0.74  medial  right leg | Action = "move"
+Must NOT = "complete" | Track medial calf distally following saphenous trunk | move | PASS
+ROW 21: 21 | Mark: RP N2→N1  posY=0.72  CALF  right leg | Action = "complete"
+Guidance contains any of: circuit, classification, complete, mapped | Circuit mapped — sufficient findings for classification | complete | PASS
+ROW 22: 22 | Move probe → HUNTERIAN
+posY=0.28  medial  right leg | Action = "complete"
+Guidance contains any of: circuit, classification | Circuit mapped — sufficient findings for classification | complete | PASS
+ROW 23: 23 | Move probe → SFJ
+posY=0.07  anterior-medial  right leg | Action = "complete" | Circuit mapped — sufficient findings for classification | complete | PASS
+---TABLE END---
+=== TABLE 3 ===
+ROW 0: # | Surgeon Action | Expected | LLM Guidance | Action | Status
+ROW 1: 1 | Start session  (id: adv_wrong_t4) | session_ready event | -- | -- | SKIP
+ROW 2: 2 | Move probe → SFJ
+posY=0.06  anterior-medial  right leg | Action = "move"
+Guidance contains any of: SFJ, groin, femoral, junction | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 3: 3 | Move probe → POPLITEAL
+posY=0.47  posterior  right leg | Action = "move"
+Guidance contains any of: popliteal, SPJ, posterior | Scan posteriorly at popliteal fossa to locate popliteal junction | move | PASS
+ROW 4: 4 | Move probe → POPLITEAL
+posY=0.53  posterior  right leg | Action = "move" | Scan posteriorly at popliteal fossa to locate popliteal junction | move | PASS
+ROW 5: 5 | Move probe → CALF
+posY=0.60  posterior  right leg | Action = "move"
+Must NOT = "complete" | Track posterior calf distally following saphenous trunk | move | PASS
+ROW 6: 6 | Move probe → CALF
+posY=0.66  medial  right leg | Action = "move"
+Must NOT = "complete" | Track medial calf distally following saphenous trunk | move | PASS
+ROW 7: 7 | Move probe → ANKLE
+posY=0.78  medial  right leg | Action = "move"
+Must NOT = "complete" | Scan medially at ankle to locate medial malleolus | move | PASS
+ROW 8: 8 | Move probe → ANKLE
+posY=0.86  medial  right leg | Action = "move"
+Must NOT = "complete" | Scan medially at medial malleolus | move | PASS
+ROW 9: 9 | Move probe → ANKLE
+posY=0.91  lateral  right leg | Action = "move"
+Must NOT = "complete" | Scan laterally at lateral malleolus | move | PASS
+ROW 10: 10 | Mark: EP N1→N3  posY=0.88  ANKLE  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along lateral calf toward popliteal fossa | move | PASS
+ROW 11: 11 | Move probe → ANKLE
+posY=0.83  lateral  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along lateral calf toward popliteal fossa | move | PASS
+ROW 12: 12 | Move probe → SFJ
+posY=0.06  anterior-medial  right leg | Action = "move"
+Must NOT = "complete" | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 13: 13 | Move probe → UPPER_THIGH
+posY=0.14  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward mid-thigh | move | PASS
+ROW 14: 14 | Move probe → POPLITEAL
+posY=0.47  posterior  right leg | Action = "move"
+Must NOT = "complete" | Scan posteriorly at popliteal fossa | move | PASS
+ROW 15: 15 | Move probe → CALF
+posY=0.57  posterior  right leg | Action = "move"
+Must NOT = "complete" | Move distally along posterior calf | move | PASS
+ROW 16: 16 | Move probe → ANKLE
+posY=0.86  medial  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along medial calf toward popliteal fossa | move | PASS
+ROW 17: 17 | Move probe → CALF
+posY=0.78  lateral  right leg | Action = "move"
+Must NOT = "complete" | Move distally along lateral calf toward ankle | move | PASS
+ROW 18: 18 | Move probe → CALF
+posY=0.69  lateral  right leg | Action = "move"
+Must NOT = "complete" | Follow N3 tributary distally on lateral lower calf | move | PASS
+ROW 19: 19 | Move probe → HUNTERIAN
+posY=0.36  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward knee | move | PASS
+ROW 20: 20 | Move probe → HUNTERIAN
+posY=0.29  medial  right leg | Action = "move"
+Must NOT = "complete" | Scan medially at Hunterian zone | move | PASS
+ROW 21: 21 | Move probe → UPPER_THIGH
+posY=0.17  medial  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along medial thigh toward groin | move | PASS
+ROW 22: 22 | Move probe → HUNTERIAN
+posY=0.25  medial  right leg | Action = "move"
+Must NOT = "complete" | Scan medially at Hunterian zone | move | PASS
+ROW 23: 23 | Mark: RP N2→N1  posY=0.27  HUNTERIAN  right leg | Action = "complete"
+Guidance contains any of: circuit, classification, complete, mapped | Circuit mapped — sufficient findings for classification | complete | PASS
+ROW 24: 24 | Move probe → CALF
+posY=0.65  medial  right leg | Action = "complete"
+Guidance contains any of: circuit, classification | Circuit mapped — sufficient findings for classification | complete | PASS
+ROW 25: 25 | Move probe → ANKLE
+posY=0.88  lateral  right leg | Action = "complete" | Circuit mapped — sufficient findings for classification | complete | PASS
+---TABLE END---
+=== TABLE 4 ===
+ROW 0: # | Surgeon Action | Expected | LLM Guidance | Action | Status
+ROW 1: 1 | Start session  (id: adv_ignore_t6) | session_ready event | -- | -- | SKIP
+ROW 2: 2 | Move probe → SFJ
+posY=0.06  anterior-medial  right leg | Action = "move"
+Guidance contains any of: SFJ, groin, femoral, junction | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 3: 3 | Move probe → POPLITEAL
+posY=0.47  posterior  right leg | Action = "move"
+Guidance contains any of: popliteal, SPJ, posterior | Scan posteriorly at popliteal fossa to assess popliteal junction | move | PASS
+ROW 4: 4 | Move probe → POPLITEAL
+posY=0.52  posterior  right leg | Action = "move"
+Must NOT = "complete" | Scan posteriorly at knee level for popliteal junction | move | PASS
+ROW 5: 5 | Move probe → CALF
+posY=0.59  lateral  right leg | Action = "move"
+Must NOT = "complete" | Move distally along lateral calf toward ankle | move | PASS
+ROW 6: 6 | Move probe → CALF
+posY=0.64  lateral  right leg | Action = "move"
+Must NOT = "complete" | Track lateral calf distally toward ankle | move | PASS
+ROW 7: 7 | Mark: EP N1→N3  posY=0.67  CALF  right leg | Action = "move"
+Must NOT = "complete" | Follow N3 tributary distally on lateral lower calf | move | PASS
+ROW 8: 8 | Move probe → SFJ
+posY=0.06  anterior-medial  right leg | Action = "move"
+Must NOT = "complete" | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 9: 9 | Move probe → UPPER_THIGH
+posY=0.14  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward mid-thigh | move | PASS
+ROW 10: 10 | Move probe → HUNTERIAN
+posY=0.23  medial  right leg | Action = "move"
+Must NOT = "complete" | Scan medially at Hunterian zone for perforators | move | PASS
+ROW 11: 11 | Move probe → SFJ
+posY=0.07  anterior-medial  right leg | Action = "move"
+Must NOT = "complete" | Scan transversely at groin crease to assess femoral junction | move | PASS
+ROW 12: 12 | Move probe → UPPER_THIGH
+posY=0.16  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward mid-thigh | move | PASS
+ROW 13: 13 | Move probe → CALF
+posY=0.71  medial  right leg | Action = "move"
+Must NOT = "complete" | Follow N3 tributary distally on medial lower calf | move | PASS
+ROW 14: 14 | Move probe → CALF
+posY=0.77  medial  right leg | Action = "move"
+Must NOT = "complete" | Track medial calf distally toward ankle | move | PASS
+ROW 15: 15 | Move probe → POPLITEAL
+posY=0.48  posterior  right leg | Action = "move"
+Must NOT = "complete" | Scan posteriorly at knee level for popliteal junction | move | PASS
+ROW 16: 16 | Move probe → CALF
+posY=0.55  posterior  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along posterior calf toward popliteal fossa | move | PASS
+ROW 17: 17 | Move probe → UPPER_THIGH
+posY=0.18  medial  right leg | Action = "move"
+Must NOT = "complete" | Move distally along medial thigh toward mid-thigh | move | PASS
+ROW 18: 18 | Move probe → HUNTERIAN
+posY=0.28  medial  right leg | Action = "move"
+Must NOT = "complete" | Scan medially at Hunterian zone for perforators | move | PASS
+ROW 19: 19 | Move probe → CALF
+posY=0.61  lateral  right leg | Action = "move"
+Must NOT = "complete" | Move medially along calf toward mid-line | move | PASS
+ROW 20: 20 | Move probe → CALF
+posY=0.67  lateral  right leg | Action = "move"
+Must NOT = "complete" | Scan transversely at current position to assess tributary | move | PASS
+ROW 21: 21 | Move probe → CALF
+posY=0.74  lateral  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along lateral calf toward previous finding | move | PASS
+ROW 22: 22 | Move probe → ANKLE
+posY=0.85  lateral  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along lateral calf toward calf region | move | PASS
+ROW 23: 23 | Move probe → ANKLE
+posY=0.91  lateral  right leg | Action = "move"
+Must NOT = "complete" | Move proximally along lateral ankle toward lower calf | move | PASS
+ROW 24: 24 | Mark: RP N3→N1  posY=0.89  ANKLE  right leg | Action = "complete"
+Guidance contains any of: circuit, classification, complete, mapped | Circuit mapped — sufficient findings for classification | complete | PASS
+ROW 25: 25 | Move probe → POPLITEAL
+posY=0.49  posterior  right leg | Action = "complete"
+Guidance contains any of: circuit, classification | Circuit mapped — sufficient findings for classification | complete | PASS
+---TABLE END---
