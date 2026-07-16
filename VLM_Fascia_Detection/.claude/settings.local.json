@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wsl -d Ubuntu -e bash --login -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && pip install mpi4py 2>&1 | tail -3\")",
+      "Bash(wsl -d Ubuntu -e bash --login -c ' *)",
+      "Bash(wsl -d Ubuntu -e bash --login -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && conda install -c conda-forge openmpi mpi4py -y 2>&1 | tail -5\")",
+      "PowerShell(Get-ChildItem -Recurse \"c:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\VLM_Fascia_Detection\" | Where-Object { !$_.PSIsContainer } | Select-Object -ExpandProperty FullName)"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wsl -d Ubuntu -- whoami)",
+      "Read(//d//**)",
+      "Bash(cmd.exe /c \"del /f D:\\\\ubuntu-export.tar\")",
+      "PowerShell(Get-Item C:\\\\pagefile.sys, C:\\\\hiberfil.sys -ErrorAction SilentlyContinue | ForEach-Object { \"$\\([math]::Round\\($_.Length/1GB,1\\)\\) GB — $\\($_.FullName\\)\" })",
+      "Bash(wsl -d Ubuntu -- bash -c \"nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader 2>&1 && echo '---' && conda --version 2>&1 && python --version 2>&1 && echo '---' && df -h / | tail -1\")",
+      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda --version && python --version\")",
+      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda --version && conda info && python3 --version\")",
+      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda create -n biomedparse python=3.10 -y 2>&1 | tail -5\")",
+      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && echo 'ENV OK' && cd /home/krish && git clone https://github.com/microsoft/BiomedParse.git 2>&1 | tail -5\")",
+      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 2>&1 | tail -5\")",
+      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && cd /home/krish/BiomedParse && pip install -r assets/requirements/requirements.txt 2>&1 | tail -10\")",
+      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && cd /home/krish/BiomedParse && pip install einops 'monai[all]' 2>&1 | tail -5\")",
+      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && python -c 'import torch; print\\(torch.__version__\\); print\\(torch.cuda.is_available\\(\\)\\); print\\(torch.cuda.get_device_name\\(0\\)\\)'\")",
+      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124 --force-reinstall 2>&1 | tail -5\")"
+    ],
+    "additionalDirectories": [
+      "\\mnt\\d"
+    ]
+  }
+}

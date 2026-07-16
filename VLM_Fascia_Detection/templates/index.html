@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fascia & Vein Detector</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Ultrasound Fascia & Vein Detection</h1>
+    <p class="subtitle">Upload a raw ultrasound frame to detect fascia layers and veins using BiomedParse.</p>
+
+    <div class="upload-area" id="dropzone">
+      <input type="file" id="fileInput" accept="image/*" hidden />
+      <div class="drop-content" id="dropContent">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <p>Drag & drop an ultrasound image here<br/>or <span class="link" onclick="document.getElementById('fileInput').click()">browse to upload</span></p>
+        <p class="hint">Supports PNG, JPG, BMP</p>
+      </div>
+    </div>
+
+    <div class="images" id="imagePanel" style="display:none">
+      <div class="image-box">
+        <h3>Input</h3>
+        <img id="inputPreview" src="" alt="Input image" />
+      </div>
+      <div class="arrow">→</div>
+      <div class="image-box">
+        <h3>Annotated Output</h3>
+        <img id="outputPreview" src="" alt="Output will appear here" />
+        <div class="spinner" id="spinner"></div>
+      </div>
+    </div>
+
+    <div class="legend" id="legend" style="display:none">
+      <span class="legend-item"><span class="dot" style="background:#00ff00"></span> Vein</span>
+      <span class="legend-item"><span class="dot" style="background:#00ffff"></span> Fascia</span>
+    </div>
+
+    <div class="error" id="errorMsg" style="display:none"></div>
+
+    <button class="btn" id="runBtn" style="display:none" onclick="runInference()">Run Again</button>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const inputPreview = document.getElementById('inputPreview');
+    const outputPreview = document.getElementById('outputPreview');
+    const imagePanel = document.getElementById('imagePanel');
+    const spinner = document.getElementById('spinner');
+    const errorMsg = document.getElementById('errorMsg');
+    const legend = document.getElementById('legend');
+    const runBtn = document.getElementById('runBtn');
+
+    let selectedFile = null;
+
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-over');
+      handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+
+    function handleFile(file) {
+      if (!file) return;
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        inputPreview.src = e.target.result;
+        outputPreview.src = '';
+        imagePanel.style.display = 'flex';
+        legend.style.display = 'none';
+        runBtn.style.display = 'none';
+        errorMsg.style.display = 'none';
+        runInference();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function runInference() {
+      if (!selectedFile) return;
+      spinner.style.display = 'block';
+      outputPreview.style.opacity = '0.3';
+      errorMsg.style.display = 'none';
+      runBtn.style.display = 'none';
+
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+
+      fetch('/predict', { method: 'POST', body: formData })
+        .then(res => {
+          if (!res.ok) return res.json().then(d => { throw new Error(d.error || 'Inference failed'); });
+          return res.blob();
+        })
+        .then(blob => {
+          outputPreview.src = URL.createObjectURL(blob);
+          outputPreview.style.opacity = '1';
+          spinner.style.display = 'none';
+          legend.style.display = 'flex';
+          runBtn.style.display = 'inline-block';
+        })
+        .catch(err => {
+          spinner.style.display = 'none';
+          outputPreview.style.opacity = '1';
+          errorMsg.textContent = 'Error: ' + err.message;
+          errorMsg.style.display = 'block';
+          runBtn.style.display = 'inline-block';
+        });
+    }
+  </script>
+</body>
+</html>
