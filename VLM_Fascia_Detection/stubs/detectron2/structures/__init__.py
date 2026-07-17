@@ -73,11 +73,28 @@ class Instances:
 
 class BitMasks:
     def __init__(self, tensor):
-        self.tensor = tensor if isinstance(tensor, torch.Tensor) else torch.as_tensor(tensor, dtype=torch.bool)
+        if isinstance(tensor, torch.Tensor):
+            self.tensor = tensor.bool()
+        else:
+            self.tensor = torch.as_tensor(tensor, dtype=torch.bool)
     def __len__(self): return self.tensor.shape[0]
     def to(self, device): return BitMasks(self.tensor.to(device))
     @property
     def device(self): return self.tensor.device
+
+    def get_bounding_boxes(self):
+        boxes = []
+        for mask in self.tensor:
+            mask_np = mask.cpu().numpy()
+            rows = np.any(mask_np, axis=1)
+            cols = np.any(mask_np, axis=0)
+            if rows.any():
+                rmin, rmax = np.where(rows)[0][[0, -1]]
+                cmin, cmax = np.where(cols)[0][[0, -1]]
+                boxes.append([cmin, rmin, cmax + 1, rmax + 1])
+            else:
+                boxes.append([0, 0, 1, 1])
+        return Boxes(torch.tensor(boxes, dtype=torch.float32))
 
 
 class ROIMasks:

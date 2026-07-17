@@ -14,10 +14,26 @@
       "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && cd /home/krish/BiomedParse && pip install -r assets/requirements/requirements.txt 2>&1 | tail -10\")",
       "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && cd /home/krish/BiomedParse && pip install einops 'monai[all]' 2>&1 | tail -5\")",
       "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && python -c 'import torch; print\\(torch.__version__\\); print\\(torch.cuda.is_available\\(\\)\\); print\\(torch.cuda.get_device_name\\(0\\)\\)'\")",
-      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124 --force-reinstall 2>&1 | tail -5\")"
+      "Bash(wsl -d Ubuntu -- bash -c \"source /home/krish/miniconda/etc/profile.d/conda.sh && conda activate biomedparse && pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124 --force-reinstall 2>&1 | tail -5\")",
+      "Bash(python -m pip install pycocotools)",
+      "Bash(python -c ' *)",
+      "Bash(del \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\VLM_Fascia_Detection\\\\_train_cell_src.py\")",
+      "PowerShell($py = \"C:\\\\Users\\\\Krish\\\\AppData\\\\Local\\\\Python\\\\pythoncore-3.12-64\\\\python.exe\"; & $py -m pip --version)",
+      "Bash(git clone *)",
+      "PowerShell($py = \"C:\\\\Users\\\\Krish\\\\AppData\\\\Local\\\\Python\\\\pythoncore-3.12-64\\\\python.exe\"; & $py -m pip install peft 2>&1)",
+      "PowerShell($py = \"C:\\\\Users\\\\Krish\\\\AppData\\\\Local\\\\Python\\\\pythoncore-3.12-64\\\\python.exe\"; & $py -m pip install einops 2>&1 | Select-String -Pattern \"installed|already|error\" -CaseSensitive:$false)",
+      "PowerShell(Start-Process -FilePath $py -ArgumentList \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\VLM_Fascia_Detection\\\\download_lisa.py\" -RedirectStandardOutput \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\VLM_Fascia_Detection\\\\download_lisa.log\" -RedirectStandardError \"C:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\VLM_Fascia_Detection\\\\download_lisa_err.log\" -WindowStyle Hidden -PassThru)",
+      "PowerShell($py = \"C:\\\\Users\\\\Krish\\\\AppData\\\\Local\\\\Python\\\\pythoncore-3.12-64\\\\python.exe\")",
+      "PowerShell(py -0 2>&1)",
+      "Bash(py -3.12 -c \"from huggingface_hub import snapshot_download; snapshot_download\\(repo_id='microsoft/Florence-2-large', local_dir=r'c:\\\\Users\\\\Krish\\\\Downloads\\\\Cygnus_Med_Demo\\\\VLM_Fascia_Detection\\\\pretrained\\\\Florence-2-large', ignore_patterns=['*.msgpack','*.h5','flax_model*','tf_model*','rust_model*']\\)\")",
+      "Bash(py -3.12 -c \"import transformers; print\\(transformers.__version__\\)\")",
+      "Bash(py -3.12 -c \"import timm; print\\(timm.__version__\\)\")",
+      "Bash(py -3.12 -c ' *)",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\Krish\\\\.cache\\\\huggingface\\\\modules\\\\transformers_modules\\\\Florence_hyphen_2_hyphen_large\" -ErrorAction SilentlyContinue)"
     ],
     "additionalDirectories": [
-      "\\mnt\\d"
+      "\\mnt\\d",
+      "C:\\Users\\Krish\\.cache\\huggingface\\modules\\transformers_modules\\Florence_hyphen_2_hyphen_large"
     ]
   }
 }

@@ -3,30 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fascia & Vein Detector</title>
+  <title>Fascia &amp; Vein Detector — Florence-2</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <div class="container">
 
     <nav class="model-nav">
-      <a href="/" class="nav-pill active">BiomedParse</a>
+      <a href="/" class="nav-pill">BiomedParse</a>
       <a href="/lisa" class="nav-pill">LISA</a>
-      <a href="/florence" class="nav-pill">Florence-2</a>
+      <a href="/florence" class="nav-pill active">Florence-2</a>
     </nav>
 
-    <h1>Ultrasound Fascia & Vein Detection</h1>
-    <p class="subtitle">Upload a raw ultrasound frame to detect fascia layers and veins using BiomedParse.</p>
+    <h1>Ultrasound Fascia &amp; Vein Detection</h1>
+    <p class="subtitle">Upload a raw ultrasound frame to detect fascia layers and veins using Florence-2 (Microsoft).</p>
 
-    <div class="upload-area" id="dropzone">
-      <input type="file" id="fileInput" accept="image/*" hidden />
+    {% if not available %}
+    <div class="unavailable-banner">
+      <strong>Florence-2 model not loaded.</strong>
+      Install <code>transformers&gt;=4.41</code> and ensure
+      <code>microsoft/Florence-2-large</code> can be downloaded from HuggingFace,
+      then restart the server.
+    </div>
+    {% endif %}
+
+    <div class="upload-area {% if not available %}disabled{% endif %}" id="dropzone">
+      <input type="file" id="fileInput" accept="image/*" hidden {% if not available %}disabled{% endif %} />
       <div class="drop-content" id="dropContent">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
           <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
-        <p>Drag & drop an ultrasound image here<br/>or <span class="link" onclick="document.getElementById('fileInput').click()">browse to upload</span></p>
+        <p>Drag &amp; drop an ultrasound image here<br/>or <span class="link" onclick="document.getElementById('fileInput').click()">browse to upload</span></p>
         <p class="hint">Supports PNG, JPG, BMP</p>
       </div>
     </div>
@@ -50,37 +59,54 @@
     </div>
 
     <div class="legend" id="legend" style="display:none">
-      <span class="legend-item"><span class="dot" style="background:#00ff00"></span> Vein</span>
-      <span class="legend-item"><span class="dot" style="background:#00ffff"></span> Fascia</span>
+      <span class="legend-item"><span class="dot" style="background:#00d200"></span> Vein (Florence-2)</span>
+      <span class="legend-item"><span class="dot" style="background:#00d2d2"></span> Fascia (Florence-2)</span>
     </div>
 
     <div class="error" id="errorMsg" style="display:none"></div>
 
     <button class="btn" id="runBtn" style="display:none" onclick="runInference()">Run Again</button>
+
+    <div class="prompt-panel">
+      <h4>Florence-2 Prompts in Use</h4>
+      <div class="prompt-group">
+        <span class="prompt-label">Fascia</span>
+        <p class="prompt-text">the bright white horizontal line running across the image</p>
+      </div>
+      <div class="prompt-group">
+        <span class="prompt-label">Vein</span>
+        <p class="prompt-text">the dark black circular or oval region</p>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('fileInput');
-    const inputPreview = document.getElementById('inputPreview');
+    const FLORENCE_AVAILABLE = {{ 'true' if available else 'false' }};
+
+    const dropzone      = document.getElementById('dropzone');
+    const fileInput     = document.getElementById('fileInput');
+    const inputPreview  = document.getElementById('inputPreview');
     const outputPreview = document.getElementById('outputPreview');
-    const masksPreview = document.getElementById('masksPreview');
-    const imagePanel = document.getElementById('imagePanel');
-    const spinner = document.getElementById('spinner');
-    const errorMsg = document.getElementById('errorMsg');
-    const legend = document.getElementById('legend');
-    const runBtn = document.getElementById('runBtn');
+    const masksPreview  = document.getElementById('masksPreview');
+    const imagePanel    = document.getElementById('imagePanel');
+    const spinner       = document.getElementById('spinner');
+    const errorMsg      = document.getElementById('errorMsg');
+    const legend        = document.getElementById('legend');
+    const runBtn        = document.getElementById('runBtn');
 
     let selectedFile = null;
 
-    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-    dropzone.addEventListener('drop', e => {
-      e.preventDefault();
-      dropzone.classList.remove('drag-over');
-      handleFile(e.dataTransfer.files[0]);
-    });
-    fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+    if (FLORENCE_AVAILABLE) {
+      dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+      dropzone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        handleFile(e.dataTransfer.files[0]);
+      });
+      fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+    }
 
     function handleFile(file) {
       if (!file) return;
@@ -110,7 +136,7 @@
       const formData = new FormData();
       formData.append('image', selectedFile);
 
-      fetch('/predict', { method: 'POST', body: formData })
+      fetch('/predict_florence', { method: 'POST', body: formData })
         .then(res => res.json().then(d => { if (!res.ok) throw new Error(d.error || 'Inference failed'); return d; }))
         .then(data => {
           outputPreview.src = 'data:image/png;base64,' + data.output;
