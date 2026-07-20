@@ -2796,7 +2796,8 @@ class Florence2ForConditionalGeneration(Florence2PreTrainedModel):
             if pixel_values is not None:
                 image_features = self._encode_image(pixel_values)
                 inputs_embeds, attention_mask = self._merge_input_ids_with_image_features(image_features, inputs_embeds)
-        
+                kwargs['attention_mask'] = attention_mask  # use merged image+text mask
+
         return self.language_model.generate(
             input_ids=None,
             inputs_embeds=inputs_embeds,

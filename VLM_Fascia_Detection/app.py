@@ -814,6 +814,7 @@ def florence_segment(image_pil: Image.Image, prompt: str) -> np.ndarray:
             do_sample=False,
             num_beams=1,
             use_cache=False,
+            bad_words_ids=[[0]],  # suppress BOS — it wins greedy but is never a valid continuation
         )
 
     generated_text = florence_processor.batch_decode(

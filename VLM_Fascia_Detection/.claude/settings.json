@@ -29,7 +29,8 @@
       "Bash(py -3.12 -c \"import transformers; print\\(transformers.__version__\\)\")",
       "Bash(py -3.12 -c \"import timm; print\\(timm.__version__\\)\")",
       "Bash(py -3.12 -c ' *)",
-      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\Krish\\\\.cache\\\\huggingface\\\\modules\\\\transformers_modules\\\\Florence_hyphen_2_hyphen_large\" -ErrorAction SilentlyContinue)"
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\Krish\\\\.cache\\\\huggingface\\\\modules\\\\transformers_modules\\\\Florence_hyphen_2_hyphen_large\" -ErrorAction SilentlyContinue)",
+      "Bash(powershell -Command \"Get-Process python* -ErrorAction SilentlyContinue | Stop-Process -Force; Write-Host 'Killed'\")"
     ],
     "additionalDirectories": [
       "\\mnt\\d",
