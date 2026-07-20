@@ -88,7 +88,13 @@ def api_chat():
         save_message(session_id, "assistant", msg)
         return jsonify({"type": "error", "conversational_response": msg, "message_id": user_msg_id})
 
-    history = [m for m in get_messages(session_id) if m["message_id"] != user_msg_id]
+    all_messages = get_messages(session_id)
+    # history without the current user message — used for NL interpretation context
+    history = [m for m in all_messages if m["message_id"] != user_msg_id]
+    # full_history includes the current user message — used for repeat-question guards
+    # (_already_asked / _sufficiency_gate_already_answered need to see the current reply
+    # so they recognise that the user HAS answered the question being checked)
+    full_history = all_messages
 
     # Always name the session on the first message, regardless of response type
     new_title = None
@@ -109,7 +115,7 @@ def api_chat():
         # Only ask if: (1) it is a genuine contradiction between the user's own messages, OR
         # (2) this is the very first time a sufficiency question is being asked in this attempt.
         # Never repeat a sufficiency question the user already answered — that is the tape-recorder bug.
-        if is_contradiction or not _sufficiency_gate_already_answered(history):
+        if is_contradiction or not _sufficiency_gate_already_answered(full_history):
             decline_msg = (
                 missing_info
                 if missing_info
@@ -167,7 +173,7 @@ def api_chat():
         # ── Elimination test ──────────────────────────────────────────────────
         # Ask only if genuinely needed AND never asked before in this session.
         if result.get("needs_elim_test") and not _already_asked(
-            history, "To distinguish Type 1+2 from Type 3"
+            full_history, "To distinguish Type 1+2 from Type 3"
         ):
             elim_msg = (
                 f"Interpreted so far: {interp_text}\n\n"
@@ -205,7 +211,7 @@ def api_chat():
             ]
             has_rp_calibre = any(c.get("calibre") for c in rp_n2n1_clips)
             if rp_n2n1_clips and not has_rp_calibre and not _already_asked(
-                history, "perforating vein is where the GSV trunk drains"
+                full_history, "perforating vein is where the GSV trunk drains"
             ):
                 calibre_msg = (
                     f"Interpreted so far: {interp_text}\n\n"
@@ -239,7 +245,7 @@ def api_chat():
             ]
             has_source = any(c.get("source") for c in ep_n1n3_clips)
             if ep_n1n3_clips and not has_source and not _already_asked(
-                history, "origin of the entry point (EP N1→N3)"
+                full_history, "origin of the entry point (EP N1→N3)"
             ):
                 source_msg = (
                     f"Interpreted so far: {interp_text}\n\n"
@@ -273,7 +279,7 @@ def api_chat():
                 if c.get("fromType") == "N3" or c.get("toType") == "N3"
             )
             if not has_branching_details and not _already_asked(
-                history, "Multiple tributary branches are present"
+                full_history, "Multiple tributary branches are present"
             ):
                 branch_msg = (
                     f"Interpreted so far: {interp_text}\n\n"
