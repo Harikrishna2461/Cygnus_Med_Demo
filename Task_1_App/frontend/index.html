@@ -935,6 +935,19 @@ function renderMessage(role, content, metadata) {
   }
   if (metadata && metadata.type === 'clinical' && metadata.findings) {
     appendClinicalResult(metadata);
+  } else if (metadata && (metadata.response_type === 'insufficient' || metadata.response_type === 'sufficiency_gate')) {
+    const wrap = document.getElementById('messages-wrap');
+    const el = document.createElement('div');
+    el.className = 'msg-row';
+    el.innerHTML = `
+      <div class="avatar bot">AI</div>
+      <div class="msg-bubble" style="max-width:92%;padding:0;background:transparent;border:none;">
+        <div class="insufficient-card">
+          <div class="insufficient-header">⚠ More information needed to classify</div>
+          <div class="insufficient-body">${escHtml(content)}</div>
+        </div>
+      </div>`;
+    wrap.appendChild(el);
   } else {
     const text = content.replace(/^\[Analysis\]\s*/,'').replace(/^\[.*?\]\s*/,'');
     appendBubble('bot', text, null);
@@ -944,7 +957,6 @@ function renderMessage(role, content, metadata) {
 function appendInsufficient(data) {
   const wrap = document.getElementById('messages-wrap');
   const missingInfo = data.missing_info || data.conversational_response || '';
-  const iid = 'ins-' + Math.random().toString(36).slice(2, 8);
   const el = document.createElement('div');
   el.className = 'msg-row';
   el.innerHTML = `
@@ -953,32 +965,10 @@ function appendInsufficient(data) {
       <div class="insufficient-card">
         <div class="insufficient-header">⚠ More information needed to classify</div>
         <div class="insufficient-body">${escHtml(missingInfo)}</div>
-        <div style="font-size:11px;color:var(--slate-500);margin-bottom:6px;font-weight:600;">ADD MISSING DETAILS BELOW:</div>
-        <textarea id="${iid}" class="insufficient-input" placeholder="Describe the missing flow information here (e.g. 'The GSV refluxes full-length to the knee…')"></textarea>
-        <button class="insufficient-submit" onclick="sendSupplementalInfo('${iid}')">Send Updated Description</button>
       </div>
     </div>`;
   wrap.appendChild(el);
   wrap.scrollTop = wrap.scrollHeight;
-  document.getElementById(iid)?.focus();
-}
-
-function sendSupplementalInfo(textareaId) {
-  const ta = document.getElementById(textareaId);
-  if (!ta) return;
-  const text = ta.value.trim();
-  if (!text) { ta.focus(); return; }
-
-  // Preserve the AI's insufficient message as a plain bubble (matches DB-stored content)
-  const msgRow = ta.closest('.msg-row');
-  const bodyEl = msgRow.querySelector('.insufficient-body');
-  const missingInfoText = bodyEl ? bodyEl.textContent.trim() : '';
-  msgRow.remove();
-  if (missingInfoText) appendBubble('bot', missingInfoText, null);
-
-  const input = document.getElementById('msg-input');
-  input.value = text;
-  sendMessage();
 }
 
 function appendClinicalResult(data) {

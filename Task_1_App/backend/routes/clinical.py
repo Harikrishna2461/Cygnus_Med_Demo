@@ -193,7 +193,8 @@ def api_chat():
                 "For example: 'Compressing the tributary abolished the retrograde GSV flow' or "
                 "'Compressing the tributary made no difference — the backward flow in the GSV persisted.'"
             )
-            save_message(session_id, "assistant", elim_msg)
+            save_message(session_id, "assistant", elim_msg,
+                         metadata={"response_type": "insufficient"})
             return jsonify({
                 "type": "insufficient",
                 "missing_info": elim_msg,
@@ -227,7 +228,8 @@ def api_chat():
                     "'The GSV drains into the femoral vein via a small perforator at mid-thigh' or "
                     "'There is a large, prominent perforating vein at the calf where the GSV returns to the deep system.'"
                 )
-                save_message(session_id, "assistant", calibre_msg)
+                save_message(session_id, "assistant", calibre_msg,
+                             metadata={"response_type": "insufficient"})
                 return jsonify({
                     "type": "insufficient",
                     "missing_info": calibre_msg,
@@ -261,7 +263,8 @@ def api_chat():
                     "'An incompetent Hunterian-level perforator feeds a thigh tributary directly' or "
                     "'A pudendal vein from the pelvis enters a groin tributary.'"
                 )
-                save_message(session_id, "assistant", source_msg)
+                save_message(session_id, "assistant", source_msg,
+                             metadata={"response_type": "insufficient"})
                 return jsonify({
                     "type": "insufficient",
                     "missing_info": source_msg,
@@ -291,7 +294,8 @@ def api_chat():
                     "For example: 'The anterior branch is the dominant one — larger calibre and further from "
                     "the perforator. The posterior branch is smaller but has adequate independent drainage.'"
                 )
-                save_message(session_id, "assistant", branch_msg)
+                save_message(session_id, "assistant", branch_msg,
+                             metadata={"response_type": "insufficient"})
                 return jsonify({
                     "type": "insufficient",
                     "missing_info": branch_msg,
