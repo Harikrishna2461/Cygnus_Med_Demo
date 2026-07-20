@@ -98,30 +98,40 @@ Case B — EP N1→N2 EXISTS (SFJ or Hunterian) AND EP N2→N3 EXISTS
         Type 3 and Type 1+2 BOTH require RP clips. EP N1→N2 + EP N2→N3 alone with zero RP = NO SHUNT.
         DO NOT classify as Type 3 just because EP N1→N2 and EP N2→N3 are present. RP is mandatory.
 
+    *** ELIMINATION TEST PRE-CHECK — APPLY THIS BEFORE B1-B5 ***
+    Before applying any B-rule, scan ALL EP N2→N3 and RP N3 clips for an eliminationTest value.
+    The elimination test is a direct hemodynamic measurement — it OVERRIDES all pattern-based rules.
+
+    If eliminationTest="Reflux" found on ANY EP N2→N3 or RP N3 clip:
+        → TYPE 1+2. STOP. Do not apply B1-B5. This is absolute.
+        (Reflux continuing during compression = GSV has independent perforator = Type 1+2 by definition.)
+
+    If eliminationTest="No Reflux" found on ANY EP N2→N3 or RP N3 clip:
+        → TYPE 3. STOP. Do not apply B1-B5.
+        (Reflux abolished during compression = tributary was the only drainage = Type 3 by definition.)
+
+    Only proceed to B1-B5 below if NO eliminationTest value is present on EP N2→N3 or RP N3 clips.
+    *** END PRE-CHECK ***
+
     B1: RP N3→N2 or RP N3→N1, NO RP N2→N1               → TYPE 3
-    B2: RP N3→N2 AND RP N2→N1                             → TYPE 3
+    B2: RP N3→N2 AND RP N2→N1, no eliminationTest        → TYPE 3
     B3: RP N3→N1 AND RP N2→N1, eliminationTest absent    → UNDETERMINED (set needs_elim_test=true)
-    B4: RP N3→N1 AND RP N2→N1, eliminationTest="Reflux"  → TYPE 1+2
-    B5: RP N3→N1 AND RP N2→N1, eliminationTest="No Reflux" → TYPE 3
+    B4: RP N3→N1 AND RP N2→N1, eliminationTest="Reflux"  → TYPE 1+2  (caught by pre-check above)
+    B5: RP N3→N1 AND RP N2→N1, eliminationTest="No Reflux" → TYPE 3  (caught by pre-check above)
 
     *** CRITICAL — WHICH CLIP TO READ eliminationTest FROM ***
     The elimination test result MUST be read from the EP N2→N3 clip OR the RP N3 clips.
     The EP N1→N2 clip (SFJ entry) may also carry an eliminationTest field — IGNORE IT for
-    B3/B4/B5 purposes. It records SFJ reflux status, not the tributary compression result.
+    B-rule purposes. It records SFJ reflux status, not the tributary compression result.
     When MULTIPLE clips carry eliminationTest values, use the value on EP N2→N3 or RP N3
     clips — that is the actual test result.
-    *** If EP N2→N3 or RP N3 has eliminationTest="No Reflux" → B5 → TYPE 3,
+    *** If EP N2→N3 or RP N3 has eliminationTest="No Reflux" → TYPE 3,
         even if EP N1→N2 separately carries eliminationTest="Reflux". ***
 
-    *** ABSOLUTE RULE — B2: RP N3→N2 + RP N2→N1 = TYPE 3. ALWAYS. ***
-    *** RP N3→N2 (tributary→GSV) means the tributary drains BACK INTO the saphenous trunk,
-        forming a CLOSED SUPERFICIAL LOOP. This is the defining feature of Type 3. ***
-    *** DO NOT let background CHIVA knowledge override B2. Some Type 3 circuits DO have a
-        segment of RP N2→N1 (the GSV between SFJ and the escape point carries blood downward),
-        but when the tributary drains back to GSV (RP N3→N2), the circuit is closed within
-        the superficial system = TYPE 3, not Type 1+2. ***
-    *** TYPE 1+2 requires RP N3→N1 (tributary to DEEP) + eliminationTest="Reflux". ***
-    *** TYPE 1+2 is IMPOSSIBLE when only RP N3→N2 is present (no RP N3→N1). ***
+    *** B2 NOTE: RP N3→N2 + RP N2→N1 with NO eliminationTest → TYPE 3. ***
+    *** However, if eliminationTest="Reflux" is present (caught by pre-check), it means the
+        GSV has INDEPENDENT drainage confirmed by direct hemodynamic test → TYPE 1+2, not Type 3.
+        The pre-check ALWAYS takes precedence over B2 pattern matching. ***
     *** TYPE 1+2 is IMPOSSIBLE without eliminationTest="Reflux" on an EP N2→N3 or RP N3 clip. ***
     *** If eliminationTest is absent from the clips, you MUST output UNDETERMINED, not Type 1+2. ***
 
@@ -242,10 +252,17 @@ Case D — No RP in any finding:
 ─────────────────────────────────────────────────────────
 
 QUICK DECISION TABLE:
+    *** ALWAYS apply elimination test pre-check first (see Case B above) ***
     Has EP N1→N2? YES + no EP N2→N3 + RP N2→N1           → TYPE 1
     Has EP N1→N2? YES + EP N2→N3 + RP N3 only             → TYPE 3
+    Has EP N1→N2? YES + EP N2→N3 + RP N3→N2 + RP N2→N1 + elim="Reflux"       → TYPE 1+2  ← pre-check
+    Has EP N1→N2? YES + EP N2→N3 + RP N3→N2 + RP N2→N1 + elim="No Reflux"    → TYPE 3
+    Has EP N1→N2? YES + EP N2→N3 + RP N3→N2 + RP N2→N1 + no elim             → TYPE 3
+    Has EP N1→N2? YES + EP N2→N3 + RP N3→N1 + RP N2→N1 + eliminationTest absent → UNDETERMINED
+    Has EP N1→N2? YES + EP N2→N3 + RP N3→N1 + RP N2→N1 + elim="Reflux"       → TYPE 1+2  ← pre-check
+    Has EP N1→N2? YES + EP N2→N3 + RP N3→N1 + RP N2→N1 + elim="No Reflux"    → TYPE 3
     Has EP N1→N2? YES + EP N2→N3 + RP N3 + RP N2→N1 + eliminationTest absent → UNDETERMINED
-    Has EP N1→N2? YES + EP N2→N3 + RP N3 + RP N2→N1 + elim="Reflux"          → TYPE 1+2
+    Has EP N1→N2? YES + EP N2→N3 + RP N3 + RP N2→N1 + elim="Reflux"          → TYPE 1+2  ← pre-check
     Has EP N1→N2? YES + EP N2→N3 + RP N3 + RP N2→N1 + elim="No Reflux"       → TYPE 3
     Has EP N1→N2? YES + EP N2→N3 + ZERO RP clips          → NO SHUNT (not Type 3 — Type 3 requires RP)
     Has EP N1→N2? YES + no EP N2→N3 + ZERO RP clips       → NO SHUNT
