@@ -40,8 +40,19 @@ BIOMEDPARSE_DIR = os.path.join(BASE_DIR, 'BiomedParse')
 opt = load_opt_from_config_files([os.path.join(BIOMEDPARSE_DIR, 'configs', 'biomedparse_inference.yaml')])
 opt = init_distributed(opt)
 
+import glob as _glob
+_ckpt_dir = os.path.join(BASE_DIR, 'BiomedParse', 'output', 'fascia_finetuning_v2')
+_ckpts = sorted(_glob.glob(os.path.join(_ckpt_dir, '**/model_state_dict.pt'), recursive=True),
+                key=os.path.getmtime)
+FINETUNED_WEIGHTS = _ckpts[-1] if _ckpts else None
 LOCAL_WEIGHTS = os.path.join(BASE_DIR, 'pretrained', 'biomedparse_v1.pt')
-pretrained_source = LOCAL_WEIGHTS if os.path.exists(LOCAL_WEIGHTS) else 'hf_hub:microsoft/BiomedParse'
+
+if FINETUNED_WEIGHTS:
+    pretrained_source = FINETUNED_WEIGHTS
+elif os.path.exists(LOCAL_WEIGHTS):
+    pretrained_source = LOCAL_WEIGHTS
+else:
+    pretrained_source = 'hf_hub:microsoft/BiomedParse'
 print(f"  weights: {pretrained_source}")
 
 model = BaseModel(opt, build_model(opt)).from_pretrained(pretrained_source).eval().cuda()
@@ -56,8 +67,10 @@ _img_transform = transforms.Compose([
     transforms.Resize((1024, 1024), interpolation=Image.BICUBIC)
 ])
 
-VEIN_COLOR   = (0, 210, 0)    # green (RGB)
-FASCIA_COLOR = (0, 210, 210)  # cyan  (RGB)
+VEIN_COLOR             = (0, 210, 0)    # green
+FASCIA_SUP_COLOR       = (0, 230, 230)  # cyan  — superficial (skin-fascia interface)
+FASCIA_DEEP_COLOR      = (0, 160, 230)  # blue  — deep (fascia-muscle interface)
+FASCIA_COLOR           = FASCIA_SUP_COLOR  # legacy alias
 
 # ---------------------------------------------------------------------------
 # Reference image/mask paths
@@ -250,56 +263,51 @@ def prob_to_vein_mask(prob: np.ndarray, threshold: float = 0.40) -> np.ndarray:
     return (prob > threshold).astype(np.uint8)
 
 
-def prob_to_fascia_centreline(prob: np.ndarray, threshold: float = 0.15) -> np.ndarray:
+def prob_to_fascia_two_lines(prob: np.ndarray, threshold: float = 0.15):
     """
-    Convert VLM fascia probability map to a thin curvilinear line.
-
-    Per column: peak-row argmax where prob > threshold.
-    Noise rejection:
-      - Require at least 40% of image columns to have signal (random noise
-        never spans the full width of the image).
-      - Slope filter: drop columns where y-position jumps >8px from the
-        smoothed running position (fascia is nearly horizontal).
-    Smooth y-coordinates, dilate 3px for visibility.
+    Returns (superficial_mask, deep_mask) — two parallel fascia band lines.
+    Uses probability-weighted centroid per column ± HALF_GAP (5% of height).
+    No jump filter so both masks are always produced when signal is present.
     """
     H, W = prob.shape
-    centreline = np.zeros((H, W), dtype=np.uint8)
-    valid_cols, y_vals = [], []
+    HALF_GAP  = max(40, int(0.05 * H))
+    LINE_HALF = 3
 
-    for col in range(W):
-        col_p = prob[:, col]
-        if col_p.max() > threshold:
-            valid_cols.append(col)
-            y_vals.append(float(np.argmax(col_p)))
+    col_max = prob.max(axis=0)
+    valid   = col_max > threshold
 
-    # Must span ≥40% of image width to be a real fascia line
-    if len(valid_cols) < 0.40 * W:
-        return centreline
+    if valid.sum() < int(0.40 * W):
+        return np.zeros((H, W), np.uint8), np.zeros((H, W), np.uint8)
 
-    y_arr = np.array(y_vals, dtype=np.float32)
+    rows     = np.arange(H, dtype=np.float64)
+    col_sums = np.maximum(prob.sum(axis=0), 1e-9)
+    ctr_raw  = (prob * rows[:, None]).sum(axis=0) / col_sums
 
-    # Smooth first so the slope filter works on a clean signal
-    k = min(31, len(y_arr))
-    if k >= 3:
-        y_smooth = np.convolve(y_arr, np.ones(k, np.float32) / k, mode='same')
-    else:
-        y_smooth = y_arr.copy()
+    valid_idx  = np.where(valid)[0]
+    ctr_filled = np.interp(np.arange(W), valid_idx, ctr_raw[valid_idx])
+    k          = min(63, max(3, W // 16))
+    ctr_smooth = np.convolve(ctr_filled, np.ones(k) / k, mode='same')
 
-    # Slope filter: max 8px jump between adjacent columns (fascia ≈ horizontal)
-    keep = np.ones(len(y_smooth), dtype=bool)
-    for i in range(1, len(y_smooth)):
-        if abs(y_smooth[i] - y_smooth[i-1]) > 8:
-            keep[i] = False
+    sup_rows  = np.clip((ctr_smooth - HALF_GAP).astype(int), 0, H - 1)
+    deep_rows = np.clip((ctr_smooth + HALF_GAP).astype(int), 0, H - 1)
 
-    for i, col in enumerate(valid_cols):
-        if keep[i]:
-            centreline[int(y_smooth[i]), col] = 255
+    sup_mask  = np.zeros((H, W), dtype=np.uint8)
+    deep_mask = np.zeros((H, W), dtype=np.uint8)
+    cols = valid_idx
+    for dr in range(-LINE_HALF, LINE_HALF + 1):
+        sup_mask [np.clip(sup_rows[cols]  + dr, 0, H-1), cols] = 255
+        deep_mask[np.clip(deep_rows[cols] + dr, 0, H-1), cols] = 255
 
-    h_close    = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 1))
-    centreline = cv2.morphologyEx(centreline, cv2.MORPH_CLOSE, h_close)
-    v_dilate   = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 3))
-    centreline = cv2.dilate(centreline, v_dilate, iterations=1)
-    return centreline
+    h_close = cv2.getStructuringElement(cv2.MORPH_RECT, (31, 1))
+    sup_mask  = cv2.morphologyEx(sup_mask,  cv2.MORPH_CLOSE, h_close)
+    deep_mask = cv2.morphologyEx(deep_mask, cv2.MORPH_CLOSE, h_close)
+    return sup_mask, deep_mask
+
+
+def prob_to_fascia_centreline(prob: np.ndarray, threshold: float = 0.15) -> np.ndarray:
+    """Single deep-band line — used by LISA / Florence fallback paths."""
+    _, deep = prob_to_fascia_two_lines(prob, threshold)
+    return deep
 
 
 # ---------------------------------------------------------------------------
@@ -465,16 +473,11 @@ def cv_detect_fascia(gray: np.ndarray, vein_mask: np.ndarray) -> np.ndarray:
 
 def annotate(image_rgb: np.ndarray, vein_mask: np.ndarray, fascia_mask: np.ndarray) -> np.ndarray:
     out = image_rgb.copy()
-
-    # Fascia: direct thin-line pixel overlay (mask already contains 5px lines)
     if fascia_mask is not None and fascia_mask.max() > 0:
         out[fascia_mask > 0] = FASCIA_COLOR
-
-    # Vein: outline only, no fill — matching clinical annotation style
     if vein_mask is not None and vein_mask.max() > 0:
         cnts, _ = cv2.findContours(vein_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cv2.drawContours(out, cnts, -1, VEIN_COLOR, 3)
-
     return out
 
 
@@ -536,10 +539,23 @@ def predict():
             "connective tissue layer", "fascial plane in ultrasound"
         ])
         fascia_prob = np.maximum(fascia_vis_prob, fascia_txt_prob)
-        fascia_mask = prob_to_fascia_centreline(fascia_prob, threshold=0.15)
+        fascia_sup, fascia_deep = prob_to_fascia_two_lines(fascia_prob, threshold=0.15)
 
-    annotated = annotate(image_np, vein_mask, fascia_mask)
-    masks_viz = make_mask_viz(vein_mask, fascia_mask, image_np.shape[0], image_np.shape[1])
+    # Two-band annotation: superficial (cyan) + deep (blue)
+    annotated = image_np.copy()
+    if fascia_sup.max() > 0:
+        annotated[fascia_sup > 0] = FASCIA_SUP_COLOR
+    if fascia_deep.max() > 0:
+        annotated[fascia_deep > 0] = FASCIA_DEEP_COLOR
+    if vein_mask.max() > 0:
+        cnts, _ = cv2.findContours(vein_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cv2.drawContours(annotated, cnts, -1, VEIN_COLOR, 3)
+
+    h, w = image_np.shape[:2]
+    masks_viz = np.zeros((h, w, 3), dtype=np.uint8)
+    if fascia_sup.max() > 0:  masks_viz[fascia_sup  > 0] = FASCIA_SUP_COLOR
+    if fascia_deep.max() > 0: masks_viz[fascia_deep > 0] = FASCIA_DEEP_COLOR
+    if vein_mask.max() > 0:   masks_viz[vein_mask   > 0] = VEIN_COLOR
 
     Image.fromarray(annotated).save(output_path)
     return jsonify({
@@ -549,336 +565,37 @@ def predict():
 
 
 # ---------------------------------------------------------------------------
-# LISA model — loaded if VLM_Fascia_Detection/LISA repo is present.
-# Model weights stored in pretrained/LISA-7B-v1/ (downloaded by setup).
-# Override with LISA_MODEL_PATH env var to point to a different checkpoint.
+# LISA — disabled
 # ---------------------------------------------------------------------------
 
-LISA_AVAILABLE   = False
-lisa_model       = None
-lisa_tokenizer   = None
-lisa_image_proc  = None
+LISA_AVAILABLE = False
 
-_local_lisa_weights = os.path.join(BASE_DIR, 'pretrained', 'LISA-7B-v1')
-LISA_MODEL_PATH = os.environ.get(
-    'LISA_MODEL_PATH',
-    _local_lisa_weights if os.path.exists(_local_lisa_weights) else 'xinlai/LISA-7B-v1'
-)
-
-_lisa_dir = os.path.join(BASE_DIR, 'LISA')
-if os.path.exists(_lisa_dir):
-    try:
-        from transformers import AutoTokenizer, CLIPImageProcessor
-        from model.LISA import LISAForCausalLM
-
-        print(f"Loading LISA model from '{LISA_MODEL_PATH}' …")
-
-        lisa_tokenizer = AutoTokenizer.from_pretrained(
-            LISA_MODEL_PATH,
-            cache_dir=None,
-            model_max_length=512,
-            padding_side='right',
-            use_fast=False,
-        )
-        lisa_tokenizer.pad_token = lisa_tokenizer.unk_token
-        lisa_tokenizer.add_tokens(['[SEG]'])
-        seg_token_idx = lisa_tokenizer('[SEG]', add_special_tokens=False).input_ids[0]
-
-        lisa_model = LISAForCausalLM.from_pretrained(
-            LISA_MODEL_PATH,
-            low_cpu_mem_usage=True,
-            vision_tower='openai/clip-vit-large-patch14',
-            seg_token_idx=seg_token_idx,
-            torch_dtype=torch.bfloat16,
-        )
-        lisa_model.config.eos_token_id = lisa_tokenizer.eos_token_id
-        lisa_model.config.bos_token_id = lisa_tokenizer.bos_token_id
-        lisa_model.config.pad_token_id = lisa_tokenizer.pad_token_id
-
-        # Initialise CLIP vision tower (required before first forward pass)
-        lisa_model.get_model().initialize_vision_modules(lisa_model.get_model().config)
-        lisa_model.get_model().get_vision_tower().to(dtype=torch.bfloat16)
-
-        lisa_model = lisa_model.bfloat16().cuda().eval()
-        lisa_image_proc = CLIPImageProcessor.from_pretrained('openai/clip-vit-large-patch14')
-        LISA_AVAILABLE = True
-        print("LISA model loaded.")
-    except Exception as _lisa_err:
-        print(f"[WARN] LISA load failed: {_lisa_err}")
-        import traceback; traceback.print_exc()
-else:
-    print(f"[INFO] No LISA directory at {_lisa_dir}; LISA page will report unavailable.")
-
-
-# ---------------------------------------------------------------------------
-# LISA — highly descriptive text prompts for each anatomical structure
-# ---------------------------------------------------------------------------
-
-LISA_FASCIA_PROMPT = (
-    "This is a medical ultrasound image of the leg for varicose vein examination. "
-    "Segment the superficial fascia: a thin, bright (hyperechoic) horizontal line "
-    "that separates the subcutaneous fat above from the muscle below."
-)
-
-LISA_VEIN_PROMPT = (
-    "This is a medical ultrasound image of the leg for varicose vein examination. "
-    "Segment all dark oval or tubular venous structures (veins): anechoic "
-    "(black), compressible, with thin bright walls, located between the skin and fascia."
-)
-
-
-# ---------------------------------------------------------------------------
-# LISA inference helper
-# ---------------------------------------------------------------------------
-
-def lisa_segment(image_pil: Image.Image, text_prompt: str) -> np.ndarray:
-    """
-    Run LISA reasoning-segmentation for one text prompt.
-    Returns a binary uint8 mask [H, W] (0/1).
-    """
-    from model.llava import conversation as conversation_lib
-    from model.llava.mm_utils import tokenizer_image_token
-    from model.segment_anything.utils.transforms import ResizeLongestSide  # type: ignore
-    from utils.utils import (DEFAULT_IM_END_TOKEN, DEFAULT_IM_START_TOKEN,
-                             DEFAULT_IMAGE_TOKEN)
-
-    image_np = np.array(image_pil)   # RGB uint8
-    H, W = image_np.shape[:2]
-
-    # --- CLIP image (336×336, bfloat16) ---
-    clip_img = lisa_image_proc.preprocess(image_np, return_tensors='pt')['pixel_values'][0]
-    clip_img = clip_img.unsqueeze(0).cuda().to(torch.bfloat16)   # [1, 3, 336, 336]
-
-    # --- SAM image: resize longest side to 1024, normalise, pad to 1024×1024 ---
-    transform = ResizeLongestSide(1024)
-    sam_np    = transform.apply_image(image_np)          # RGB numpy, longest side=1024
-    resize_list = [sam_np.shape[:2]]                     # post-resize (h, w)
-
-    pixel_mean = torch.tensor([123.675, 116.28,  103.53]).view(-1, 1, 1)
-    pixel_std  = torch.tensor([58.395,  57.12,   57.375]).view(-1, 1, 1)
-    sam_t = torch.from_numpy(sam_np).permute(2, 0, 1).contiguous().float()
-    sam_t = (sam_t - pixel_mean) / pixel_std
-    h, w  = sam_t.shape[-2:]
-    sam_t = F.pad(sam_t, (0, 1024 - w, 0, 1024 - h))
-    sam_t = sam_t.unsqueeze(0).cuda().to(torch.bfloat16)  # [1, 3, 1024, 1024]
-
-    # --- Conversational prompt with <im_start>/<im_end> wrapping ---
-    _tpl = 'llava_llama_2' if 'llama2' in LISA_MODEL_PATH.lower() else 'llava_v1'
-    conv = conversation_lib.conv_templates[_tpl].copy()
-    conv.messages = []
-
-    img_str = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
-    user_msg = img_str + '\n' + text_prompt
-
-    conv.append_message(conv.roles[0], user_msg)
-    conv.append_message(conv.roles[1], '')
-    prompt = conv.get_prompt()
-
-    input_ids = tokenizer_image_token(
-        prompt, lisa_tokenizer, return_tensors='pt'
-    ).unsqueeze(0).cuda()
-
-    with torch.no_grad():
-        _, pred_masks = lisa_model.evaluate(
-            clip_img,
-            sam_t,
-            input_ids,
-            resize_list=resize_list,
-            original_size_list=[(H, W)],
-            max_new_tokens=32,
-            tokenizer=lisa_tokenizer,
-        )
-
-    if pred_masks and len(pred_masks) > 0 and pred_masks[0] is not None \
-            and pred_masks[0].shape[0] > 0:
-        mask = pred_masks[0].detach().cpu().numpy()[0]   # float logits [H, W]
-        return (mask > 0).astype(np.uint8)
-
-    return np.zeros((H, W), dtype=np.uint8)
-
-
-# ---------------------------------------------------------------------------
-# LISA routes
-# ---------------------------------------------------------------------------
 
 @app.route('/lisa')
 def lisa_page():
-    return render_template('lisa.html', available=LISA_AVAILABLE)
+    return render_template('lisa.html', available=False)
 
 
 @app.route('/predict_lisa', methods=['POST'])
 def predict_lisa():
-    if not LISA_AVAILABLE:
-        return jsonify({
-            'error': (
-                'LISA model is not loaded. '
-                'Clone https://github.com/dvlab-research/LISA to '
-                'VLM_Fascia_Detection/LISA and restart the server.'
-            )
-        }), 503
-
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image uploaded'}), 400
-
-    file = request.files['image']
-    uid  = uuid.uuid4().hex
-    input_path  = os.path.join(UPLOAD_DIR, f'{uid}_lisa_input.png')
-    output_path = os.path.join(OUTPUT_DIR, f'{uid}_lisa_output.png')
-
-    try:
-        image = Image.open(file.stream).convert('RGB')
-        image.save(input_path)
-        image_np = np.array(image)
-
-        with torch.no_grad():
-            # Vein: LISA binary mask used directly
-            vein_mask = lisa_segment(image, LISA_VEIN_PROMPT)
-
-            # Fascia: LISA binary mask → thin centreline (reuse BiomedParse centreline logic)
-            fascia_binary = lisa_segment(image, LISA_FASCIA_PROMPT)
-            fascia_mask   = prob_to_fascia_centreline(
-                fascia_binary.astype(np.float32), threshold=0.5
-            )
-
-        annotated  = annotate(image_np, vein_mask, fascia_mask)
-        masks_viz  = make_mask_viz(vein_mask, fascia_mask, image_np.shape[0], image_np.shape[1])
-
-        Image.fromarray(annotated).save(output_path)
-        return jsonify({
-            'output': _arr_to_b64(annotated),
-            'masks':  _arr_to_b64(masks_viz),
-        })
-    except Exception as e:
-        import traceback
-        return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500
+    return jsonify({'error': 'LISA model is disabled.'}), 503
 
 
 # ---------------------------------------------------------------------------
-# Florence-2 model — microsoft/Florence-2-large (770 M params, ~1.5 GB)
-# Supports REFERRING_EXPRESSION_SEGMENTATION natively; no SAM decoder needed.
+# Florence-2 — disabled
 # ---------------------------------------------------------------------------
 
-FLORENCE_AVAILABLE  = False
-florence_model      = None
-florence_processor  = None
+FLORENCE_AVAILABLE = False
 
-_local_florence = os.path.join(BASE_DIR, 'pretrained', 'Florence-2-large')
-FLORENCE_MODEL_PATH = os.environ.get(
-    'FLORENCE_MODEL_PATH',
-    _local_florence if os.path.exists(_local_florence) else 'microsoft/Florence-2-large'
-)
-
-try:
-    from transformers import AutoProcessor, AutoModelForCausalLM as _AutoMCLM
-
-    print(f"Loading Florence-2 from '{FLORENCE_MODEL_PATH}' …")
-    florence_processor = AutoProcessor.from_pretrained(
-        FLORENCE_MODEL_PATH, trust_remote_code=True
-    )
-    florence_model = _AutoMCLM.from_pretrained(
-        FLORENCE_MODEL_PATH,
-        dtype=torch.float16,
-        trust_remote_code=True,
-        attn_implementation='eager',
-    ).cuda()
-    # safetensors only stores shared.weight; tie the three copies manually
-    _lm = florence_model.language_model
-    _lm.model.encoder.embed_tokens.weight = _lm.model.shared.weight
-    _lm.model.decoder.embed_tokens.weight = _lm.model.shared.weight
-    _lm.lm_head.weight                    = _lm.model.shared.weight
-    florence_model.eval()
-    FLORENCE_AVAILABLE = True
-    print("Florence-2 loaded.")
-except Exception as _fl_err:
-    print(f"[WARN] Florence-2 load failed: {_fl_err}")
-    import traceback; traceback.print_exc()
-
-
-FLORENCE_FASCIA_PROMPT = "the bright white horizontal line running across the image"
-FLORENCE_VEIN_PROMPT   = "the dark black circular or oval region"
-
-
-def florence_segment(image_pil: Image.Image, prompt: str) -> np.ndarray:
-    W, H = image_pil.size
-    task  = '<REFERRING_EXPRESSION_SEGMENTATION>'
-    inputs = florence_processor(
-        text=task + prompt,
-        images=image_pil,
-        return_tensors='pt',
-    ).to('cuda', torch.float16)
-
-    with torch.no_grad():
-        generated_ids = florence_model.generate(
-            **inputs,
-            max_new_tokens=1024,
-            do_sample=False,
-            num_beams=1,
-            use_cache=False,
-            bad_words_ids=[[0]],  # suppress BOS — it wins greedy but is never a valid continuation
-        )
-
-    generated_text = florence_processor.batch_decode(
-        generated_ids, skip_special_tokens=False
-    )[0]
-    parsed = florence_processor.post_process_generation(
-        generated_text, task=task, image_size=(W, H)
-    )
-
-    mask = np.zeros((H, W), dtype=np.uint8)
-    for instance_polys in parsed.get(task, {}).get('polygons', []):
-        for polygon in instance_polys:
-            if len(polygon) >= 6:
-                pts = np.array(polygon, dtype=np.float32).reshape(-1, 2).astype(np.int32)
-                cv2.fillPoly(mask, [pts], 1)
-    return mask
-
-
-# ---------------------------------------------------------------------------
-# Florence-2 routes
-# ---------------------------------------------------------------------------
 
 @app.route('/florence')
 def florence_page():
-    return render_template('florence.html', available=FLORENCE_AVAILABLE)
+    return render_template('florence.html', available=False)
 
 
 @app.route('/predict_florence', methods=['POST'])
 def predict_florence():
-    if not FLORENCE_AVAILABLE:
-        return jsonify({'error': 'Florence-2 model is not loaded.'}), 503
-
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image uploaded'}), 400
-
-    file = request.files['image']
-    uid  = uuid.uuid4().hex
-    input_path  = os.path.join(UPLOAD_DIR, f'{uid}_florence_input.png')
-    output_path = os.path.join(OUTPUT_DIR, f'{uid}_florence_output.png')
-
-    try:
-        image = Image.open(file.stream).convert('RGB')
-        image.save(input_path)
-        image_np = np.array(image)
-
-        with torch.no_grad():
-            vein_mask     = florence_segment(image, FLORENCE_VEIN_PROMPT)
-            fascia_binary = florence_segment(image, FLORENCE_FASCIA_PROMPT)
-            fascia_mask   = prob_to_fascia_centreline(
-                fascia_binary.astype(np.float32), threshold=0.5
-            )
-
-        annotated = annotate(image_np, vein_mask, fascia_mask)
-        masks_viz = make_mask_viz(vein_mask, fascia_mask, image_np.shape[0], image_np.shape[1])
-
-        Image.fromarray(annotated).save(output_path)
-        return jsonify({
-            'output': _arr_to_b64(annotated),
-            'masks':  _arr_to_b64(masks_viz),
-        })
-    except Exception as e:
-        import traceback
-        return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500
-
+    return jsonify({'error': 'Florence-2 model is disabled.'}), 503
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
