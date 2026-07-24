@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'stubs'))
 sys.path.insert(0, os.path.join(BASE_DIR, 'BiomedParse'))
 sys.path.insert(0, os.path.join(BASE_DIR, 'LISA'))
 
+from detectron2.structures import ImageList
 from modeling.BaseModel import BaseModel
 from modeling import build_model
 from modeling.language.loss import vl_similarity
@@ -35,32 +36,39 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # ---------------------------------------------------------------------------
 # Model load
 # ---------------------------------------------------------------------------
-print("Loading BiomedParse model...")
-BIOMEDPARSE_DIR = os.path.join(BASE_DIR, 'BiomedParse')
-opt = load_opt_from_config_files([os.path.join(BIOMEDPARSE_DIR, 'configs', 'biomedparse_inference.yaml')])
-opt = init_distributed(opt)
-
 import glob as _glob
-_ckpt_dir = os.path.join(BASE_DIR, 'BiomedParse', 'output', 'fascia_finetuning_v3')
+BIOMEDPARSE_DIR = os.path.join(BASE_DIR, 'BiomedParse')
+
+# Fascia model — fine-tuned weights, training config (GeneralizedSEEM)
+print("Loading fascia model (fine-tuned)...")
+fascia_opt = load_opt_from_config_files([os.path.join(BIOMEDPARSE_DIR, 'configs', 'biomed_fascia_finetuning.yaml')])
+fascia_opt = init_distributed(fascia_opt)
+_ckpt_dir = os.path.join(BASE_DIR, 'BiomedParse', 'output', 'fascia_finetuning_v2_production')
 _ckpts = sorted(_glob.glob(os.path.join(_ckpt_dir, '**/model_state_dict.pt'), recursive=True),
                 key=os.path.getmtime)
 FINETUNED_WEIGHTS = _ckpts[-1] if _ckpts else None
 LOCAL_WEIGHTS = os.path.join(BASE_DIR, 'pretrained', 'biomedparse_v1.pt')
-
-if FINETUNED_WEIGHTS:
-    pretrained_source = FINETUNED_WEIGHTS
-elif os.path.exists(LOCAL_WEIGHTS):
-    pretrained_source = LOCAL_WEIGHTS
-else:
-    pretrained_source = 'hf_hub:microsoft/BiomedParse'
-print(f"  weights: {pretrained_source}")
-
-model = BaseModel(opt, build_model(opt)).from_pretrained(pretrained_source).eval().cuda()
+fascia_weights = FINETUNED_WEIGHTS or (LOCAL_WEIGHTS if os.path.exists(LOCAL_WEIGHTS) else 'hf_hub:microsoft/BiomedParse')
+print(f"  fascia weights: {fascia_weights}")
+model = BaseModel(fascia_opt, build_model(fascia_opt)).from_pretrained(fascia_weights).eval().cuda()
 with torch.no_grad():
     model.model.sem_seg_head.predictor.lang_encoder.get_text_embeddings(
         BIOMED_CLASSES + ["background"], is_eval=True
     )
-print("Model loaded.")
+print("Fascia model loaded.")
+
+# Vein model — base BiomedParse weights, inference config (has evaluate_demo)
+print("Loading vein model (base BiomedParse)...")
+vein_opt = load_opt_from_config_files([os.path.join(BIOMEDPARSE_DIR, 'configs', 'biomedparse_inference.yaml')])
+vein_opt = init_distributed(vein_opt)
+vein_weights = LOCAL_WEIGHTS if os.path.exists(LOCAL_WEIGHTS) else 'hf_hub:microsoft/BiomedParse'
+print(f"  vein weights: {vein_weights}")
+vein_model = BaseModel(vein_opt, build_model(vein_opt)).from_pretrained(vein_weights).eval().cuda()
+with torch.no_grad():
+    vein_model.model.sem_seg_head.predictor.lang_encoder.get_text_embeddings(
+        BIOMED_CLASSES + ["background"], is_eval=True
+    )
+print("Vein model loaded.")
 
 # Image transform matching BiomedParse training (1024x1024 bicubic)
 _img_transform = transforms.Compose([
@@ -209,7 +217,7 @@ def vlm_visual_infer_prob(
 
         prob = F.interpolate(
             pred_masks[matched:matched+1, :, :][None], (H, W), mode='bilinear'
-        )[0, 0, :H, :W].sigmoid().cpu().numpy()
+        )[0, 0, :H, :W].sigmoid().detach().cpu().numpy()
 
         best_prob = prob if best_prob is None else np.maximum(best_prob, prob)
 
@@ -252,10 +260,102 @@ def vlm_text_infer_prob(
     for idx in matched_ids:
         prob = F.interpolate(
             pred_masks[idx:idx+1, :, :][None], (H, W), mode='bilinear'
-        )[0, 0, :H, :W].sigmoid().cpu().numpy()
+        )[0, 0, :H, :W].sigmoid().detach().cpu().numpy()
         best_prob = np.maximum(best_prob, prob.astype(np.float32))
 
     return best_prob
+
+
+def infer_vein_prob(query_image_pil: Image.Image) -> np.ndarray:
+    """
+    Vein detection using base BiomedParse (evaluate_demo + text grounding).
+    Uses vein_model which has the inference config with evaluate_demo available.
+    """
+    img_tensor = _img_to_tensor(query_image_pil)
+    W, H = query_image_pil.size
+
+    vein_model.model.task_switch['spatial']   = False
+    vein_model.model.task_switch['visual']    = False
+    vein_model.model.task_switch['grounding'] = True
+    vein_model.model.task_switch['audio']     = False
+
+    prompts = ["vein", "blood vessel", "anechoic vessel in ultrasound"]
+    data    = {"image": img_tensor, 'text': prompts, "height": H, "width": W}
+    results, _, extra = vein_model.model.evaluate_demo([data])
+
+    pred_masks = results['pred_masks'][0]
+    v_emb      = results['pred_captions'][0]
+    t_emb      = extra['grounding_class']
+
+    t_emb = t_emb / (t_emb.norm(dim=-1, keepdim=True) + 1e-7)
+    v_emb = v_emb / (v_emb.norm(dim=-1, keepdim=True) + 1e-7)
+    temperature = vein_model.model.sem_seg_head.predictor.lang_encoder.logit_scale
+    out_prob    = vl_similarity(v_emb, t_emb, temperature=temperature)
+
+    matched_ids = out_prob.max(0)[1]
+    best_prob   = np.zeros((H, W), dtype=np.float32)
+    for idx in matched_ids:
+        prob = F.interpolate(
+            pred_masks[idx:idx+1, :, :][None], (H, W), mode='bilinear'
+        )[0, 0, :H, :W].sigmoid().detach().cpu().numpy()
+        best_prob = np.maximum(best_prob, prob.astype(np.float32))
+    return best_prob
+
+
+def infer_grounding_prob(
+    query_image_pil: Image.Image,
+    text: str = 'fascia layer in PeripheralVascular Ultrasound',
+    infer_size: int = 512,
+) -> np.ndarray:
+    """
+    Fine-tuned grounding inference for fascia segmentation.
+    Uses the task='grounding_eval' path and pred_gmasks (not pred_masks).
+    Best query selected by spatial max across all 101 grounding queries.
+    """
+    m    = model.model
+    pred = m.sem_seg_head.predictor
+    W, H = query_image_pil.size
+
+    arr   = np.asarray(query_image_pil.resize((infer_size, infer_size), Image.BICUBIC)).astype(np.float32)
+    img_t = torch.from_numpy(arr.copy()).permute(2, 0, 1).cuda()
+    images = ImageList.from_tensors(
+        [(img_t - m.pixel_mean) / m.pixel_std],
+        m.size_divisibility,
+    )
+
+    gtext    = pred.lang_encoder.get_text_token_embeddings(
+        [text], name='grounding', token=False, norm=False
+    )
+    tok_emb  = gtext['token_emb']
+    tok_mask = gtext['tokens']['attention_mask'].bool()
+    q_emb    = tok_emb[tok_mask]
+    nz_mask  = torch.zeros(q_emb[:, None].shape[:-1], dtype=torch.bool, device=q_emb.device)
+
+    extra = {
+        'grounding_tokens':       q_emb[:, None],
+        'grounding_nonzero_mask': nz_mask.t(),
+        'grounding_class':        gtext['class_emb'],
+    }
+
+    with torch.no_grad():
+        feats     = m.backbone(images.tensor)
+        mf, _, ms = m.sem_seg_head.pixel_decoder.forward_features(feats)
+        outputs   = pred(ms, mf, extra=extra, task='grounding_eval')
+
+    all_gm = outputs['pred_gmasks'][0]                        # [101, H', W']
+    probs  = torch.sigmoid(all_gm)                            # [101, H', W']
+
+    # Weight activations toward top of image — fascia is always in the upper portion
+    Hm = probs.shape[1]
+    vert_weight = torch.linspace(2.0, 0.2, Hm, device=probs.device).view(1, Hm, 1)
+    weighted = (probs * vert_weight).reshape(101, -1).max(dim=1).values
+    best_q   = weighted.argmax().item()
+
+    prob = F.interpolate(
+        all_gm[best_q:best_q + 1][None], (H, W),
+        mode='bilinear', align_corners=False,
+    )[0, 0].sigmoid().detach().cpu().numpy().astype(np.float32)
+    return prob
 
 
 def prob_to_vein_mask(prob: np.ndarray, threshold: float = 0.40,
@@ -266,7 +366,7 @@ def prob_to_vein_mask(prob: np.ndarray, threshold: float = 0.40,
       - mean intensity: veins are anechoic (dark); rejects bright non-vein blobs
     """
     binary = (prob > threshold).astype(np.uint8)
-    min_area = max(50, int(0.002 * prob.shape[0] * prob.shape[1]))
+    min_area = max(30, int(0.0005 * prob.shape[0] * prob.shape[1]))
     n, labels, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
     out = np.zeros_like(binary)
     for i in range(1, n):
@@ -346,31 +446,6 @@ def prob_to_fascia_centreline(prob: np.ndarray, threshold: float = 0.15) -> np.n
 # Pre-compute visual reference features at startup
 # ---------------------------------------------------------------------------
 
-def _load_ref_pair(img_path, mask_path):
-    img  = Image.open(img_path).convert('RGB')
-    mask = Image.open(mask_path).convert('L')
-    return img, mask
-
-
-print("Encoding visual reference examples (few-shot setup)...")
-with torch.no_grad():
-    FASCIA_VIS_FEATURES = []
-    for img_path, msk_path in FASCIA_REFS:
-        if os.path.exists(img_path) and os.path.exists(msk_path):
-            img, msk = _load_ref_pair(img_path, msk_path)
-            FASCIA_VIS_FEATURES.append(encode_reference(img, msk))
-        else:
-            print(f"  [WARN] missing fascia ref: {img_path}")
-
-    VEIN_VIS_FEATURES = []
-    for img_path, msk_path in VEIN_REFS:
-        if os.path.exists(img_path) and os.path.exists(msk_path):
-            img, msk = _load_ref_pair(img_path, msk_path)
-            VEIN_VIS_FEATURES.append(encode_reference(img, msk))
-        else:
-            print(f"  [WARN] missing vein ref: {img_path}")
-
-print(f"  {len(FASCIA_VIS_FEATURES)} fascia refs, {len(VEIN_VIS_FEATURES)} vein refs encoded.")
 print("Ready. Open http://localhost:5000")
 
 
@@ -411,7 +486,7 @@ def cv_detect_vein(gray: np.ndarray) -> np.ndarray:
 
     candidates.sort(key=lambda x: x[0], reverse=True)
     mask = np.zeros((h, w), dtype=np.uint8)
-    for _, cnt in candidates[:1]:   # keep only the single largest vessel
+    for _, cnt in candidates[:5]:
         cv2.drawContours(mask, [cnt], -1, 1, cv2.FILLED)
     return mask
 
@@ -549,74 +624,86 @@ def predict():
     input_path  = os.path.join(UPLOAD_DIR, f'{uid}_input.png')
     output_path = os.path.join(OUTPUT_DIR, f'{uid}_output.png')
 
-    image = Image.open(file.stream).convert('RGB')
+    try:
+        image = Image.open(file.stream).convert('RGB')
+    except Exception as e:
+        return jsonify({'error': f'Image open failed: {e}'}), 400
     image.save(input_path)
 
     image_np   = np.array(image)
-    image_gray = np.array(image.convert('L'))   # grayscale for anechoic check
+    image_gray = np.array(image.convert('L'))
+    h_orig, w_orig = image_np.shape[:2]
 
-    with torch.no_grad():
-        # Vein: visual few-shot + text grounding ensemble
-        vein_vis_prob  = vlm_visual_infer_prob(image, VEIN_VIS_FEATURES)
-        vein_txt_prob  = vlm_text_infer_prob(image, [
-            "vein", "blood vessel", "anechoic vessel in ultrasound"
-        ])
-        vein_mask = prob_to_vein_mask(
-            np.maximum(vein_vis_prob, vein_txt_prob),
-            threshold=0.40, image_gray=image_gray
-        )
+    # Resize to training dimensions (1024×1024) before model inference
+    image_model = image.resize((1024, 1024), Image.BICUBIC)
 
-        # Fascia: visual few-shot + text grounding ensemble → centreline
-        fascia_vis_prob = vlm_visual_infer_prob(image, FASCIA_VIS_FEATURES)
-        fascia_txt_prob = vlm_text_infer_prob(image, [
-            "fascia", "hyperechoic fascial layer",
-            "connective tissue layer", "fascial plane in ultrasound"
-        ])
-        fascia_prob = np.maximum(fascia_vis_prob, fascia_txt_prob)
+    try:
+        with torch.no_grad():
+            # Fascia: fine-tuned grounding inference
+            fascia_prob_1024 = infer_grounding_prob(image_model,
+                text='fascia layer in PeripheralVascular Ultrasound')
+            fascia_prob = cv2.resize(fascia_prob_1024, (w_orig, h_orig))
 
-    # The model predicts the full fascia zone (superficial to deep line).
-    # Top edge of blob = superficial fascia line; bottom edge = deep fascia line.
+        # Vein: base BiomedParse text grounding
+        vein_prob_1024 = infer_vein_prob(image_model)
+        vein_prob = cv2.resize(vein_prob_1024, (w_orig, h_orig))
+        vein_mask = prob_to_vein_mask(vein_prob, threshold=0.40, image_gray=image_gray)
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500
+
     h, w = image_np.shape[:2]
-    above     = fascia_prob > 0.30
-    col_max   = fascia_prob.max(axis=0)
-    valid     = col_max > 0.30
+
+    # Two thin smooth lines: top edge (superficial) + bottom edge (deep) of fascia zone
+    fascia_prob_smooth = cv2.GaussianBlur(fascia_prob, (0, 0), sigmaX=5)
+    above   = fascia_prob_smooth > 0.35
+    col_max = fascia_prob_smooth.max(axis=0)
+    valid   = col_max > 0.35
     valid_idx = np.where(valid)[0]
 
-    fascia_boundary = np.zeros((h, w), dtype=np.uint8)
-    if valid_idx.size >= int(0.40 * w):
-        # Superficial line: first row with signal per column (top edge of fascial zone)
+    # Re-threshold using only the TOP half of the probability map (fascia is always upper)
+    above_half = np.zeros_like(above)
+    above_half[:h//2, :] = above[:h//2, :]
+    above = above_half
+    col_max = fascia_prob_smooth[:h//2, :].max(axis=0)
+    valid   = col_max > 0.35
+    valid_idx = np.where(valid)[0]
+
+    fascia_mask = np.zeros((h, w), dtype=np.uint8)
+    if valid_idx.size >= int(0.30 * w):
         sup_raw  = np.argmax(above, axis=0).astype(np.float64)
-        # Deep line: last row with signal per column (bottom edge of fascial zone)
         deep_raw = (h - 1 - np.argmax(above[::-1], axis=0)).astype(np.float64)
 
-        k   = min(255, max(3, w // 4))   # wide kernel for smooth curve
-        pad = k // 2
-        kernel = np.ones(k) / k
         sup_filled  = np.interp(np.arange(w), valid_idx, sup_raw[valid_idx])
         deep_filled = np.interp(np.arange(w), valid_idx, deep_raw[valid_idx])
-        # Two-pass box filter — rounds sharp dips into smooth curves
-        for _ in range(2):
+
+        # Three passes of wide box filter for very smooth curves
+        k = min(127, max(5, w // 8))
+        pad = k // 2
+        kernel = np.ones(k) / k
+        for _ in range(3):
             sup_filled  = np.convolve(np.pad(sup_filled,  pad, mode='edge'), kernel, mode='valid')[:w]
             deep_filled = np.convolve(np.pad(deep_filled, pad, mode='edge'), kernel, mode='valid')[:w]
 
         sup_rows  = np.clip(sup_filled.astype(int),  0, h - 1)
         deep_rows = np.clip(deep_filled.astype(int), 0, h - 1)
 
-        LINE_HALF = 7
+        LINE_HALF = 2   # 5px total per line
         cols = valid_idx
         for dr in range(-LINE_HALF, LINE_HALF + 1):
-            fascia_boundary[np.clip(deep_rows[cols] + dr, 0, h-1), cols] = 255
-            fascia_boundary[np.clip(sup_rows[cols]  + dr, 0, h-1), cols] = 255
+            fascia_mask[np.clip(sup_rows[cols]  + dr, 0, h - 1), cols] = 255
+            fascia_mask[np.clip(deep_rows[cols] + dr, 0, h - 1), cols] = 255
 
-        h_close = cv2.getStructuringElement(cv2.MORPH_RECT, (31, 1))
-        fascia_boundary = cv2.morphologyEx(fascia_boundary, cv2.MORPH_CLOSE, h_close)
+        h_close = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 1))
+        fascia_mask = cv2.morphologyEx(fascia_mask, cv2.MORPH_CLOSE, h_close)
         c0, c1 = int(valid_idx[0]), int(valid_idx[-1]) + 1
-        if c0 > 0: fascia_boundary[:, :c0] = 0
-        if c1 < w: fascia_boundary[:, c1:] = 0
+        if c0 > 0: fascia_mask[:, :c0] = 0
+        if c1 < w: fascia_mask[:, c1:] = 0
 
     annotated = image_np.copy()
-    if fascia_boundary.max() > 0:
-        annotated[fascia_boundary > 0] = FASCIA_SUP_COLOR
+    if fascia_mask.max() > 0:
+        annotated[fascia_mask > 0] = FASCIA_SUP_COLOR
     if vein_mask.max() > 0:
         # Blur mask slightly before contouring → smooth natural outline, not ellipse
         vein_blur = cv2.GaussianBlur(vein_mask.astype(np.float32) * 255, (0, 0), sigmaX=3)
@@ -625,8 +712,8 @@ def predict():
         cv2.drawContours(annotated, cnts, -1, VEIN_COLOR, 3)
 
     masks_viz = np.zeros((h, w, 3), dtype=np.uint8)
-    if fascia_boundary.max() > 0: masks_viz[fascia_boundary > 0] = FASCIA_SUP_COLOR
-    if vein_mask.max() > 0:       masks_viz[vein_mask       > 0] = VEIN_COLOR
+    if fascia_mask.max() > 0: masks_viz[fascia_mask > 0] = FASCIA_SUP_COLOR
+    if vein_mask.max() > 0:           masks_viz[vein_mask           > 0] = VEIN_COLOR
 
     Image.fromarray(annotated).save(output_path)
     return jsonify({
