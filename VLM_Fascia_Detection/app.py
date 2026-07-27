@@ -1,4 +1,5 @@
 import base64
+import concurrent.futures
 import io
 import os
 import sys
@@ -11,6 +12,7 @@ from flask import Flask, request, jsonify, send_file, render_template
 from flask_cors import CORS
 from PIL import Image
 from torchvision import transforms
+from groq import Groq
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(BASE_DIR, 'stubs'))
@@ -39,16 +41,15 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 import glob as _glob
 BIOMEDPARSE_DIR = os.path.join(BASE_DIR, 'BiomedParse')
 
-# Fascia model — fine-tuned weights, training config (GeneralizedSEEM)
-print("Loading fascia model (fine-tuned)...")
+# Fascia model — fascia-only fine-tuned weights (proven working)
+print("Loading fascia model...")
 fascia_opt = load_opt_from_config_files([os.path.join(BIOMEDPARSE_DIR, 'configs', 'biomed_fascia_finetuning.yaml')])
 fascia_opt = init_distributed(fascia_opt)
 _ckpt_dir = os.path.join(BASE_DIR, 'BiomedParse', 'output', 'fascia_finetuning_v2_production')
 _ckpts = sorted(_glob.glob(os.path.join(_ckpt_dir, '**/model_state_dict.pt'), recursive=True),
                 key=os.path.getmtime)
-FINETUNED_WEIGHTS = _ckpts[-1] if _ckpts else None
 LOCAL_WEIGHTS = os.path.join(BASE_DIR, 'pretrained', 'biomedparse_v1.pt')
-fascia_weights = FINETUNED_WEIGHTS or (LOCAL_WEIGHTS if os.path.exists(LOCAL_WEIGHTS) else 'hf_hub:microsoft/BiomedParse')
+fascia_weights = (_ckpts[-1] if _ckpts else None) or (LOCAL_WEIGHTS if os.path.exists(LOCAL_WEIGHTS) else 'hf_hub:microsoft/BiomedParse')
 print(f"  fascia weights: {fascia_weights}")
 model = BaseModel(fascia_opt, build_model(fascia_opt)).from_pretrained(fascia_weights).eval().cuda()
 with torch.no_grad():
@@ -57,11 +58,14 @@ with torch.no_grad():
     )
 print("Fascia model loaded.")
 
-# Vein model — base BiomedParse weights, inference config (has evaluate_demo)
-print("Loading vein model (base BiomedParse)...")
-vein_opt = load_opt_from_config_files([os.path.join(BIOMEDPARSE_DIR, 'configs', 'biomedparse_inference.yaml')])
+# Vein model — fascia+vein fine-tuned weights
+print("Loading vein model...")
+vein_opt = load_opt_from_config_files([os.path.join(BIOMEDPARSE_DIR, 'configs', 'biomed_fascia_finetuning.yaml')])
 vein_opt = init_distributed(vein_opt)
-vein_weights = LOCAL_WEIGHTS if os.path.exists(LOCAL_WEIGHTS) else 'hf_hub:microsoft/BiomedParse'
+_ckpt_dir = os.path.join(BASE_DIR, 'BiomedParse', 'output', 'fascia_vein_finetuning')
+_ckpts = sorted(_glob.glob(os.path.join(_ckpt_dir, '**/model_state_dict.pt'), recursive=True),
+                key=os.path.getmtime)
+vein_weights = (_ckpts[-1] if _ckpts else None) or (LOCAL_WEIGHTS if os.path.exists(LOCAL_WEIGHTS) else 'hf_hub:microsoft/BiomedParse')
 print(f"  vein weights: {vein_weights}")
 vein_model = BaseModel(vein_opt, build_model(vein_opt)).from_pretrained(vein_weights).eval().cuda()
 with torch.no_grad():
@@ -79,6 +83,98 @@ VEIN_COLOR             = (0, 210, 0)    # green
 FASCIA_SUP_COLOR       = (0, 230, 230)  # cyan  — superficial (skin-fascia interface)
 FASCIA_DEEP_COLOR      = (0, 160, 230)  # blue  — deep (fascia-muscle interface)
 FASCIA_COLOR           = FASCIA_SUP_COLOR  # legacy alias
+
+# ---------------------------------------------------------------------------
+# Groq evaluator — verifies each vein candidate blob using llama-4-scout vision
+# ---------------------------------------------------------------------------
+_GROQ_API_KEY      = ""
+_GROQ_VISION_MODEL = "qwen/qwen3.6-27b"
+_groq_client = Groq(api_key=_GROQ_API_KEY)
+
+_EVALUATOR_SYSTEM = (
+    "You are a peripheral vascular sonographer reviewing a full B-mode ultrasound frame. "
+    "One candidate structure is marked with a GREEN outline. "
+    "Decide whether it is a real vein — which can appear anywhere: above the fascia (superficial veins), "
+    "at the fascia, or deep inside the muscle compartment (deep veins like femoral or popliteal).\n\n"
+    "A real vein has ALL of these:\n"
+    "  - DISCRETE BOUNDARY — a clear, well-defined wall separating it from surrounding tissue\n"
+    "  - DARK INTERIOR — anechoic or hypoechoic lumen (clearly darker than surrounding muscle speckle)\n"
+    "  - COMPACT SHAPE — oval or round, not sprawling or irregular\n\n"
+    "Say NO only if the structure is CLEARLY:\n"
+    "  - Muscle tissue with internal speckle (not truly dark inside)\n"
+    "  - A diffuse irregular blob with no clean boundary\n"
+    "  - A horizontal band or sheet (fascia or artifact, not a vessel)\n\n"
+    "When uncertain, say YES. Reply with exactly one word: YES or NO."
+)
+
+
+def _full_img_b64_highlighted(image_rgb: np.ndarray, blob_mask: np.ndarray) -> str:
+    """Draw a bright green outline on the full image so the model sees full anatomical context."""
+    annotated = image_rgb.copy()
+    contours, _ = cv2.findContours(blob_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(annotated, contours, -1, (0, 255, 0), 3)
+    buf = io.BytesIO()
+    Image.fromarray(annotated).save(buf, format='PNG')
+    return base64.b64encode(buf.getvalue()).decode()
+
+
+def _evaluate_blob(image_rgb: np.ndarray, blob_mask: np.ndarray) -> bool:
+    """Returns True if Groq vision model confirms this blob is a real vein."""
+    try:
+        b64 = _full_img_b64_highlighted(image_rgb, blob_mask)
+        resp = _groq_client.chat.completions.create(
+            model=_GROQ_VISION_MODEL,
+            messages=[
+                {"role": "system", "content": _EVALUATOR_SYSTEM},
+                {"role": "user", "content": [
+                    {"type": "image_url",
+                     "image_url": {"url": f"data:image/png;base64,{b64}"}},
+                    {"type": "text",
+                     "text": (
+                         "The GREEN outlined structure is the candidate. "
+                         "Is it a vein? YES or NO. /no_think"
+                     )},
+                ]},
+            ],
+            max_tokens=1024,
+            temperature=0.0,
+        )
+        raw = resp.choices[0].message.content or ''
+        import re as _re
+        clean = _re.sub(r'<think>.*?</think>', '', raw, flags=_re.DOTALL | _re.IGNORECASE).strip()
+        answer = (clean.split()[0] if clean.split() else raw).upper()
+        print(f"[evaluator] answer={answer!r}")
+        return answer.startswith('YES')
+    except Exception as e:
+        print(f"[evaluator] error: {e}")
+        return True
+
+
+def evaluate_vein_mask(vein_mask: np.ndarray, image_rgb: np.ndarray) -> np.ndarray:
+    """
+    Split the model's vein prediction into individual blobs, evaluate each in
+    parallel with Groq LLM, return a mask containing only confirmed veins.
+    """
+    n, labels, _, _ = cv2.connectedComponentsWithStats(vein_mask, connectivity=8)
+    if n <= 1:
+        return vein_mask
+
+    h, w    = vein_mask.shape
+    min_px  = max(50, int(0.0003 * h * w))   # ignore sub-50px specks — not anatomically meaningful
+    blob_ids = [i for i in range(1, n) if int((labels == i).sum()) >= min_px]
+
+    if not blob_ids:
+        return np.zeros_like(vein_mask)
+
+    def _check(i):
+        return i, _evaluate_blob(image_rgb, (labels == i))
+
+    verified = np.zeros_like(vein_mask)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, len(blob_ids))) as ex:
+        for blob_id, is_vein in ex.map(_check, blob_ids):
+            if is_vein:
+                verified[labels == blob_id] = 1
+    return verified
 
 # ---------------------------------------------------------------------------
 # Reference image/mask paths
@@ -266,63 +362,23 @@ def vlm_text_infer_prob(
     return best_prob
 
 
-def infer_vein_prob(query_image_pil: Image.Image) -> np.ndarray:
-    """
-    Vein detection using base BiomedParse (evaluate_demo + text grounding).
-    Uses vein_model which has the inference config with evaluate_demo available.
-    """
-    img_tensor = _img_to_tensor(query_image_pil)
-    W, H = query_image_pil.size
-
-    vein_model.model.task_switch['spatial']   = False
-    vein_model.model.task_switch['visual']    = False
-    vein_model.model.task_switch['grounding'] = True
-    vein_model.model.task_switch['audio']     = False
-
-    prompts = ["vein", "blood vessel", "anechoic vessel in ultrasound"]
-    data    = {"image": img_tensor, 'text': prompts, "height": H, "width": W}
-    results, _, extra = vein_model.model.evaluate_demo([data])
-
-    pred_masks = results['pred_masks'][0]
-    v_emb      = results['pred_captions'][0]
-    t_emb      = extra['grounding_class']
-
-    t_emb = t_emb / (t_emb.norm(dim=-1, keepdim=True) + 1e-7)
-    v_emb = v_emb / (v_emb.norm(dim=-1, keepdim=True) + 1e-7)
-    temperature = vein_model.model.sem_seg_head.predictor.lang_encoder.logit_scale
-    out_prob    = vl_similarity(v_emb, t_emb, temperature=temperature)
-
-    matched_ids = out_prob.max(0)[1]
-    best_prob   = np.zeros((H, W), dtype=np.float32)
-    for idx in matched_ids:
-        prob = F.interpolate(
-            pred_masks[idx:idx+1, :, :][None], (H, W), mode='bilinear'
-        )[0, 0, :H, :W].sigmoid().detach().cpu().numpy()
-        best_prob = np.maximum(best_prob, prob.astype(np.float32))
-    return best_prob
+VEIN_PROMPT = (
+    'small oval anechoic dark void vein lumen in cross-section '
+    'peripheral vascular ultrasound below fascia'
+)
 
 
-def infer_grounding_prob(
-    query_image_pil: Image.Image,
-    text: str = 'fascia layer in PeripheralVascular Ultrasound',
-    infer_size: int = 512,
-) -> np.ndarray:
-    """
-    Fine-tuned grounding inference for fascia segmentation.
-    Uses the task='grounding_eval' path and pred_gmasks (not pred_masks).
-    Best query selected by spatial max across all 101 grounding queries.
-    """
-    m    = model.model
+def _grounding_prob(mdl, query_image_pil, text, infer_size=512, top_bias=False):
+    """Grounding inference on a given model instance. Returns float32 prob map."""
+    m    = mdl.model
     pred = m.sem_seg_head.predictor
     W, H = query_image_pil.size
 
     arr   = np.asarray(query_image_pil.resize((infer_size, infer_size), Image.BICUBIC)).astype(np.float32)
     img_t = torch.from_numpy(arr.copy()).permute(2, 0, 1).cuda()
     images = ImageList.from_tensors(
-        [(img_t - m.pixel_mean) / m.pixel_std],
-        m.size_divisibility,
+        [(img_t - m.pixel_mean) / m.pixel_std], m.size_divisibility
     )
-
     gtext    = pred.lang_encoder.get_text_token_embeddings(
         [text], name='grounding', token=False, norm=False
     )
@@ -330,52 +386,63 @@ def infer_grounding_prob(
     tok_mask = gtext['tokens']['attention_mask'].bool()
     q_emb    = tok_emb[tok_mask]
     nz_mask  = torch.zeros(q_emb[:, None].shape[:-1], dtype=torch.bool, device=q_emb.device)
-
     extra = {
         'grounding_tokens':       q_emb[:, None],
         'grounding_nonzero_mask': nz_mask.t(),
         'grounding_class':        gtext['class_emb'],
     }
-
     with torch.no_grad():
         feats     = m.backbone(images.tensor)
         mf, _, ms = m.sem_seg_head.pixel_decoder.forward_features(feats)
         outputs   = pred(ms, mf, extra=extra, task='grounding_eval')
 
-    all_gm = outputs['pred_gmasks'][0]                        # [101, H', W']
-    probs  = torch.sigmoid(all_gm)                            # [101, H', W']
-
-    # Weight activations toward top of image — fascia is always in the upper portion
-    Hm = probs.shape[1]
-    vert_weight = torch.linspace(2.0, 0.2, Hm, device=probs.device).view(1, Hm, 1)
-    weighted = (probs * vert_weight).reshape(101, -1).max(dim=1).values
-    best_q   = weighted.argmax().item()
-
-    prob = F.interpolate(
-        all_gm[best_q:best_q + 1][None], (H, W),
-        mode='bilinear', align_corners=False,
+    all_gm = outputs['pred_gmasks'][0]
+    probs  = torch.sigmoid(all_gm)
+    if top_bias:
+        Hm = probs.shape[1]
+        vert_weight = torch.linspace(2.0, 0.2, Hm, device=probs.device).view(1, Hm, 1)
+        weighted = (probs * vert_weight).reshape(101, -1).max(dim=1).values
+    else:
+        weighted = probs.reshape(101, -1).max(dim=1).values
+    best_q = weighted.argmax().item()
+    return F.interpolate(
+        all_gm[best_q:best_q + 1][None], (H, W), mode='bilinear', align_corners=False,
     )[0, 0].sigmoid().detach().cpu().numpy().astype(np.float32)
-    return prob
 
 
-def prob_to_vein_mask(prob: np.ndarray, threshold: float = 0.40,
+def prob_to_vein_mask(prob: np.ndarray, threshold: float = 0.25,
                       image_gray: np.ndarray = None) -> np.ndarray:
     """
-    Threshold + two filters:
-      - min area: drops pixel-level noise
-      - mean intensity: veins are anechoic (dark); rejects bright non-vein blobs
+    Keep only blobs that look like real vein cross-sections:
+      - small (0.02–2.5 % of image)
+      - anechoic (mean pixel < 65)
+      - not wildly elongated (aspect ratio ≤ 4)
+      - not completely irregular (circularity ≥ 0.15)
     """
     binary = (prob > threshold).astype(np.uint8)
-    min_area = max(30, int(0.0005 * prob.shape[0] * prob.shape[1]))
+    total  = prob.shape[0] * prob.shape[1]
+    min_area = max(10, int(0.0002 * total))
+    max_area = int(0.025 * total)   # 2.5 % max — veins are small
     n, labels, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
     out = np.zeros_like(binary)
     for i in range(1, n):
-        if stats[i, cv2.CC_STAT_AREA] < min_area:
+        area = stats[i, cv2.CC_STAT_AREA]
+        if area < min_area or area > max_area:
             continue
         if image_gray is not None:
             mean_val = float(image_gray[labels == i].mean())
-            if mean_val > 90:   # too bright to be an anechoic vein
+            if mean_val > 65:
                 continue
+        bw = stats[i, cv2.CC_STAT_WIDTH]
+        bh = stats[i, cv2.CC_STAT_HEIGHT]
+        if bw >= 1 and bh >= 1 and max(bw, bh) / min(bw, bh) > 4.0:
+            continue   # too elongated — not a vein cross-section
+        mask_i = (labels == i).astype(np.uint8)
+        cnts, _ = cv2.findContours(mask_i, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if cnts:
+            perim = cv2.arcLength(cnts[0], True)
+            if perim > 0 and (4 * np.pi * area / perim ** 2) < 0.15:
+                continue   # too irregular
         out[labels == i] = 1
     return out
 
@@ -630,24 +697,26 @@ def predict():
         return jsonify({'error': f'Image open failed: {e}'}), 400
     image.save(input_path)
 
-    image_np   = np.array(image)
-    image_gray = np.array(image.convert('L'))
+    image_np = np.array(image)
     h_orig, w_orig = image_np.shape[:2]
-
-    # Resize to training dimensions (1024×1024) before model inference
-    image_model = image.resize((1024, 1024), Image.BICUBIC)
 
     try:
         with torch.no_grad():
-            # Fascia: fine-tuned grounding inference
-            fascia_prob_1024 = infer_grounding_prob(image_model,
-                text='fascia layer in PeripheralVascular Ultrasound')
-            fascia_prob = cv2.resize(fascia_prob_1024, (w_orig, h_orig))
-
-        # Vein: base BiomedParse text grounding
-        vein_prob_1024 = infer_vein_prob(image_model)
-        vein_prob = cv2.resize(vein_prob_1024, (w_orig, h_orig))
-        vein_mask = prob_to_vein_mask(vein_prob, threshold=0.40, image_gray=image_gray)
+            fascia_prob = _grounding_prob(
+                model, image,
+                text='fascia layer in PeripheralVascular Ultrasound',
+                top_bias=True,
+            )
+            vein_prob = _grounding_prob(
+                vein_model, image,
+                text=VEIN_PROMPT,
+                top_bias=False,
+            )
+        fascia_prob = cv2.resize(fascia_prob, (w_orig, h_orig))
+        vein_prob   = cv2.resize(vein_prob,   (w_orig, h_orig))
+        vein_mask_raw = (vein_prob > 0.5).astype(np.uint8)
+        use_evaluator = request.form.get('use_evaluator', '1') == '1'
+        vein_mask     = evaluate_vein_mask(vein_mask_raw, image_np) if use_evaluator else vein_mask_raw
     except Exception as e:
         import traceback
         print(traceback.format_exc())
@@ -657,17 +726,11 @@ def predict():
 
     # Two thin smooth lines: top edge (superficial) + bottom edge (deep) of fascia zone
     fascia_prob_smooth = cv2.GaussianBlur(fascia_prob, (0, 0), sigmaX=5)
-    above   = fascia_prob_smooth > 0.35
-    col_max = fascia_prob_smooth.max(axis=0)
-    valid   = col_max > 0.35
-    valid_idx = np.where(valid)[0]
-
-    # Re-threshold using only the TOP half of the probability map (fascia is always upper)
-    above_half = np.zeros_like(above)
-    above_half[:h//2, :] = above[:h//2, :]
-    above = above_half
-    col_max = fascia_prob_smooth[:h//2, :].max(axis=0)
-    valid   = col_max > 0.35
+    above_half = np.zeros_like(fascia_prob_smooth)
+    above_half[:h//2, :] = fascia_prob_smooth[:h//2, :]
+    above     = above_half > 0.35
+    col_max   = fascia_prob_smooth[:h//2, :].max(axis=0)
+    valid     = col_max > 0.35
     valid_idx = np.where(valid)[0]
 
     fascia_mask = np.zeros((h, w), dtype=np.uint8)
@@ -686,7 +749,7 @@ def predict():
             sup_filled  = np.convolve(np.pad(sup_filled,  pad, mode='edge'), kernel, mode='valid')[:w]
             deep_filled = np.convolve(np.pad(deep_filled, pad, mode='edge'), kernel, mode='valid')[:w]
 
-        sup_rows  = np.clip(sup_filled.astype(int),  0, h - 1)
+        sup_rows  = np.clip(sup_filled.astype(int) - 8, 0, h - 1)
         deep_rows = np.clip(deep_filled.astype(int), 0, h - 1)
 
         LINE_HALF = 2   # 5px total per line
