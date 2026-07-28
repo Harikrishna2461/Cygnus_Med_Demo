@@ -287,6 +287,45 @@ CRITICAL RULE 2B — eliminationTest values and when to add:
       No independent re-entry perforator exists to maintain the tributary circuit once SFJ is blocked.
       → eliminationTest="No Reflux"  (Type 3)
 
+  INSTRUCTION-AS-RESULT INTERPRETATION — read this carefully:
+  Clinicians answering the elimination test question sometimes phrase their response as an
+  action fragment rather than a complete outcome sentence. ALWAYS read these as results,
+  not as instructions. A clinician in a clinical examination setting who mentions compression
+  alongside a vessel's flow state is REPORTING WHAT THEY OBSERVED, not giving a future order.
+
+  When the description mentions a compression action on a vessel AND (anywhere in the same
+  sentence or phrase) describes the flow state of the monitored vessel, extract that state
+  as the eliminationTest result — regardless of grammatical structure.
+
+  METHOD 1 — compress tributary, observe GSV:
+    "compress the tributary that gsv is refluxing"
+    → "that gsv is refluxing" = the GSV is refluxing at the time of compression
+    → reflux continues = eliminationTest="Reflux"
+
+    "compress the tributary that gsv is refluxing" means:
+    "I compressed the tributary [and observed that] the GSV is refluxing" — NOT
+    "please compress the tributary [which is the one] the GSV is refluxing through".
+    In a clinical response to the elimination test question, the former interpretation is ALWAYS correct.
+
+    Further examples → eliminationTest="Reflux":
+      "compressing the tributary, the gsv was refluxing"
+      "compress the tributary — gsv reflux present"
+      "I compressed the tributary, gsv still refluxing"
+      "tributary compressed, backward flow in gsv confirmed"
+
+    Further examples → eliminationTest="No Reflux":
+      "compress the tributary, gsv reflux gone"
+      "compressed the tributary, no backward flow in gsv"
+      "the tributary compress, no gsv reflux"
+
+  METHOD 2 — compress GSV/SFJ, observe tributary:
+    "compress the gsv, the tributary is refluxing" → eliminationTest="Reflux"
+    "compress the sfj, tributary reflux abolished" → eliminationTest="No Reflux"
+
+  *** ANY mention of compression + ANY mention of the monitored vessel's flow state
+      = extract eliminationTest. Do not require "when", "after", "during", or explicit
+      outcome language. The co-occurrence of compression action and vessel state IS the result. ***
+
   Read the clinical meaning of the description. Do not pattern-match on individual words.
   "confirmed there is a reflux" in the context of Method 1 = saphenous reflux continues = eliminationTest="Reflux".
 
@@ -503,8 +542,11 @@ If the clip is missing, add it now.
      Use RP N3→N2 if the tributary drains back toward the GSV.
      Use RP N3→N1 if the tributary drains to the deep system via a perforating vein.
 
-  F. Does the description mention a compression/elimination test with a stated result?
-     → Add eliminationTest to the relevant EP N2→N3 or RP N3 clip. Otherwise omit it.
+  F. Does the description mention a compression/elimination test — including any action+state
+     pattern per the INSTRUCTION-AS-RESULT rule in CRITICAL RULE 2B?
+     → Add eliminationTest to the relevant EP N2→N3 or RP N3 clip.
+     → "compress the tributary that gsv is refluxing" = eliminationTest="Reflux" — extract it.
+     → Only omit if there is NO mention of compression whatsoever.
 
 If you answered YES to D, you must have clips for both D AND E (assuming E is also described).
 The most common error is generating A + C but omitting D and E. Do not do this.
