@@ -1,0 +1,56 @@
+C:\Users\Krish\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\timm\models\layers\__init__.py:49: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Deformable Transformer Encoder is not available.
+Loading pretrained BiomedParse model (no fine-tuning)...
+  weights : c:\Users\Krish\Downloads\Cygnus_Med_Demo\VLM_Fascia_Detection\pretrained\biomedparse_v1.pt
+  config  : c:\Users\Krish\Downloads\Cygnus_Med_Demo\VLM_Fascia_Detection\BiomedParse\configs\biomed_fascia_finetuning.yaml
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|##########| 199/199 [00:00<00:00, 50546.02it/s]
+[transformers] [1mBertModel LOAD REPORT[0m from: microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext
+Key                                        | Status     |  | 
+-------------------------------------------+------------+--+-
+cls.predictions.transform.LayerNorm.bias   | UNEXPECTED |  | 
+cls.predictions.transform.dense.bias       | UNEXPECTED |  | 
+cls.predictions.decoder.weight             | UNEXPECTED |  | 
+cls.predictions.decoder.bias               | UNEXPECTED |  | 
+cls.predictions.transform.dense.weight     | UNEXPECTED |  | 
+cls.seq_relationship.bias                  | UNEXPECTED |  | 
+cls.seq_relationship.weight                | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.weight | UNEXPECTED |  | 
+cls.predictions.bias                       | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+Model loaded.
+
+Loading test JSON: c:\Users\Krish\Downloads\Cygnus_Med_Demo\VLM_Fascia_Detection\BiomedParse\biomedparse_datasets\Fascia_Detection\test_with_veins_backup.json
+Total annotations: 720
+
+Starting evaluation...
+
+[0/720] cls=fascia  img=000000_Ultrasound_PeripheralVascular.png
+[50/720] cls=fascia  img=000050_Ultrasound_PeripheralVascular.png
+[100/720] cls=fascia  img=000100_Ultrasound_PeripheralVascular.png
+[150/720] cls=fascia  img=000150_Ultrasound_PeripheralVascular.png
+[200/720] cls=fascia  img=000200_Ultrasound_PeripheralVascular.png
+[250/720] cls=fascia  img=000250_Ultrasound_PeripheralVascular.png
+[300/720] cls=fascia  img=000300_Ultrasound_PeripheralVascular.png
+[350/720] cls=fascia  img=000350_Ultrasound_PeripheralVascular.png
+[400/720] cls=fascia  img=000400_Ultrasound_PeripheralVascular.png
+[450/720] cls=vein  img=000450_Ultrasound_PeripheralVascular.png
+[500/720] cls=vein  img=000500_Ultrasound_PeripheralVascular.png
+[550/720] cls=vein  img=000550_Ultrasound_PeripheralVascular.png
+[600/720] cls=vein  img=000600_Ultrasound_PeripheralVascular.png
+[650/720] cls=vein  img=000650_Ultrasound_PeripheralVascular.png
+[700/720] cls=vein  img=000700_Ultrasound_PeripheralVascular.png
+
+Evaluation complete.
+
+============================================================
+BASELINE RESULTS (pretrained biomedparse_v1.pt, no fine-tuning)
+============================================================
+  FASCIA    mean_IoU=0.0450  mean_Dice=0.0853  (n=415, skipped=0)
+  VEIN      mean_IoU=0.7360  mean_Dice=0.8190  (n=305, skipped=0)
+============================================================
+
+Results saved to: c:\Users\Krish\Downloads\Cygnus_Med_Demo\VLM_Fascia_Detection\eval_baseline_results.json

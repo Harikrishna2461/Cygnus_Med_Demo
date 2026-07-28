@@ -1,0 +1,106 @@
+C:\Users\Krish\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\timm\models\layers\__init__.py:49: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Deformable Transformer Encoder is not available.
+Seen frames   : 8
+Unseen frames : 31
+Loading Baseline ...
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|##########| 199/199 [00:00<00:00, 90744.35it/s]
+[transformers] [1mBertModel LOAD REPORT[0m from: microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext
+Key                                        | Status     |  | 
+-------------------------------------------+------------+--+-
+cls.predictions.decoder.bias               | UNEXPECTED |  | 
+cls.seq_relationship.weight                | UNEXPECTED |  | 
+cls.predictions.transform.dense.weight     | UNEXPECTED |  | 
+cls.seq_relationship.bias                  | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.weight | UNEXPECTED |  | 
+cls.predictions.decoder.weight             | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.bias   | UNEXPECTED |  | 
+cls.predictions.bias                       | UNEXPECTED |  | 
+cls.predictions.transform.dense.bias       | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+  Baseline loaded.
+Loading Fine-tuned Fascia ...
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|##########| 199/199 [00:00<00:00, 49917.26it/s]
+[transformers] [1mBertModel LOAD REPORT[0m from: microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext
+Key                                        | Status     |  | 
+-------------------------------------------+------------+--+-
+cls.predictions.decoder.bias               | UNEXPECTED |  | 
+cls.seq_relationship.weight                | UNEXPECTED |  | 
+cls.predictions.transform.dense.weight     | UNEXPECTED |  | 
+cls.seq_relationship.bias                  | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.weight | UNEXPECTED |  | 
+cls.predictions.decoder.weight             | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.bias   | UNEXPECTED |  | 
+cls.predictions.bias                       | UNEXPECTED |  | 
+cls.predictions.transform.dense.bias       | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+  Fine-tuned Fascia loaded.
+Loading Fine-tuned Vein ...
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|##########| 199/199 [00:00<00:00, 30021.81it/s]
+[transformers] [1mBertModel LOAD REPORT[0m from: microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext
+Key                                        | Status     |  | 
+-------------------------------------------+------------+--+-
+cls.predictions.decoder.bias               | UNEXPECTED |  | 
+cls.seq_relationship.weight                | UNEXPECTED |  | 
+cls.predictions.transform.dense.weight     | UNEXPECTED |  | 
+cls.seq_relationship.bias                  | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.weight | UNEXPECTED |  | 
+cls.predictions.decoder.weight             | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.bias   | UNEXPECTED |  | 
+cls.predictions.bias                       | UNEXPECTED |  | 
+cls.predictions.transform.dense.bias       | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+  Fine-tuned Vein loaded.
+
+=== Processing Seen Frames ===
+  [seen] 1/8 — Screenshot 2026-07-16 101239.png
+  [seen] 2/8 — Screenshot 2026-07-16 165413.png
+  [seen] 3/8 — Screenshot 2026-07-16 165436.png
+  [seen] 4/8 — Screenshot 2026-07-17 111424.png
+  [seen] 5/8 — Screenshot 2026-07-22 102503.png
+  [seen] 6/8 — Screenshot 2026-07-24 180131.png
+  [seen] 7/8 — Screenshot 2026-07-27 105802.png
+  [seen] 8/8 — Screenshot 2026-07-27 110444.png
+
+=== Processing Unseen Frames ===
+  [unseen] 1/31 — Screenshot 2026-07-27 150721_resized.png
+  [unseen] 2/31 — Screenshot 2026-07-27 150750_resized.png
+  [unseen] 3/31 — Screenshot 2026-07-27 150813_resized.png
+  [unseen] 4/31 — Screenshot 2026-07-27 150830_resized.png
+  [unseen] 5/31 — Screenshot 2026-07-27 150843_resized.png
+  [unseen] 6/31 — Screenshot 2026-07-27 150857_resized.png
+  [unseen] 7/31 — Screenshot 2026-07-28 170443.png
+  [unseen] 8/31 — Screenshot 2026-07-28 170648.png
+  [unseen] 9/31 — Screenshot 2026-07-28 170854.png
+  [unseen] 10/31 — Screenshot 2026-07-28 171101.png
+  [unseen] 11/31 — Screenshot 2026-07-28 171205.png
+  [unseen] 12/31 — Screenshot 2026-07-28 171431.png
+  [unseen] 13/31 — Screenshot 2026-07-28 171516.png
+  [unseen] 14/31 — Screenshot 2026-07-28 171701.png
+  [unseen] 15/31 — Screenshot 2026-07-28 171935.png
+  [unseen] 16/31 — Screenshot 2026-07-28 172016.png
+  [unseen] 17/31 — Screenshot 2026-07-28 173753.png
+  [unseen] 18/31 — Screenshot 2026-07-28 174005.png
+  [unseen] 19/31 — Screenshot 2026-07-28 174102.png
+  [unseen] 20/31 — Screenshot 2026-07-28 174502.png
+  [unseen] 21/31 — Screenshot 2026-07-28 174741.png
+  [unseen] 22/31 — Screenshot 2026-07-28 175229.png
+  [unseen] 23/31 — Screenshot 2026-07-28 175334.png
+  [unseen] 24/31 — Screenshot 2026-07-28 175430.png
+  [unseen] 25/31 — Screenshot 2026-07-28 175520.png
+  [unseen] 26/31 — Screenshot 2026-07-28 175615.png
+  [unseen] 27/31 — Screenshot 2026-07-28 175712.png
+  [unseen] 28/31 — Screenshot 2026-07-28 175813.png
+  [unseen] 29/31 — Screenshot 2026-07-28 175942.png
+  [unseen] 30/31 — Screenshot 2026-07-28 180024.png
+  [unseen] 31/31 — Screenshot 2026-07-28 180118.png
+
+Word document updated: C:\Users\Krish\Downloads\Cygnus_Med_Demo\VLM_Fascia_Detection\FasciaVeinDetection_Report.docx
+Panels saved to: C:\Users\Krish\Downloads\Cygnus_Med_Demo\VLM_Fascia_Detection\report_panels

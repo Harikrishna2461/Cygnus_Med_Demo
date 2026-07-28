@@ -18,10 +18,16 @@
     <h1>Ultrasound Fascia & Vein Detection</h1>
     <p class="subtitle">Upload a raw ultrasound frame to detect fascia layers and veins using BiomedParse.</p>
 
-    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#aaa;margin-bottom:12px;">
-      <input type="checkbox" id="evaluatorToggle" checked />
-      <span>Evaluator (filter false positive veins)</span>
-    </label>
+    <div style="display:flex;gap:24px;margin-bottom:12px;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#aaa;">
+        <input type="checkbox" id="evaluatorToggle" checked />
+        <span>Evaluator (filter false positive veins)</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#aaa;">
+        <input type="checkbox" id="claheToggle" />
+        <span>CLAHE (normalize contrast for non-standard images)</span>
+      </label>
+    </div>
 
     <div class="upload-area" id="dropzone">
       <input type="file" id="fileInput" accept="image/*" hidden />
@@ -76,6 +82,7 @@
     const legend = document.getElementById('legend');
     const runBtn = document.getElementById('runBtn');
     const evaluatorToggle = document.getElementById('evaluatorToggle');
+    const claheToggle = document.getElementById('claheToggle');
 
     let selectedFile = null;
 
@@ -116,6 +123,7 @@
       const formData = new FormData();
       formData.append('image', selectedFile);
       formData.append('use_evaluator', evaluatorToggle.checked ? '1' : '0');
+      formData.append('use_clahe', claheToggle.checked ? '1' : '0');
 
       fetch('/predict', { method: 'POST', body: formData })
         .then(res => res.json().then(d => { if (!res.ok) throw new Error(d.error || 'Inference failed'); return d; }))

@@ -1,0 +1,65 @@
+C:\Users\Krish\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\timm\models\layers\__init__.py:49: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Deformable Transformer Encoder is not available.
+Loading fascia model: C:\Users\Krish\Downloads\Cygnus_Med_Demo\VLM_Fascia_Detection\BiomedParse\output\fascia_finetuning_v2_production\biomed_fascia_finetuning.yaml_conf~\run_3\00001470\default\model_state_dict.pt
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|##########| 199/199 [00:00<00:00, 87509.59it/s]
+[transformers] [1mBertModel LOAD REPORT[0m from: microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext
+Key                                        | Status     |  | 
+-------------------------------------------+------------+--+-
+cls.predictions.transform.LayerNorm.bias   | UNEXPECTED |  | 
+cls.predictions.decoder.bias               | UNEXPECTED |  | 
+cls.seq_relationship.weight                | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.weight | UNEXPECTED |  | 
+cls.predictions.bias                       | UNEXPECTED |  | 
+cls.predictions.transform.dense.bias       | UNEXPECTED |  | 
+cls.seq_relationship.bias                  | UNEXPECTED |  | 
+cls.predictions.decoder.weight             | UNEXPECTED |  | 
+cls.predictions.transform.dense.weight     | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+  fascia [0/415]
+  fascia [50/415]
+  fascia [100/415]
+  fascia [150/415]
+  fascia [200/415]
+  fascia [250/415]
+  fascia [300/415]
+  fascia [350/415]
+  fascia [400/415]
+
+FASCIA FT: IoU=0.3547  Dice=0.5115  n=415
+
+Loading vein model: C:\Users\Krish\Downloads\Cygnus_Med_Demo\VLM_Fascia_Detection\BiomedParse\output\fascia_vein_finetuning\biomed_fascia_finetuning.yaml_conf~\run_1\00001785\default\model_state_dict.pt
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|##########| 199/199 [00:00<00:00, 39458.54it/s]
+[transformers] [1mBertModel LOAD REPORT[0m from: microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext
+Key                                        | Status     |  | 
+-------------------------------------------+------------+--+-
+cls.predictions.transform.LayerNorm.bias   | UNEXPECTED |  | 
+cls.predictions.decoder.bias               | UNEXPECTED |  | 
+cls.seq_relationship.weight                | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.weight | UNEXPECTED |  | 
+cls.predictions.bias                       | UNEXPECTED |  | 
+cls.predictions.transform.dense.bias       | UNEXPECTED |  | 
+cls.seq_relationship.bias                  | UNEXPECTED |  | 
+cls.predictions.decoder.weight             | UNEXPECTED |  | 
+cls.predictions.transform.dense.weight     | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+  vein [0/305]
+  vein [50/305]
+  vein [100/305]
+  vein [150/305]
+  vein [200/305]
+  vein [250/305]
+  vein [300/305]
+
+VEIN FT: IoU=0.5678  Dice=0.6450  n=305
+
+============================================================
+FASCIA FT : IoU=0.3547  Dice=0.5115
+VEIN FT   : IoU=0.5678  Dice=0.6450
+============================================================
+Saved to eval_finetuned_results.json

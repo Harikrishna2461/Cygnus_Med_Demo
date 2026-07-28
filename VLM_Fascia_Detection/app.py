@@ -368,14 +368,22 @@ VEIN_PROMPT = (
 )
 
 
-def _grounding_prob(mdl, query_image_pil, text, infer_size=512, top_bias=False):
+_clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+
+def _apply_clahe(arr_uint8: np.ndarray) -> np.ndarray:
+    gray = cv2.cvtColor(arr_uint8, cv2.COLOR_RGB2GRAY)
+    return cv2.cvtColor(_clahe.apply(gray), cv2.COLOR_GRAY2RGB)
+
+
+def _grounding_prob(mdl, query_image_pil, text, infer_size=512, top_bias=False, use_clahe=False):
     """Grounding inference on a given model instance. Returns float32 prob map."""
     m    = mdl.model
     pred = m.sem_seg_head.predictor
     W, H = query_image_pil.size
 
-    arr   = np.asarray(query_image_pil.resize((infer_size, infer_size), Image.BICUBIC)).astype(np.float32)
-    img_t = torch.from_numpy(arr.copy()).permute(2, 0, 1).cuda()
+    resized = np.asarray(query_image_pil.resize((infer_size, infer_size), Image.BICUBIC))
+    arr     = (_apply_clahe(resized) if use_clahe else resized).astype(np.float32)
+    img_t   = torch.from_numpy(arr.copy()).permute(2, 0, 1).cuda()
     images = ImageList.from_tensors(
         [(img_t - m.pixel_mean) / m.pixel_std], m.size_divisibility
     )
@@ -701,21 +709,24 @@ def predict():
     h_orig, w_orig = image_np.shape[:2]
 
     try:
+        use_clahe     = request.form.get('use_clahe', '0') == '1'
+        use_evaluator = request.form.get('use_evaluator', '1') == '1'
         with torch.no_grad():
             fascia_prob = _grounding_prob(
                 model, image,
                 text='fascia layer in PeripheralVascular Ultrasound',
                 top_bias=True,
+                use_clahe=use_clahe,
             )
             vein_prob = _grounding_prob(
                 vein_model, image,
                 text=VEIN_PROMPT,
                 top_bias=False,
+                use_clahe=use_clahe,
             )
         fascia_prob = cv2.resize(fascia_prob, (w_orig, h_orig))
         vein_prob   = cv2.resize(vein_prob,   (w_orig, h_orig))
         vein_mask_raw = (vein_prob > 0.5).astype(np.uint8)
-        use_evaluator = request.form.get('use_evaluator', '1') == '1'
         vein_mask     = evaluate_vein_mask(vein_mask_raw, image_np) if use_evaluator else vein_mask_raw
     except Exception as e:
         import traceback
