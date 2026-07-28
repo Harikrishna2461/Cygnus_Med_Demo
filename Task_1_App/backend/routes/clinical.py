@@ -39,6 +39,18 @@ def _already_asked(history: list[dict], marker: str) -> bool:
     return False
 
 
+def _times_asked(history: list[dict], marker: str) -> int:
+    """
+    Count how many times the assistant has asked a question containing *marker*.
+    Used for questions that need a specific answer — a single irrelevant user
+    reply should not permanently suppress the question.
+    """
+    return sum(
+        1 for msg in history
+        if msg.get("role") == "assistant" and marker in (msg.get("content") or "")
+    )
+
+
 def _sufficiency_gate_already_answered(history: list[dict]) -> bool:
     """
     Return True if the assistant already sent a sufficiency-gate message
@@ -211,9 +223,9 @@ def api_chat():
                 if c.get("flow") == "RP" and c.get("fromType") == "N2" and c.get("toType") == "N1"
             ]
             has_rp_calibre = any(c.get("calibre") for c in rp_n2n1_clips)
-            if rp_n2n1_clips and not has_rp_calibre and not _already_asked(
+            if rp_n2n1_clips and not has_rp_calibre and _times_asked(
                 full_history, "perforating vein is where the GSV trunk drains"
-            ):
+            ) < 2:
                 calibre_msg = (
                     f"Interpreted so far: {interp_text}\n\n"
                     "To determine the correct ligation strategy for Type 1+2, I need to know how significant "
