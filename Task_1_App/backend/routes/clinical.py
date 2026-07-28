@@ -171,10 +171,10 @@ def api_chat():
             result["shunt_type"] = "Type 1+2" if elim_value_in_clips.strip() == "Reflux" else "Type 3"
 
         # ── Elimination test ──────────────────────────────────────────────────
-        # Ask only if genuinely needed AND never asked before in this session.
-        if result.get("needs_elim_test") and not _already_asked(
-            full_history, "To distinguish Type 1+2 from Type 3"
-        ):
+        # Always re-ask if the classifier still needs the result — never return UNDETERMINED.
+        # If the user provided a proper result, the NL interpreter would have extracted it
+        # and needs_elim_test would already be False.
+        if result.get("needs_elim_test"):
             elim_msg = (
                 f"Interpreted so far: {interp_text}\n\n"
                 "To distinguish Type 1+2 from Type 3 I need the elimination test result. "
