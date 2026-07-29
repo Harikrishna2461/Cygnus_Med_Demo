@@ -1,0 +1,29 @@
+Dataset format: COCO-style JSON
+
+
+train_with_veins_backup.json
+├── images[]         — {id, file_name, height, width}
+├── annotations[]    — one per image
+│   ├── image_id
+│   ├── category_id  — 17 = fascia, 18 = vein
+│   ├── mask_file    — path to a separate PNG mask
+│   └── sentences[]  — [{"raw": "fascia layer in PeripheralVascular Ultrasound"}]
+└── categories[]     — 0–18 (BiomedParse's 16 original + our 2 custom)
+4095 training images, 4095 annotations — each image has one annotation.
+
+How masks are stored
+
+Not COCO polygons — separate PNG files. Each mask PNG has pixel value 1 where the structure is, 0 elsewhere. The mapper reads it as RGB, sums channels ([1,1,1] → sum=3), then thresholds at 3.
+
+How it's fed to the model
+
+The BioMedDatasetMapper does this per sample:
+
+Reads image → resize to 512×512 (ResizeScale 0.9–1.1 + FixedSizeCrop)
+Reads mask PNG → applies same transform
+Picks a random sentence from sentences[] as the text grounding query
+Remaps category IDs: fascia (17) → 14 (histology structure), vein (18) → 7 (vessel) — the model never learns new classes, it reuses existing BiomedParse vocabulary slots
+Feeds (image, mask, text) triplet to the model under grounding_eval task
+Why domain shift happens
+
+All 4095 images come from your specific ultrasound machine/videos — same brightness, gain, resolution, speckle pattern. The model has never seen a different machine's output, so it hallucinates on internet images.

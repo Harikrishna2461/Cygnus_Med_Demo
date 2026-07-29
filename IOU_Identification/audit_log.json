@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2026-07-29T09:15:40.397025+00:00",
+    "cv_box": [
+      118,
+      55,
+      488,
+      405
+    ],
+    "vlm_box": null,
+    "result": "cv_only",
+    "confidence": 0.75
+  },
+  {
+    "timestamp": "2026-07-29T09:16:56.301918+00:00",
+    "cv_box": [
+      118,
+      55,
+      488,
+      405
+    ],
+    "vlm_box": null,
+    "result": "cv_only",
+    "confidence": 0.75
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "06e3c5f89aed06": {
+    "resolution": "720x480",
+    "roi": {
+      "x1": 144,
+      "y1": 55,
+      "x2": 503,
+      "y2": 405
+    },
+    "detection_method": "agent",
+    "confidence": 0.92,
+    "verified_on": [
+      "sample_data"
+    ]
+  }
+}
