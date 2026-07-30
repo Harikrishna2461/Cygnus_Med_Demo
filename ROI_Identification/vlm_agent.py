@@ -16,14 +16,11 @@ import numpy as np
 from groq import Groq
 
 GROQ_API_KEY = ""
-# Vision-capable models to try in order; first successful one is used.
+# Vision-capable model (qwen3.6-27b accepts image_url inputs on Groq).
 GROQ_VISION_MODELS = [
-    "meta-llama/llama-4-maverick-17b-128e-instruct",
-    "meta-llama/llama-4-scout-17b-16e-instruct",
-    "llama-3.2-90b-vision-preview",
-    "llama-3.2-11b-vision-preview",
+    "qwen/qwen3.6-27b",
 ]
-GROQ_MODEL = GROQ_VISION_MODELS[0]   # updated after first successful call
+GROQ_MODEL = GROQ_VISION_MODELS[0]
 MAX_SEND_DIM   = 720   # longest side when downscaling for the API call
 
 _client: Groq | None = None
@@ -42,7 +39,7 @@ def _encode_frame(frame: np.ndarray, max_dim: int = MAX_SEND_DIM) -> tuple[str, 
     """
     Resize frame so longest side <= max_dim.
     Returns (base64_jpeg_string, scale_factor) where scale_factor maps
-    sent-image coords → original coords (multiply VLM output by 1/scale).
+    sent-image coords -> original coords (multiply VLM output by 1/scale).
     """
     h, w = frame.shape[:2]
     scale = min(1.0, max_dim / max(h, w))
@@ -54,6 +51,21 @@ def _encode_frame(frame: np.ndarray, max_dim: int = MAX_SEND_DIM) -> tuple[str, 
 
 
 # ── Prompts ───────────────────────────────────────────────────────────────────
+
+def _prompt_view_type(img_w: int, img_h: int) -> str:
+    return (
+        f"This is a cropped ultrasound scan frame ({img_w}x{img_h} pixels, "
+        "no UI chrome — only scan content). "
+        "Classify the probe orientation:\n"
+        "- TRANSVERSE: vessels appear as circular or roughly round dark cross-sections "
+        "(probe cut perpendicular to the vessel axis).\n"
+        "- LONGITUDINAL: vessels appear as elongated, tube-like dark channels "
+        "running horizontally across most of the frame width "
+        "(probe parallel to the vessel axis).\n"
+        'Reply with ONLY this JSON and nothing else: {"view_type": "TRANSVERSE"} '
+        'or {"view_type": "LONGITUDINAL"}'
+    )
+
 
 def _prompt_detect(img_w: int, img_h: int) -> str:
     return (
@@ -112,27 +124,23 @@ def _parse(text: str, max_w: int, max_h: int) -> tuple | None:
 
 # ── VLM call with model fallback ─────────────────────────────────────────────
 
-def _call_vlm(
+_SYSTEM = "You are a medical image analysis AI. Output ONLY raw JSON — no markdown, no explanation."
+
+
+def _call_vlm_text(
     client: Groq,
     b64: str,
     prompt: str,
-    max_w: int,
-    max_h: int,
-) -> tuple | None:
-    """Try each model in GROQ_VISION_MODELS until one succeeds."""
+    max_tokens: int = 150,
+) -> str | None:
+    """Try each model in GROQ_VISION_MODELS until one succeeds. Returns raw text."""
     global GROQ_MODEL
     for model in GROQ_VISION_MODELS:
         try:
             resp = client.chat.completions.create(
                 model=model,
                 messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a medical image analysis AI. "
-                            "Output ONLY raw JSON — no markdown, no explanation."
-                        ),
-                    },
+                    {"role": "system", "content": _SYSTEM},
                     {
                         "role": "user",
                         "content": [
@@ -143,14 +151,28 @@ def _call_vlm(
                     },
                 ],
                 temperature=0.0,
-                max_tokens=150,
+                max_tokens=max_tokens,
+                reasoning_effort="none",
             )
-            GROQ_MODEL = model      # remember which model worked
-            text = resp.choices[0].message.content.strip()
-            return _parse(text, max_w, max_h)
+            GROQ_MODEL = model
+            return resp.choices[0].message.content.strip()
         except Exception as e:
             print(f"[VLM] Model {model} failed: {e}")
     return None
+
+
+def _call_vlm(
+    client: Groq,
+    b64: str,
+    prompt: str,
+    max_w: int,
+    max_h: int,
+) -> tuple | None:
+    """Try each model in GROQ_VISION_MODELS until one succeeds."""
+    text = _call_vlm_text(client, b64, prompt, max_tokens=150)
+    if text is None:
+        return None
+    return _parse(text, max_w, max_h)
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
@@ -201,3 +223,54 @@ def query_roi(
         int(np.median([r[2] for r in results])),
         int(np.median([r[3] for r in results])),
     )
+
+
+def classify_view(frames: list[np.ndarray]) -> str:
+    """
+    Classify ultrasound probe orientation using VLM on already-cropped scan frames.
+    Returns 'TRANSVERSE', 'LONGITUDINAL', or 'UNKNOWN'.
+    """
+    client = _client_get()
+    votes: list[str] = []
+
+    for frame in frames[:3]:
+        orig_h, orig_w = frame.shape[:2]
+        b64, scale = _encode_frame(frame)
+        sent_w = int(orig_w * scale)
+        sent_h = int(orig_h * scale)
+        prompt = _prompt_view_type(sent_w, sent_h)
+
+        text = _call_vlm_text(client, b64, prompt, max_tokens=60)
+        if not text:
+            continue
+
+        label = None
+        for c in reversed(re.findall(r'\{[^{}]*\}', text, re.DOTALL)):
+            try:
+                d = json.loads(c)
+                vt = d.get("view_type", "").upper()
+                if vt in ("TRANSVERSE", "LONGITUDINAL"):
+                    label = vt
+                    break
+            except (KeyError, ValueError, json.JSONDecodeError):
+                pass
+
+        if label is None:
+            tu = text.upper()
+            if "TRANSVERSE" in tu:
+                label = "TRANSVERSE"
+            elif "LONGITUDINAL" in tu:
+                label = "LONGITUDINAL"
+
+        if label:
+            votes.append(label)
+            print(f"[VLM view] frame vote: {label}")
+
+    if not votes:
+        return "UNKNOWN"
+
+    t = votes.count("TRANSVERSE")
+    l = votes.count("LONGITUDINAL")
+    result = "TRANSVERSE" if t >= l else "LONGITUDINAL"
+    print(f"[VLM view] final: {result} ({t}T / {l}L)")
+    return result

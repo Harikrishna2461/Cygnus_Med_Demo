@@ -58,6 +58,21 @@
         <h3>Raw Masks</h3>
         <img id="masksPreview" src="" alt="Raw detection masks" />
       </div>
+      <div class="arrow">→</div>
+      <div class="image-box">
+        <h3>Fascia (no top bias)</h3>
+        <img id="fasciaNobiasPreview" src="" alt="Fascia without top bias" />
+      </div>
+      <div class="arrow">→</div>
+      <div class="image-box">
+        <h3>Poly fit (top bias)</h3>
+        <img id="fasciaPolyPreview" src="" alt="Fascia poly fit with top bias" />
+      </div>
+      <div class="arrow">→</div>
+      <div class="image-box">
+        <h3>Poly fit (no top bias)</h3>
+        <img id="fasciaPolyNobiasPreview" src="" alt="Fascia poly fit without top bias" />
+      </div>
     </div>
 
     <div class="legend" id="legend" style="display:none">
@@ -76,6 +91,9 @@
     const inputPreview = document.getElementById('inputPreview');
     const outputPreview = document.getElementById('outputPreview');
     const masksPreview = document.getElementById('masksPreview');
+    const fasciaNobiasPreview     = document.getElementById('fasciaNobiasPreview');
+    const fasciaPolyPreview       = document.getElementById('fasciaPolyPreview');
+    const fasciaPolyNobiasPreview = document.getElementById('fasciaPolyNobiasPreview');
     const imagePanel = document.getElementById('imagePanel');
     const spinner = document.getElementById('spinner');
     const errorMsg = document.getElementById('errorMsg');
@@ -103,6 +121,9 @@
         inputPreview.src = e.target.result;
         outputPreview.src = '';
         masksPreview.src = '';
+        fasciaNobiasPreview.src     = '';
+        fasciaPolyPreview.src       = '';
+        fasciaPolyNobiasPreview.src = '';
         imagePanel.style.display = 'flex';
         legend.style.display = 'none';
         runBtn.style.display = 'none';
@@ -117,6 +138,9 @@
       spinner.style.display = 'block';
       outputPreview.style.opacity = '0.3';
       masksPreview.style.opacity = '0.3';
+      fasciaNobiasPreview.style.opacity     = '0.3';
+      fasciaPolyPreview.style.opacity       = '0.3';
+      fasciaPolyNobiasPreview.style.opacity = '0.3';
       errorMsg.style.display = 'none';
       runBtn.style.display = 'none';
 
@@ -128,18 +152,27 @@
       fetch('/predict', { method: 'POST', body: formData })
         .then(res => res.json().then(d => { if (!res.ok) throw new Error(d.error || 'Inference failed'); return d; }))
         .then(data => {
-          outputPreview.src = 'data:image/png;base64,' + data.output;
-          masksPreview.src  = 'data:image/png;base64,' + data.masks;
-          outputPreview.style.opacity = '1';
-          masksPreview.style.opacity  = '1';
+          outputPreview.src        = 'data:image/png;base64,' + data.output;
+          masksPreview.src         = 'data:image/png;base64,' + data.masks;
+          fasciaNobiasPreview.src     = 'data:image/png;base64,' + data.fascia_nobias;
+          fasciaPolyPreview.src       = 'data:image/png;base64,' + data.fascia_poly;
+          fasciaPolyNobiasPreview.src = 'data:image/png;base64,' + data.fascia_poly_nobias;
+          outputPreview.style.opacity           = '1';
+          masksPreview.style.opacity            = '1';
+          fasciaNobiasPreview.style.opacity     = '1';
+          fasciaPolyPreview.style.opacity       = '1';
+          fasciaPolyNobiasPreview.style.opacity = '1';
           spinner.style.display = 'none';
           legend.style.display = 'flex';
           runBtn.style.display = 'inline-block';
         })
         .catch(err => {
           spinner.style.display = 'none';
-          outputPreview.style.opacity = '1';
-          masksPreview.style.opacity  = '1';
+          outputPreview.style.opacity       = '1';
+          masksPreview.style.opacity        = '1';
+          fasciaNobiasPreview.style.opacity     = '1';
+          fasciaPolyPreview.style.opacity       = '1';
+          fasciaPolyNobiasPreview.style.opacity = '1';
           errorMsg.textContent = 'Error: ' + err.message;
           errorMsg.style.display = 'block';
           runBtn.style.display = 'inline-block';

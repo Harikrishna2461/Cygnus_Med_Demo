@@ -28,14 +28,29 @@ def _has_scan_content(crop: np.ndarray, min_var: float = 30.0) -> bool:
 
 # -- ffmpeg helper -------------------------------------------------------------
 
+def _get_ffmpeg_exe() -> str | None:
+    """Return path to an ffmpeg executable, preferring the system one."""
+    import shutil
+    if shutil.which("ffmpeg"):
+        return "ffmpeg"
+    try:
+        import imageio_ffmpeg
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        return None
+
+
 def _ffmpeg_remux(src: str, dst: str) -> bool:
     """
     Try to remux/re-encode src -> dst (H.264 mp4) using ffmpeg.
     Returns True on success, False if ffmpeg is not available.
     """
+    exe = _get_ffmpeg_exe()
+    if exe is None:
+        return False
     try:
-        result = subprocess.run(
-            ["ffmpeg", "-y", "-i", src,
+        subprocess.run(
+            [exe, "-y", "-i", src,
              "-c:v", "libx264", "-crf", "23",
              "-movflags", "+faststart",
              "-an", dst],
@@ -44,7 +59,7 @@ def _ffmpeg_remux(src: str, dst: str) -> bool:
             timeout=600,
         )
         return True
-    except (FileNotFoundError, subprocess.CalledProcessError):
+    except subprocess.CalledProcessError:
         return False
 
 

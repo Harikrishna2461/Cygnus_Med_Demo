@@ -262,6 +262,25 @@
       border-radius: 50%;
       margin-right: 4px;
     }
+
+    #view-type-box {
+      grid-column: 1 / -1;
+      border-left: 4px solid var(--border);
+      transition: border-color 0.3s, background 0.3s;
+    }
+    #view-type-box.view-transverse {
+      border-left-color: #2f81f7;
+      background: rgba(47, 129, 247, 0.1);
+    }
+    #view-type-box.view-longitudinal {
+      border-left-color: #3fb950;
+      background: rgba(63, 185, 80, 0.1);
+    }
+    #view-type-box .val {
+      font-size: 1.05rem;
+    }
+    #view-type-box.view-transverse .val { color: #58a6ff; }
+    #view-type-box.view-longitudinal .val { color: #3fb950; }
   </style>
 </head>
 <body>
@@ -338,6 +357,10 @@
       <div class="key">Confidence</div>
       <div class="val" id="meta-conf">—</div>
     </div>
+    <div class="meta-item" id="view-type-box">
+      <div class="key">View type</div>
+      <div class="val" id="meta-view">—</div>
+    </div>
   </div>
 
   <div class="actions">
@@ -383,6 +406,8 @@
   const metaSize      = document.getElementById("meta-size");
   const metaMethod    = document.getElementById("meta-method");
   const metaConf      = document.getElementById("meta-conf");
+  const metaView      = document.getElementById("meta-view");
+  const viewTypeBox   = document.getElementById("view-type-box");
   const downloadBtn   = document.getElementById("download-btn");
   const newJobInline  = document.getElementById("new-job-inline");
 
@@ -434,6 +459,8 @@
     progressSec.style.display   = "none";
     resultSec.style.display     = "none";
     outputPlayer.src            = "";
+    metaView.textContent        = "—";
+    viewTypeBox.classList.remove("view-transverse", "view-longitudinal");
     setProgress(0, "Starting…");
   }
 
@@ -546,6 +573,13 @@
 
     const conf = job.confidence || 0;
     metaConf.textContent = (conf * 100).toFixed(0) + "%";
+
+    const vt = job.view_type || "UNKNOWN";
+    metaView.textContent = vt === "UNKNOWN" ? "Unknown"
+      : vt.charAt(0) + vt.slice(1).toLowerCase();
+    viewTypeBox.classList.remove("view-transverse", "view-longitudinal");
+    if (vt === "TRANSVERSE")   viewTypeBox.classList.add("view-transverse");
+    else if (vt === "LONGITUDINAL") viewTypeBox.classList.add("view-longitudinal");
 
     const dotColor = conf >= 0.90 ? "#3fb950" : conf >= 0.70 ? "#d29922" : "#f85149";
     confBadge.innerHTML =

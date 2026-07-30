@@ -1,0 +1,94 @@
+Overall Flow
+
+Upload video → Sample frames → Registry cache? → Yes → Skip detection, go crop
+                                               → No  → LangGraph Agent → CV fallback
+                                                       ↓
+                                               Crop video (ffmpeg faststart)
+                                                       ↓
+                                               Qwen vision → classify view type
+                                                       ↓
+                                               Return result to browser
+Stage 1 — Machine Registry Cache
+Before any detection, a perceptual hash of the first frame is computed. If this machine has been seen before, the cached ROI is reused instantly (skips the agent entirely). Confidence is set to 1.0 for cache hits.
+
+Stage 2 — LangGraph ROI Agent (roi_agent.py)
+Uses qwen3.6-27b (image-text-only) via Groq. No vision. Instead, 4 CV tools convert pixel data into numbers the text model can reason about:
+
+Tools in agent_tools.py:
+
+get_video_metadata — returns width, height, fps
+run_cv_detection — runs an OpenCV ensemble (edge detection, thresholding, contour analysis) for a starting estimate
+get_spatial_profile — divides the frame into 20 column slices × 16 row slices, reports texture_density per slice. Key metric: scan speckle has texture_density > 0.25, UI panels have < 0.15
+analyze_region(x1,y1,x2,y2) — returns brightness, texture_density, classification (SCAN CONTENT / UI PANEL / BACKGROUND / COLOURED UI CHROME / MIXED) averaged over 3 frames
+Exact system prompt sent to qwen:
+
+
+You are an ultrasound scan-area detection agent.
+
+GOAL: Find bounding box (x1, y1, x2, y2) of ONLY the scan image — exclude UI chrome
+(parameter panels, depth rulers, logos, gain bars, sidebars).
+
+KEY METRIC: texture_density (fraction of pixels with significant local texture, 0-1)
+- SCAN CONTENT or MIXED: include in scan area
+- UI PANEL / BACKGROUND / COLOURED UI CHROME: exclude
+
+MANDATORY 5-STEP WORKFLOW — follow exactly, no deviations:
+
+STEP 1: get_video_metadata  (learn width x height)
+STEP 2: run_cv_detection    (get cv_roi = [x1,y1,x2,y2])
+STEP 3: get_spatial_profile (read col_profile; note which column ranges are SCAN CONTENT)
+
+  After step 3, build your CANDIDATE ROI:
+  - y1, y2: use cv_roi values (CV ensemble is reliable for vertical extent)
+  - x1: find the first column range in col_profile classified SCAN CONTENT or MIXED; use its start pixel
+  - x2: find the last column range in col_profile classified SCAN CONTENT or MIXED; use its end pixel
+
+STEP 4: analyze_region on the full candidate ROI [x1, y1, x2, y2]
+  - If classification is SCAN CONTENT or MIXED: good, proceed to step 5
+  - If not: set x1/x2 back to cv_roi x1/x2 as fallback
+
+STEP 5: analyze_region on a 30-px strip at the right edge [x2-30, y1, x2, y2]
+  - If UI PANEL or BACKGROUND: shrink x2 by moving left to the previous col_profile boundary
+  - If SCAN CONTENT or MIXED: keep x2
+
+Then output FINAL_ROI immediately — do NOT call any more tools.
+
+OUTPUT (last thing you write, nothing after):
+FINAL_ROI: {"x1": <int>, "y1": <int>, "x2": <int>, "y2": <int>}
+
+RULES:
+- NEVER call scan_boundary
+- NEVER binary-search pixel by pixel — read col_profile boundaries directly
+- MIXED = scan content, always include it
+- Make at most 5 tool calls, then output FINAL_ROI
+User message sent:
+
+
+Detect the ultrasound scan area in this video file:
+  path: <video_path>
+
+Follow the mandatory 5-step workflow from the system prompt exactly.
+Make at most 5 tool calls, then output:
+FINAL_ROI: {"x1": INT, "y1": INT, "x2": INT, "y2": INT}
+Stage 3 — Video Cropping (video_cropper.py)
+Writes frames to a temp .avi via OpenCV (XVID codec), then remuxes to .mp4 using ffmpeg -movflags +faststart (places the moov atom at the file start so browsers can play it immediately). Falls back to imageio-ffmpeg's bundled binary if system ffmpeg isn't installed.
+
+Stage 4 — View Type Classification (vlm_agent.py)
+Uses qwen3.6-27b with image input. Sends 1–3 cropped frames (after ROI crop, so no UI chrome).
+
+Exact system prompt:
+
+
+You are a medical image analysis AI. Output ONLY raw JSON — no markdown, no explanation.
+Exact user prompt per frame:
+
+
+This is a cropped ultrasound scan frame (WxH pixels, no UI chrome — only scan content). 
+Classify the probe orientation:
+- TRANSVERSE: vessels appear as circular or roughly round dark cross-sections 
+  (probe cut perpendicular to the vessel axis).
+- LONGITUDINAL: vessels appear as elongated, tube-like dark channels 
+  running horizontally across most of the frame width 
+  (probe parallel to the vessel axis).
+Reply with ONLY this JSON and nothing else: {"view_type": "TRANSVERSE"} or {"view_type": "LONGITUDINAL"}
+Majority vote across up to 3 frames. Falls back to text-search ("TRANSVERSE" / "LONGITUDINAL" anywhere in the response) if JSON parsing fails.

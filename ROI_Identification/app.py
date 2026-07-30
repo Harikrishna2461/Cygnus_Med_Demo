@@ -80,6 +80,7 @@ def _worker(job_id: str, input_path: str):
             roi=list(result["roi"]),
             method=result["method"],
             confidence=round(result["confidence"], 3),
+            view_type=result.get("view_type", "UNKNOWN"),
         )
     except Exception as e:
         _set(job_id, status="error", stage="Failed", error=str(e))

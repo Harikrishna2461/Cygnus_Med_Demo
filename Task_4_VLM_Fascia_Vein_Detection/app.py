@@ -689,6 +689,87 @@ def index():
     return render_template('index.html')
 
 
+def _build_fascia_mask(fascia_prob: np.ndarray, h: int, w: int) -> np.ndarray:
+    """Convert a raw fascia probability map to a two-line mask (sup + deep edges)."""
+    smooth = cv2.GaussianBlur(fascia_prob, (0, 0), sigmaX=5)
+    above_half = np.zeros_like(smooth)
+    above_half[:h//2, :] = smooth[:h//2, :]
+    above     = above_half > 0.35
+    col_max   = smooth[:h//2, :].max(axis=0)
+    valid_idx = np.where(col_max > 0.35)[0]
+
+    mask = np.zeros((h, w), dtype=np.uint8)
+    if valid_idx.size < int(0.30 * w):
+        return mask
+
+    sup_raw  = np.argmax(above, axis=0).astype(np.float64)
+    deep_raw = (h - 1 - np.argmax(above[::-1], axis=0)).astype(np.float64)
+    sup_filled  = np.interp(np.arange(w), valid_idx, sup_raw[valid_idx])
+    deep_filled = np.interp(np.arange(w), valid_idx, deep_raw[valid_idx])
+
+    k = min(127, max(5, w // 8))
+    pad = k // 2
+    kernel = np.ones(k) / k
+    for _ in range(3):
+        sup_filled  = np.convolve(np.pad(sup_filled,  pad, mode='edge'), kernel, mode='valid')[:w]
+        deep_filled = np.convolve(np.pad(deep_filled, pad, mode='edge'), kernel, mode='valid')[:w]
+
+    sup_rows  = np.clip(sup_filled.astype(int) - 8, 0, h - 1)
+    deep_rows = np.clip(deep_filled.astype(int), 0, h - 1)
+    cols = valid_idx
+    for dr in range(-2, 3):
+        mask[np.clip(sup_rows[cols]  + dr, 0, h - 1), cols] = 255
+        mask[np.clip(deep_rows[cols] + dr, 0, h - 1), cols] = 255
+
+    h_close = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 1))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, h_close)
+    c0, c1 = int(valid_idx[0]), int(valid_idx[-1]) + 1
+    if c0 > 0: mask[:, :c0] = 0
+    if c1 < w: mask[:, c1:] = 0
+    return mask
+
+
+def _build_fascia_mask_poly(fascia_prob: np.ndarray, h: int, w: int, degree: int = 3) -> np.ndarray:
+    """Same edge extraction as _build_fascia_mask but uses polynomial curve fitting instead of box-filter smoothing."""
+    smooth = cv2.GaussianBlur(fascia_prob, (0, 0), sigmaX=5)
+    above_half = np.zeros_like(smooth)
+    above_half[:h//2, :] = smooth[:h//2, :]
+    above     = above_half > 0.35
+    col_max   = smooth[:h//2, :].max(axis=0)
+    valid_idx = np.where(col_max > 0.35)[0]
+
+    mask = np.zeros((h, w), dtype=np.uint8)
+    if valid_idx.size < int(0.30 * w):
+        return mask
+
+    sup_raw  = np.argmax(above, axis=0).astype(np.float64)
+    deep_raw = (h - 1 - np.argmax(above[::-1], axis=0)).astype(np.float64)
+
+    # Normalize x to [-1, 1] for numerical stability
+    span = (valid_idx.max() - valid_idx.min()) / 2 + 1e-6
+    x_norm = (valid_idx - valid_idx.mean()) / span
+    x_all_norm = (np.arange(w) - valid_idx.mean()) / span
+
+    sup_coeffs  = np.polyfit(x_norm, sup_raw[valid_idx],  degree)
+    deep_coeffs = np.polyfit(x_norm, deep_raw[valid_idx], degree)
+    sup_filled  = np.polyval(sup_coeffs,  x_all_norm)
+    deep_filled = np.polyval(deep_coeffs, x_all_norm)
+
+    sup_rows  = np.clip(sup_filled.astype(int) - 8, 0, h - 1)
+    deep_rows = np.clip(deep_filled.astype(int), 0, h - 1)
+    cols = valid_idx
+    for dr in range(-2, 3):
+        mask[np.clip(sup_rows[cols]  + dr, 0, h - 1), cols] = 255
+        mask[np.clip(deep_rows[cols] + dr, 0, h - 1), cols] = 255
+
+    h_close = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 1))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, h_close)
+    c0, c1 = int(valid_idx[0]), int(valid_idx[-1]) + 1
+    if c0 > 0: mask[:, :c0] = 0
+    if c1 < w: mask[:, c1:] = 0
+    return mask
+
+
 @app.route('/predict', methods=['POST'])
 def predict():
     if 'image' not in request.files:
@@ -718,14 +799,21 @@ def predict():
                 top_bias=True,
                 use_clahe=use_clahe,
             )
+            fascia_prob_nobias = _grounding_prob(
+                model, image,
+                text='fascia layer in PeripheralVascular Ultrasound',
+                top_bias=False,
+                use_clahe=use_clahe,
+            )
             vein_prob = _grounding_prob(
                 vein_model, image,
                 text=VEIN_PROMPT,
                 top_bias=False,
                 use_clahe=use_clahe,
             )
-        fascia_prob = cv2.resize(fascia_prob, (w_orig, h_orig))
-        vein_prob   = cv2.resize(vein_prob,   (w_orig, h_orig))
+        fascia_prob        = cv2.resize(fascia_prob,        (w_orig, h_orig))
+        fascia_prob_nobias = cv2.resize(fascia_prob_nobias, (w_orig, h_orig))
+        vein_prob          = cv2.resize(vein_prob,          (w_orig, h_orig))
         vein_mask_raw = (vein_prob > 0.5).astype(np.uint8)
         vein_mask     = evaluate_vein_mask(vein_mask_raw, image_np) if use_evaluator else vein_mask_raw
     except Exception as e:
@@ -735,64 +823,49 @@ def predict():
 
     h, w = image_np.shape[:2]
 
-    # Two thin smooth lines: top edge (superficial) + bottom edge (deep) of fascia zone
-    fascia_prob_smooth = cv2.GaussianBlur(fascia_prob, (0, 0), sigmaX=5)
-    above_half = np.zeros_like(fascia_prob_smooth)
-    above_half[:h//2, :] = fascia_prob_smooth[:h//2, :]
-    above     = above_half > 0.35
-    col_max   = fascia_prob_smooth[:h//2, :].max(axis=0)
-    valid     = col_max > 0.35
-    valid_idx = np.where(valid)[0]
+    fascia_mask           = _build_fascia_mask(fascia_prob,        h, w)
+    fascia_mask_nobias    = _build_fascia_mask(fascia_prob_nobias, h, w)
+    fascia_mask_poly      = _build_fascia_mask_poly(fascia_prob,        h, w)
+    fascia_mask_poly_nobias = _build_fascia_mask_poly(fascia_prob_nobias, h, w)
 
-    fascia_mask = np.zeros((h, w), dtype=np.uint8)
-    if valid_idx.size >= int(0.30 * w):
-        sup_raw  = np.argmax(above, axis=0).astype(np.float64)
-        deep_raw = (h - 1 - np.argmax(above[::-1], axis=0)).astype(np.float64)
-
-        sup_filled  = np.interp(np.arange(w), valid_idx, sup_raw[valid_idx])
-        deep_filled = np.interp(np.arange(w), valid_idx, deep_raw[valid_idx])
-
-        # Three passes of wide box filter for very smooth curves
-        k = min(127, max(5, w // 8))
-        pad = k // 2
-        kernel = np.ones(k) / k
-        for _ in range(3):
-            sup_filled  = np.convolve(np.pad(sup_filled,  pad, mode='edge'), kernel, mode='valid')[:w]
-            deep_filled = np.convolve(np.pad(deep_filled, pad, mode='edge'), kernel, mode='valid')[:w]
-
-        sup_rows  = np.clip(sup_filled.astype(int) - 8, 0, h - 1)
-        deep_rows = np.clip(deep_filled.astype(int), 0, h - 1)
-
-        LINE_HALF = 2   # 5px total per line
-        cols = valid_idx
-        for dr in range(-LINE_HALF, LINE_HALF + 1):
-            fascia_mask[np.clip(sup_rows[cols]  + dr, 0, h - 1), cols] = 255
-            fascia_mask[np.clip(deep_rows[cols] + dr, 0, h - 1), cols] = 255
-
-        h_close = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 1))
-        fascia_mask = cv2.morphologyEx(fascia_mask, cv2.MORPH_CLOSE, h_close)
-        c0, c1 = int(valid_idx[0]), int(valid_idx[-1]) + 1
-        if c0 > 0: fascia_mask[:, :c0] = 0
-        if c1 < w: fascia_mask[:, c1:] = 0
+    def _draw_vein_contours(img):
+        if vein_mask.max() > 0:
+            vein_blur = cv2.GaussianBlur(vein_mask.astype(np.float32) * 255, (0, 0), sigmaX=3)
+            vein_smooth = (vein_blur > 100).astype(np.uint8)
+            cnts, _ = cv2.findContours(vein_smooth, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cv2.drawContours(img, cnts, -1, VEIN_COLOR, 3)
 
     annotated = image_np.copy()
     if fascia_mask.max() > 0:
         annotated[fascia_mask > 0] = FASCIA_SUP_COLOR
-    if vein_mask.max() > 0:
-        # Blur mask slightly before contouring → smooth natural outline, not ellipse
-        vein_blur = cv2.GaussianBlur(vein_mask.astype(np.float32) * 255, (0, 0), sigmaX=3)
-        vein_smooth_mask = (vein_blur > 100).astype(np.uint8)
-        cnts, _ = cv2.findContours(vein_smooth_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        cv2.drawContours(annotated, cnts, -1, VEIN_COLOR, 3)
+    _draw_vein_contours(annotated)
+
+    annotated_nobias = image_np.copy()
+    if fascia_mask_nobias.max() > 0:
+        annotated_nobias[fascia_mask_nobias > 0] = FASCIA_SUP_COLOR
+    _draw_vein_contours(annotated_nobias)
+
+    annotated_poly = image_np.copy()
+    if fascia_mask_poly.max() > 0:
+        annotated_poly[fascia_mask_poly > 0] = FASCIA_SUP_COLOR
+    _draw_vein_contours(annotated_poly)
+
+    annotated_poly_nobias = image_np.copy()
+    if fascia_mask_poly_nobias.max() > 0:
+        annotated_poly_nobias[fascia_mask_poly_nobias > 0] = FASCIA_SUP_COLOR
+    _draw_vein_contours(annotated_poly_nobias)
 
     masks_viz = np.zeros((h, w, 3), dtype=np.uint8)
     if fascia_mask.max() > 0: masks_viz[fascia_mask > 0] = FASCIA_SUP_COLOR
-    if vein_mask.max() > 0:           masks_viz[vein_mask           > 0] = VEIN_COLOR
+    if vein_mask.max() > 0:   masks_viz[vein_mask   > 0] = VEIN_COLOR
 
     Image.fromarray(annotated).save(output_path)
     return jsonify({
-        'output': _arr_to_b64(annotated),
-        'masks':  _arr_to_b64(masks_viz),
+        'output':              _arr_to_b64(annotated),
+        'masks':               _arr_to_b64(masks_viz),
+        'fascia_nobias':       _arr_to_b64(annotated_nobias),
+        'fascia_poly':         _arr_to_b64(annotated_poly),
+        'fascia_poly_nobias':  _arr_to_b64(annotated_poly_nobias),
     })
 
 

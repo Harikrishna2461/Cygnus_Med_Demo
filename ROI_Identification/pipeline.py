@@ -17,10 +17,81 @@ import sys
 from pathlib import Path
 from typing import Callable, Optional
 
+import cv2
+import numpy as np
 import frame_sampler
 import cv_ensemble
 import machine_registry
 from video_cropper import crop_video
+
+
+def _trim_dark_borders(frames: list, roi: tuple) -> tuple:
+    """
+    Trim black border strips from the ROI.
+    Left/right use aggressive thresholds (true black columns + UI markers like 'Q').
+    Top/bottom use conservative thresholds (avoid cutting naturally-dark deep scan content).
+    """
+    x1, y1, x2, y2 = roi
+    cropped = []
+    for f in frames:
+        h, w = f.shape[:2]
+        c = f[max(0, y1):min(h, y2), max(0, x1):min(w, x2)]
+        if c.size > 0:
+            cropped.append(c)
+    if not cropped:
+        return roi
+
+    avg = np.mean([f.astype(np.float32) for f in cropped], axis=0).astype(np.uint8)
+    gray = cv2.cvtColor(avg, cv2.COLOR_BGR2GRAY)
+
+    def _leading(arr, thresh, frac):
+        for i, v in enumerate((arr < thresh).mean(axis=-1) if arr.ndim > 1 else arr):
+            if v < frac:
+                return i
+        return 0
+
+    # Left/right: threshold=28, frac=0.65 — catches true black strips and corner markers
+    col_dark_lr = (gray < 28).mean(axis=0)
+    l = _leading(col_dark_lr, 28, 0.65)
+    r = _leading(col_dark_lr[::-1], 28, 0.65)
+
+    # Top/bottom: threshold=18, frac=0.88 — only trim near-black rows, not attenuated scan
+    row_dark_tb = (gray < 18).mean(axis=1)
+    t = _leading(row_dark_tb, 18, 0.88)
+    b = _leading(row_dark_tb[::-1], 18, 0.88)
+
+    nx1, ny1, nx2, ny2 = x1 + l, y1 + t, x2 - r, y2 - b
+    if nx2 > nx1 + 20 and ny2 > ny1 + 20:
+        return (nx1, ny1, nx2, ny2)
+    return roi
+
+
+def _crop_frames(frames: list, roi: tuple) -> list:
+    """Crop a list of numpy frames to the given ROI for VLM view classification."""
+    import numpy as np
+    x1, y1, x2, y2 = roi
+    out = []
+    for f in frames:
+        h, w = f.shape[:2]
+        c = f[max(0, y1):min(h, y2), max(0, x1):min(w, x2)]
+        if c.size > 0:
+            out.append(c)
+    return out
+
+
+def _classify_view(frames: list, roi: tuple, status_fn) -> str:
+    try:
+        from vlm_agent import classify_view
+        cropped = _crop_frames(frames, roi)
+        if not cropped:
+            return "UNKNOWN"
+        status_fn("Classifying view type (transverse/longitudinal)…")
+        view = classify_view(cropped)
+        status_fn(f"View type: {view}")
+        return view
+    except Exception as e:
+        status_fn(f"View classification failed: {e}")
+        return "UNKNOWN"
 
 
 def run_pipeline(
@@ -69,12 +140,16 @@ def run_pipeline(
         cached = machine_registry.lookup(first_frame, info["width"], info["height"])
         if cached:
             _status(f"Registry cache hit -> ROI {cached}")
+            cached = _trim_dark_borders(frames, cached)
+            _status(f"After border trim -> ROI {cached}")
             crop_video(input_path, output_path, cached, on_progress=on_progress)
+            view_type = _classify_view(frames, cached, _status)
             return {
                 "output_path": output_path,
                 "roi":         cached,
                 "method":      "registry_cache",
                 "confidence":  1.0,
+                "view_type":   view_type,
             }
 
     # Stage 2b: LangGraph agent -----------------------------------------------
@@ -111,6 +186,10 @@ def run_pipeline(
 
     _status(f"Final ROI: {final_roi} | method: {method} | confidence: {confidence:.2f}")
 
+    # Trim dark border strips and corner UI markers
+    final_roi = _trim_dark_borders(frames, final_roi)
+    _status(f"After border trim -> ROI {final_roi}")
+
     # Register for future cache hits (only when confidence is high)
     if use_registry and confidence >= 0.88:
         machine_registry.register(
@@ -123,11 +202,15 @@ def run_pipeline(
     crop_video(input_path, output_path, final_roi, on_progress=on_progress)
     _status(f"Done -> {output_path}")
 
+    # Stage 4: VLM view classification ----------------------------------------
+    view_type = _classify_view(frames, final_roi, _status)
+
     return {
         "output_path": output_path,
         "roi":         final_roi,
         "method":      method,
         "confidence":  confidence,
+        "view_type":   view_type,
     }
 
 
