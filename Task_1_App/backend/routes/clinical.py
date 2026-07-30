@@ -156,6 +156,7 @@ def api_chat():
         interpretation = parse_nl_to_clips(user_message, history=history, skip_sufficiency=True)
         clips = interpretation.get("clips", [])
         interp_text = interpretation.get("interpretation") or interp_text
+        sufficient = True  # force classification — gate was already answered
 
     if is_clinical and sufficient:
         try:
