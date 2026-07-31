@@ -1,0 +1,13 @@
+We need to build a Vein Name Classification System doing the following things : 
+   (1) First you go read all the books in the book_articles folder in this pc to understand the vein anatomy very thoroughly and to understand the relation between the location on the leg and the veins that can be present in the location.
+   (2) Then through the Task-2 codebase thoroughly to understand the relationship between probe location on the leg and the veins that can be present at that location.
+   (3) There will be two inputs for the system i.e. the ultrasound video and the webcam video showing the doctor scanning with the probe on various locations on the patient's leg. The output will be two videos which will be explained in Step 4.IV below.
+   (4) Then Start building the system following these steps : 
+	(I) First use BioMedParse to segment the ultrasound input video to segment the veins and fascia.
+        (II) Then create an intermediatory annotated video where the veins are first annotated according to their position with respect to fascia. The knowledge here needed mainly to classify is : the veins within or very near fascia are N2 (GSV/SSV or related) veins, the veins above fascia are superficial / N3 veins and the veins below the fascia are N1 / deep veins.
+        (III) Then use a VLM enhanced by the probe location to vein name correlation knowledge to first look at the webcam video to understand the probe location on the patient's leg and use that information as well as the knowledge of location->vein name and anatomy you learned in previous states to reannotate the intermediatory video created in step II to reassign the labels names from N1/N2/N3 to the actual medical vein names like CFV,GSV,SSV,Tributaries,Perforators etc etc.
+        (IV) Then create a simple app where we can upload the two videos (ultrasound video and the webcam video) and they get processed by our system and two outputs namely the intermediatory (N1/N2/N3 annotated) video and the final annotated video are displayed on the UI.
+
+Note : We can use qwen 27B from groq as the VLM reasoning engine. Strictly there should be no hardcoded rules at all and reasoning should be done by the VLM.Use the finetuned BioMedParse model from the Task_4_VLM_Fascia_Vein_Identification folder for segmentation.
+
+For understanding how the inputs will be , take reference from the two videos  (one ultrasound video and one webcam video) in the folder named "C:\Users\Krish\Desktop\data from Ed\data". We can use the same system from ROI_Identification folder for the ROI cropper, you can copy that system here.

@@ -4,55 +4,27 @@
     "roi": {
       "x1": 472,
       "y1": 56,
-      "x2": 1629,
-      "y2": 1436
+      "x2": 1628,
+      "y2": 1430
     },
     "detection_method": "agent",
     "confidence": 0.92,
     "verified_on": [
-      "37e064ca-52d3-486c-8cf4-558acc9b9fa4"
-    ]
-  },
-  "84f7fd42184c1c": {
-    "resolution": "720x480",
-    "roi": {
-      "x1": 154,
-      "y1": 55,
-      "x2": 489,
-      "y2": 350
-    },
-    "detection_method": "agent",
-    "confidence": 0.92,
-    "verified_on": [
-      "a92d6adc-2449-4853-addb-7ae391d05acf"
+      "1e2ffef7-76bc-4cad-831c-caeb440da607"
     ]
   },
   "1d5e260e23e669": {
     "resolution": "720x480",
     "roi": {
-      "x1": 154,
-      "y1": 55,
-      "x2": 489,
-      "y2": 331
+      "x1": 155,
+      "y1": 64,
+      "x2": 488,
+      "y2": 345
     },
     "detection_method": "agent",
     "confidence": 0.92,
     "verified_on": [
-      "56c40241-03ed-4642-b090-f69ec63d5c98"
-    ]
-  },
-  "06e3c5f89aed06": {
-    "resolution": "720x480",
-    "roi": {
-      "x1": 154,
-      "y1": 55,
-      "x2": 489,
-      "y2": 365
-    },
-    "detection_method": "agent",
-    "confidence": 0.92,
-    "verified_on": [
-      "d91b820c-0793-452d-82df-9e6b5677e987"
+      "597c42f6-3b07-4d57-8471-2d9ef187aa70"
     ]
   }
 }

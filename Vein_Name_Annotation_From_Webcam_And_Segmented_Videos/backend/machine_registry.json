@@ -1,0 +1,16 @@
+{
+  "458838a9af4709": {
+    "resolution": "1920x1080",
+    "roi": {
+      "x1": 787,
+      "y1": 100,
+      "x2": 1151,
+      "y2": 698
+    },
+    "detection_method": "agent",
+    "confidence": 0.92,
+    "verified_on": [
+      "qml_us_20s"
+    ]
+  }
+}

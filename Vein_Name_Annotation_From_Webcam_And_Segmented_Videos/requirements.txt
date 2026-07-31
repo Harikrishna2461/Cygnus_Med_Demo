@@ -1,0 +1,22 @@
+# Run with `python3 app.py` (confirmed: on this machine `python3` resolves to
+# C:\Users\Krish\AppData\Local\Python\pythoncore-3.14-64\python.exe, which already has
+# the full combined dependency stack installed — both Task_4_VLM_Fascia_Vein_Detection's
+# BiomedParse stack (torch+cuda, opencv, transformers, timm, groq, flask,
+# detectron2/fvcore/mpi4py stubs) and ROI_Identification's LangGraph/LangChain stack).
+# This project deliberately shares that global environment rather than an isolated venv,
+# to avoid duplicating a multi-GB torch/CUDA install and the two finetuned checkpoints,
+# and to keep segmentation results identical to Task_4's own app.
+#
+# Net-new packages this project adds on top of that shared environment:
+imageio>=2.37
+imageio-ffmpeg>=0.5    # bundles a static ffmpeg binary; used for browser-compatible H.264
+                        # output — OpenCV's own VideoWriter has no working H.264 encoder on
+                        # this machine (OpenH264 DLL missing) and its mp4v fallback is not
+                        # reliably playable in Chrome/Edge <video> tags (confirmed in build)
+requests>=2.31          # HTTP client used only by backend/smoketest_step8_http_e2e.py;
+                        # not required to run app.py itself
+#
+# Already present (from ROI_Identification/'s own requirements — listed here for
+# completeness, not because this project needs to (re)install them):
+# langchain-core, langchain-groq, langgraph — used by roi_agent.py/agent_tools.py for the
+# ultrasound scan-area ROI-cropping preprocessing step (backend/roi_pipeline.py).

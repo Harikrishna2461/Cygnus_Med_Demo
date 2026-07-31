@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vein Name Classification System</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <h1>Vein Name Classification System</h1>
+    <p class="subtitle">
+      Upload an ultrasound video and a webcam video of the probe scanning the leg.
+      The system segments veins and fascia, classifies each vein by depth (N1/N2/N3),
+      then uses the probe's on-screen location to assign real medical vein names.
+    </p>
+
+    <form id="upload-form">
+      <div class="field">
+        <label for="ultrasound_video">Ultrasound video</label>
+        <input type="file" id="ultrasound_video" name="ultrasound_video" accept="video/*" required>
+      </div>
+      <div class="field">
+        <label for="webcam_video">Webcam video</label>
+        <input type="file" id="webcam_video" name="webcam_video" accept="video/*" required>
+      </div>
+      <button type="submit" id="submit-btn">Process</button>
+    </form>
+
+    <div id="progress-area" class="hidden">
+      <div class="stage-label" id="stage-label">Starting...</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-pct" id="progress-pct"></div>
+    </div>
+
+    <div id="error-area" class="hidden error"></div>
+
+    <div id="results-area" class="hidden">
+      <h2>Results</h2>
+      <div class="videos">
+        <div class="video-col">
+          <h3>Intermediate (N1 / N2 / N3)</h3>
+          <video id="video-intermediate" controls></video>
+        </div>
+        <div class="video-col">
+          <h3>Final (vein names)</h3>
+          <video id="video-final" controls></video>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('upload-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const progressArea = document.getElementById('progress-area');
+    const stageLabel = document.getElementById('stage-label');
+    const progressFill = document.getElementById('progress-fill');
+    const progressPct = document.getElementById('progress-pct');
+    const errorArea = document.getElementById('error-area');
+    const resultsArea = document.getElementById('results-area');
+
+    let pollTimer = null;
+
+    const STAGE_TEXT = {
+      starting: 'Starting...',
+      cropping: 'Cropping ultrasound video to the scan area...',
+      segmenting: 'Segmenting ultrasound video (BioMedParse) and classifying N1 / N2 / N3...',
+      naming: 'Reading probe location and naming veins...',
+      done: 'Done.',
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorArea.classList.add('hidden');
+      resultsArea.classList.add('hidden');
+      submitBtn.disabled = true;
+
+      const formData = new FormData(form);
+      let resp, data;
+      try {
+        resp = await fetch('/api/jobs', { method: 'POST', body: formData });
+        data = await resp.json();
+      } catch (err) {
+        showError('Upload failed: ' + err.message);
+        submitBtn.disabled = false;
+        return;
+      }
+      if (!resp.ok) {
+        showError(data.error || 'Upload failed.');
+        submitBtn.disabled = false;
+        return;
+      }
+
+      progressArea.classList.remove('hidden');
+      pollStatus(data.job_id);
+    });
+
+    function pollStatus(jobId) {
+      pollTimer = setInterval(async () => {
+        let resp, data;
+        try {
+          resp = await fetch(`/api/jobs/${jobId}/status`);
+          data = await resp.json();
+        } catch (err) {
+          return; // transient network hiccup — try again next tick
+        }
+        if (!resp.ok) {
+          clearInterval(pollTimer);
+          showError(data.error || 'Job status error.');
+          submitBtn.disabled = false;
+          return;
+        }
+
+        stageLabel.textContent = STAGE_TEXT[data.stage] || data.stage || '...';
+        progressFill.style.width = data.progress_pct + '%';
+        progressPct.textContent = data.progress_pct + '%';
+
+        if (data.status === 'error') {
+          clearInterval(pollTimer);
+          showError(data.error || 'Processing failed.');
+          submitBtn.disabled = false;
+        } else if (data.status === 'done') {
+          clearInterval(pollTimer);
+          showResults(jobId);
+          submitBtn.disabled = false;
+        }
+      }, 1500);
+    }
+
+    function showResults(jobId) {
+      document.getElementById('video-intermediate').src = `/api/jobs/${jobId}/result/intermediate`;
+      document.getElementById('video-final').src = `/api/jobs/${jobId}/result/final`;
+      resultsArea.classList.remove('hidden');
+    }
+
+    function showError(msg) {
+      errorArea.textContent = msg;
+      errorArea.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
