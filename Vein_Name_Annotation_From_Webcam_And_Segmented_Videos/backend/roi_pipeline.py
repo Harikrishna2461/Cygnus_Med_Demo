@@ -24,15 +24,27 @@ import cv_ensemble
 import machine_registry
 from video_cropper import crop_video
 
+# IoU above which the agent's box and the CV ensemble's independent box are treated as
+# "the same region" (and averaged) rather than a disagreement (agent trusted alone).
+AGREEMENT_IOU_THRESHOLD = 0.5
+
 
 def _trim_dark_borders(frames: list, roi: tuple) -> tuple:
     """
-    Adaptive border trim: detect the sharpest brightness jump near each edge
-    (dark border -> scan content) without any hardcoded absolute thresholds.
-    The only parameter is max_scan (how far from each edge to look), which is
-    a structural constraint, not a brightness value.
+    Adaptive border trim: finds where real tissue speckle texture starts near each
+    edge, using a threshold relative to that column/row's own peak texture (not a
+    hardcoded absolute value) and requiring a sustained run of high-texture
+    columns/rows (not a single noisy pixel) before declaring "content starts here".
+
+    Originally (ROI_Identification/pipeline.py) this looked for the single sharpest
+    brightness jump within 60px of each edge. Confirmed on real reference footage
+    that this misses a common real case: the scan cone's edge often fades to black
+    *gradually* (falloff, not a step), which has no single sharp jump for that
+    approach to find regardless of window size — texture density (present throughout
+    real tissue, absent in background) catches it correctly instead.
     """
-    MAX_SCAN = 60   # look at most 60px from each edge for a jump
+    MAX_SCAN = 180
+    MIN_RUN = 5   # consecutive high-texture columns/rows required to count as content
 
     x1, y1, x2, y2 = roi
     cropped = []
@@ -45,28 +57,34 @@ def _trim_dark_borders(frames: list, roi: tuple) -> tuple:
         return roi
 
     avg = np.mean([f.astype(np.float32) for f in cropped], axis=0).astype(np.uint8)
-    gray = cv2.cvtColor(avg, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(avg, cv2.COLOR_BGR2GRAY)   # keep uint8 — cv2.Laplacian needs it
+    texture = np.abs(cv2.Laplacian(gray, cv2.CV_64F))
 
-    col_means = gray.mean(axis=0)   # mean brightness per column
-    row_means = gray.mean(axis=1)   # mean brightness per row
+    col_texture = texture.mean(axis=0)
+    row_texture = texture.mean(axis=1)
 
-    def _jump_trim(means):
-        """Find the largest dark->bright jump in the first MAX_SCAN values."""
-        strip = means[:MAX_SCAN].astype(float)
-        if len(strip) < 2:
+    def _texture_trim(profile):
+        strip = profile[:MAX_SCAN]
+        if len(strip) < MIN_RUN:
             return 0
-        diffs = np.diff(strip)
-        peak = diffs.max()
-        # Only trim if there's a meaningful jump (> 15 absolute brightness units)
-        # — this single value is relative to the 0-255 scale, not to image content
-        if peak < 15:
+        peak = strip.max()
+        if peak < 1e-6:
             return 0
-        return int(np.argmax(diffs)) + 1
+        thr = peak * 0.25
+        run = 0
+        for i, v in enumerate(strip):
+            if v >= thr:
+                run += 1
+                if run >= MIN_RUN:
+                    return max(0, i - (MIN_RUN - 1))
+            else:
+                run = 0
+        return 0
 
-    l = _jump_trim(col_means)
-    r = _jump_trim(col_means[::-1])
-    t = _jump_trim(row_means)
-    b = _jump_trim(row_means[::-1])
+    l = _texture_trim(col_texture)
+    r = _texture_trim(col_texture[::-1])
+    t = _texture_trim(row_texture)
+    b = _texture_trim(row_texture[::-1])
 
     nx1, ny1, nx2, ny2 = x1 + l, y1 + t, x2 - r, y2 - b
     if nx2 > nx1 + 20 and ny2 > ny1 + 20:
@@ -143,27 +161,40 @@ def run_pipeline(
 
     first_frame = frames[0]
 
-    # Stage 2a: registry cache ------------------------------------------------
+    # CV ensemble is cheap/deterministic (no LLM call) — compute it unconditionally so it
+    # can both cross-validate a registry cache hit and combine with the agent's estimate.
+    # Confirmed empirically on real reference footage: a single LangGraph agent call has
+    # real run-to-run variance (383px-604px width swings for the *same* physical machine/
+    # crop region across different runs) — averaging with CV's independent estimate when
+    # they broadly agree corrects for that variance instead of trusting one LLM call.
+    cv_roi = cv_ensemble.detect_roi_cv(frames)
+
+    # Stage 2a: registry cache, cross-validated against a fresh CV estimate -------------
     if use_registry:
         cached = machine_registry.lookup(first_frame, info["width"], info["height"])
         if cached:
-            _status(f"Registry cache hit -> ROI {cached}")
-            cached = _trim_dark_borders(frames, cached)
-            _status(f"After border trim -> ROI {cached}")
-            crop_video(input_path, output_path, cached, on_progress=on_progress)
-            view_type = _classify_view(frames, cached, _status)
-            return {
-                "output_path": output_path,
-                "roi":         cached,
-                "method":      "registry_cache",
-                "confidence":  1.0,
-                "view_type":   view_type,
-            }
+            agreement = cv_ensemble.iou(cached, cv_roi) if cv_roi else 0.0
+            if agreement >= AGREEMENT_IOU_THRESHOLD:
+                _status(f"Registry cache hit -> ROI {cached} (CV agrees, IoU={agreement:.2f})")
+                cached = _trim_dark_borders(frames, cached)
+                _status(f"After border trim -> ROI {cached}")
+                crop_video(input_path, output_path, cached, on_progress=on_progress)
+                view_type = _classify_view(frames, cached, _status)
+                return {
+                    "output_path": output_path,
+                    "roi":         cached,
+                    "method":      "registry_cache",
+                    "confidence":  1.0,
+                    "view_type":   view_type,
+                }
+            _status(f"Registry cache hit -> ROI {cached}, but fresh CV estimate disagrees "
+                     f"(IoU={agreement:.2f}, cv={cv_roi}) — distrusting cache, re-detecting.")
 
-    # Stage 2b: LangGraph agent -----------------------------------------------
+    # Stage 2b: LangGraph agent, combined with the CV estimate ------------------------
     final_roi  = None
     method     = "cv_only"
     confidence = 0.75
+    agent_roi  = None
 
     if use_agent:
         _status("Launching ROI detection agent...")
@@ -171,19 +202,33 @@ def run_pipeline(
             from roi_agent import detect_roi
             agent_roi = detect_roi(input_path, status_callback=_status)
             if agent_roi:
-                final_roi  = agent_roi
-                method     = "agent"
-                confidence = 0.92
-                _status(f"Agent ROI: {final_roi}")
+                _status(f"Agent ROI: {agent_roi}")
         except Exception as e:
             _status(f"Agent error ({e}) - falling back to CV-only")
 
-    # Stage 2c: CV fallback ---------------------------------------------------
+    if agent_roi and cv_roi:
+        agreement = cv_ensemble.iou(agent_roi, cv_roi)
+        if agreement >= AGREEMENT_IOU_THRESHOLD:
+            final_roi = tuple(round((a + c) / 2) for a, c in zip(agent_roi, cv_roi))
+            method = "agent+cv_averaged"
+            confidence = 0.95
+            _status(f"Agent/CV agree (IoU={agreement:.2f}) -> averaged ROI {final_roi}")
+        else:
+            # Disagreement: trust the agent (it reasons explicitly about UI-vs-content,
+            # CV is purely statistical) but flag it clearly rather than silently picking.
+            final_roi = agent_roi
+            method = "agent"
+            confidence = 0.92
+            _status(f"Agent/CV disagree (IoU={agreement:.2f}, cv={cv_roi}) -> trusting agent: {agent_roi}")
+    elif agent_roi:
+        final_roi = agent_roi
+        method = "agent"
+        confidence = 0.92
+
+    # Stage 2c: CV-only fallback (agent unavailable/failed) ----------------------------
     if final_roi is None:
-        _status("Running CV ensemble fallback...")
-        cv_box = cv_ensemble.detect_roi_cv(frames)
-        if cv_box:
-            final_roi  = cv_box
+        if cv_roi:
+            final_roi  = cv_roi
             method     = "cv_only"
             confidence = 0.75
             _status(f"CV ROI: {final_roi}")

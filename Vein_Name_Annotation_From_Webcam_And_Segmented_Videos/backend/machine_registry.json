@@ -2,15 +2,15 @@
   "458838a9af4709": {
     "resolution": "1920x1080",
     "roi": {
-      "x1": 787,
+      "x1": 750,
       "y1": 100,
-      "x2": 1151,
+      "x2": 1200,
       "y2": 698
     },
-    "detection_method": "agent",
-    "confidence": 0.92,
+    "detection_method": "agent+cv_averaged",
+    "confidence": 0.95,
     "verified_on": [
-      "qml_us_20s"
+      "drift_test_src"
     ]
   }
 }

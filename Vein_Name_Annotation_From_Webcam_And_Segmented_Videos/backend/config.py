@@ -27,13 +27,18 @@ VEIN_PROMPT = (
 )
 INFER_SIZE = 512
 
-# Vein blob filtering (ported verbatim from Task_4/app.py::prob_to_vein_mask)
+# Vein blob filtering (ported from Task_4/app.py::prob_to_vein_mask)
 VEIN_PROB_THRESHOLD = 0.25
-VEIN_MIN_AREA_FRAC = 0.0002   # of total image pixels
+VEIN_MIN_AREA_FRAC = 0.0002   # fraction of VEIN_AREA_REFERENCE_PX, not of the current frame
 VEIN_MAX_AREA_FRAC = 0.025
 VEIN_MAX_ASPECT_RATIO = 4.0
 VEIN_MIN_CIRCULARITY = 0.15
 VEIN_MAX_ANECHOIC_MEAN = 65.0
+# Fixed reference pixel count (~802x805, Task_4's own validated test-frame size) that
+# VEIN_MIN/MAX_AREA_FRAC are fractions of. Keeps the size filter scale-invariant across
+# different ROI-crop dimensions instead of rescaling with whatever the current frame
+# happens to be — see prob_to_vein_mask for the real-data case this fixes.
+VEIN_AREA_REFERENCE_PX = 802 * 805
 
 # Fascia two-line extraction (ported from Task_4/app.py::prob_to_fascia_two_lines)
 FASCIA_PROB_THRESHOLD = 0.15
@@ -43,6 +48,11 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY") or ""
 GROQ_VLM_MODEL = "qwen/qwen3.6-27b"
 GROQ_MAX_TOKENS = 3072
 GROQ_TEMPERATURE = 0.0
+# "none" disables the model's separate verbose <think> preamble (same setting the copied
+# ROI_Identification agents already use on this model) — it still makes the call, just
+# without spending most of the latency on visible chain-of-thought tokens first. This was
+# the dominant cost in end-to-end runtime (~3min for a 20s test clip beforehand).
+GROQ_REASONING_EFFORT = "none"
 GROQ_TIMEOUT_SEC = 60
 
 # --- Sampling / debounce cadence (tune here, not inline in pipeline code) ---

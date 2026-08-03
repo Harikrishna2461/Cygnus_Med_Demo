@@ -56,6 +56,12 @@ class VeinBlob:
     area_px: int
     n_class: str = None                # "N1"|"N2"|"N3" — filled by stage2, never by this module
     n_class_reasoning: str = None
+    is_valid: bool = True              # False if stage2 judges this a non-anatomical false
+                                        # positive (text/watermark/logo, not a real vein) —
+                                        # e.g. a recording-software watermark burned into the
+                                        # video, which ROI cropping can't remove since it can
+                                        # sit inside the scan region itself, not just the
+                                        # surrounding machine-UI chrome ROI cropping targets
 
 
 @dataclass
@@ -112,14 +118,45 @@ def get_models():
 
 def grounding_prob(model, image_pil: Image.Image, text: str, infer_size: int = 512,
                     top_bias: bool = False) -> np.ndarray:
-    """Ported from Task_4_VLM_Fascia_Vein_Detection/app.py::_grounding_prob. Returns a
-    dense float32 [0,1] probability map at the original (H, W) of image_pil."""
+    """Ported from Task_4_VLM_Fascia_Vein_Detection/app.py::_grounding_prob, with one
+    deliberate change: letterbox (aspect-ratio-preserving resize + pad) instead of a
+    direct non-uniform stretch to infer_size x infer_size.
+
+    Confirmed the actual fascia/vein fine-tuning data pipeline (BiomedParse/datasets/
+    dataset_mappers/biomed_dataset_mapper.py::build_transform_gen, driven by
+    configs/biomed_fascia_finetuning.yaml's MIN/MAX_SIZE_TRAIN=460/560, IMAGE_SIZE=512)
+    uses detectron2's T.ResizeScale + T.FixedSizeCrop -- aspect-preserving resize to fit
+    within 512x512, then pad (or crop, only if training's 0.9-1.1x scale jitter pushed it
+    over) to exactly 512x512. This is NOT what app.py's direct `.resize((512,512))` stretch
+    does, and app.py's stretch is what got ported here originally. Real ROI-cropped frames
+    are often distinctly non-square (confirmed: 364x598, aspect ~0.61) so this mismatch is
+    not cosmetic -- it measurably distorts proportions the model never trained on.
+
+    Matches detectron2's FixedSizeCrop specifically: padding added only to the right/
+    bottom (content anchored top-left, not centered -- confirmed via CropTransform/
+    PadTransform's (0,0) origin convention), with the same pad_value=128.0 (mid-gray)
+    default, not black -- chosen in detectron2 to be visually distinct from real content,
+    whereas black would blend into ultrasound's naturally near-black background regions
+    and read as "more background" rather than "padding" to the model. No real detectron2
+    install is available on this machine to read its source directly (stubbed, see
+    Task_4_VLM_Fascia_Vein_Detection/stubs/), so this is reconstructed from detectron2's
+    public API/documented defaults, not verified byte-for-byte -- flagging that
+    explicitly rather than presenting it as fully confirmed.
+
+    Returns a dense float32 [0,1] probability map at the original (H, W) of image_pil.
+    """
     m = model.model
     pred = m.sem_seg_head.predictor
     W, H = image_pil.size
 
-    resized = np.asarray(image_pil.resize((infer_size, infer_size), Image.BICUBIC)).astype(np.float32)
-    img_t = torch.from_numpy(resized.copy()).permute(2, 0, 1).cuda()
+    scale = min(infer_size / W, infer_size / H)
+    new_w, new_h = max(1, round(W * scale)), max(1, round(H * scale))
+    resized_content = image_pil.resize((new_w, new_h), Image.BICUBIC)
+    canvas = Image.new("RGB", (infer_size, infer_size), (128, 128, 128))  # detectron2 FixedSizeCrop default
+    canvas.paste(resized_content, (0, 0))
+
+    arr = np.asarray(canvas).astype(np.float32)
+    img_t = torch.from_numpy(arr.copy()).permute(2, 0, 1).cuda()
     images = ImageList.from_tensors([(img_t - m.pixel_mean) / m.pixel_std], m.size_divisibility)
 
     gtext = pred.lang_encoder.get_text_token_embeddings([text], name="grounding", token=False, norm=False)
@@ -146,19 +183,35 @@ def grounding_prob(model, image_pil: Image.Image, text: str, infer_size: int = 5
     else:
         weighted = probs.reshape(101, -1).max(dim=1).values
     best_q = weighted.argmax().item()
-    return F.interpolate(
-        all_gm[best_q:best_q + 1][None], (H, W), mode="bilinear", align_corners=False,
+
+    # Upsample to canvas size, crop out the padding, then resize the real-content
+    # region up to the true original (H, W) -- the inverse of the letterbox above.
+    canvas_pred = F.interpolate(
+        all_gm[best_q:best_q + 1][None], (infer_size, infer_size), mode="bilinear", align_corners=False,
+    )[0, 0]
+    content_pred = canvas_pred[:new_h, :new_w]
+    final = F.interpolate(
+        content_pred[None, None], (H, W), mode="bilinear", align_corners=False,
     )[0, 0].sigmoid().detach().cpu().numpy().astype(np.float32)
+    return final
 
 
 def prob_to_vein_mask(prob: np.ndarray, image_gray: np.ndarray = None,
                        threshold: float = config.VEIN_PROB_THRESHOLD) -> np.ndarray:
-    """Ported verbatim from Task_4_VLM_Fascia_Vein_Detection/app.py::prob_to_vein_mask.
-    Keeps only blobs that look like real vein cross-sections: small, anechoic, not
-    elongated, not irregular. This filtering is tuned to this segmentation model's
-    output characteristics, not a medical classification rule."""
+    """Ported from Task_4_VLM_Fascia_Vein_Detection/app.py::prob_to_vein_mask (one change
+    below). Keeps only blobs that look like real vein cross-sections: small, anechoic, not
+    elongated, not irregular. This filtering is tuned to this segmentation model's output
+    characteristics, not a medical classification rule.
+
+    Area bounds are fractions of a FIXED reference pixel count (config.VEIN_AREA_REFERENCE_PX,
+    Task_4's own ~802x805 validated test-frame size), not of prob.shape itself. Confirmed on
+    real reference footage: after ROI-cropping to a much smaller frame (e.g. 364x598), the
+    same real vein covers a much larger *fraction* of the smaller frame, so a fraction-of-
+    current-image cap was rejecting genuinely large, obvious veins as "too big" purely
+    because the frame got tighter — not because the vein itself was unusual.
+    """
     binary = (prob > threshold).astype(np.uint8)
-    total = prob.shape[0] * prob.shape[1]
+    total = config.VEIN_AREA_REFERENCE_PX
     min_area = max(10, int(config.VEIN_MIN_AREA_FRAC * total))
     max_area = int(config.VEIN_MAX_AREA_FRAC * total)
     n, labels, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)

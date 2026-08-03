@@ -1,10 +1,13 @@
 """
-Thin Groq wrapper for the reasoning VLM calls (qwen/qwen3.6-27b).
+Thin Groq wrapper for the VLM calls (qwen/qwen3.6-27b).
 
-Unlike the /no_think one-word-answer call already used elsewhere in this codebase
-(Task_4_VLM_Fascia_Vein_Detection/app.py's blob evaluator), our calls want the model to
-actually reason, so responses carry a <think>...</think> block that must be stripped
-before JSON parsing.
+reasoning_effort="none" (config.GROQ_REASONING_EFFORT, same setting already used by the
+copied ROI_Identification agents) turns off the model's separate verbose <think> preamble
+— it still makes the classification/naming call itself, just without spending a large
+chunk of latency generating visible chain-of-thought tokens first. This was the dominant
+cost in end-to-end runtime (a 20s test clip took ~3 minutes, almost entirely thinking
+tokens). strip_think() is kept as a harmless no-op safety net in case a caller ever passes
+a different reasoning_effort that does emit a <think> block.
 """
 import json
 import re
@@ -50,6 +53,7 @@ def call_vlm_json(
     max_tokens: int = None,
     temperature: float = None,
     timeout: float = None,
+    reasoning_effort: str = None,
 ) -> tuple[dict, str]:
     """Returns (parsed_json, raw_response_text).
 
@@ -72,6 +76,7 @@ def call_vlm_json(
         max_tokens=max_tokens or config.GROQ_MAX_TOKENS,
         temperature=config.GROQ_TEMPERATURE if temperature is None else temperature,
         timeout=timeout or config.GROQ_TIMEOUT_SEC,
+        reasoning_effort=config.GROQ_REASONING_EFFORT if reasoning_effort is None else reasoning_effort,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": content},

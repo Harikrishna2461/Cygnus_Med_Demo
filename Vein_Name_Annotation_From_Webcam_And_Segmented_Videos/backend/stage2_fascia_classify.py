@@ -16,17 +16,30 @@ import renderer
 _FASCIAL_DEPTH_TEXT = anatomy_knowledge.ANATOMY_REFERENCE_TEXT.split("LEG LEVELS")[0].strip()
 
 SYSTEM_PROMPT = (
-    "You classify vein cross-sections in an annotated leg-ultrasound frame by their depth "
-    "relative to the fascial compartment. A YELLOW line marks the superficial edge of the "
-    "saphenous fascia; an ORANGE line marks the deep edge (at the muscle fascia). Numbered "
-    "green/colored contours mark candidate vein lumens.\n\n"
+    "You read annotated leg-ultrasound frames. A YELLOW line marks the superficial edge of "
+    "the saphenous fascia; an ORANGE line marks the deep edge (at the muscle fascia). "
+    "Numbered contours mark candidate vein lumens detected by an automated segmentation "
+    "model — the model sometimes fires on things that are NOT real veins, for example "
+    "letters/words from an on-screen watermark or logo (a closed letter shape like 'e', "
+    "'o', 'g', or 'P' can look like a small dark oval), a UI icon, or other non-tissue "
+    "graphics. Real ultrasound tissue has a grainy speckle texture; text/logos/watermarks "
+    "have flat colour and sharp typographic edges with no speckle around them, and often "
+    "sit in a visually distinct strip or overlay rather than embedded in the grayscale scan "
+    "image.\n\n"
+    "For EACH numbered blob, first judge is_valid_vein: does this actually sit inside real "
+    "speckled ultrasound tissue, or is it part of text/a watermark/a logo/UI graphics? "
+    "If invalid, you do not need to classify its depth — set n_class to null.\n\n"
+    "If valid, classify its depth relative to the fascial compartment:\n"
     + _FASCIAL_DEPTH_TEXT +
-    "\n\nFor each numbered blob you are also given a precomputed geometric measurement "
-    "(from the segmentation model itself, not a guess) describing its position relative "
-    "to both lines at its own column. Use both the image and this measurement together to "
-    "decide. Respond with ONLY a compact JSON object, no markdown, no prose outside the "
-    "JSON, in exactly this shape:\n"
-    '{"<blob_id>": {"n_class": "N1"|"N2"|"N3", "reasoning": "<one sentence>"}, ...}'
+    "\n\nFor each blob you are also given a precomputed geometric measurement (from the "
+    "segmentation model itself, not a guess) describing its position relative to both "
+    "fascia lines at its own column — use this alongside the image for the depth call, but "
+    "it says nothing about whether the blob is a real vein in the first place, judge that "
+    "from the image.\n\n"
+    "Respond with ONLY a compact JSON object, no markdown, no prose outside the JSON, in "
+    "exactly this shape:\n"
+    '{"<blob_id>": {"is_valid_vein": true|false, "n_class": "N1"|"N2"|"N3"|null, '
+    '"reasoning": "<one sentence>"}, ...}'
 )
 
 
@@ -70,7 +83,11 @@ def classify_blobs(frame_bgr: np.ndarray, blobs: list, fascia) -> None:
         blob = by_id.get(bid)
         if blob is None or not isinstance(val, dict):
             continue
+        blob.n_class_reasoning = val.get("reasoning")
+        if val.get("is_valid_vein") is False:
+            blob.is_valid = False
+            blob.n_class = None
+            continue
         n_class = val.get("n_class")
         if n_class in ("N1", "N2", "N3"):
             blob.n_class = n_class
-            blob.n_class_reasoning = val.get("reasoning")

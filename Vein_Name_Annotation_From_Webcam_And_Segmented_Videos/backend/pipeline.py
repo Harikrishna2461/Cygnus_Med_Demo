@@ -7,10 +7,18 @@ intermediate video, and serialize per-tick geometry to a JSON artifact.
 Pass 2: replay that artifact (no BioMedParse re-run) alongside the webcam video, read
 probe location (Stage 3a) and name veins (Stage 3b), render the final video.
 
-Neither pass tracks blob identity across ticks (see project plan's known "naming flicker"
-limitation) — between VLM calls, the last classification/naming is held and reapplied to
-the newly re-segmented blobs by their (deterministic, position-sorted) blob_id, which is a
-cheap ordinal-matching approximation valid for short hold windows, not a tracker.
+Between VLM calls, the last classification/naming is held and reapplied to the newly
+re-segmented blobs by NEAREST CENTROID (within a distance tolerance), not by blob_id.
+blob_id is only a within-tick ordinal (position-sorted, reassigned fresh every tick) — it
+is NOT a stable identity across ticks, confirmed empirically on real footage: across six
+consecutive 0.5s ticks, blob count flickered 3/0/1/2/1/2 and blob_id=1 referred to a
+different physical vein from one tick to the next (a y=46 tributary at tick 0, a y=141
+vein at tick 2). Holding a classification by blob_id equality was silently applying stale
+labels to the wrong physical vein whenever segmentation noise reordered or dropped a blob
+mid-hold-window — this was a real, frequent source of wrong-looking N1/N2/N3 labels
+despite individual VLM classification calls themselves being accurate. Nearest-centroid
+matching (with no match = treated as unclassified, not stale-labeled) fixes this; it is
+still not a true tracker (no motion model, no occlusion handling) — see BLOB_MATCH_MAX_DIST_FRAC.
 """
 import json
 import math
@@ -41,6 +49,19 @@ class FrameTick:
 def _frame_diagonal(frame_bgr) -> float:
     h, w = frame_bgr.shape[:2]
     return math.hypot(h, w)
+
+
+def _nearest_match(centroid: tuple, records: list, max_dist: float):
+    """Finds the record in `records` (each a dict with a "centroid" key) closest to
+    `centroid`, within max_dist. Returns None if none qualify — callers must treat "no
+    match" as "unclassified", not fall back to some arbitrary record. This is the fix
+    for blob_id not being a stable cross-tick identity (see module docstring)."""
+    best, best_d = None, max_dist
+    for rec in records:
+        d = math.hypot(centroid[0] - rec["centroid"][0], centroid[1] - rec["centroid"][1])
+        if d < best_d:
+            best_d, best = d, rec
+    return best
 
 
 # --- Artifact (de)serialization -------------------------------------------------------
@@ -129,32 +150,32 @@ def run_pass1(ultrasound_path: str, intermediate_video_path: str, artifact_path:
     writer = None
     ticks = []
     last_classified_at = -1e9
-    last_centroids = {}   # blob_id -> (cx, cy) as of the last real Stage-2 call
-    last_n_class = {}     # blob_id -> n_class as of the last real Stage-2 call
+    last_records = []   # [{"centroid": (cx,cy), "n_class": str|None, "is_valid": bool}, ...]
 
     for ts, frame in video_io.iter_sample_frames(ultrasound_path, config.SEG_SAMPLE_INTERVAL_SEC):
         blobs, fascia = bpe.segment_frame(frame)
+        max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
 
         needs_classify = bool(blobs) and (
             (ts - last_classified_at) >= config.VLM_SAMPLE_INTERVAL_SEC
-            or {b.blob_id for b in blobs} != set(last_n_class.keys())
+            or len(blobs) != len(last_records)
+            or any(_nearest_match(b.centroid, last_records, max_dist) is None for b in blobs)
         )
-        if not needs_classify and blobs:
-            diag = _frame_diagonal(frame)
-            for b in blobs:
-                prev = last_centroids.get(b.blob_id)
-                if prev is None or math.hypot(b.centroid[0] - prev[0], b.centroid[1] - prev[1]) / diag > config.BLOB_CHANGE_DEBOUNCE_FRAC:
-                    needs_classify = True
-                    break
 
         if needs_classify:
             s2.classify_blobs(frame, blobs, fascia)
             last_classified_at = ts
-            last_centroids = {b.blob_id: b.centroid for b in blobs}
-            last_n_class = {b.blob_id: b.n_class for b in blobs}
+            last_records = [{"centroid": b.centroid, "n_class": b.n_class, "is_valid": b.is_valid}
+                             for b in blobs]
         else:
             for b in blobs:
-                b.n_class = last_n_class.get(b.blob_id)
+                match = _nearest_match(b.centroid, last_records, max_dist)
+                b.n_class = match["n_class"] if match else None
+                b.is_valid = match["is_valid"] if match else True
+
+        # Drop blobs stage2 judged non-anatomical (text/watermark/logo) before they're
+        # ever rendered or handed to stage3 — see biomedparse_engine.VeinBlob.is_valid.
+        blobs = [b for b in blobs if b.is_valid]
 
         annotated = renderer.draw_intermediate_frame(frame, blobs, fascia)
         if writer is None:
@@ -187,7 +208,9 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
     location = s3a.normalize({})
     last_location_at = -1e9
     last_named_at = -1e9
-    last_names = {}  # blob_id -> vein_name
+    last_named_records = []  # [{"centroid": (cx,cy), "vein_name": str}, ...] — see
+                              # pipeline module docstring: matched by nearest centroid,
+                              # NOT blob_id, since blob_id isn't a stable cross-tick identity
 
     try:
         for i, (tick, (ts, frame)) in enumerate(zip(ticks, us_frames)):
@@ -199,20 +222,32 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
                     last_location_at = ts
                     location_refreshed = True
 
+            max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
             needs_naming = bool(tick.blobs) and (
                 location_refreshed
                 or (ts - last_named_at) >= config.VLM_SAMPLE_INTERVAL_SEC
-                or {b.blob_id for b in tick.blobs} != set(last_names.keys())
+                or len(tick.blobs) != len(last_named_records)
+                or any(_nearest_match(b.centroid, last_named_records, max_dist) is None for b in tick.blobs)
             )
             if needs_naming:
                 blob_dicts = [{"blob_id": b.blob_id, "n_class": b.n_class, "centroid": list(b.centroid)}
                               for b in tick.blobs]
                 annotated_intermediate = renderer.draw_intermediate_frame(frame, tick.blobs, tick.fascia)
                 names_result = s3b.name_veins(blob_dicts, location, annotated_ultrasound_frame_bgr=annotated_intermediate)
-                last_names = {bid: v["vein_name"] for bid, v in names_result.items()}
+                by_id = {b.blob_id: b for b in tick.blobs}
+                last_named_records = [
+                    {"centroid": by_id[bid].centroid, "vein_name": v["vein_name"]}
+                    for bid, v in names_result.items() if bid in by_id
+                ]
                 last_named_at = ts
 
-            final_frame = renderer.draw_final_frame(frame, tick.blobs, tick.fascia, last_names)
+            current_names = {}
+            for b in tick.blobs:
+                match = _nearest_match(b.centroid, last_named_records, max_dist)
+                if match:
+                    current_names[b.blob_id] = match["vein_name"]
+
+            final_frame = renderer.draw_final_frame(frame, tick.blobs, tick.fascia, current_names)
             if writer is None:
                 h, w = frame.shape[:2]
                 writer = video_io.OutputVideoWriter(final_video_path, fps=config.OUTPUT_FPS, frame_size=(w, h))

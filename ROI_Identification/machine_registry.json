@@ -26,5 +26,19 @@
     "verified_on": [
       "597c42f6-3b07-4d57-8471-2d9ef187aa70"
     ]
+  },
+  "458838a9af4709": {
+    "resolution": "1920x1080",
+    "roi": {
+      "x1": 787,
+      "y1": 100,
+      "x2": 1151,
+      "y2": 698
+    },
+    "detection_method": "agent",
+    "confidence": 0.92,
+    "verified_on": [
+      "f98fec5c-d52a-415b-8827-99c9980dbfca"
+    ]
   }
 }
