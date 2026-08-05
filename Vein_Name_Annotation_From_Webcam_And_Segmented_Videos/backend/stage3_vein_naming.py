@@ -51,10 +51,15 @@ def build_naming_prompt(blobs: list[dict], location: dict,
     return system, user
 
 
-def name_veins(blobs: list[dict], location: dict, annotated_ultrasound_frame_bgr=None) -> dict:
-    """Returns {blob_id(int): {"vein_name": str, "reasoning": str}} — only for blobs the
-    VLM actually answered with a non-empty vein_name."""
+MAX_NAMING_RETRIES = 2  # extra attempts beyond the first, asking again only for blobs
+                         # the model skipped — see name_veins()
+
+
+def _name_veins_once(blobs: list[dict], location: dict, annotated_ultrasound_frame_bgr,
+                      extra_instruction: str = "") -> dict:
     system, user = build_naming_prompt(blobs, location)
+    if extra_instruction:
+        user = user + "\n\n" + extra_instruction
     img_b64 = None
     if annotated_ultrasound_frame_bgr is not None:
         _, buf = cv2.imencode(".png", annotated_ultrasound_frame_bgr)
@@ -69,4 +74,39 @@ def name_veins(blobs: list[dict], location: dict, annotated_ultrasound_frame_bgr
             continue
         if isinstance(val, dict) and val.get("vein_name"):
             out[bid] = {"vein_name": val["vein_name"], "reasoning": val.get("reasoning", "")}
+    return out
+
+
+def name_veins(blobs: list[dict], location: dict, annotated_ultrasound_frame_bgr=None) -> dict:
+    """Returns {blob_id(int): {"vein_name": str, "reasoning": str}}.
+
+    Every blob passed in gets a real, VLM-decided name if at all possible — the caller
+    (pipeline.py) requires this so the final video never shows a bare N-class instead of
+    a name. A single call sometimes skips a blob_id in its JSON response even though
+    build_naming_prompt() asked about all of them; rather than filling the gap with a
+    Python-decided default (which would reintroduce exactly the hardcoded-lookup pattern
+    this project exists to avoid), this retries up to MAX_NAMING_RETRIES times, each time
+    asking ONLY about the still-missing blob(s) with an explicit "you must answer for all
+    of these" instruction. Genuinely unnamed blobs after all retries are rare (network/
+    parsing failure, not the model choosing to skip) and are left absent from the
+    returned dict — pipeline.py's hold logic will retry again on the next naming tick.
+    """
+    remaining = {b["blob_id"]: b for b in blobs}
+    out: dict = {}
+    attempt = 0
+    while remaining and attempt <= MAX_NAMING_RETRIES:
+        extra = ""
+        if attempt > 0:
+            extra = (
+                f"Your previous answer did not include a vein_name for blob(s) "
+                f"{sorted(remaining.keys())}. You MUST provide a vein_name for every one "
+                f"of those blob_ids now, even if uncertain — do not omit any."
+            )
+        result = _name_veins_once(list(remaining.values()), location,
+                                   annotated_ultrasound_frame_bgr, extra_instruction=extra)
+        out.update(result)
+        for bid in list(remaining.keys()):
+            if bid in result:
+                del remaining[bid]
+        attempt += 1
     return out

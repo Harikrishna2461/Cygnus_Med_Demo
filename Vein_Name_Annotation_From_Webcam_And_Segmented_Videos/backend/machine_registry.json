@@ -12,5 +12,19 @@
     "verified_on": [
       "drift_test_src"
     ]
+  },
+  "61cdbc0205d747": {
+    "resolution": "1920x1080",
+    "roi": {
+      "x1": 790,
+      "y1": 100,
+      "x2": 1193,
+      "y2": 555
+    },
+    "detection_method": "agent+cv_averaged",
+    "confidence": 0.95,
+    "verified_on": [
+      "nfix_us_20s"
+    ]
   }
 }

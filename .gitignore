@@ -67,6 +67,12 @@ build/
 
 # (vein_detection_task_3_training now uses its own .gitignore for granular exclusions)
 
+# Pipeline output folders (contain large videos and intermediate files)
+Vein_Name_Annotation_From_Webcam_And_Segmented_Videos/backend/outputs/
+
+# VLM finetuning frame datasets (too large for GitHub)
+Task_4_VLM_Fascia_Vein_Detection/veins_vlm_finetuning/
+
 # PyInstaller build output
 Task_1_App/_internal/
 Task_1_App_Pyside/_internal/

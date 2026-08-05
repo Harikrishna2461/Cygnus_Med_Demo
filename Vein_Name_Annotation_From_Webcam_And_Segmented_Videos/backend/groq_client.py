@@ -71,16 +71,27 @@ def call_vlm_json(
         })
     content.append({"type": "text", "text": user_text})
 
-    resp = client.chat.completions.create(
+    kwargs = dict(
         model=model or config.GROQ_VLM_MODEL,
         max_tokens=max_tokens or config.GROQ_MAX_TOKENS,
         temperature=config.GROQ_TEMPERATURE if temperature is None else temperature,
         timeout=timeout or config.GROQ_TIMEOUT_SEC,
-        reasoning_effort=config.GROQ_REASONING_EFFORT if reasoning_effort is None else reasoning_effort,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": content},
         ],
     )
+    effort = config.GROQ_REASONING_EFFORT if reasoning_effort is None else reasoning_effort
+    # "default" is a sentinel meaning "don't send reasoning_effort at all" — lets the
+    # model use its own full chain-of-thought rather than the fast/no-think mode. Needed
+    # for calls doing genuinely multi-step reasoning (see stage3_webcam_location.py's
+    # facing-direction mirroring) where "none" measurably hurt consistency — confirmed on
+    # real footage: the same near-identical frame ("patient facing camera, probe on
+    # right side of image") got mirrored correctly sometimes and backwards other times
+    # across adjacent 2s ticks with reasoning off.
+    if effort != "default":
+        kwargs["reasoning_effort"] = effort
+
+    resp = client.chat.completions.create(**kwargs)
     raw = resp.choices[0].message.content or ""
     return extract_json(raw), raw

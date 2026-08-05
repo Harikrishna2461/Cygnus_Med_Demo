@@ -22,11 +22,11 @@ still not a true tracker (no motion model, no occlusion handling) — see BLOB_M
 """
 import json
 import math
+import os
 from dataclasses import dataclass
 
+import cv2
 import numpy as np
-
-import os
 
 import config
 import biomedparse_engine as bpe
@@ -197,12 +197,26 @@ def run_pass1(ultrasound_path: str, intermediate_video_path: str, artifact_path:
 # --- Pass 2: webcam location + vein naming ---------------------------------------------
 
 def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_path: str,
-              progress_cb=None) -> None:
+              progress_cb=None, probe_log_dir: str = None) -> None:
+    """probe_log_dir: if given, every Stage-3a probe-location reading is appended to
+    <probe_log_dir>/probe_location_log.jsonl (one JSON object per line: timestamp_sec +
+    the full location dict) and the exact webcam frame that reading was based on is saved
+    to <probe_log_dir>/frames/t<seconds>s.jpg — lets a human cross-check each reading
+    against the actual webcam video frame by frame, independent of what made it into the
+    final rendered video."""
     hold_frames = max(1, round(config.SEG_SAMPLE_INTERVAL_SEC * config.OUTPUT_FPS))
     n_ticks = max(len(ticks), 1)
 
     webcam_reader = video_io.TimestampFrameReader(webcam_path)
     us_frames = video_io.iter_sample_frames(ultrasound_path, config.SEG_SAMPLE_INTERVAL_SEC)
+
+    probe_log_file = None
+    probe_frames_dir = None
+    if probe_log_dir:
+        os.makedirs(probe_log_dir, exist_ok=True)
+        probe_frames_dir = os.path.join(probe_log_dir, "frames")
+        os.makedirs(probe_frames_dir, exist_ok=True)
+        probe_log_file = open(os.path.join(probe_log_dir, "probe_location_log.jsonl"), "w")
 
     writer = None
     location = s3a.normalize({})
@@ -221,6 +235,12 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
                     location = s3a.read_location(webcam_frame)
                     last_location_at = ts
                     location_refreshed = True
+                    if probe_log_file:
+                        entry = {"timestamp_sec": round(ts, 2), **location}
+                        probe_log_file.write(json.dumps(entry) + "\n")
+                        probe_log_file.flush()
+                        frame_name = f"t{ts:08.2f}s.jpg"
+                        cv2.imwrite(os.path.join(probe_frames_dir, frame_name), webcam_frame)
 
             max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
             needs_naming = bool(tick.blobs) and (
@@ -260,16 +280,20 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
         if writer:
             writer.release()
         webcam_reader.release()
+        if probe_log_file:
+            probe_log_file.close()
 
 
 # --- Convenience wrapper for callers (Flask job, CLI) ----------------------------------
 
 def run_full_pipeline(ultrasound_path: str, webcam_path: str, intermediate_video_path: str,
                        final_video_path: str, artifact_path: str, roi_out_dir: str,
-                       progress_cb=None) -> None:
+                       progress_cb=None, probe_log_dir: str = None) -> None:
     """progress_cb(stage: str, frac: float) if given — stage is 'cropping', 'segmenting',
     or 'naming'. The webcam video is never ROI-cropped (it's a room/leg view, not a
-    machine-UI capture) — only the ultrasound video goes through Stage 0."""
+    machine-UI capture) — only the ultrasound video goes through Stage 0.
+    probe_log_dir: see run_pass2's docstring — logs every Stage-3a reading + the exact
+    webcam frame it saw, for manual cross-checking against the source video."""
     if progress_cb:
         progress_cb("cropping", 0.0)
     cropped_ultrasound_path = run_roi_crop(ultrasound_path, roi_out_dir)
@@ -285,4 +309,5 @@ def run_full_pipeline(ultrasound_path: str, webcam_path: str, intermediate_video
             progress_cb("naming", frac)
 
     ticks = run_pass1(cropped_ultrasound_path, intermediate_video_path, artifact_path, progress_cb=p1_cb)
-    run_pass2(ticks, cropped_ultrasound_path, webcam_path, final_video_path, progress_cb=p2_cb)
+    run_pass2(ticks, cropped_ultrasound_path, webcam_path, final_video_path, progress_cb=p2_cb,
+              probe_log_dir=probe_log_dir)

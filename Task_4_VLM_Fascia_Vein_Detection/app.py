@@ -62,7 +62,7 @@ print("Fascia model loaded.")
 print("Loading vein model...")
 vein_opt = load_opt_from_config_files([os.path.join(BIOMEDPARSE_DIR, 'configs', 'biomed_fascia_finetuning.yaml')])
 vein_opt = init_distributed(vein_opt)
-_ckpt_dir = os.path.join(BASE_DIR, 'BiomedParse', 'output', 'fascia_vein_finetuning')
+_ckpt_dir = r'D:\vein_phase3'
 _ckpts = sorted(_glob.glob(os.path.join(_ckpt_dir, '**/model_state_dict.pt'), recursive=True),
                 key=os.path.getmtime)
 vein_weights = (_ckpts[-1] if _ckpts else None) or (LOCAL_WEIGHTS if os.path.exists(LOCAL_WEIGHTS) else 'hf_hub:microsoft/BiomedParse')
@@ -399,6 +399,7 @@ def _grounding_prob(mdl, query_image_pil, text, infer_size=512, top_bias=False, 
         'grounding_nonzero_mask': nz_mask.t(),
         'grounding_class':        gtext['class_emb'],
     }
+
     with torch.no_grad():
         feats     = m.backbone(images.tensor)
         mf, _, ms = m.sem_seg_head.pixel_decoder.forward_features(feats)

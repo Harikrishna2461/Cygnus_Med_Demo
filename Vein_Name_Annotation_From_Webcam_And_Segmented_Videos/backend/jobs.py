@@ -22,6 +22,7 @@ class Job:
         self.final_path = os.path.join(out_dir, "final.mp4")
         self.artifact_path = os.path.join(out_dir, "artifact.json")
         self.roi_out_dir = os.path.join(out_dir, "roi_cropped")
+        self.probe_log_dir = os.path.join(out_dir, "probe_location_log")
 
     def to_status_dict(self) -> dict:
         return {
@@ -30,6 +31,10 @@ class Job:
             "stage": self.stage,
             "progress_pct": round(self.progress_pct * 100, 1),
             "error": self.error,
+            # JSONL of every Stage-3a probe-location reading (timestamp + the exact
+            # webcam frame it was based on, under frames/) — for manual cross-checking
+            # against the source webcam video, not used by the app itself.
+            "probe_log_path": os.path.join(self.probe_log_dir, "probe_location_log.jsonl"),
         }
 
 
@@ -65,7 +70,7 @@ def _run_job(job: Job) -> None:
         pipeline.run_full_pipeline(
             job.ultrasound_path, job.webcam_path,
             job.intermediate_path, job.final_path, job.artifact_path, job.roi_out_dir,
-            progress_cb=progress_cb,
+            progress_cb=progress_cb, probe_log_dir=job.probe_log_dir,
         )
         job.status = "done"
         job.stage = "done"

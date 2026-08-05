@@ -5,7 +5,10 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))           # .../Vein_Name_Annotation_From_Webcam_And_Segmented_Videos/backend
 PROJECT_DIR = os.path.dirname(BASE_DIR)                          # .../Vein_Name_Annotation_From_Webcam_And_Segmented_Videos
 CYGNUS_ROOT = os.path.dirname(PROJECT_DIR)                       # .../Cygnus_Med_Demo
-TASK4_DIR = os.path.join(CYGNUS_ROOT, "Task_4_VLM_Fascia_Vein_Detection")
+# Folder was renamed from "Task_4_VLM_Fascia_Vein_Detection" to "VLM_Fascia_Detection"
+# mid-project (confirmed: old name no longer exists on disk, new one has identical
+# internal structure — stubs/, BiomedParse/output/ with the same checkpoint dirs).
+TASK4_DIR = os.path.join(CYGNUS_ROOT, "VLM_Fascia_Detection")
 
 UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
 OUTPUTS_DIR = os.path.join(BASE_DIR, "outputs")
@@ -17,7 +20,7 @@ BIOMEDPARSE_DIR = os.path.join(TASK4_DIR, "BiomedParse")
 STUBS_DIR = os.path.join(TASK4_DIR, "stubs")
 BIOMEDPARSE_CONFIG = os.path.join(BIOMEDPARSE_DIR, "configs", "biomed_fascia_finetuning.yaml")
 FASCIA_CKPT_DIR = os.path.join(BIOMEDPARSE_DIR, "output", "fascia_finetuning_v2_production")
-VEIN_CKPT_DIR = os.path.join(BIOMEDPARSE_DIR, "output", "fascia_vein_finetuning")
+VEIN_CKPT_DIR = r"D:\vein_phase3"
 LOCAL_FALLBACK_WEIGHTS = os.path.join(TASK4_DIR, "pretrained", "biomedparse_v1.pt")
 
 FASCIA_PROMPT = "fascia layer in PeripheralVascular Ultrasound"
@@ -58,7 +61,13 @@ GROQ_TIMEOUT_SEC = 60
 # --- Sampling / debounce cadence (tune here, not inline in pipeline code) ---
 SEG_SAMPLE_INTERVAL_SEC = 0.5
 VLM_SAMPLE_INTERVAL_SEC = 4.0
-WEBCAM_LOCATION_MIN_INTERVAL_SEC = 8.0
+# Was 8.0s — set that high back when each Groq call took several seconds (reasoning
+# mode) and needed cost-controlling. Now that GROQ_REASONING_EFFORT="none" makes calls
+# ~1s each, that's no longer a good tradeoff: an 8s window means a mid-window probe move
+# doesn't get picked up for up to 8s, so vein names can lag well behind where the probe
+# actually is. Tightened to track probe movement responsively instead of the naming
+# cadence (4.0s) being the more frequent of the two, which was backwards.
+WEBCAM_LOCATION_MIN_INTERVAL_SEC = 2.0
 BLOB_CHANGE_DEBOUNCE_FRAC = 0.05
 OUTPUT_FPS = 10
 WEBCAM_TIME_OFFSET_SEC = 0.0   # add to ultrasound timestamp before indexing into webcam video
