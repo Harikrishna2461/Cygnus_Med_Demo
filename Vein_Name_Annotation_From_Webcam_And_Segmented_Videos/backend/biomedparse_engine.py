@@ -74,6 +74,21 @@ _lock = threading.Lock()
 _fascia_model = None
 _vein_model = None
 
+# Guards every forward pass through either model, not just loading. BiomedParse's
+# AttentionDataStruct (modeling/interface/prototype/attention_data_struct_seemv1.py)
+# mutates shared in-place state (self.query_index, self.attn_variables, ...) across the
+# reset() -> set() -> cross_attn_variables() -> update_variables() sequence inside one
+# forward() call. If a second thread's forward() call interleaves with that sequence
+# (e.g. two jobs/videos being processed concurrently -- jobs.py starts one unthrottled
+# thread per job with no concurrency cap), one call's reset() can wipe or a stale
+# cross_attn_name list can outlive the query_index it was paired with, producing
+# intermittent `KeyError: 'queries_object'`-style crashes deep in vendor code. Confirmed
+# empirically: the exact same 120s video that crashed under the running Flask server
+# processed clean end-to-end (220+ ticks) when run standalone/single-threaded -- not a
+# per-frame data bug, a concurrency one. Model inference was never going to be safely
+# concurrent on one shared instance anyway (also avoids two videos fighting over VRAM).
+_infer_lock = threading.Lock()
+
 
 def _newest_ckpt(ckpt_dir: str) -> str:
     ckpts = sorted(
@@ -238,6 +253,30 @@ def prob_to_vein_mask(prob: np.ndarray, image_gray: np.ndarray = None,
     return out
 
 
+def _fit_fascia_curve(valid_cols: np.ndarray, raw_rows: np.ndarray, W: int) -> np.ndarray:
+    """Least-squares polynomial fit (degree config.FASCIA_POLY_DEGREE) through the raw
+    per-column fascia row readings, evaluated at every column 0..W-1.
+
+    Replaces a moving-average smoothing pass that still left visible local wiggle in the
+    line (a boxcar filter only damps noise within its own window, it doesn't produce a
+    mathematically smooth curve). A single global polynomial has no per-point jaggedness
+    by construction — fascia is a large-scale gently-curving anatomical plane, not a
+    high-frequency signal, so a low-degree fit is the right amount of flexibility:
+    degree 1 (straight line) is too rigid for the genuine curvature fascia can have along
+    a frame's width; degree 3 (cubic) comfortably follows a gentle asymmetric hump/S-curve
+    without the overfitting risk of a much higher degree chasing pixel-level noise.
+    Falls back to a lower degree (or a flat mean) automatically if there simply aren't
+    enough valid points to support a stable cubic fit.
+    """
+    if len(valid_cols) == 0:
+        return np.zeros(W)
+    degree = min(config.FASCIA_POLY_DEGREE, len(valid_cols) - 1)
+    if degree < 1:
+        return np.full(W, raw_rows.mean())
+    coeffs = np.polyfit(valid_cols, raw_rows, degree)
+    return np.polyval(coeffs, np.arange(W))
+
+
 def prob_to_fascia_two_lines(prob: np.ndarray, threshold: float = config.FASCIA_PROB_THRESHOLD):
     """Ported from Task_4_VLM_Fascia_Vein_Detection/fascia_helpers.py::prob_to_fascia_two_lines,
     extended to also return the per-column row-index arrays (not just the rasterized mask) —
@@ -257,14 +296,8 @@ def prob_to_fascia_two_lines(prob: np.ndarray, threshold: float = config.FASCIA_
     deep_raw = (H - 1 - np.argmax(above[::-1], axis=0)).astype(np.float64)
 
     valid_idx = np.where(valid)[0]
-    sup_filled = np.interp(np.arange(W), valid_idx, sup_raw[valid_idx])
-    deep_filled = np.interp(np.arange(W), valid_idx, deep_raw[valid_idx])
-
-    k = min(63, max(3, W // 16))
-    pad = k // 2
-    kernel = np.ones(k) / k
-    sup_smooth = np.convolve(np.pad(sup_filled, pad, mode="edge"), kernel, mode="valid")[:W]
-    deep_smooth = np.convolve(np.pad(deep_filled, pad, mode="edge"), kernel, mode="valid")[:W]
+    sup_smooth = _fit_fascia_curve(valid_idx, sup_raw[valid_idx], W)
+    deep_smooth = _fit_fascia_curve(valid_idx, deep_raw[valid_idx], W)
 
     sup_rows = np.clip(sup_smooth.astype(int), 0, H - 1)
     deep_rows = np.clip(deep_smooth.astype(int), 0, H - 1)
@@ -320,8 +353,9 @@ def segment_frame(frame_bgr: np.ndarray):
     image_pil = Image.fromarray(rgb)
     gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
 
-    fascia_prob = grounding_prob(fascia_model, image_pil, config.FASCIA_PROMPT, config.INFER_SIZE, top_bias=True)
-    vein_prob = grounding_prob(vein_model, image_pil, config.VEIN_PROMPT, config.INFER_SIZE, top_bias=False)
+    with _infer_lock:
+        fascia_prob = grounding_prob(fascia_model, image_pil, config.FASCIA_PROMPT, config.INFER_SIZE, top_bias=True)
+        vein_prob = grounding_prob(vein_model, image_pil, config.VEIN_PROMPT, config.INFER_SIZE, top_bias=False)
 
     sup_mask, deep_mask, sup_rows, deep_rows = prob_to_fascia_two_lines(fascia_prob)
     vein_mask = prob_to_vein_mask(vein_prob, image_gray=gray)

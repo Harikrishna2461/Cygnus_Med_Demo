@@ -5,10 +5,22 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))           # .../Vein_Name_Annotation_From_Webcam_And_Segmented_Videos/backend
 PROJECT_DIR = os.path.dirname(BASE_DIR)                          # .../Vein_Name_Annotation_From_Webcam_And_Segmented_Videos
 CYGNUS_ROOT = os.path.dirname(PROJECT_DIR)                       # .../Cygnus_Med_Demo
-# Folder was renamed from "Task_4_VLM_Fascia_Vein_Detection" to "VLM_Fascia_Detection"
-# mid-project (confirmed: old name no longer exists on disk, new one has identical
-# internal structure — stubs/, BiomedParse/output/ with the same checkpoint dirs).
-TASK4_DIR = os.path.join(CYGNUS_ROOT, "VLM_Fascia_Detection")
+# This folder has been renamed back and forth at least twice mid-project
+# (Task_4_VLM_Fascia_Vein_Detection <-> VLM_Fascia_Detection) — confirmed each rename
+# broke the hardcoded path and crashed model loading (ModuleNotFoundError: detectron2,
+# since the stubs/ shim path stopped resolving). Rather than hand-fixing this constant
+# every time it happens again, resolve it dynamically: try each known name and use
+# whichever actually exists on disk right now.
+_TASK4_DIR_CANDIDATES = ["Task_4_VLM_Fascia_Vein_Detection", "VLM_Fascia_Detection"]
+for _name in _TASK4_DIR_CANDIDATES:
+    _candidate = os.path.join(CYGNUS_ROOT, _name)
+    if os.path.isdir(_candidate):
+        TASK4_DIR = _candidate
+        break
+else:
+    # None exist — fall back to the most recently known name so the resulting error
+    # message at least shows a real, debuggable path instead of failing silently here.
+    TASK4_DIR = os.path.join(CYGNUS_ROOT, _TASK4_DIR_CANDIDATES[0])
 
 UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
 OUTPUTS_DIR = os.path.join(BASE_DIR, "outputs")
@@ -29,6 +41,11 @@ VEIN_PROMPT = (
     "peripheral vascular ultrasound below fascia"
 )
 INFER_SIZE = 512
+
+# Fascia line smoothing: degree of the global least-squares polynomial fit through the
+# raw per-column readings (see biomedparse_engine._fit_fascia_curve). 3 = cubic: enough
+# flexibility for a genuine gentle asymmetric curve, low enough to not chase pixel noise.
+FASCIA_POLY_DEGREE = 3
 
 # Vein blob filtering (ported from Task_4/app.py::prob_to_vein_mask)
 VEIN_PROB_THRESHOLD = 0.25

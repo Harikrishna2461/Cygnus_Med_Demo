@@ -49,6 +49,7 @@ def call_vlm_json(
     user_text: str,
     image_b64: str = None,
     image_media_type: str = "image/png",
+    extra_images: list[tuple[str, str]] = None,
     model: str = None,
     max_tokens: int = None,
     temperature: float = None,
@@ -61,6 +62,12 @@ def call_vlm_json(
     that as "this tick's classification failed", not silently substitute a guess.
     Network/API errors are not caught here; that's a pipeline-level retry/skip decision,
     not this wrapper's job.
+
+    extra_images: optional list of (b64, media_type) tuples for additional reference
+    images (e.g. a labeled example frame) sent alongside the primary image_b64 — appended
+    to the same OpenAI-compatible multi-part `content` list, which Groq's vision models
+    accept multiple image_url entries in. Put after the primary image so the caller's
+    text can refer to "the frame above" vs. "the reference example below" unambiguously.
     """
     client = _get_client()
     content = []
@@ -68,6 +75,11 @@ def call_vlm_json(
         content.append({
             "type": "image_url",
             "image_url": {"url": f"data:{image_media_type};base64,{image_b64}"},
+        })
+    for ref_b64, ref_media_type in (extra_images or []):
+        content.append({
+            "type": "image_url",
+            "image_url": {"url": f"data:{ref_media_type};base64,{ref_b64}"},
         })
     content.append({"type": "text", "text": user_text})
 

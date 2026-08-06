@@ -232,7 +232,14 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
             if (ts - last_location_at) >= config.WEBCAM_LOCATION_MIN_INTERVAL_SEC or i == 0:
                 webcam_frame = webcam_reader.get(ts)
                 if webcam_frame is not None:
-                    location = s3a.read_location(webcam_frame)
+                    # Pass the last reading in as a stabilizing prior (see
+                    # stage3_webcam_location.read_location's docstring) -- but only if it
+                    # was itself a real (non-uncertain) reading; an all-uncertain `location`
+                    # (the initial value, or a prior frame with nothing visible) isn't a
+                    # useful prior and build_prompt() already ignores 'uncertain' fields,
+                    # this check just avoids passing a pointless empty dict.
+                    prior = location if location.get("leg_side") != "uncertain" else None
+                    location = s3a.read_location(webcam_frame, previous_location=prior)
                     last_location_at = ts
                     location_refreshed = True
                     if probe_log_file:
