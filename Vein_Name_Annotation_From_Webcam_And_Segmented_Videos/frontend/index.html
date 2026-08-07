@@ -46,6 +46,16 @@
           <video id="video-final" controls></video>
         </div>
       </div>
+
+      <details id="position-debug-area" class="hidden">
+        <summary>Debug: probe position (0 = above knee / 1 = at or below knee)</summary>
+        <p class="subtitle">
+          Fast first-pass judgment (Stage A) burned onto the webcam video, before the
+          more detailed leg-level classification runs — lets you verify the upstream
+          above/below-knee split independent of the final result.
+        </p>
+        <video id="video-position-debug" controls></video>
+      </details>
     </div>
   </div>
 
@@ -121,16 +131,24 @@
           submitBtn.disabled = false;
         } else if (data.status === 'done') {
           clearInterval(pollTimer);
-          showResults(jobId);
+          showResults(jobId, data.position_debug_ready);
           submitBtn.disabled = false;
         }
       }, 1500);
     }
 
-    function showResults(jobId) {
+    function showResults(jobId, positionDebugReady) {
       document.getElementById('video-intermediate').src = `/api/jobs/${jobId}/result/intermediate`;
       document.getElementById('video-final').src = `/api/jobs/${jobId}/result/final`;
       resultsArea.classList.remove('hidden');
+
+      const positionDebugArea = document.getElementById('position-debug-area');
+      if (positionDebugReady) {
+        document.getElementById('video-position-debug').src = `/api/jobs/${jobId}/result/position_debug`;
+        positionDebugArea.classList.remove('hidden');
+      } else {
+        positionDebugArea.classList.add('hidden');
+      }
     }
 
     function showError(msg) {

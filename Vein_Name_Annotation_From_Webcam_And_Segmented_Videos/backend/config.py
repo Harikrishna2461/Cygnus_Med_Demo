@@ -78,13 +78,52 @@ GROQ_TIMEOUT_SEC = 60
 # --- Sampling / debounce cadence (tune here, not inline in pipeline code) ---
 SEG_SAMPLE_INTERVAL_SEC = 0.5
 VLM_SAMPLE_INTERVAL_SEC = 4.0
-# Was 8.0s — set that high back when each Groq call took several seconds (reasoning
-# mode) and needed cost-controlling. Now that GROQ_REASONING_EFFORT="none" makes calls
-# ~1s each, that's no longer a good tradeoff: an 8s window means a mid-window probe move
-# doesn't get picked up for up to 8s, so vein names can lag well behind where the probe
-# actually is. Tightened to track probe movement responsively instead of the naming
-# cadence (4.0s) being the more frequent of the two, which was backwards.
-WEBCAM_LOCATION_MIN_INTERVAL_SEC = 2.0
+# Stage 3a (webcam probe location) always runs reasoning_effort="default" (full
+# chain-of-thought) — confirmed necessary TWICE: "none" mode was tried once with a
+# previous-reading prior in the prompt (caused the model to blindly anchor on the prior
+# and repeat one leg_level for an entire video), and tried again with that prior removed
+# entirely (STILL collapsed leg_level to the reference image's own scenario on every
+# frame, AND still flipped leg_side unpredictably — the exact original bug this setting
+# was chosen to fix in the first place). This is a genuine capability gap for this
+# model/task, not a fixable prompt issue — call QUALITY cannot be cheapened here.
+#
+# Call FREQUENCY is the real, correct cost lever, but a fixed timer is the wrong version
+# of that lever: a long fixed interval (e.g. 6s) risks feeding Stage 3b (vein naming) a
+# stale location if the probe moves mid-interval, while a short fixed interval (e.g. 2s)
+# wastes calls re-confirming a position that hasn't changed for the many seconds a
+# clinician typically dwells at one scan location. See run_pass2 in pipeline.py: it now
+# fires this call MOTION-TRIGGERED — a cheap CPU-only frame-diff check (no VLM cost) runs
+# every tick, and only calls Stage 3a early when the webcam frame has actually changed
+# meaningfully. These two constants bound that behavior:
+WEBCAM_LOCATION_MIN_INTERVAL_SEC = 1.5   # never re-call faster than this even if motion
+                                          # detected, to avoid jitter/noise spamming calls
+WEBCAM_LOCATION_MAX_INTERVAL_SEC = 5.0   # safety net: force a call after this long even
+                                          # with no detected motion, in case of slow drift
+                                          # too gradual for the frame-diff check to catch.
+                                          # Bounds worst-case staleness fed into vein
+                                          # naming (Stage 3b) at 5s even if the motion
+                                          # heuristic misses a real change entirely.
+                                          # Simulated against a real 2-minute clip: 23
+                                          # Stage 3a calls total (vs. 60 at the old flat
+                                          # 2.0s interval, ~similar to a flat 6.0s interval
+                                          # by count) but concentrated where the webcam
+                                          # frame actually changes rather than spread
+                                          # evenly — reacts within MIN_INTERVAL of real
+                                          # movement instead of waiting out a fixed timer.
+WEBCAM_MOTION_DIFF_THRESHOLD = 20.0      # mean abs grayscale pixel diff (0-255 scale) on
+                                          # a 64x48 downsized frame vs. the frame from the
+                                          # last actual Stage 3a call. Calibrated against 6
+                                          # real frame-pairs from actual footage, not
+                                          # guessed: same-clinical-position pairs (just
+                                          # hand/cable movement, e.g. during the reflux
+                                          # compression test) scored up to 19.6; genuine
+                                          # probe-location changes scored 25-34. 20.0 sits
+                                          # cleanly between those two clusters on this
+                                          # sample, but it's a small sample (6 pairs) from
+                                          # one video — re-tune if real usage shows
+                                          # too-frequent or too-rare triggering.
+                                          # WEBCAM_LOCATION_MAX_INTERVAL_SEC is the safety
+                                          # net for whatever this heuristic misses.
 BLOB_CHANGE_DEBOUNCE_FRAC = 0.05
 OUTPUT_FPS = 10
 WEBCAM_TIME_OFFSET_SEC = 0.0   # add to ultrasound timestamp before indexing into webcam video

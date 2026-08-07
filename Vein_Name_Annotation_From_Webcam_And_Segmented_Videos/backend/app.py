@@ -61,9 +61,13 @@ def job_result(job_id, which):
     job = jobs.get_job(job_id)
     if job is None:
         return jsonify({"error": "unknown job_id"}), 404
-    path = {"intermediate": job.intermediate_path, "final": job.final_path}.get(which)
+    path = {
+        "intermediate": job.intermediate_path,
+        "final": job.final_path,
+        "position_debug": job.position_debug_path,
+    }.get(which)
     if path is None:
-        return jsonify({"error": "which must be 'intermediate' or 'final'"}), 400
+        return jsonify({"error": "which must be 'intermediate', 'final', or 'position_debug'"}), 400
     if job.status != "done" or not os.path.exists(path):
         return jsonify({"error": "result not ready"}), 409
     return send_file(path, mimetype="video/mp4")

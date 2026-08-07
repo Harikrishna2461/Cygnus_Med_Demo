@@ -98,3 +98,21 @@ def draw_final_frame(frame_bgr: np.ndarray, blobs, fascia, vein_names: dict) -> 
         name = vein_names.get(b.blob_id)
         return f"{b.blob_id}:{name}" if name else f"{b.blob_id}:{b.n_class or '?'}"
     return _render(frame_bgr, blobs, fascia, _label)
+
+
+_POSITION_LABEL_TEXT = {0: "0 (ABOVE knee)", 1: "1 (AT/BELOW knee)", "uncertain": "uncertain"}
+_POSITION_LABEL_COLOR = {0: (60, 60, 230), 1: (0, 210, 0), "uncertain": (150, 150, 150)}
+
+
+def draw_position_debug_frame(webcam_frame_bgr: np.ndarray, probe_position) -> np.ndarray:
+    """Debug/verification video: burns Stage 3a's fast binary probe_position judgment
+    (see stage3_webcam_location.read_probe_position) directly onto the webcam frame it
+    was based on, at 0 (above knee) / 1 (at-or-below knee) / uncertain — so a human can
+    scrub through and visually confirm the upstream binary split (which the narrowed-
+    vocabulary leg_level classification in Stage B depends on) is landing correctly,
+    independent of what made it into the final annotated ultrasound video."""
+    out = webcam_frame_bgr.copy()
+    text = _POSITION_LABEL_TEXT.get(probe_position, "uncertain")
+    color = _POSITION_LABEL_COLOR.get(probe_position, (150, 150, 150))
+    _put_label(out, f"stage A: {text}", (16, 40), color=color, scale=1.1)
+    return out

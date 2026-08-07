@@ -23,6 +23,7 @@ class Job:
         self.artifact_path = os.path.join(out_dir, "artifact.json")
         self.roi_out_dir = os.path.join(out_dir, "roi_cropped")
         self.probe_log_dir = os.path.join(out_dir, "probe_location_log")
+        self.position_debug_path = os.path.join(out_dir, "position_debug.mp4")
 
     def to_status_dict(self) -> dict:
         return {
@@ -35,6 +36,10 @@ class Job:
             # webcam frame it was based on, under frames/) — for manual cross-checking
             # against the source webcam video, not used by the app itself.
             "probe_log_path": os.path.join(self.probe_log_dir, "probe_location_log.jsonl"),
+            # Whether the position-debug video (Stage A's 0/1/uncertain burned onto the
+            # webcam video) is ready to fetch from /api/jobs/<id>/result/position_debug
+            # — the frontend uses this to decide whether to show that optional player.
+            "position_debug_ready": self.status == "done" and os.path.exists(self.position_debug_path),
         }
 
 
@@ -71,6 +76,7 @@ def _run_job(job: Job) -> None:
             job.ultrasound_path, job.webcam_path,
             job.intermediate_path, job.final_path, job.artifact_path, job.roi_out_dir,
             progress_cb=progress_cb, probe_log_dir=job.probe_log_dir,
+            position_debug_video_path=job.position_debug_path,
         )
         job.status = "done"
         job.stage = "done"

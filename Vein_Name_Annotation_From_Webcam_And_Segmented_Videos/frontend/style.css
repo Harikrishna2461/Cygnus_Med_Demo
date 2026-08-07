@@ -112,3 +112,24 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 
 .hidden { display: none; }
+
+#position-debug-area {
+  margin-top: 2rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+}
+#position-debug-area summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+}
+#position-debug-area .subtitle { margin: 0.75rem 0 1rem; }
+#position-debug-area video {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #000;
+}

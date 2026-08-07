@@ -194,16 +194,46 @@ def run_pass1(ultrasound_path: str, intermediate_video_path: str, artifact_path:
     return ticks
 
 
+# --- Motion-triggered Stage 3a gating -------------------------------------------------
+# Cheap CPU-only heuristic (no VLM cost) deciding when the webcam probe location is worth
+# re-checking — see config.WEBCAM_LOCATION_MIN/MAX_INTERVAL_SEC / WEBCAM_MOTION_DIFF_THRESHOLD
+# for why this replaced a fixed timer: a fixed interval either wastes calls during long
+# static dwell periods or risks feeding stale location into vein naming when the probe
+# moves mid-interval. This can't and shouldn't try to be a precise motion detector — it
+# only needs to answer "does this frame look meaningfully different from the frame the
+# last Stage 3a call was based on", cheaply enough to run on every tick.
+_MOTION_DOWNSIZE = (64, 48)
+
+
+def _small_gray(frame_bgr: np.ndarray) -> np.ndarray:
+    small = cv2.resize(frame_bgr, _MOTION_DOWNSIZE)
+    return cv2.cvtColor(small, cv2.COLOR_BGR2GRAY).astype(np.float32)
+
+
+def _webcam_changed(prev_small: np.ndarray, frame_bgr: np.ndarray, threshold: float) -> tuple[bool, np.ndarray]:
+    small = _small_gray(frame_bgr)
+    if prev_small is None:
+        return True, small
+    diff = float(np.abs(small - prev_small).mean())
+    return diff >= threshold, small
+
+
 # --- Pass 2: webcam location + vein naming ---------------------------------------------
 
 def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_path: str,
-              progress_cb=None, probe_log_dir: str = None) -> None:
+              progress_cb=None, probe_log_dir: str = None, position_debug_video_path: str = None) -> None:
     """probe_log_dir: if given, every Stage-3a probe-location reading is appended to
     <probe_log_dir>/probe_location_log.jsonl (one JSON object per line: timestamp_sec +
-    the full location dict) and the exact webcam frame that reading was based on is saved
-    to <probe_log_dir>/frames/t<seconds>s.jpg — lets a human cross-check each reading
-    against the actual webcam video frame by frame, independent of what made it into the
-    final rendered video."""
+    the full location dict, including probe_position_stage_a) and the exact webcam frame
+    that reading was based on is saved to <probe_log_dir>/frames/t<seconds>s.jpg — lets a
+    human cross-check each reading against the actual webcam video frame by frame,
+    independent of what made it into the final rendered video.
+
+    position_debug_video_path: if given, writes a continuous copy of the webcam video
+    with Stage A's fast probe_position (0/1/uncertain) burned onto every frame — lets a
+    human scrub through and visually verify the upstream binary split that Stage B's
+    narrowed leg_level vocabulary depends on, since that split isn't otherwise visible in
+    the final ultrasound-side output video at all."""
     hold_frames = max(1, round(config.SEG_SAMPLE_INTERVAL_SEC * config.OUTPUT_FPS))
     n_ticks = max(len(ticks), 1)
 
@@ -219,8 +249,11 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
         probe_log_file = open(os.path.join(probe_log_dir, "probe_location_log.jsonl"), "w")
 
     writer = None
+    position_writer = None
     location = s3a.normalize({})
+    last_probe_position = "uncertain"  # held/repeated between Stage A refreshes, like location
     last_location_at = -1e9
+    last_location_small_frame = None  # see _webcam_changed -- baseline for motion gating
     last_named_at = -1e9
     last_named_records = []  # [{"centroid": (cx,cy), "vein_name": str}, ...] — see
                               # pipeline module docstring: matched by nearest centroid,
@@ -229,18 +262,27 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
     try:
         for i, (tick, (ts, frame)) in enumerate(zip(ticks, us_frames)):
             location_refreshed = False
-            if (ts - last_location_at) >= config.WEBCAM_LOCATION_MIN_INTERVAL_SEC or i == 0:
-                webcam_frame = webcam_reader.get(ts)
-                if webcam_frame is not None:
-                    # Pass the last reading in as a stabilizing prior (see
-                    # stage3_webcam_location.read_location's docstring) -- but only if it
-                    # was itself a real (non-uncertain) reading; an all-uncertain `location`
-                    # (the initial value, or a prior frame with nothing visible) isn't a
-                    # useful prior and build_prompt() already ignores 'uncertain' fields,
-                    # this check just avoids passing a pointless empty dict.
-                    prior = location if location.get("leg_side") != "uncertain" else None
-                    location = s3a.read_location(webcam_frame, previous_location=prior)
+            elapsed = ts - last_location_at
+            # Every tick fetches the webcam frame once (reused for both the motion-gating
+            # check below and the position-debug video), not just on a refresh -- the
+            # debug video needs continuous coverage, unlike the JSONL log which only
+            # records refresh moments.
+            webcam_frame = webcam_reader.get(ts)
+            # Motion-triggered gating (see _webcam_changed / config constants): only worth
+            # calling Stage 3a once MIN_INTERVAL has passed, and always worth a forced
+            # call past MAX_INTERVAL regardless of detected motion (slow-drift safety
+            # net) or on the very first tick.
+            if webcam_frame is not None and (i == 0 or elapsed >= config.WEBCAM_LOCATION_MIN_INTERVAL_SEC):
+                force = i == 0 or elapsed >= config.WEBCAM_LOCATION_MAX_INTERVAL_SEC
+                changed, small = _webcam_changed(last_location_small_frame, webcam_frame,
+                                                  config.WEBCAM_MOTION_DIFF_THRESHOLD)
+                if force or changed:
+                    # No previous-reading context passed -- each call evaluates its own
+                    # frame independently (see stage3_webcam_location.read_location).
+                    location = s3a.read_location(webcam_frame)
+                    last_probe_position = location.get("probe_position_stage_a", "uncertain")
                     last_location_at = ts
+                    last_location_small_frame = small
                     location_refreshed = True
                     if probe_log_file:
                         entry = {"timestamp_sec": round(ts, 2), **location}
@@ -248,6 +290,15 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
                         probe_log_file.flush()
                         frame_name = f"t{ts:08.2f}s.jpg"
                         cv2.imwrite(os.path.join(probe_frames_dir, frame_name), webcam_frame)
+
+            if position_debug_video_path and webcam_frame is not None:
+                debug_frame = renderer.draw_position_debug_frame(webcam_frame, last_probe_position)
+                if position_writer is None:
+                    h, w = webcam_frame.shape[:2]
+                    position_writer = video_io.OutputVideoWriter(position_debug_video_path,
+                                                                  fps=config.OUTPUT_FPS, frame_size=(w, h))
+                for _ in range(hold_frames):
+                    position_writer.write(debug_frame)
 
             max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
             needs_naming = bool(tick.blobs) and (
@@ -286,6 +337,8 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
     finally:
         if writer:
             writer.release()
+        if position_writer:
+            position_writer.release()
         webcam_reader.release()
         if probe_log_file:
             probe_log_file.close()
@@ -295,12 +348,15 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
 
 def run_full_pipeline(ultrasound_path: str, webcam_path: str, intermediate_video_path: str,
                        final_video_path: str, artifact_path: str, roi_out_dir: str,
-                       progress_cb=None, probe_log_dir: str = None) -> None:
+                       progress_cb=None, probe_log_dir: str = None,
+                       position_debug_video_path: str = None) -> None:
     """progress_cb(stage: str, frac: float) if given — stage is 'cropping', 'segmenting',
     or 'naming'. The webcam video is never ROI-cropped (it's a room/leg view, not a
     machine-UI capture) — only the ultrasound video goes through Stage 0.
     probe_log_dir: see run_pass2's docstring — logs every Stage-3a reading + the exact
-    webcam frame it saw, for manual cross-checking against the source video."""
+    webcam frame it saw, for manual cross-checking against the source video.
+    position_debug_video_path: see run_pass2's docstring — the Stage A 0/1/uncertain
+    debug video."""
     if progress_cb:
         progress_cb("cropping", 0.0)
     cropped_ultrasound_path = run_roi_crop(ultrasound_path, roi_out_dir)
@@ -317,4 +373,4 @@ def run_full_pipeline(ultrasound_path: str, webcam_path: str, intermediate_video
 
     ticks = run_pass1(cropped_ultrasound_path, intermediate_video_path, artifact_path, progress_cb=p1_cb)
     run_pass2(ticks, cropped_ultrasound_path, webcam_path, final_video_path, progress_cb=p2_cb,
-              probe_log_dir=probe_log_dir)
+              probe_log_dir=probe_log_dir, position_debug_video_path=position_debug_video_path)
