@@ -26,5 +26,19 @@
     "verified_on": [
       "nfix_us_20s"
     ]
+  },
+  "e803fb7a5756b3": {
+    "resolution": "1920x1080",
+    "roi": {
+      "x1": 4,
+      "y1": 4,
+      "x2": 1752,
+      "y2": 1076
+    },
+    "detection_method": "agent+cv_averaged",
+    "confidence": 0.95,
+    "verified_on": [
+      "ultrasound"
+    ]
   }
 }

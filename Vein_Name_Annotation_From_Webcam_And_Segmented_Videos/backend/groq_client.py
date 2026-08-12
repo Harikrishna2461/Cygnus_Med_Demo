@@ -11,19 +11,106 @@ a different reasoning_effort that does emit a <think> block.
 """
 import json
 import re
+import threading
+import time
+from collections import deque
 
-from groq import Groq
+from groq import Groq, RateLimitError
 
 import config
 
 _THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
+_WAIT_SECONDS_RE = re.compile(r"try again in ([\d.]+)s", re.IGNORECASE)
 _client = None
+GROQ_RATE_LIMIT_MAX_RETRIES = 5  # this project's own backoff for 429s specifically --
+# raised from 3 -> 5 once Stage 2 calls started running concurrently (see
+# config.STAGE2_MAX_WORKERS): concurrent threads can genuinely collide into a couple of
+# extra 429s under real contention even at a conservative worker count, so this needs a
+# little more headroom than the original single-threaded-caller assumption had. Each
+# retry still waits out Groq's own suggested time (see _WAIT_SECONDS_RE below), so this
+# only costs real wall-clock time when actually rate-limited, not on every call.
+# separate from the SDK's max_retries=1 below, which covers generic transient errors.
+# A 429 is fully expected under real usage (confirmed live: a production job hit
+# "Rate limit reached ... tokens per minute (TPM)" and crashed at 75% progress because
+# nothing above call_vlm_json ever retried it -- jobs.py's exception handler just marks
+# the whole job "error" on any exception, no partial-progress recovery). Waiting out the
+# limit and retrying is the correct response to a 429 (it is not a real failure, just a
+# "not yet" from Groq), so this belongs here rather than in every caller.
+
+
+class _OtpmLimiter:
+    """Thread-safe sliding-60s-window limiter for Groq's real output-tokens-per-minute
+    (OTPM) ceiling for this model/account (32000, confirmed directly from a real 429:
+    "Rate limit reached ... on output tokens per minute (OTPM): Limit 32000, Used 31472,
+    Requested 15754"). Concurrency (config.STAGE2_MAX_WORKERS) is a GUESS at a safe worker
+    count; it has no way to know how close the real usage is to the ceiling until it's
+    already over, which is exactly why raising it kept reproducing 429 storms instead of
+    just going faster. This replaces guessing with actually tracking spend: every call
+    RESERVES an estimated token cost before it's allowed to fire (blocking/sleeping if the
+    rolling window is too full), then CORRECTS that reservation to the call's real
+    completion_tokens once the response comes back -- so a call that used far less than
+    its estimate frees that headroom immediately for the next caller instead of holding it
+    hostage for the full 60s. This is what lets concurrency actually help (workers wait
+    here, safely, instead of firing and eating a 429) rather than just being a different
+    way to guess wrong.
+    """
+    def __init__(self, limit_per_min: int):
+        self._limit = limit_per_min
+        self._lock = threading.Lock()
+        self._events = deque()  # each entry: [timestamp, token_cost] (mutable for correct())
+
+    def _prune(self, now: float) -> None:
+        while self._events and now - self._events[0][0] > 60.0:
+            self._events.popleft()
+
+    def reserve(self, estimate: int) -> list:
+        """Blocks until `estimate` tokens fit under the rolling budget, reserves them,
+        returns the mutable entry (pass to correct() once actual usage is known)."""
+        while True:
+            with self._lock:
+                now = time.monotonic()
+                self._prune(now)
+                used = sum(cost for _, cost in self._events)
+                if used + estimate <= self._limit:
+                    entry = [now, estimate]
+                    self._events.append(entry)
+                    return entry
+                # Not enough headroom right now. Poll at a short, bounded interval rather
+                # than sleeping the full time until the oldest reservation ages out --
+                # correct() calls from OTHER in-flight callers can free up real headroom
+                # (an over-estimated reservation dropping to its much lower actual usage)
+                # at any moment, and a single long sleep would miss that entirely, waiting
+                # out the full 60s window even when the budget freed up in the first
+                # couple seconds (confirmed: this exact bug showed an 8th concurrent
+                # caller waiting 60s+ despite 6 of the other 7 correcting down to <2000
+                # actual tokens almost immediately after their reservation).
+                wait_s = min(max(60.0 - (now - self._events[0][0]) + 0.5, 0.5), 2.0) if self._events else 1.0
+            time.sleep(wait_s)
+
+    def correct(self, entry: list, actual_tokens: int) -> None:
+        with self._lock:
+            entry[1] = actual_tokens
+
+
+# Reserve slightly below the real 32000 ceiling -- leaves a small margin for estimation
+# error and for any other caller on this same API key outside this process.
+_otpm_limiter = _OtpmLimiter(limit_per_min=28000)
 
 
 def _get_client() -> Groq:
     global _client
     if _client is None:
-        _client = Groq(api_key=config.GROQ_API_KEY)
+        # max_retries=1 (SDK default is 2): a stuck/rate-limited call at
+        # GROQ_TIMEOUT_SEC=60 with the default of 2 retries can silently burn up to
+        # ~180s on ONE call before finally raising or succeeding, invisible to any
+        # logging in this project (the retry/backoff happens inside the SDK's HTTP
+        # layer). That compounding tail latency across dozens of sequential Pass-2
+        # calls is the leading suspect for "job took far longer than expected" reports
+        # — capping at 1 retry still absorbs a genuine one-off transient error/429
+        # but roughly halves the worst-case stall per call. Not zero, since a call
+        # failing outright (no retry) would just move the same problem to
+        # pipeline.py's per-tick error handling instead of fixing it.
+        _client = Groq(api_key=config.GROQ_API_KEY, max_retries=1)
     return _client
 
 
@@ -55,6 +142,7 @@ def call_vlm_json(
     temperature: float = None,
     timeout: float = None,
     reasoning_effort: str = None,
+    label: str = None,
 ) -> tuple[dict, str]:
     """Returns (parsed_json, raw_response_text).
 
@@ -104,6 +192,76 @@ def call_vlm_json(
     if effort != "default":
         kwargs["reasoning_effort"] = effort
 
-    resp = client.chat.completions.create(**kwargs)
+    # Visible timing per call, tagged with a caller-supplied label — this is the
+    # single biggest diagnostic gap that made "why is this slow" unanswerable before:
+    # the SDK's own retry/backoff on rate limits happens silently inside
+    # client.chat.completions.create(), so without a wall-clock stamp around the call
+    # a 3s call and a 90s-after-two-retries call look identical in the pipeline's own
+    # logs. Printed (not logged via `logging`) to match this project's existing
+    # print()-based console output convention (see pipeline.py).
+    tag = label or "groq_call"
+    # Reserve the call's own max_tokens ceiling against the real OTPM budget BEFORE
+    # firing -- see _OtpmLimiter. This MUST be the actual max_tokens passed to Groq, not a
+    # smaller guess: Groq enforces on real generated tokens, so a call can never produce
+    # more than its own max_tokens, which means reserving exactly that value is the only
+    # way to GUARANTEE this process's own calls can never collectively exceed the budget
+    # (a smaller estimate was tried first and confirmed insufficient -- it still let rare
+    # 429s through, because another call could start believing there was room during the
+    # window before a big call's actual usage got corrected in). Callers control real
+    # concurrency by passing a smaller max_tokens for calls that don't need the full
+    # ceiling (see stage2_fascia_classify._first_attempt_max_tokens) rather than this
+    # wrapper under-reserving on their behalf. correct() below still shrinks the
+    # reservation to actual usage the moment it's known, so an over-generous max_tokens
+    # only costs a brief, self-healing wait for other callers, never a stuck reservation.
+    effective_max = max_tokens or config.GROQ_MAX_TOKENS
+    reservation = _otpm_limiter.reserve(effective_max)
+
+    t0 = time.monotonic()
+    resp = None
+    try:
+        for attempt in range(GROQ_RATE_LIMIT_MAX_RETRIES + 1):
+            try:
+                resp = client.chat.completions.create(**kwargs)
+                break
+            except RateLimitError as exc:
+                if attempt >= GROQ_RATE_LIMIT_MAX_RETRIES:
+                    elapsed = time.monotonic() - t0
+                    print(f"[groq] {tag} FAILED after {elapsed:.1f}s ({attempt} rate-limit "
+                          f"retries exhausted): {exc}")
+                    raise
+                m = _WAIT_SECONDS_RE.search(str(exc))
+                # Groq's own error message names the exact wait -- use it plus a small
+                # margin rather than a guessed backoff schedule. Falls back to a
+                # conservative fixed wait if the message format ever changes.
+                wait_s = float(m.group(1)) + 1.0 if m else 15.0
+                print(f"[groq] {tag} rate-limited (attempt {attempt + 1}/"
+                      f"{GROQ_RATE_LIMIT_MAX_RETRIES}), waiting {wait_s:.1f}s: {exc}")
+                # A 429 despite our own reservation means our estimate/limiter is out of
+                # sync with reality (e.g. another process sharing this key) -- correct
+                # this reservation up to the full ceiling so we stop under-reserving for
+                # the retry, then wait Groq's own suggested time on top of that.
+                _otpm_limiter.correct(reservation, effective_max)
+                time.sleep(wait_s)
+            except Exception as exc:
+                elapsed = time.monotonic() - t0
+                print(f"[groq] {tag} FAILED after {elapsed:.1f}s: {exc}")
+                raise
+    finally:
+        if resp is not None and getattr(resp, "usage", None) is not None:
+            _otpm_limiter.correct(reservation, resp.usage.completion_tokens)
+        elif resp is None:
+            # Call never succeeded (raised) -- release the reservation rather than
+            # holding phantom budget hostage for 60s on a call that produced no tokens.
+            _otpm_limiter.correct(reservation, 0)
+    elapsed = time.monotonic() - t0
     raw = resp.choices[0].message.content or ""
+    if elapsed > 8.0:
+        # Anything this slow on a single call is either heavy reasoning (expected for
+        # reasoning_effort="default") or a silent retry-after-rate-limit having
+        # happened underneath — flagged so a long job's console output shows exactly
+        # which calls/timestamps are the actual bottleneck instead of a single opaque
+        # total at the end.
+        print(f"[groq] {tag} took {elapsed:.1f}s (slow) — {len(raw)} chars returned")
+    else:
+        print(f"[groq] {tag} took {elapsed:.1f}s")
     return extract_json(raw), raw

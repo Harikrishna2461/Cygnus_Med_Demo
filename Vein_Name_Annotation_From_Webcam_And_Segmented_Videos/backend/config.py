@@ -78,6 +78,52 @@ GROQ_TIMEOUT_SEC = 60
 # --- Sampling / debounce cadence (tune here, not inline in pipeline code) ---
 SEG_SAMPLE_INTERVAL_SEC = 0.5
 VLM_SAMPLE_INTERVAL_SEC = 4.0
+# Stage 2 (N1/N2/N3) early-refresh floor -- HISTORICAL, now disabled (0.0), see below.
+#
+# run_pass1's needs_classify fires early (before VLM_SAMPLE_INTERVAL_SEC is up) whenever
+# the blob count changes or a blob can't be centroid-matched to the last classified set.
+# This floor was added to stop BioMedParse's documented segmentation flicker (blob count
+# bouncing 3/0/1/2/1/2 across six consecutive 0.5s ticks -- see pipeline.py's module
+# docstring) from spamming calls, back when a plain fixed-worker-count was the only
+# throttle and had no real signal for when to hold back.
+#
+# CONFIRMED REAL DOWNSIDE: pipeline.py's own hold logic already treats "no centroid
+# match" as unclassified (n_class=None, rendered as a bare number, no N1/N2/N3 label) --
+# a deliberate, separate, correct choice to avoid mislabeling a DIFFERENT vein with a
+# stale class. This floor was blocking the very reclassify call that would have fixed
+# that blank label for up to 2s after any real, genuine blob change -- confirmed on real
+# footage: a single clean, unambiguous blob sat with no N-class label rendered for
+# several ticks purely because this floor delayed its reclassify, even though Stage 3
+# (which reads the image directly, not just this text hint) still named it correctly.
+#
+# Now that groq_client.py has a real sliding-window OTPM budget limiter (_OtpmLimiter --
+# every call reserves against actual token spend and queues safely instead of firing
+# blind), the floor's original job (stop call-frequency from blindly exceeding the real
+# rate limit) is handled properly at the token-budget level, not by artificially
+# withholding legitimate reclassify triggers. Set to 0.0 (disabled) rather than deleted,
+# in case a real run ever shows the OTPM limiter alone isn't enough and this needs to
+# come back as a secondary throttle.
+VLM_MIN_INTERVAL_SEC = 0.0
+
+# Stage 2 classify calls are dispatched concurrently (see pipeline.run_pass1) -- each call
+# only needs its own tick's frame/blobs/fascia, no cross-tick state, so there is no
+# correctness reason to run them one-at-a-time. This is the dominant lever for real
+# wall-clock time (reasoning_effort="default" calls run 5-30s each; at ~20-40 scheduled
+# calls for a 2-minute clip, serial execution alone was minutes of pure queueing with the
+# GPU/network both idle).
+#
+# A fixed worker count was originally the only throttle here, and repeatedly proved to be
+# blind guessing against Groq's real OTPM (output-tokens-per-minute = 32000) ceiling --
+# confirmed via real 429 storms at both 4 and 2 workers, because worker count says nothing
+# about actual token spend until a call is already over budget. groq_client.py now has a
+# real sliding-window token-budget limiter (_OtpmLimiter) that every Groq call reserves
+# against before firing and self-corrects to actual usage afterward -- THAT is what keeps
+# calls under the real ceiling now, not this number. This constant only bounds how many
+# calls can be simultaneously in-flight (network/local-CPU concurrency for encoding
+# images, building prompts, etc.) -- extra workers beyond what the token budget allows
+# simply queue inside the limiter's reserve() call instead of firing and eating a 429, so
+# it's safe to set this higher than the old worst-case-token-math would have allowed.
+STAGE2_MAX_WORKERS = 6
 # Stage 3a (webcam probe location) always runs reasoning_effort="default" (full
 # chain-of-thought) — confirmed necessary TWICE: "none" mode was tried once with a
 # previous-reading prior in the prompt (caused the model to blindly anchor on the prior

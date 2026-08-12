@@ -64,7 +64,8 @@ def _name_veins_once(blobs: list[dict], location: dict, annotated_ultrasound_fra
     if annotated_ultrasound_frame_bgr is not None:
         _, buf = cv2.imencode(".png", annotated_ultrasound_frame_bgr)
         img_b64 = base64.b64encode(buf).decode()
-    parsed, _raw = groq_client.call_vlm_json(system, user, image_b64=img_b64, image_media_type="image/png")
+    parsed, _raw = groq_client.call_vlm_json(system, user, image_b64=img_b64, image_media_type="image/png",
+                                              label="stage3b_naming")
 
     out = {}
     for key, val in parsed.items():

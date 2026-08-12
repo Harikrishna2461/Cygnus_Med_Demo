@@ -23,6 +23,8 @@ still not a true tracker (no motion model, no occlusion handling) — see BLOB_M
 import json
 import math
 import os
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 
 import cv2
@@ -143,28 +145,106 @@ def run_roi_crop(ultrasound_path: str, out_dir: str) -> str:
 
 def run_pass1(ultrasound_path: str, intermediate_video_path: str, artifact_path: str,
               progress_cb=None) -> list:
+    """Split into 3 steps (schedule -> parallel classify -> sequential render) instead of
+    one straight-through loop, specifically so the Groq calls can run concurrently. This
+    is safe because the SCHEDULING decision (which ticks need a fresh classify call) only
+    ever reads blob CENTROIDS -- never the actual n_class answer -- to detect a changed
+    blob set (see the loop below); the n_class answer itself is only needed later, when
+    replaying holds onto the render pass. That means scheduling can be computed once,
+    up front, from segmentation alone (GPU, no Groq), and every scheduled classify call is
+    then independent of every other one -- there is no correctness reason they were ever
+    serial. See config.STAGE2_MAX_WORKERS for the concurrency level and its rate-limit
+    reasoning. Trade-off: this buffers every sampled frame in memory for the duration of
+    Pass 1 (previously streamed one frame at a time) -- acceptable for the short demo
+    clips this project targets (a 2-minute clip at 0.5s/tick is ~240 frames), flagged here
+    in case a much longer video ever makes that a real constraint.
+    """
     info = video_io.probe_video(ultrasound_path)
     duration = max(info["duration_sec"], 1e-6)
     hold_frames = max(1, round(config.SEG_SAMPLE_INTERVAL_SEC * config.OUTPUT_FPS))
 
-    writer = None
-    ticks = []
-    last_classified_at = -1e9
-    last_records = []   # [{"centroid": (cx,cy), "n_class": str|None, "is_valid": bool}, ...]
+    # progress_cb was previously only called from Step 3 (render) -- Steps 1 and 2 (where
+    # the real wall-clock time actually goes, especially Step 2's Groq calls) never
+    # reported anything, so the UI sat at 0% for the whole job then jumped 0->100 in the
+    # few seconds Step 3 takes. These weights split one continuous 0..1 signal across all
+    # 3 steps, roughly proportional to where time is actually spent (Step 2 dominates).
+    _SEG_WEIGHT, _CLASSIFY_WEIGHT, _RENDER_WEIGHT = 0.10, 0.75, 0.15
 
+    def _report(frac_0_to_1: float) -> None:
+        if progress_cb:
+            progress_cb(max(0.0, min(frac_0_to_1, 1.0)))
+
+    pass1_t0 = time.monotonic()
+    print(f"[pipeline] Pass 1 (segmentation + N1/N2/N3) starting — {duration:.1f}s of ultrasound video "
+          f"at {config.SEG_SAMPLE_INTERVAL_SEC}s/tick (~{int(duration / config.SEG_SAMPLE_INTERVAL_SEC)} ticks)")
+
+    # --- Step 1: segment every tick, decide the classify schedule (GPU + centroid math
+    # only, no Groq calls yet) ---
+    seg_t0 = time.monotonic()
+    scheduled_ticks = []   # ticks selected for a fresh Stage 2 call
+    all_ticks = []         # every tick, in order, needs_classify flag included
+    last_classified_at = -1e9
+    last_centroids = []    # just centroids -- scheduling never needs n_class/is_valid
     for ts, frame in video_io.iter_sample_frames(ultrasound_path, config.SEG_SAMPLE_INTERVAL_SEC):
         blobs, fascia = bpe.segment_frame(frame)
         max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
 
-        needs_classify = bool(blobs) and (
-            (ts - last_classified_at) >= config.VLM_SAMPLE_INTERVAL_SEC
-            or len(blobs) != len(last_records)
-            or any(_nearest_match(b.centroid, last_records, max_dist) is None for b in blobs)
+        elapsed_since_classify = ts - last_classified_at
+        needs_classify = bool(blobs) and elapsed_since_classify >= config.VLM_MIN_INTERVAL_SEC and (
+            elapsed_since_classify >= config.VLM_SAMPLE_INTERVAL_SEC
+            or len(blobs) != len(last_centroids)
+            or any(_nearest_match(b.centroid, last_centroids, max_dist) is None for b in blobs)
         )
-
         if needs_classify:
-            s2.classify_blobs(frame, blobs, fascia)
             last_classified_at = ts
+            last_centroids = [{"centroid": b.centroid} for b in blobs]
+
+        entry = {"ts": ts, "frame": frame, "blobs": blobs, "fascia": fascia, "needs_classify": needs_classify}
+        all_ticks.append(entry)
+        if needs_classify:
+            scheduled_ticks.append(entry)
+        _report(_SEG_WEIGHT * min(ts / duration, 1.0))
+    print(f"[pipeline] Pass 1 segmentation+scheduling done in {time.monotonic() - seg_t0:.1f}s — "
+          f"{len(all_ticks)} ticks, {len(scheduled_ticks)} scheduled for a Stage 2 Groq call")
+
+    # --- Step 2: fire all scheduled Stage 2 calls concurrently -- each mutates its own
+    # tick's blobs in place, independent of every other tick (see docstring above) ---
+    classify_t0 = time.monotonic()
+    n_scheduled = len(scheduled_ticks)
+    _report(_SEG_WEIGHT)  # segmentation done; classify step starts at this floor regardless
+    if scheduled_ticks:
+        # No submission stagger needed here (an earlier version added one) -- that was a
+        # workaround for blind worker-count concurrency having no real signal for when to
+        # hold back. groq_client._OtpmLimiter now makes every call reserve real budget
+        # before firing, so simultaneous submission is safe: calls that don't fit the
+        # budget queue inside reserve() rather than firing and eating a 429.
+        with ThreadPoolExecutor(max_workers=config.STAGE2_MAX_WORKERS) as pool:
+            futures = {pool.submit(s2.classify_blobs, e["frame"], e["blobs"], e["fascia"]): e
+                       for e in scheduled_ticks}
+            n_done = 0
+            for fut in as_completed(futures):
+                fut.result()  # re-raise here (main thread) so a real failure still surfaces,
+                               # matching the previous serial behaviour of not swallowing errors
+                n_done += 1
+                # This is the step that actually eats the wall-clock time (Groq calls) --
+                # reporting per-completion here is what makes the progress bar move
+                # continuously instead of sitting at one value for the whole job.
+                _report(_SEG_WEIGHT + _CLASSIFY_WEIGHT * (n_done / n_scheduled))
+    print(f"[pipeline] Pass 1 Stage 2 classification done in {time.monotonic() - classify_t0:.1f}s "
+          f"({config.STAGE2_MAX_WORKERS} concurrent workers, {n_scheduled} calls)")
+    _report(_SEG_WEIGHT + _CLASSIFY_WEIGHT)
+
+    # --- Step 3: sequential replay -- apply holds (nearest-centroid, see module
+    # docstring) using the now-filled-in classify results, and render ---
+    writer = None
+    ticks = []
+    n_ticks_total = max(len(all_ticks), 1)
+    last_records = []   # [{"centroid": (cx,cy), "n_class": str|None, "is_valid": bool}, ...]
+    for tick_idx, entry in enumerate(all_ticks):
+        ts, frame, blobs, fascia = entry["ts"], entry["frame"], entry["blobs"], entry["fascia"]
+        max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
+
+        if entry["needs_classify"]:
             last_records = [{"centroid": b.centroid, "n_class": b.n_class, "is_valid": b.is_valid}
                              for b in blobs]
         else:
@@ -185,12 +265,16 @@ def run_pass1(ultrasound_path: str, intermediate_video_path: str, artifact_path:
             writer.write(annotated)
 
         ticks.append(FrameTick(timestamp_sec=ts, frame_index=int(round(ts * info["fps"])), blobs=blobs, fascia=fascia))
-        if progress_cb:
-            progress_cb(min(ts / duration, 1.0))
+        _report(_SEG_WEIGHT + _CLASSIFY_WEIGHT + _RENDER_WEIGHT * ((tick_idx + 1) / n_ticks_total))
 
     if writer:
         writer.release()
     write_artifact(ticks, artifact_path)
+    _report(1.0)
+    pass1_elapsed = time.monotonic() - pass1_t0
+    print(f"[pipeline] Pass 1 done in {pass1_elapsed:.1f}s ({len(ticks)} ticks, "
+          f"{pass1_elapsed / max(len(ticks), 1):.2f}s/tick avg) — {n_scheduled} stage2_nclass Groq "
+          f"calls run at {config.STAGE2_MAX_WORKERS}x concurrency (the real driver of Pass 1 wall-clock time)")
     return ticks
 
 
@@ -259,6 +343,11 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
                               # pipeline module docstring: matched by nearest centroid,
                               # NOT blob_id, since blob_id isn't a stable cross-tick identity
 
+    pass2_t0 = time.monotonic()
+    n_stage3a_calls = 0
+    n_stage3b_calls = 0
+    print(f"[pipeline] Pass 2 (webcam location + vein naming) starting — {n_ticks} ticks")
+
     try:
         for i, (tick, (ts, frame)) in enumerate(zip(ticks, us_frames)):
             location_refreshed = False
@@ -272,14 +361,30 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
             # calling Stage 3a once MIN_INTERVAL has passed, and always worth a forced
             # call past MAX_INTERVAL regardless of detected motion (slow-drift safety
             # net) or on the very first tick.
+            #
+            # Also gated on tick.blobs being non-empty (except for the MAX_INTERVAL
+            # force-refresh, which still fires regardless): per direct guidance, when the
+            # clinician does a two-hand reflux/compression test the ultrasound machine
+            # switches out of B-mode, and BioMedParse (trained on B-mode only) can't
+            # produce usable blobs for those frames -- confirmed this is exactly why the
+            # extensive real-footage testing on reflux-testing frames kept finding a
+            # stubborn, unfixable Stage 3a accuracy problem there: the probe LOCATION
+            # during those frames was never going to be usable for naming anyway, since
+            # there's nothing to name. Skipping the refresh here isn't giving up on
+            # accuracy, it's not paying for a call whose answer can't be used, on exactly
+            # the stretch of footage that was consuming the most budget arguing with
+            # itself over. The MAX_INTERVAL force-refresh is deliberately NOT gated on
+            # blobs, so location still catches up promptly once real B-mode content (and
+            # therefore real blobs) resumes.
             if webcam_frame is not None and (i == 0 or elapsed >= config.WEBCAM_LOCATION_MIN_INTERVAL_SEC):
                 force = i == 0 or elapsed >= config.WEBCAM_LOCATION_MAX_INTERVAL_SEC
                 changed, small = _webcam_changed(last_location_small_frame, webcam_frame,
                                                   config.WEBCAM_MOTION_DIFF_THRESHOLD)
-                if force or changed:
+                if force or (changed and tick.blobs):
                     # No previous-reading context passed -- each call evaluates its own
                     # frame independently (see stage3_webcam_location.read_location).
                     location = s3a.read_location(webcam_frame)
+                    n_stage3a_calls += 1
                     last_probe_position = location.get("probe_position_stage_a", "uncertain")
                     last_location_at = ts
                     last_location_small_frame = small
@@ -312,6 +417,7 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
                               for b in tick.blobs]
                 annotated_intermediate = renderer.draw_intermediate_frame(frame, tick.blobs, tick.fascia)
                 names_result = s3b.name_veins(blob_dicts, location, annotated_ultrasound_frame_bgr=annotated_intermediate)
+                n_stage3b_calls += 1
                 by_id = {b.blob_id: b for b in tick.blobs}
                 last_named_records = [
                     {"centroid": by_id[bid].centroid, "vein_name": v["vein_name"]}
@@ -334,6 +440,19 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
 
             if progress_cb:
                 progress_cb((i + 1) / n_ticks)
+
+            # Periodic wall-clock progress line (every 10 ticks) with a naive linear
+            # ETA — this is what answers "why is this taking so long" WHILE the job is
+            # still running, instead of only after it finishes or errors out. Also
+            # surfaces the actual Stage 3a/3b call counts, since those (not tick count)
+            # are what drive real wall-clock time in this pass.
+            if (i + 1) % 10 == 0 or (i + 1) == n_ticks:
+                pass2_elapsed = time.monotonic() - pass2_t0
+                rate = pass2_elapsed / (i + 1)
+                eta = rate * (n_ticks - (i + 1))
+                print(f"[pipeline] Pass 2: tick {i + 1}/{n_ticks} (ts={ts:.1f}s) — "
+                      f"{pass2_elapsed:.1f}s elapsed, ~{eta:.1f}s remaining — "
+                      f"{n_stage3a_calls} stage3a + {n_stage3b_calls} stage3b Groq calls so far")
     finally:
         if writer:
             writer.release()
@@ -342,6 +461,9 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
         webcam_reader.release()
         if probe_log_file:
             probe_log_file.close()
+        pass2_elapsed = time.monotonic() - pass2_t0
+        print(f"[pipeline] Pass 2 done in {pass2_elapsed:.1f}s — {n_stage3a_calls} stage3a calls, "
+              f"{n_stage3b_calls} stage3b naming calls ({n_stage3a_calls + n_stage3b_calls} Groq calls total)")
 
 
 # --- Convenience wrapper for callers (Flask job, CLI) ----------------------------------
@@ -357,9 +479,12 @@ def run_full_pipeline(ultrasound_path: str, webcam_path: str, intermediate_video
     webcam frame it saw, for manual cross-checking against the source video.
     position_debug_video_path: see run_pass2's docstring — the Stage A 0/1/uncertain
     debug video."""
+    job_t0 = time.monotonic()
     if progress_cb:
         progress_cb("cropping", 0.0)
+    crop_t0 = time.monotonic()
     cropped_ultrasound_path = run_roi_crop(ultrasound_path, roi_out_dir)
+    print(f"[pipeline] ROI crop done in {time.monotonic() - crop_t0:.1f}s")
     if progress_cb:
         progress_cb("cropping", 1.0)
 
@@ -374,3 +499,5 @@ def run_full_pipeline(ultrasound_path: str, webcam_path: str, intermediate_video
     ticks = run_pass1(cropped_ultrasound_path, intermediate_video_path, artifact_path, progress_cb=p1_cb)
     run_pass2(ticks, cropped_ultrasound_path, webcam_path, final_video_path, progress_cb=p2_cb,
               probe_log_dir=probe_log_dir, position_debug_video_path=position_debug_video_path)
+    print(f"[pipeline] Full job done in {time.monotonic() - job_t0:.1f}s total "
+          f"(cropping + Pass 1 segmentation + Pass 2 location/naming)")
