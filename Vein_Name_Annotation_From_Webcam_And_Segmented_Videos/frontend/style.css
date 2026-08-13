@@ -98,17 +98,36 @@ button:disabled { opacity: 0.5; cursor: default; }
   font-size: 0.88rem;
 }
 
-.videos {
+/* Synced 3-pane player: Intermediate | Final | Webcam, one shared outer border/rounding
+   so it reads as ONE player, with a visible vertical divider line BETWEEN panes (not
+   just a gap) per explicit request -- a gap alone doesn't read as clearly "separated but
+   joined" as an actual ruled line does. Each pane keeps its own heading above it. Wraps
+   to a stacked layout on narrow viewports (divider becomes horizontal via border-top). */
+.synced-player {
   display: flex;
-  gap: 1.5rem;
   flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--panel);
 }
-.video-col { flex: 1 1 400px; }
-.video-col video {
+.video-pane {
+  flex: 1 1 320px;
+  padding: 1rem;
+  border-left: 2px solid var(--border);
+}
+.video-pane:first-child { border-left: none; }
+@media (max-width: 720px) {
+  .video-pane { border-left: none; border-top: 2px solid var(--border); }
+  .video-pane:first-child { border-top: none; }
+}
+.video-pane h3 { margin: 0 0 0.6rem; }
+.video-pane video {
   width: 100%;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: #000;
+  display: block;
 }
 
 .hidden { display: none; }

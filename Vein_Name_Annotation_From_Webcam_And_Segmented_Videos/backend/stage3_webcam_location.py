@@ -742,13 +742,34 @@ LEVEL_USER_PROMPT = (
 MAX_TOKENS = 16384  # Groq's hard ceiling for this model's context window — confirmed via a
 # real 400 error when 25000 was tried; cannot be raised further.
 
-# NOTE: this module used to have a _looks_truncated() check + _RETRY_SUFFIX that fired an
-# automatic retry whenever a call ran out of space mid-reasoning without ever reaching
-# JSON. Removed along with the majority-vote helpers (see comment above the agentic
-# section) -- same root cause, same fix: stop multiplying calls per tick. A truncated
-# response now just falls through to normalize()'s "uncertain"/"low" defaults below,
-# same as any other malformed response -- costs nothing extra, and this tick's answer
-# gets picked up again on the next refresh rather than paying for an immediate retry.
+# HISTORY: this module used to have a truncation retry, removed along with the
+# majority-vote helpers after a real TPM crash -- but that crash came from the VOTE
+# pattern (multiple full re-draws per tick, each up to MAX_TOKENS, on a dense long
+# video), not from a single scoped truncation retry. Re-added below as its own, narrower
+# thing: confirmed real failure mode this targets -- on a SHORT clip with only one
+# Stage 3a call scheduled for the whole video, that one call truncating (a real 32.5s/
+# 61151-char non-JSON response, confirmed on actual footage) meant leg_side/leg_level/
+# surface fell back to "uncertain" for the ENTIRE clip, with no later refresh ever
+# coming to fix it -- the "gets picked up again on the next refresh" assumption behind
+# removing the retry only holds for long videos with many scheduled calls, not short
+# ones. A single truncation-only retry (same bounded pattern already proven safe and
+# re-validated repeatedly in stage2_fascia_classify.py, now also sitting behind
+# groq_client's OTPM/TPM budget limiter that didn't exist when the original crash
+# happened) closes this gap without reintroducing the multi-vote cost risk.
+_RETRY_SUFFIX = (
+    "\n\nYour previous attempt at this exact frame ran out of space mid-reasoning "
+    "without ever reaching a JSON answer -- you were spending too much reasoning. This "
+    "time: work through leg_side, leg_level, and surface in at most 2 short sentences "
+    "each, reach a conclusion, and move on -- do not re-litigate a judgment once made. "
+    "The instant you have all three, stop reasoning and output the JSON immediately."
+)
+
+
+def _looks_truncated(parsed: dict, raw: str) -> bool:
+    """Same pattern as stage2_fascia_classify._looks_truncated -- true when the call
+    produced no usable JSON at all and the raw text is long, i.e. the model spent its
+    whole budget mid-reasoning instead of a genuinely short/empty response."""
+    return not parsed and len(raw) > 2000
 
 
 def normalize(parsed: dict, allowed_levels: list[str] = None) -> dict:
@@ -772,7 +793,7 @@ def normalize(parsed: dict, allowed_levels: list[str] = None) -> dict:
 
 
 def read_level_and_surface(frame_bgr, allowed_levels: list[str], position_evidence: str = None,
-                            occluded: bool = False) -> dict:
+                            occluded: bool = False, pos=None) -> dict:
     """Stage B. Full reasoning (reasoning_effort='default') — confirmed necessary for
     the facing-direction mirroring and surface disambiguation this does; only the
     leg_level VOCABULARY is narrowed here compared to the old single-call design, not
@@ -786,7 +807,19 @@ def read_level_and_surface(frame_bgr, allowed_levels: list[str], position_eviden
 
     occluded: see read_level_name_reflux -- appends OCCLUSION_NOTE when knee_cv
     detected a near-lens obstruction, so non-reflux frames get the same "try anyway"
-    treatment as the reflux agents rather than defaulting straight to uncertain."""
+    treatment as the reflux agents rather than defaulting straight to uncertain.
+
+    pos: Stage A's 0/1/"uncertain" reading — used ONLY as a last-resort fallback (see
+    below) if this combined call truncates on both the first attempt and the retry.
+    Confirmed real failure mode on real footage: a single webcam frame that reliably
+    produces ~61-62k chars of non-terminating reasoning on EVERY attempt (not a random
+    fluke -- two independent draws converged to nearly the same length), meaning a
+    same-shaped retry can't fix it. The already-proven split-agent pattern (Agent LN +
+    Agent S, built for reflux frames -- see the block comment above their definitions)
+    reasons about leg_level and surface SEPARATELY, each a much smaller/simpler judgment
+    than this combined call's leg_side+leg_level+surface-with-facing-direction-mirroring
+    -- far less likely to hit the same runaway-reasoning failure. Falling back to it here
+    reuses existing, tested code rather than adding new speculative logic."""
     _, buf = cv2.imencode(".jpg", frame_bgr)
     img_b64 = base64.b64encode(buf).decode()
     system = _level_system_prompt(allowed_levels, position_evidence)
@@ -799,17 +832,40 @@ def read_level_and_surface(frame_bgr, allowed_levels: list[str], position_eviden
         (level_ref_b64, "image/jpeg") if level_ref_b64 else None,
         (surface_ref_b64, "image/jpeg") if surface_ref_b64 else None,
     ] if im] or None
-    # Single call, no truncation retry, no posterior majority-vote -- removed after a
-    # real production job hit a hard TPM (tokens-per-minute) rate-limit crash at 75%
-    # progress. The vote/retry machinery could multiply this one call into up to 3-5
-    # calls at MAX_TOKENS=16384 each; on a dense video that alone can exceed the
-    # account's per-minute budget. Accuracy note: this is the ORIGINAL non-reflux path,
-    # never confirmed broken the way the reflux path was -- so trusting a single draw
-    # here is a reversion to the original (working) behavior, not a new risk.
-    parsed, _raw = groq_client.call_vlm_json(system, user, image_b64=img_b64, image_media_type="image/jpeg",
-                                              extra_images=extra_images,
-                                              reasoning_effort="default", max_tokens=MAX_TOKENS,
-                                              label="stage3a_level_surface")
+    # No posterior majority-vote here (removed after a real TPM crash caused by that
+    # specific multi-vote pattern -- see history note above MAX_TOKENS) -- but DOES get
+    # one single, narrowly-scoped truncation retry, which is a different, bounded thing.
+    parsed, raw = groq_client.call_vlm_json(system, user, image_b64=img_b64, image_media_type="image/jpeg",
+                                             extra_images=extra_images,
+                                             reasoning_effort="default", max_tokens=MAX_TOKENS,
+                                             label="stage3a_level_surface")
+    if _looks_truncated(parsed, raw):
+        print(f"[stage3a] level_surface call truncated ({len(raw)} chars, no JSON) -- retrying once")
+        parsed, raw = groq_client.call_vlm_json(system, user + _RETRY_SUFFIX, image_b64=img_b64,
+                                                 image_media_type="image/jpeg", extra_images=extra_images,
+                                                 reasoning_effort="default", max_tokens=MAX_TOKENS,
+                                                 label="stage3a_level_surface_retry")
+        if _looks_truncated(parsed, raw) and pos in (0, 1):
+            # Both attempts truncated on this exact frame -- confirmed real footage
+            # case where a same-shaped retry doesn't help (the retry converged to
+            # almost the same length as the first attempt). Fall back to the smaller,
+            # already-proven split-agent judgments instead of giving up to all-uncertain.
+            print(f"[stage3a] level_surface truncated again after retry -- falling back to split agents (LN+S)")
+            half_desc = "ABOVE" if pos == 0 else "AT/BELOW"
+            level_result = read_level_name_reflux(frame_bgr, allowed_levels, half_desc, occluded=occluded)
+            surface_result = read_surface_reflux(frame_bgr, position_evidence, occluded=occluded)
+            return {
+                "leg_side": surface_result["leg_side"],
+                "leg_level": level_result["leg_level"],
+                "surface": surface_result["surface"],
+                "confidence": _min_confidence(level_result["confidence"], surface_result["confidence"]),
+                "probe_visible": surface_result["probe_visible"],
+                "visual_evidence": (
+                    f"[fallback after 2x truncation] [Agent LN: leg_level="
+                    f"{level_result['leg_level']} conf={level_result['confidence']}] "
+                    f"[Agent S: {surface_result['visual_evidence']}]"
+                ),
+            }
     return normalize(parsed, allowed_levels)
 
 
@@ -879,7 +935,7 @@ def read_location(frame_bgr) -> dict:
     else:
         result = read_level_and_surface(frame_bgr, allowed_levels,
                                          position_evidence=position["visual_evidence"] or None,
-                                         occluded=occluded)
+                                         occluded=occluded, pos=pos)
 
     result["probe_position_stage_a"] = pos
     result["num_clinician_hands"] = position["num_clinician_hands"]

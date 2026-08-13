@@ -31,27 +31,54 @@ SYSTEM_PROMPT = (
     "If invalid, you do not need to classify its depth — set n_class to null.\n\n"
     "If valid, classify its depth relative to the fascial compartment:\n"
     + _FASCIAL_DEPTH_TEXT +
-    "\n\nDECISION RULE — apply this explicitly, in order, for every valid blob, using the "
-    "geometric measurement below alongside the image:\n"
-    "- Is the blob BELOW the ORANGE (deep) line? → N1. This includes a blob sitting ON or "
-    "straddling the orange line itself — do not call anything N3 just because it touches a "
-    "fascia line; touching/straddling the DEEP line still means N1, not N3.\n"
-    "- Is the blob BETWEEN the two lines — below/on the yellow line AND above/on the orange "
-    "line? → N2. This is the most commonly under-used class: a vein sitting close to, "
-    "touching, or even flattened against EITHER fascia line, as long as it is still within "
-    "the space bounded by the two lines, is N2 (the saphenous compartment), never N3. Do "
-    "NOT default to N3 just because a blob looks small, faint, or close to a boundary line — "
-    "closeness to a line is not superficiality; only genuinely being ABOVE both lines is.\n"
-    "- Is the blob ABOVE the YELLOW (superficial) line, with no part of it inside the "
-    "compartment? → N3. Reserve N3 strictly for blobs clearly sitting in the subcutaneous "
-    "fat above the yellow line — a blob merely near the yellow line but still on/below it is "
-    "N2, not N3.\n"
-    "A confirmed, repeated real-world failure this system exists to avoid: blobs sitting "
-    "exactly at or just inside a fascia line getting defaulted to N3 (superficial) when the "
-    "geometry clearly places them within or below the compartment. Read the precomputed "
-    "pixel-distance measurement carefully — a small \"Npx above/below\" distance still has a "
-    "definite sign (above vs. below); use that sign, do not round it away to 'basically on "
-    "the line, so probably superficial'.\n\n"
+    "\n\nDECISION RULE — apply this explicitly, in order, for every valid blob. The "
+    "precomputed geometric measurement gives you a SIGNED distance to each line — that "
+    "sign is the primary signal, always defer to it over a vague visual impression of "
+    "'this looks close to a line so it's probably that class':\n"
+    "- d_deep (distance to the deep/orange line) POSITIVE means the blob's centroid is "
+    "still ABOVE the deep line, i.e. still inside the compartment. d_deep NEGATIVE means "
+    "the centroid has crossed BELOW the deep line, into deep tissue.\n"
+    "- d_sup (distance to the superficial/yellow line) POSITIVE means the centroid is "
+    "BELOW the yellow line, i.e. still inside or below the compartment. d_sup NEGATIVE "
+    "means the centroid has crossed ABOVE the yellow line, into subcutaneous fat.\n\n"
+    "Using those signs — THE SIGN IS THE ONLY RULE, there is no visual override or "
+    "exception to it. Do not classify by how the contour LOOKS relative to a line "
+    "(touching, brushing, dipping across it, etc.) — a real segmentation contour is "
+    "never pixel-perfect, so a genuinely-N2 vein's lumen boundary will often visually "
+    "graze or slightly overlap the orange line even though its actual position is still "
+    "within the compartment. The centroid sign already accounts for this — trust it "
+    "completely instead of re-judging from the picture:\n"
+    "- d_deep NEGATIVE (centroid below the deep line) → N1.\n"
+    "- d_deep POSITIVE (centroid above the deep line), no matter how small the number, "
+    "AND d_sup POSITIVE → N2. THIS IS THE DEFAULT for any blob that is solidly between "
+    "the two lines, including one whose contour visually touches, brushes, or appears to "
+    "slightly cross either line — being NEAR a line, or LOOKING like it crosses one, is "
+    "NOT the same as its centroid actually crossing it. A d_deep of +2px is still N2, "
+    "exactly the same rule as +80px — do not treat a small positive number as 'close "
+    "enough to N1'. Do not downgrade a blob to N1 just because it is the lowest/"
+    "deepest-looking blob in the frame, or because part of its visible boundary appears "
+    "to reach the orange line — check the actual sign, only the sign.\n"
+    "- d_sup NEGATIVE (centroid above the yellow line) → N3, using the same sign-only "
+    "rule (no visual override) as above.\n\n"
+    "TWO CONFIRMED, OPPOSITE, REAL FAILURE MODES this system exists to avoid — you must "
+    "guard against BOTH, not overcorrect from one into the other. Both have been "
+    "confirmed to recur MULTIPLE times on real footage, including after earlier attempts "
+    "to fix them, which is exactly why the rule above allows NO visual judgment call at "
+    "all anymore -- only the sign:\n"
+    "(a) Blobs sitting exactly at or just inside a fascia line getting defaulted to N3 "
+    "when the geometry clearly places them within or below the compartment — closeness "
+    "to the YELLOW line from below/inside is not superficiality.\n"
+    "(b) Blobs that are genuinely still N2 (d_deep POSITIVE, even barely) getting pushed "
+    "down to N1 because they sit in the lower part of the compartment and visually LOOK "
+    "close to, or like they touch, the ORANGE line — this has recurred even after "
+    "explicit prior instruction not to do it, so the fix now is structural: there is no "
+    "situation in which a POSITIVE d_deep should produce N1. None. If you find yourself "
+    "wanting to call a blob N1 because of how its contour looks against the orange line, "
+    "re-check the sign — if it says positive, the answer is N2, full stop, regardless of "
+    "what the picture seems to show.\n"
+    "Read the precomputed pixel-distance measurement carefully — a small \"Npx above/"
+    "below\" distance still has a definite sign; use ONLY that sign, never a visual "
+    "impression, no matter how confident that impression feels.\n\n"
     "For each blob you are also given a precomputed geometric measurement (from the "
     "segmentation model itself, not a guess) describing its position relative to both "
     "fascia lines at its own column — use this alongside the image for the depth call, but "
@@ -116,6 +143,22 @@ def _first_attempt_max_tokens(n_blobs: int) -> int:
     triggering the truncation retry, not a rate-limit error), so erring larger is cheap;
     erring smaller only costs a rare extra retry, never a real rate-limit violation."""
     return min(MAX_TOKENS, 2500 + 3000 * max(n_blobs, 1))
+
+
+def _retry_max_tokens(n_blobs: int) -> int:
+    """Confirmed real cost waste this fixes: the retry used to always jump straight to
+    the full 16384-token ceiling regardless of blob count -- fine for a genuinely busy
+    4-blob frame that needs it, but wasteful for a 1-blob truncation (real observed case:
+    first attempt at 5500 tokens truncated, retry then reserved/paid for the FULL 16384
+    ceiling, an ~11000-token jump for a single blob). The retry also carries
+    _RETRY_SUFFIX, which explicitly asks for a terser answer, so it rarely needs MORE
+    room than a generous multiple of the first attempt's own budget -- real evidence
+    backs this too (retries have consistently finished in far fewer tokens than the
+    truncated first attempt, e.g. a 32s/56k-char truncated attempt recovering in a 4.7s/
+    short retry). 2x the first-attempt budget, capped at the true ceiling, keeps genuinely
+    complex multi-blob frames at (or near) the full ceiling while cutting the wasted
+    headroom for the common low-blob-count case."""
+    return min(MAX_TOKENS, _first_attempt_max_tokens(n_blobs) * 2)
 
 _RETRY_SUFFIX = (
     "\n\nYour previous attempt at this exact frame ran out of space mid-reasoning without "
@@ -206,7 +249,7 @@ def classify_blobs(frame_bgr: np.ndarray, blobs: list, fascia) -> None:
         print(f"[stage2] retrying: truncated={truncated}, missing_blob_ids={missing}")
         parsed, raw = groq_client.call_vlm_json(
             SYSTEM_PROMPT, user_text + suffix, image_b64=img_b64,
-            reasoning_effort="default", max_tokens=MAX_TOKENS,
+            reasoning_effort="default", max_tokens=_retry_max_tokens(len(blobs)),
             label="stage2_nclass_retry",
         )
         still_missing = _missing_blob_ids(parsed, blobs)

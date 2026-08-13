@@ -36,14 +36,19 @@
 
     <div id="results-area" class="hidden">
       <h2>Results</h2>
-      <div class="videos">
-        <div class="video-col">
+      <p class="subtitle">Press play on any one video — all three stay in sync.</p>
+      <div class="synced-player">
+        <div class="video-pane">
           <h3>Intermediate (N1 / N2 / N3)</h3>
           <video id="video-intermediate" controls></video>
         </div>
-        <div class="video-col">
+        <div class="video-pane">
           <h3>Final (vein names)</h3>
           <video id="video-final" controls></video>
+        </div>
+        <div class="video-pane">
+          <h3>Webcam (source)</h3>
+          <video id="video-webcam" controls muted></video>
         </div>
       </div>
 
@@ -138,9 +143,14 @@
     }
 
     function showResults(jobId, positionDebugReady) {
-      document.getElementById('video-intermediate').src = `/api/jobs/${jobId}/result/intermediate`;
-      document.getElementById('video-final').src = `/api/jobs/${jobId}/result/final`;
+      const vIntermediate = document.getElementById('video-intermediate');
+      const vFinal = document.getElementById('video-final');
+      const vWebcam = document.getElementById('video-webcam');
+      vIntermediate.src = `/api/jobs/${jobId}/result/intermediate`;
+      vFinal.src = `/api/jobs/${jobId}/result/final`;
+      vWebcam.src = `/api/jobs/${jobId}/result/webcam`;
       resultsArea.classList.remove('hidden');
+      setupSyncedPlayer(vIntermediate, [vFinal, vWebcam]);
 
       const positionDebugArea = document.getElementById('position-debug-area');
       if (positionDebugReady) {
@@ -149,6 +159,69 @@
       } else {
         positionDebugArea.classList.add('hidden');
       }
+    }
+
+    // Drives `followers` from `master` — press play/pause/seek on ANY one of them (all
+    // three keep native controls, so scrubbing works on whichever pane you click) and
+    // the others follow. Followers are muted to avoid overlapping/conflicting audio
+    // when multiple videos play at once; `master` keeps its own audio. A `syncing` guard
+    // stops the mirrored play/pause calls on followers from re-triggering their own
+    // 'play'/'pause' listeners back onto the master, which would otherwise loop.
+    function setupSyncedPlayer(master, followers) {
+      const DRIFT_TOLERANCE_SEC = 0.15;
+      let syncing = false;
+
+      function withSyncGuard(fn) {
+        syncing = true;
+        fn();
+        // Reset on the next tick -- play()/pause() and currentTime assignment fire their
+        // own events asynchronously-ish; a microtask delay keeps the guard up through them.
+        setTimeout(() => { syncing = false; }, 0);
+      }
+
+      function alignTime(fromEl) {
+        followers.forEach(v => {
+          if (Math.abs(v.currentTime - fromEl.currentTime) > DRIFT_TOLERANCE_SEC) {
+            v.currentTime = fromEl.currentTime;
+          }
+        });
+      }
+
+      followers.forEach(v => { v.muted = true; });
+
+      master.addEventListener('play', () => {
+        if (syncing) return;
+        withSyncGuard(() => followers.forEach(v => v.play().catch(() => {})));
+      });
+      master.addEventListener('pause', () => {
+        if (syncing) return;
+        withSyncGuard(() => followers.forEach(v => v.pause()));
+      });
+      master.addEventListener('seeking', () => alignTime(master));
+      master.addEventListener('timeupdate', () => alignTime(master));
+
+      // Any follower can also be used as the scrub/play control (native controls are
+      // still visible on all three panes) -- mirror its actions back onto master AND
+      // the other followers, using the same guard so it doesn't bounce back and forth.
+      followers.forEach(self => {
+        const others = () => [master, ...followers.filter(v => v !== self)];
+        self.addEventListener('play', () => {
+          if (syncing) return;
+          withSyncGuard(() => others().forEach(v => v.play().catch(() => {})));
+        });
+        self.addEventListener('pause', () => {
+          if (syncing) return;
+          withSyncGuard(() => others().forEach(v => v.pause()));
+        });
+        self.addEventListener('seeking', () => {
+          if (syncing) return;
+          withSyncGuard(() => others().forEach(v => {
+            if (Math.abs(v.currentTime - self.currentTime) > DRIFT_TOLERANCE_SEC) {
+              v.currentTime = self.currentTime;
+            }
+          }));
+        });
+      });
     }
 
     function showError(msg) {

@@ -124,6 +124,21 @@ VLM_MIN_INTERVAL_SEC = 0.0
 # simply queue inside the limiter's reserve() call instead of firing and eating a 429, so
 # it's safe to set this higher than the old worst-case-token-math would have allowed.
 STAGE2_MAX_WORKERS = 6
+
+# Pass 2 (webcam location + vein naming) concurrency -- mirrors STAGE2_MAX_WORKERS'
+# reasoning exactly (same _OtpmLimiter governs real safety regardless of worker count;
+# these only bound how many calls can be simultaneously in-flight). Confirmed real
+# complaint this fixes: Pass 2 was left fully sequential when Pass 1 was parallelized
+# earlier -- one call at a time, ~5-30s each, for potentially 40-80+ Stage 3a + Stage 3b
+# calls on a 2-minute clip, which is exactly the "45 minutes for a 2-minute video"
+# report. STAGE3A_MAX_WORKERS is a little lower than STAGE3B's because a single
+# read_location() call can itself fire 2-3 sequential sub-calls internally (Stage A, then
+# Stage B or the reflux Agent LN+Agent S pair) -- so N concurrent read_location() calls
+# already means up to ~2-3N simultaneous real API requests, more effective concurrency
+# per worker than Stage 2 or Stage 3b (each of which is one call, or one call + a bounded
+# retry loop, per invocation).
+STAGE3A_MAX_WORKERS = 3
+STAGE3B_MAX_WORKERS = 5
 # Stage 3a (webcam probe location) always runs reasoning_effort="default" (full
 # chain-of-thought) — confirmed necessary TWICE: "none" mode was tried once with a
 # previous-reading prior in the prompt (caused the model to blindly anchor on the prior

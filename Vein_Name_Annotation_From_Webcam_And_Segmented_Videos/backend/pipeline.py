@@ -31,6 +31,7 @@ import cv2
 import numpy as np
 
 import config
+import groq_client
 import biomedparse_engine as bpe
 import stage2_fascia_classify as s2
 import stage3_webcam_location as s3a
@@ -211,6 +212,7 @@ def run_pass1(ultrasound_path: str, intermediate_video_path: str, artifact_path:
     # tick's blobs in place, independent of every other tick (see docstring above) ---
     classify_t0 = time.monotonic()
     n_scheduled = len(scheduled_ticks)
+    n_failed = 0
     _report(_SEG_WEIGHT)  # segmentation done; classify step starts at this floor regardless
     if scheduled_ticks:
         # No submission stagger needed here (an earlier version added one) -- that was a
@@ -223,15 +225,34 @@ def run_pass1(ultrasound_path: str, intermediate_video_path: str, artifact_path:
                        for e in scheduled_ticks}
             n_done = 0
             for fut in as_completed(futures):
-                fut.result()  # re-raise here (main thread) so a real failure still surfaces,
-                               # matching the previous serial behaviour of not swallowing errors
+                try:
+                    fut.result()
+                except Exception as exc:
+                    # Confirmed real production crash this guards against: one call
+                    # exhausting all rate-limit retries (or any other transient Groq/
+                    # network failure) used to propagate all the way up through
+                    # run_full_pipeline and kill the ENTIRE job -- $4.5 and 40 minutes of
+                    # real spend producing zero usable output, because one tick out of
+                    # dozens hit a bad draw. This tick's blobs simply stay unclassified
+                    # (n_class=None, is_valid=True) -- already a normal, gracefully-
+                    # rendered state elsewhere in this pipeline (see renderer.py), not a
+                    # new failure mode. The rest of the job continues.
+                    e = futures[fut]
+                    e["classify_failed"] = True  # read back in Step 3 -- a failed call
+                    # must NOT overwrite last_records with this tick's (blank) state; see
+                    # Step 3 for why blanking it would erase an already-correct label
+                    # rather than just leaving one frame unlabeled.
+                    n_failed += 1
+                    print(f"[pipeline] Stage 2 call FAILED for tick t={e['ts']:.1f}s, "
+                          f"leaving its blob(s) unclassified -- continuing rest of job: {exc}")
                 n_done += 1
                 # This is the step that actually eats the wall-clock time (Groq calls) --
                 # reporting per-completion here is what makes the progress bar move
                 # continuously instead of sitting at one value for the whole job.
                 _report(_SEG_WEIGHT + _CLASSIFY_WEIGHT * (n_done / n_scheduled))
     print(f"[pipeline] Pass 1 Stage 2 classification done in {time.monotonic() - classify_t0:.1f}s "
-          f"({config.STAGE2_MAX_WORKERS} concurrent workers, {n_scheduled} calls)")
+          f"({config.STAGE2_MAX_WORKERS} concurrent workers, {n_scheduled} calls"
+          f"{f', {n_failed} FAILED (left unclassified)' if n_failed else ''})")
     _report(_SEG_WEIGHT + _CLASSIFY_WEIGHT)
 
     # --- Step 3: sequential replay -- apply holds (nearest-centroid, see module
@@ -244,7 +265,15 @@ def run_pass1(ultrasound_path: str, intermediate_video_path: str, artifact_path:
         ts, frame, blobs, fascia = entry["ts"], entry["frame"], entry["blobs"], entry["fascia"]
         max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
 
-        if entry["needs_classify"]:
+        # Only adopt this tick's fresh state when it was BOTH scheduled AND actually
+        # succeeded -- a scheduled-but-failed call (see Step 2) must fall through to the
+        # else branch exactly like a normal held tick, so it keeps showing the last
+        # KNOWN-GOOD label instead of blanking every blob to n_class=None. Confirmed real
+        # bug this fixes: the old version unconditionally overwrote last_records whenever
+        # needs_classify was true, even on failure, which erased an already-correct
+        # label a viewer had just seen a moment earlier -- not merely "one blank frame",
+        # a regression of a real answer back to nothing.
+        if entry["needs_classify"] and not entry.get("classify_failed"):
             last_records = [{"centroid": b.centroid, "n_class": b.n_class, "is_valid": b.is_valid}
                              for b in blobs]
         else:
@@ -304,6 +333,23 @@ def _webcam_changed(prev_small: np.ndarray, frame_bgr: np.ndarray, threshold: fl
 
 # --- Pass 2: webcam location + vein naming ---------------------------------------------
 
+def _stage3b_for_entry(entry: dict, resolved_location: dict):
+    """Runs in a worker thread (see run_pass2 Step 4) — pure w.r.t. its own tick, no
+    shared mutable state touched. Only blobs with a real N-class get sent to naming --
+    stage3_vein_naming's whole vocabulary-gating design depends on trusting each blob's
+    N-class to pick its allowed vein-name list; a blob Stage 2 never classified has no
+    vocabulary to offer and would otherwise fall through to the naming module's
+    defensive "union of all three lists" fallback -- exactly the unconstrained-vocabulary
+    situation that let N2 blobs get named "Tributary" in the first place."""
+    tick = entry["tick"]
+    blob_dicts = [{"blob_id": b.blob_id, "n_class": b.n_class, "centroid": list(b.centroid)}
+                  for b in tick.blobs if b.n_class in ("N1", "N2", "N3")]
+    if not blob_dicts:
+        return {}
+    annotated_intermediate = renderer.draw_intermediate_frame(entry["frame"], tick.blobs, tick.fascia)
+    return s3b.name_veins(blob_dicts, resolved_location, annotated_ultrasound_frame_bgr=annotated_intermediate)
+
+
 def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_path: str,
               progress_cb=None, probe_log_dir: str = None, position_debug_video_path: str = None) -> None:
     """probe_log_dir: if given, every Stage-3a probe-location reading is appended to
@@ -317,13 +363,166 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
     with Stage A's fast probe_position (0/1/uncertain) burned onto every frame — lets a
     human scrub through and visually verify the upstream binary split that Stage B's
     narrowed leg_level vocabulary depends on, since that split isn't otherwise visible in
-    the final ultrasound-side output video at all."""
+    the final ultrasound-side output video at all.
+
+    Split into 5 steps (schedule -> parallel Stage 3a -> resolve held locations -> parallel
+    Stage 3b -> sequential render), mirroring run_pass1's restructure -- see that
+    function's docstring for the underlying reasoning (scheduling only needs cheap
+    CPU-only signals, never the actual VLM answer, so it can be computed once up front and
+    every scheduled call then dispatched independently). Confirmed real complaint this
+    fixes: Pass 2 was left fully sequential when Pass 1 was parallelized earlier, and was
+    the actual reason a 2-minute clip took ~45 minutes end-to-end.
+
+    One real coupling Pass 1 didn't have: Stage 3b's ANSWER depends on Stage 3a's ANSWER
+    (the resolved probe location), not just on scheduling facts -- so Stage 3b calls
+    cannot fire until Stage 3a's results are known. Step 3 (a fast, Groq-free sequential
+    replay) resolves "what location applies to each naming tick" from Stage 3a's now-
+    completed results BEFORE Stage 3b's parallel dispatch -- this is the one step that
+    must stay sequential, and it's cheap (pure Python, no calls) so it doesn't cost
+    meaningful wall-clock time."""
     hold_frames = max(1, round(config.SEG_SAMPLE_INTERVAL_SEC * config.OUTPUT_FPS))
     n_ticks = max(len(ticks), 1)
 
-    webcam_reader = video_io.TimestampFrameReader(webcam_path)
-    us_frames = video_io.iter_sample_frames(ultrasound_path, config.SEG_SAMPLE_INTERVAL_SEC)
+    _SCHED_W, _S3A_W, _S3B_W, _RENDER_W = 0.05, 0.40, 0.40, 0.15
 
+    def _report(frac_0_to_1: float) -> None:
+        if progress_cb:
+            progress_cb(max(0.0, min(frac_0_to_1, 1.0)))
+
+    webcam_reader = video_io.TimestampFrameReader(webcam_path)
+    us_frames = list(video_io.iter_sample_frames(ultrasound_path, config.SEG_SAMPLE_INTERVAL_SEC))
+
+    pass2_t0 = time.monotonic()
+    print(f"[pipeline] Pass 2 (webcam location + vein naming) starting — {n_ticks} ticks")
+
+    # --- Step 1: schedule -- cheap CPU-only signals (motion diff, blob debounce), no Groq
+    # calls, decides which ticks need Stage 3a and/or Stage 3b. Identical gating logic to
+    # the old single-loop version; "location_refreshed" is now "needs_stage3a", which is
+    # itself just a scheduling fact known without waiting for the actual answer. ---
+    sched_t0 = time.monotonic()
+    entries = []
+    last_location_at = -1e9
+    last_location_small_frame = None
+    last_named_at = -1e9
+    last_named_centroids = []  # scheduling only needs centroids, not actual vein_names --
+                                # same principle as run_pass1's last_centroids
+    for i, (tick, (ts, frame)) in enumerate(zip(ticks, us_frames)):
+        webcam_frame = webcam_reader.get(ts)
+        elapsed = ts - last_location_at
+        needs_stage3a = False
+        if webcam_frame is not None and (i == 0 or elapsed >= config.WEBCAM_LOCATION_MIN_INTERVAL_SEC):
+            force = i == 0 or elapsed >= config.WEBCAM_LOCATION_MAX_INTERVAL_SEC
+            changed, small = _webcam_changed(last_location_small_frame, webcam_frame,
+                                              config.WEBCAM_MOTION_DIFF_THRESHOLD)
+            if force or (changed and tick.blobs):
+                needs_stage3a = True
+                last_location_at = ts
+                last_location_small_frame = small
+
+        max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
+        needs_naming = bool(tick.blobs) and (
+            needs_stage3a
+            or (ts - last_named_at) >= config.VLM_SAMPLE_INTERVAL_SEC
+            or len(tick.blobs) != len(last_named_centroids)
+            or any(_nearest_match(b.centroid, last_named_centroids, max_dist) is None for b in tick.blobs)
+        )
+        if needs_naming:
+            last_named_at = ts
+            last_named_centroids = [{"centroid": b.centroid} for b in tick.blobs]
+
+        entries.append({"i": i, "ts": ts, "frame": frame, "webcam_frame": webcam_frame,
+                         "tick": tick, "needs_stage3a": needs_stage3a, "needs_naming": needs_naming})
+        _report(_SCHED_W * ((i + 1) / n_ticks))
+
+    scheduled_3a = [e for e in entries if e["needs_stage3a"]]
+    scheduled_naming = [e for e in entries if e["needs_naming"]]
+    print(f"[pipeline] Pass 2 scheduling done in {time.monotonic() - sched_t0:.1f}s — "
+          f"{len(scheduled_3a)} stage3a scheduled, {len(scheduled_naming)} naming scheduled")
+
+    # --- Step 2: dispatch all scheduled Stage 3a calls concurrently -- each is a
+    # standalone read_location(webcam_frame) call, independent of every other tick. ---
+    s3a_t0 = time.monotonic()
+    _report(_SCHED_W)
+    stage3a_results: dict[int, dict] = {}
+    n_s3a_failed = 0
+    if scheduled_3a:
+        with ThreadPoolExecutor(max_workers=config.STAGE3A_MAX_WORKERS) as pool:
+            futures = {pool.submit(s3a.read_location, e["webcam_frame"]): e for e in scheduled_3a}
+            n_done = 0
+            for fut in as_completed(futures):
+                e = futures[fut]
+                try:
+                    stage3a_results[e["i"]] = fut.result()
+                except Exception as exc:
+                    # Same non-fatal-degradation principle as Pass 1's Stage 2 dispatch --
+                    # a single failed read_location() call must never crash the whole job.
+                    # Step 3 below already falls back to the last successfully-held
+                    # location when a tick's result is missing from this dict, so this
+                    # tick's probe location just stays stale for one refresh cycle
+                    # instead of the entire job dying.
+                    n_s3a_failed += 1
+                    print(f"[pipeline] Stage 3a call FAILED for tick t={e['ts']:.1f}s, "
+                          f"holding previous location -- continuing rest of job: {exc}")
+                n_done += 1
+                _report(_SCHED_W + _S3A_W * (n_done / len(scheduled_3a)))
+    print(f"[pipeline] Pass 2 Stage 3a done in {time.monotonic() - s3a_t0:.1f}s "
+          f"({config.STAGE3A_MAX_WORKERS}x concurrency, {len(scheduled_3a)} calls"
+          f"{f', {n_s3a_failed} FAILED (held previous location)' if n_s3a_failed else ''})")
+    _report(_SCHED_W + _S3A_W)
+
+    # --- Step 3: sequential, Groq-free replay -- resolve which location applies to each
+    # tick (held between Stage 3a refreshes, same semantics as the old single-loop
+    # version) now that Stage 3a's real answers are known. This is the one step that must
+    # stay sequential (Stage 3b's answer depends on Stage 3a's answer, not just
+    # scheduling), but it's pure Python/dict lookups -- no meaningful wall-clock cost. ---
+    location = s3a.normalize({})
+    last_probe_position = "uncertain"
+    resolved_location_by_i: dict[int, dict] = {}
+    for e in entries:
+        if e["needs_stage3a"] and e["i"] in stage3a_results:
+            # `.get`-style membership check, not a raw index -- a failed Stage 3a call
+            # (see Step 2) leaves this tick's result absent rather than raising, and the
+            # correct degradation here is to simply keep holding whatever location was
+            # already current, exactly as if this tick had never been scheduled at all.
+            location = stage3a_results[e["i"]]
+            last_probe_position = location.get("probe_position_stage_a", "uncertain")
+        resolved_location_by_i[e["i"]] = location
+        e["resolved_probe_position"] = last_probe_position
+
+    # --- Step 4: dispatch all scheduled Stage 3b naming calls concurrently, each using
+    # its own tick's now-resolved location -- independent of every other naming tick. ---
+    s3b_t0 = time.monotonic()
+    naming_results: dict[int, dict] = {}
+    n_s3b_failed = 0
+    if scheduled_naming:
+        with ThreadPoolExecutor(max_workers=config.STAGE3B_MAX_WORKERS) as pool:
+            futures = {pool.submit(_stage3b_for_entry, e, resolved_location_by_i[e["i"]]): e
+                       for e in scheduled_naming}
+            n_done = 0
+            for fut in as_completed(futures):
+                e = futures[fut]
+                try:
+                    naming_results[e["i"]] = fut.result()
+                except Exception as exc:
+                    # Same non-fatal-degradation principle again -- Step 5's render
+                    # already does naming_results.get(i, {}), so a missing entry here
+                    # just means this tick's blobs keep showing "naming..." (see
+                    # renderer.draw_final_frame) until the next naming refresh succeeds,
+                    # instead of taking down the whole job.
+                    n_s3b_failed += 1
+                    print(f"[pipeline] Stage 3b call FAILED for tick t={e['ts']:.1f}s, "
+                          f"leaving its blob(s) unnamed -- continuing rest of job: {exc}")
+                n_done += 1
+                _report(_SCHED_W + _S3A_W + _S3B_W * (n_done / len(scheduled_naming)))
+    print(f"[pipeline] Pass 2 Stage 3b done in {time.monotonic() - s3b_t0:.1f}s "
+          f"({config.STAGE3B_MAX_WORKERS}x concurrency, {len(scheduled_naming)} calls"
+          f"{f', {n_s3b_failed} FAILED (left unnamed)' if n_s3b_failed else ''})")
+    _report(_SCHED_W + _S3A_W + _S3B_W)
+
+    # --- Step 5: sequential render -- apply held naming (nearest-centroid, see module
+    # docstring), write the probe log / position-debug video / final video. No Groq calls
+    # in this step, matching run_pass1's Step 3. ---
+    render_t0 = time.monotonic()
     probe_log_file = None
     probe_frames_dir = None
     if probe_log_dir:
@@ -334,70 +533,22 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
 
     writer = None
     position_writer = None
-    location = s3a.normalize({})
-    last_probe_position = "uncertain"  # held/repeated between Stage A refreshes, like location
-    last_location_at = -1e9
-    last_location_small_frame = None  # see _webcam_changed -- baseline for motion gating
-    last_named_at = -1e9
-    last_named_records = []  # [{"centroid": (cx,cy), "vein_name": str}, ...] — see
-                              # pipeline module docstring: matched by nearest centroid,
-                              # NOT blob_id, since blob_id isn't a stable cross-tick identity
-
-    pass2_t0 = time.monotonic()
-    n_stage3a_calls = 0
-    n_stage3b_calls = 0
-    print(f"[pipeline] Pass 2 (webcam location + vein naming) starting — {n_ticks} ticks")
-
+    last_named_records = []  # [{"centroid": (cx,cy), "vein_name": str}, ...] — matched by
+                              # nearest centroid, NOT blob_id (see module docstring)
     try:
-        for i, (tick, (ts, frame)) in enumerate(zip(ticks, us_frames)):
-            location_refreshed = False
-            elapsed = ts - last_location_at
-            # Every tick fetches the webcam frame once (reused for both the motion-gating
-            # check below and the position-debug video), not just on a refresh -- the
-            # debug video needs continuous coverage, unlike the JSONL log which only
-            # records refresh moments.
-            webcam_frame = webcam_reader.get(ts)
-            # Motion-triggered gating (see _webcam_changed / config constants): only worth
-            # calling Stage 3a once MIN_INTERVAL has passed, and always worth a forced
-            # call past MAX_INTERVAL regardless of detected motion (slow-drift safety
-            # net) or on the very first tick.
-            #
-            # Also gated on tick.blobs being non-empty (except for the MAX_INTERVAL
-            # force-refresh, which still fires regardless): per direct guidance, when the
-            # clinician does a two-hand reflux/compression test the ultrasound machine
-            # switches out of B-mode, and BioMedParse (trained on B-mode only) can't
-            # produce usable blobs for those frames -- confirmed this is exactly why the
-            # extensive real-footage testing on reflux-testing frames kept finding a
-            # stubborn, unfixable Stage 3a accuracy problem there: the probe LOCATION
-            # during those frames was never going to be usable for naming anyway, since
-            # there's nothing to name. Skipping the refresh here isn't giving up on
-            # accuracy, it's not paying for a call whose answer can't be used, on exactly
-            # the stretch of footage that was consuming the most budget arguing with
-            # itself over. The MAX_INTERVAL force-refresh is deliberately NOT gated on
-            # blobs, so location still catches up promptly once real B-mode content (and
-            # therefore real blobs) resumes.
-            if webcam_frame is not None and (i == 0 or elapsed >= config.WEBCAM_LOCATION_MIN_INTERVAL_SEC):
-                force = i == 0 or elapsed >= config.WEBCAM_LOCATION_MAX_INTERVAL_SEC
-                changed, small = _webcam_changed(last_location_small_frame, webcam_frame,
-                                                  config.WEBCAM_MOTION_DIFF_THRESHOLD)
-                if force or (changed and tick.blobs):
-                    # No previous-reading context passed -- each call evaluates its own
-                    # frame independently (see stage3_webcam_location.read_location).
-                    location = s3a.read_location(webcam_frame)
-                    n_stage3a_calls += 1
-                    last_probe_position = location.get("probe_position_stage_a", "uncertain")
-                    last_location_at = ts
-                    last_location_small_frame = small
-                    location_refreshed = True
-                    if probe_log_file:
-                        entry = {"timestamp_sec": round(ts, 2), **location}
-                        probe_log_file.write(json.dumps(entry) + "\n")
-                        probe_log_file.flush()
-                        frame_name = f"t{ts:08.2f}s.jpg"
-                        cv2.imwrite(os.path.join(probe_frames_dir, frame_name), webcam_frame)
+        for e in entries:
+            i, ts, frame, webcam_frame, tick = e["i"], e["ts"], e["frame"], e["webcam_frame"], e["tick"]
+
+            if e["needs_stage3a"] and probe_log_file:
+                loc = resolved_location_by_i[i]
+                log_entry = {"timestamp_sec": round(ts, 2), **loc}
+                probe_log_file.write(json.dumps(log_entry) + "\n")
+                probe_log_file.flush()
+                if webcam_frame is not None:
+                    cv2.imwrite(os.path.join(probe_frames_dir, f"t{ts:08.2f}s.jpg"), webcam_frame)
 
             if position_debug_video_path and webcam_frame is not None:
-                debug_frame = renderer.draw_position_debug_frame(webcam_frame, last_probe_position)
+                debug_frame = renderer.draw_position_debug_frame(webcam_frame, e["resolved_probe_position"])
                 if position_writer is None:
                     h, w = webcam_frame.shape[:2]
                     position_writer = video_io.OutputVideoWriter(position_debug_video_path,
@@ -405,26 +556,23 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
                 for _ in range(hold_frames):
                     position_writer.write(debug_frame)
 
-            max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
-            needs_naming = bool(tick.blobs) and (
-                location_refreshed
-                or (ts - last_named_at) >= config.VLM_SAMPLE_INTERVAL_SEC
-                or len(tick.blobs) != len(last_named_records)
-                or any(_nearest_match(b.centroid, last_named_records, max_dist) is None for b in tick.blobs)
-            )
-            if needs_naming:
-                blob_dicts = [{"blob_id": b.blob_id, "n_class": b.n_class, "centroid": list(b.centroid)}
-                              for b in tick.blobs]
-                annotated_intermediate = renderer.draw_intermediate_frame(frame, tick.blobs, tick.fascia)
-                names_result = s3b.name_veins(blob_dicts, location, annotated_ultrasound_frame_bgr=annotated_intermediate)
-                n_stage3b_calls += 1
+            # Only adopt fresh naming when the call actually SUCCEEDED (i in
+            # naming_results) -- confirmed real bug this fixes: the old version rebuilt
+            # last_named_records from naming_results.get(i, {}) unconditionally whenever
+            # needs_naming was true, and a FAILED call means that dict lookup returns {},
+            # which wiped last_named_records to empty and erased an already-correct name
+            # that had just been showing a moment earlier. Same principle as run_pass1's
+            # classify_failed fix -- a failed call must fall through and keep showing the
+            # last known-good state, not blank it.
+            if e["needs_naming"] and i in naming_results:
+                names_result = naming_results[i]
                 by_id = {b.blob_id: b for b in tick.blobs}
                 last_named_records = [
                     {"centroid": by_id[bid].centroid, "vein_name": v["vein_name"]}
                     for bid, v in names_result.items() if bid in by_id
                 ]
-                last_named_at = ts
 
+            max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
             current_names = {}
             for b in tick.blobs:
                 match = _nearest_match(b.centroid, last_named_records, max_dist)
@@ -438,21 +586,7 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
             for _ in range(hold_frames):
                 writer.write(final_frame)
 
-            if progress_cb:
-                progress_cb((i + 1) / n_ticks)
-
-            # Periodic wall-clock progress line (every 10 ticks) with a naive linear
-            # ETA — this is what answers "why is this taking so long" WHILE the job is
-            # still running, instead of only after it finishes or errors out. Also
-            # surfaces the actual Stage 3a/3b call counts, since those (not tick count)
-            # are what drive real wall-clock time in this pass.
-            if (i + 1) % 10 == 0 or (i + 1) == n_ticks:
-                pass2_elapsed = time.monotonic() - pass2_t0
-                rate = pass2_elapsed / (i + 1)
-                eta = rate * (n_ticks - (i + 1))
-                print(f"[pipeline] Pass 2: tick {i + 1}/{n_ticks} (ts={ts:.1f}s) — "
-                      f"{pass2_elapsed:.1f}s elapsed, ~{eta:.1f}s remaining — "
-                      f"{n_stage3a_calls} stage3a + {n_stage3b_calls} stage3b Groq calls so far")
+            _report(_SCHED_W + _S3A_W + _S3B_W + _RENDER_W * ((i + 1) / n_ticks))
     finally:
         if writer:
             writer.release()
@@ -461,9 +595,12 @@ def run_pass2(ticks: list, ultrasound_path: str, webcam_path: str, final_video_p
         webcam_reader.release()
         if probe_log_file:
             probe_log_file.close()
+        _report(1.0)
+        print(f"[pipeline] Pass 2 render done in {time.monotonic() - render_t0:.1f}s")
         pass2_elapsed = time.monotonic() - pass2_t0
-        print(f"[pipeline] Pass 2 done in {pass2_elapsed:.1f}s — {n_stage3a_calls} stage3a calls, "
-              f"{n_stage3b_calls} stage3b naming calls ({n_stage3a_calls + n_stage3b_calls} Groq calls total)")
+        print(f"[pipeline] Pass 2 done in {pass2_elapsed:.1f}s — {len(scheduled_3a)} stage3a calls, "
+              f"{len(scheduled_naming)} stage3b naming calls ({len(scheduled_3a) + len(scheduled_naming)} "
+              f"Groq calls total, at {config.STAGE3A_MAX_WORKERS}x/{config.STAGE3B_MAX_WORKERS}x concurrency)")
 
 
 # --- Convenience wrapper for callers (Flask job, CLI) ----------------------------------
@@ -480,6 +617,8 @@ def run_full_pipeline(ultrasound_path: str, webcam_path: str, intermediate_video
     position_debug_video_path: see run_pass2's docstring — the Stage A 0/1/uncertain
     debug video."""
     job_t0 = time.monotonic()
+    groq_client.usage_tracker.reset()  # per-job total, not cumulative across jobs in this
+                                        # server process -- see groq_client._UsageTracker
     if progress_cb:
         progress_cb("cropping", 0.0)
     crop_t0 = time.monotonic()
@@ -496,8 +635,20 @@ def run_full_pipeline(ultrasound_path: str, webcam_path: str, intermediate_video
         if progress_cb:
             progress_cb("naming", frac)
 
-    ticks = run_pass1(cropped_ultrasound_path, intermediate_video_path, artifact_path, progress_cb=p1_cb)
-    run_pass2(ticks, cropped_ultrasound_path, webcam_path, final_video_path, progress_cb=p2_cb,
-              probe_log_dir=probe_log_dir, position_debug_video_path=position_debug_video_path)
-    print(f"[pipeline] Full job done in {time.monotonic() - job_t0:.1f}s total "
-          f"(cropping + Pass 1 segmentation + Pass 2 location/naming)")
+    try:
+        ticks = run_pass1(cropped_ultrasound_path, intermediate_video_path, artifact_path, progress_cb=p1_cb)
+        run_pass2(ticks, cropped_ultrasound_path, webcam_path, final_video_path, progress_cb=p2_cb,
+                  probe_log_dir=probe_log_dir, position_debug_video_path=position_debug_video_path)
+        print(f"[pipeline] Full job done in {time.monotonic() - job_t0:.1f}s total "
+              f"(cropping + Pass 1 segmentation + Pass 2 location/naming)")
+    finally:
+        # Printed even on a genuine crash (per-tick Groq failures no longer reach here at
+        # all -- see run_pass1/run_pass2's try/except around every concurrent dispatch --
+        # so anything that DOES still raise past this point is a real, different failure,
+        # and the user should still see exactly how much was spent before it happened
+        # rather than losing that visibility along with the job).
+        usage = groq_client.usage_tracker.summary()
+        print(f"[pipeline] Groq usage this job: {usage['calls']} calls, "
+              f"{usage['prompt_tokens']:,} prompt + {usage['completion_tokens']:,} completion "
+              f"= {usage['total_tokens']:,} tokens total, ~${usage['est_cost_usd']:.2f} "
+              f"estimated (pricing approximate -- see _UsageTracker.summary)")

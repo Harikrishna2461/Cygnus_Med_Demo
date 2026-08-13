@@ -13,9 +13,13 @@ N_CLASS_COLORS = {
 DEFAULT_COLOR = (0, 210, 0)
 
 
-def _put_label(img, text, org, color=(255, 255, 255), scale=0.5):
-    cv2.putText(img, text, org, cv2.FONT_HERSHEY_SIMPLEX, scale, (0, 0, 0), 3, cv2.LINE_AA)
-    cv2.putText(img, text, org, cv2.FONT_HERSHEY_SIMPLEX, scale, color, 1, cv2.LINE_AA)
+def _put_label(img, text, org, color=(255, 255, 255), scale=0.5, thickness=1):
+    # Outline thickness scales with the main thickness (roughly 2x + a fixed margin) so
+    # a bigger/bolder label keeps a legible black outline instead of the outline
+    # staying fixed-width while the text grows past it.
+    outline_thickness = thickness * 2 + 1
+    cv2.putText(img, text, org, cv2.FONT_HERSHEY_SIMPLEX, scale, (0, 0, 0), outline_thickness, cv2.LINE_AA)
+    cv2.putText(img, text, org, cv2.FONT_HERSHEY_SIMPLEX, scale, color, thickness, cv2.LINE_AA)
 
 
 def draw_fascia_lines(frame_bgr: np.ndarray, fascia) -> np.ndarray:
@@ -93,11 +97,31 @@ def draw_intermediate_frame(frame_bgr: np.ndarray, blobs, fascia) -> np.ndarray:
 
 
 def draw_final_frame(frame_bgr: np.ndarray, blobs, fascia, vein_names: dict) -> np.ndarray:
-    """vein_names: {blob_id: "GSV"|...}. Falls back to N-class if a blob wasn't named."""
-    def _label(b):
-        name = vein_names.get(b.blob_id)
-        return f"{b.blob_id}:{name}" if name else f"{b.blob_id}:{b.n_class or '?'}"
-    return _render(frame_bgr, blobs, fascia, _label)
+    """vein_names: {blob_id: "GSV"|...}.
+
+    STRICT policy per explicit user direction: this video must show ONLY real vein
+    names, nothing else -- no placeholder text, no internal state exposed. Two earlier
+    versions both violated this in different ways: (1) falling back to the raw N-class
+    ("N2", etc.) when unnamed -- Stage 2's depth vocabulary leaking into what's supposed
+    to be the finished-names video; (2) a "naming..." placeholder -- an improvement over
+    (1) but still not an actual vein name, and confirmed on real output to read as "wtf
+    is this" rather than a clear in-progress indicator. The fix now is to not render an
+    unnamed blob AT ALL -- no contour, no label -- rather than show any non-name text.
+    It simply appears once naming resolves (which is usually within a tick or two --
+    stage3_vein_naming's retry/validation loop rejects off-vocabulary and duplicate-
+    trunk answers rather than accepting a wrong one, see that module), instead of ever
+    displaying a placeholder in the meantime.
+
+    CONFIRMED REAL GAP in that filter: "uncertain" is a legitimate, non-empty value
+    name_veins() can return (the model explicitly saying "I don't know" rather than
+    guessing) -- `vein_names.get(b.blob_id)` is truthy for it, so it sailed straight
+    through the "only real names get drawn" filter and rendered as "1:uncertain" for an
+    entire clip. Per explicit direction, "uncertain" is NOT a vein name and must be
+    treated exactly like "no name yet" -- excluded here too, not just missing entries."""
+    NON_NAMES = {"uncertain", "unknown", ""}
+    blobs = [b for b in blobs
+             if (vein_names.get(b.blob_id) or "").strip().lower() not in NON_NAMES]
+    return _render(frame_bgr, blobs, fascia, lambda b: f"{b.blob_id}:{vein_names[b.blob_id]}")
 
 
 _POSITION_LABEL_TEXT = {0: "0 (ABOVE knee)", 1: "1 (AT/BELOW knee)", "uncertain": "uncertain"}
@@ -114,5 +138,9 @@ def draw_position_debug_frame(webcam_frame_bgr: np.ndarray, probe_position) -> n
     out = webcam_frame_bgr.copy()
     text = _POSITION_LABEL_TEXT.get(probe_position, "uncertain")
     color = _POSITION_LABEL_COLOR.get(probe_position, (150, 150, 150))
-    _put_label(out, f"stage A: {text}", (16, 40), color=color, scale=1.1)
+    # Confirmed illegible on real footage: webcam frames are full 1920x1080, and the old
+    # scale=1.1/thickness=1 label was sized for a much smaller frame -- proportionally
+    # tiny and thin on the real resolution. Bumped scale and thickness substantially, and
+    # moved down a little from the original y=40 per explicit request.
+    _put_label(out, f"stage A: {text}", (24, 90), color=color, scale=2.2, thickness=4)
     return out

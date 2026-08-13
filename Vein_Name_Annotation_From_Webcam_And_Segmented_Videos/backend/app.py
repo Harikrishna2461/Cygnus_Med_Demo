@@ -65,10 +65,16 @@ def job_result(job_id, which):
         "intermediate": job.intermediate_path,
         "final": job.final_path,
         "position_debug": job.position_debug_path,
+        # The raw webcam upload -- not a pipeline OUTPUT, so it's available immediately
+        # (see the readiness check below) rather than gated on job.status == "done".
+        # Serves the 3rd pane of the frontend's synced player, so a viewer can compare
+        # the annotated results directly against the source footage they came from.
+        "webcam": job.webcam_path,
     }.get(which)
     if path is None:
-        return jsonify({"error": "which must be 'intermediate', 'final', or 'position_debug'"}), 400
-    if job.status != "done" or not os.path.exists(path):
+        return jsonify({"error": "which must be 'intermediate', 'final', 'position_debug', or 'webcam'"}), 400
+    ready = os.path.exists(path) and (which == "webcam" or job.status == "done")
+    if not ready:
         return jsonify({"error": "result not ready"}), 409
     return send_file(path, mimetype="video/mp4")
 

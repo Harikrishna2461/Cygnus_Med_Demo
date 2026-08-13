@@ -40,5 +40,33 @@
     "verified_on": [
       "ultrasound"
     ]
+  },
+  "06e3c5f89aed06": {
+    "resolution": "720x480",
+    "roi": {
+      "x1": 185,
+      "y1": 55,
+      "x2": 478,
+      "y2": 405
+    },
+    "detection_method": "agent+cv_averaged",
+    "confidence": 0.95,
+    "verified_on": [
+      "test_ultrasound_20s"
+    ]
+  },
+  "c450b85719fc80": {
+    "resolution": "1920x1088",
+    "roi": {
+      "x1": 764,
+      "y1": 100,
+      "x2": 1172,
+      "y2": 702
+    },
+    "detection_method": "agent+cv_averaged",
+    "confidence": 0.95,
+    "verified_on": [
+      "ultrasound"
+    ]
   }
 }

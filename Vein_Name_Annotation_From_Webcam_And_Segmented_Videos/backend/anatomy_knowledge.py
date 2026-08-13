@@ -23,6 +23,33 @@ LEG_LEVELS = [
     "uncertain",
 ]
 
+# Per-N-class vein-name vocabularies for Stage 3b (stage3_vein_naming.py) -- mirrors the
+# SAME narrowed-vocabulary pattern already proven in stage3_webcam_location.py's
+# allowed_levels (Stage A's 0/1 above/below-knee split narrows Stage B's leg_level
+# choices). Confirmed real bug this fixes: without a class-gated vocabulary, the naming
+# model was free to pick "Tributary" (an N3-only epifascial concept) for an N2
+# (interfascial/saphenous-trunk) blob, and nothing stopped it -- the vocabulary itself
+# must make that combination impossible to express, not just discouraged in prose.
+# Derived directly from the N1/N2/N3 anatomical definitions in ANATOMY_REFERENCE_TEXT
+# below -- keep these two in sync if the anatomy text ever changes.
+#
+# "Perforator" is intentionally included in all three: a perforator's whole clinical
+# significance is that it crosses between compartments (superficial to deep), so a single
+# vessel's course can genuinely present at any of the three depths depending on exactly
+# where the cross-section falls along it -- this is not a gap in the gating, it's the one
+# vein type that legitimately belongs in every list.
+N1_VEIN_NAMES = ["CFV", "FV", "PV", "Posterior Tibial Vein", "Peroneal Vein", "Perforator"]
+N2_VEIN_NAMES = ["GSV", "SSV", "AASV", "PASV", "Giacomini", "Perforator"]
+N3_VEIN_NAMES = ["Tributary", "AASV", "PASV", "Perforator"]
+
+VEIN_NAMES_BY_NCLASS = {"N1": N1_VEIN_NAMES, "N2": N2_VEIN_NAMES, "N3": N3_VEIN_NAMES}
+
+# Trunk names that refer to ONE specific real vessel, not a category -- at most one blob
+# per frame should ever be assigned any single one of these (see the uniqueness check in
+# stage3_vein_naming.py). "Tributary" is deliberately excluded: it's a generic category,
+# genuinely expected to repeat across multiple distinct small blobs in one frame.
+UNIQUE_PER_FRAME_VEIN_NAMES = {"GSV", "SSV", "CFV", "PV", "FV"}
+
 ANATOMY_REFERENCE_TEXT = """
 FASCIAL DEPTH — why N1/N2/N3 exist anatomically:
 Two fasciae define three compartments on ultrasound. The muscle fascia (deep) is the
