@@ -2,6 +2,8 @@
 import cv2
 import numpy as np
 
+import knee_cv
+
 FASCIA_SUP_COLOR = (0, 230, 230)   # matches Task_4_VLM_Fascia_Vein_Detection's convention
 FASCIA_DEEP_COLOR = (0, 160, 230)
 
@@ -134,8 +136,19 @@ def draw_position_debug_frame(webcam_frame_bgr: np.ndarray, probe_position) -> n
     was based on, at 0 (above knee) / 1 (at-or-below knee) / uncertain — so a human can
     scrub through and visually confirm the upstream binary split (which the narrowed-
     vocabulary leg_level classification in Stage B depends on) is landing correctly,
-    independent of what made it into the final annotated ultrasound video."""
+    independent of what made it into the final annotated ultrasound video.
+
+    Also burns the SAME knee-height line knee_cv.py draws for the VLM itself (see
+    read_probe_position's "CV-assisted knee line" docstring) — recomputed here directly
+    on this frame (classical CV, zero VLM tokens, cheap enough to call once per debug
+    frame) so a human reviewing this video sees exactly what the model saw when it made
+    the above/below-knee call, not just the call's answer. When knee_cv can't find a
+    confident knee on this particular frame (falls back to text-only for the real VLM
+    call too, see read_probe_position), no line is drawn — never a guessed one."""
     out = webcam_frame_bgr.copy()
+    knee_y, _bbox = knee_cv.find_knee_y(webcam_frame_bgr)
+    if knee_y is not None:
+        out = knee_cv.draw_knee_line(out, knee_y)
     text = _POSITION_LABEL_TEXT.get(probe_position, "uncertain")
     color = _POSITION_LABEL_COLOR.get(probe_position, (150, 150, 150))
     # Confirmed illegible on real footage: webcam frames are full 1920x1080, and the old

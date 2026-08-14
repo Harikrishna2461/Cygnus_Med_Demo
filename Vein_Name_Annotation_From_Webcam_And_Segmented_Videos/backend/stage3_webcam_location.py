@@ -34,6 +34,11 @@ import knee_cv
 
 _CONF_RANK = {"low": 0, "medium": 1, "high": 2}
 
+
+def _encode_jpeg_b64(frame_bgr) -> str:
+    _, buf = cv2.imencode(".jpg", frame_bgr)
+    return base64.b64encode(buf).decode()
+
 # Appended to the relevant system prompts when knee_cv.occlusion_score flags a frame --
 # confirmed directly on real footage (not assumed): telling the model to actively
 # ignore the blurry near-lens obstruction and judge from whatever IS visible recovers
@@ -490,7 +495,22 @@ _SURFACE_LEG_SIDE_SYSTEM_PROMPT_TAIL = (
     "4. If you cannot tell, answer leg_side='uncertain' rather than guessing.\n"
     "5. Scanning the popliteal fossa (back of the knee) does NOT by itself mean the "
     "patient turned their whole body around — check actual visible cues (face, back "
-    "of head/shoulders) before concluding they turned around.\n\n"
+    "of head/shoulders) before concluding they turned around.\n"
+    "6. THIS FOOTAGE IS OFTEN CROPPED TO JUST THE LOWER LEGS — no face, shoulders, or "
+    "head in frame at all. When that's the case, do NOT guess facing direction from "
+    "general vibe or default to 'facing the camera' — use the visible FOOT/FEET "
+    "instead, which is a reliable cue even alone:\n"
+    "   - Look specifically for individual TOE shapes and toenails, and the top-of-"
+    "foot instep curve. If you can clearly make out separate toes, the patient's "
+    "FRONT faces the camera.\n"
+    "   - Look specifically for a rounded HEEL and the Achilles tendon cord running "
+    "up the back of the ankle, with no toe detail visible (the foot's sole/toes are "
+    "hidden or pointing away from the camera). If that's what you see, the patient's "
+    "BACK faces the camera.\n"
+    "   - Do not assume toes are visible just because a foot/leg is visible in frame "
+    "— actively check which of the two patterns above the visible foot actually "
+    "shows before deciding. Getting this backwards (claiming toes when only a heel "
+    "is shown, or vice versa) is a common, confirmed failure mode — look twice.\n\n"
     "HOW TO DETERMINE surface (anterior/medial/posterior/lateral). The clinically "
     "important distinction is GROUP-level: {anterior, medial} are the SAME vein "
     "territory (GSV) and mixing those two up is low-stakes — but POSTERIOR is a "
@@ -499,6 +519,13 @@ _SURFACE_LEG_SIDE_SYSTEM_PROMPT_TAIL = (
     "VS posterior; don't agonize over medial vs. anterior specifically.\n"
     "This camera angle can make an anterior scene and a posterior scene look "
     "surprisingly similar at a glance — do not confidently pattern-match from vibe.\n"
+    "STRONG DIRECT CUE (check this FIRST, before comparing to the reference panels "
+    "below): the same heel-vs-toes foot check from the leg_side reasoning above is "
+    "ALSO one of the most reliable surface signals here. A visible HEEL/Achilles "
+    "tendon with no toes, together with a rounded calf-muscle bulge (gastrocnemius) "
+    "on the back of the lower leg rather than the harder shin-bone ridge on the "
+    "front, is a strong POSTERIOR indicator — weight it at least as heavily as the "
+    "panel-composition comparison below, and prefer it if the two seem to disagree.\n"
     "There is a reference image included with this message, two panels, both real "
     "frames from this exact exam, both user-verified ground truth: PANEL A is "
     "confirmed ANTERIOR/MEDIAL (red=anterior, green=medial). PANEL B is confirmed "
@@ -535,28 +562,76 @@ def _surface_system_prompt(position_evidence: str = None) -> str:
     )
 
 
+_FOOT_CROP_NOTE = (
+    "\n\nAN EXTRA IMAGE is included with this message: a ZOOMED-IN crop of this exact "
+    "frame's foot/ankle region (the same frame, cropped and enlarged, not a different "
+    "moment). Full-frame images at this resolution have been confirmed, via direct "
+    "testing, to be unreliable for reading fine toe-vs-heel detail — the foot is a "
+    "small fraction of the full frame. USE THE ZOOMED CROP, not the full frame, to make "
+    "the toe/heel determination described above; trust what you see in the crop over "
+    "any impression from the full-frame view if the two seem to disagree."
+)
+
+
+_AGENT_S_RETRY_SUFFIX = (
+    "\n\nYour previous attempt at this exact frame ran out of space mid-reasoning "
+    "without ever reaching a JSON answer. This time: work through leg_side and surface "
+    "(including the toe/heel crop check) in at most 2 short sentences each, reach a "
+    "conclusion, and move on -- do not re-litigate a judgment once made. The instant you "
+    "have both, stop reasoning and output the JSON immediately."
+)
+
+
 def read_surface_reflux(frame_bgr, position_evidence: str = None, occluded: bool = False) -> dict:
-    """Agent S. Single call, no majority vote, no truncation retry -- see
-    read_level_name_reflux's docstring for why (real TPM rate-limit crash in
-    production). Also no longer uses the "confirmed dodd" reference image -- same
-    anchoring problem confirmed here too (visual_evidence text was citing "the provided
-    ground truth" verbatim). Back to the generic Panel A/B surface composite only.
+    """Agent S. No majority vote (see read_level_name_reflux's docstring for why -- real
+    TPM rate-limit crash in production caused by the VOTE pattern specifically). Also no
+    longer uses the "confirmed dodd" reference image -- same anchoring problem confirmed
+    here too (visual_evidence text was citing "the provided ground truth" verbatim). Back
+    to the generic Panel A/B surface composite only.
+
+    DOES now get one single, narrowly-scoped truncation retry (same bounded pattern as
+    read_level_and_surface's -- a different, safer thing than the removed vote pattern).
+    Added alongside the foot-crop fix below: confirmed on real repeated draws that the
+    extra image + extra reasoning instructions measurably raised this call's truncation
+    rate (2 of 3 real draws on one test frame came back with no JSON at all, losing all
+    information for that frame) -- unacceptable regression, a bounded retry is the
+    already-proven fix for exactly this shape of problem elsewhere in this file.
 
     occluded: see read_level_name_reflux -- confirmed on real footage to recover a full
-    confident answer on a frame that previously came back completely empty."""
+    confident answer on a frame that previously came back completely empty.
+
+    Foot crop (knee_cv.foot_crop): a zoomed-in crop of the foot/ankle region, added as an
+    extra image whenever knee_cv can find the leg bbox -- fixes a CONFIRMED real vision
+    failure (not a prompt-wording issue): the model reliably hallucinated "toes visible"
+    on full frames that unambiguously showed only a bare heel, on real footage, even when
+    directly and explicitly asked to check. See knee_cv.foot_crop's docstring for the
+    real before/after test that led to this fix."""
     _, buf = cv2.imencode(".jpg", frame_bgr)
     img_b64 = base64.b64encode(buf).decode()
     system = _surface_system_prompt(position_evidence)
+    crop = knee_cv.foot_crop(frame_bgr)
+    if crop is not None:
+        system += _FOOT_CROP_NOTE
     if occluded:
         system += OCCLUSION_NOTE
     ref_b64 = _get_surface_reference_image_b64()
-    extra_images = [(ref_b64, "image/jpeg")] if ref_b64 else None
+    extra_images = [im for im in [
+        (ref_b64, "image/jpeg") if ref_b64 else None,
+        (_encode_jpeg_b64(crop), "image/jpeg") if crop is not None else None,
+    ] if im] or None
 
-    parsed, _raw = groq_client.call_vlm_json(
+    parsed, raw = groq_client.call_vlm_json(
         system, "Classify this frame.", image_b64=img_b64, image_media_type="image/jpeg",
         extra_images=extra_images, reasoning_effort="default", max_tokens=8192,
         label="agent_s",
     )
+    if _looks_truncated(parsed, raw):
+        print(f"[stage3a] agent_s call truncated ({len(raw)} chars, no JSON) -- retrying once")
+        parsed, raw = groq_client.call_vlm_json(
+            system, "Classify this frame." + _AGENT_S_RETRY_SUFFIX, image_b64=img_b64,
+            image_media_type="image/jpeg", extra_images=extra_images,
+            reasoning_effort="default", max_tokens=8192, label="agent_s_retry",
+        )
     return {
         "leg_side": parsed.get("leg_side") or "uncertain",
         "surface": parsed.get("surface") or "uncertain",
@@ -582,7 +657,18 @@ _HAND_ID_FALLBACK = (
 )
 
 
-def _level_system_prompt(allowed_levels: list[str], position_evidence: str = None) -> str:
+def _level_system_prompt(allowed_levels: list[str], position_evidence: str = None,
+                          has_foot_crop: bool = False) -> str:
+    """has_foot_crop: this model has a hard 3-image-per-call limit, and this prompt's
+    call already sends 2 fixed reference images (level bands + surface panel) alongside
+    the real frame -- exactly 3, no room for a 4th. When knee_cv.foot_crop finds a crop
+    (see its docstring), it REPLACES the surface panel image rather than appending
+    (confirmed necessary: appending it hit a real 400 "Too many images... supports up to
+    3" error). This flag switches the surface-determination text below to match:
+    describing the foot crop that will actually be sent instead of the panel composite
+    that won't be, so the prompt never references an image the model wasn't given
+    (confirmed elsewhere in this project that mismatched image references cause the
+    model to hallucinate seeing something that isn't there)."""
     hand_id_block = (
         f"A FIRST-PASS SYSTEM ALREADY LOOKED AT THIS EXACT FRAME and identified which "
         f"hand holds the real probe (this exam sometimes shows two hands on the leg "
@@ -663,7 +749,23 @@ def _level_system_prompt(allowed_levels: list[str], position_evidence: str = Non
         "patient's overall stance and facing direction stay the same as moments before. "
         "Do not re-derive facing direction from scratch just because the surface being "
         "scanned is posterior — check the actual visible cues (face, back of head/"
-        "shoulders) in THIS frame before concluding the patient turned around.\n\n"
+        "shoulders) in THIS frame before concluding the patient turned around.\n"
+        "6. THIS FOOTAGE IS OFTEN CROPPED TO JUST THE LOWER LEGS — no face, shoulders, "
+        "or head in frame at all. When that's the case, do NOT guess facing direction "
+        "from general vibe or default to 'facing the camera' — use the visible FOOT/"
+        "FEET instead, which is a reliable cue even alone:\n"
+        "   - Look specifically for individual TOE shapes and toenails, and the "
+        "top-of-foot instep curve. If you can clearly make out separate toes, the "
+        "patient's FRONT faces the camera.\n"
+        "   - Look specifically for a rounded HEEL and the Achilles tendon cord "
+        "running up the back of the ankle, with no toe detail visible (the foot's "
+        "sole/toes are hidden or pointing away from the camera). If that's what you "
+        "see, the patient's BACK faces the camera.\n"
+        "   - Do not assume toes are visible just because a foot/leg is visible in "
+        "frame — actively check which of the two patterns above the visible foot "
+        "actually shows before deciding. Getting this backwards (claiming toes when "
+        "only a heel is shown, or vice versa) is a common, confirmed failure mode — "
+        "look twice.\n\n"
         "HOW TO DETERMINE surface (anterior/medial/posterior/lateral) of the leg being "
         "scanned. The clinically important distinction is GROUP-level: {anterior, "
         "medial} are the SAME vein territory (GSV) and mixing those two up specifically "
@@ -677,36 +779,77 @@ def _level_system_prompt(allowed_levels: list[str], position_evidence: str = Non
         "angle can make an anterior scene and a posterior scene look surprisingly "
         "similar at a glance, confirmed on real footage from this exact exam. Do not "
         "confidently pattern-match from general vibe.\n"
-        "There is a THIRD reference image included with this message (separate from "
-        "the probe-vs-hand/levels one) with two panels, both real frames from this "
-        "exact exam, both user-verified ground truth (not guessed): PANEL A is "
-        "confirmed ANTERIOR/MEDIAL (annotated red=anterior, green=medial). PANEL B is "
-        "confirmed POSTERIOR (annotated blue). Compare the CURRENT frame you are "
-        "classifying against BOTH panels and judge which one it more closely resembles "
-        "— not just 'does a leg appear', but the overall composition: how much of the "
-        "leg(s)/body is in frame, the clinician's arm/hand position relative to the "
-        "probe, how the probe is angled relative to the leg(s). If the current frame "
-        "closely resembles PANEL A's composition, answer medial or anterior. If it "
-        "closely resembles PANEL B's composition, answer posterior. If it resembles "
-        "neither clearly, do not force a confident guess — answer at 'low' or 'medium' "
-        "confidence, or 'uncertain' if genuinely unreadable, rather than asserting a "
-        "surface the image doesn't actually support.\n"
-        "- lateral: the probe is on the OUTER side of the leg, away from the other leg "
-        "— uncommon in this kind of exam, only choose it if clearly visible (neither "
-        "reference panel is an example of this).\n\n"
-        "Work through the facing-direction and leg_side reasoning ONCE, reach a "
+        + (
+            "STRONG DIRECT CUE, and your PRIMARY evidence for this call (there is no "
+            "separate reference-panel image this time — see below for why): the same "
+            "heel-vs-toes foot check from the leg_side reasoning above IS the main "
+            "surface signal here. The THIRD image included with this message is NOT a "
+            "fixed reference — it is a ZOOMED-IN crop of THIS SAME FIRST FRAME's foot/"
+            "ankle region, enlarged because fine toe/heel detail is confirmed unreliable "
+            "to read on the full first image at this resolution. Look at that crop: a "
+            "visible HEEL/Achilles tendon with no toes, together with a rounded "
+            "calf-muscle bulge (gastrocnemius) on the back of the lower leg rather than "
+            "the harder shin-bone ridge on the front, is a strong POSTERIOR indicator. "
+            "Toes clearly visible in the crop point to anterior/medial instead. If the "
+            "crop is genuinely inconclusive, answer at 'low'/'medium' confidence rather "
+            "than forcing a guess.\n"
+            "- lateral: the probe is on the OUTER side of the leg, away from the other "
+            "leg — uncommon in this kind of exam, only choose it if clearly visible.\n\n"
+            if has_foot_crop else
+            "STRONG DIRECT CUE (check this FIRST, before comparing to the reference "
+            "panel below): the same heel-vs-toes foot check from the leg_side reasoning "
+            "above is ALSO one of the most reliable surface signals here. A visible "
+            "HEEL/Achilles tendon with no toes, together with a rounded calf-muscle "
+            "bulge (gastrocnemius) on the back of the lower leg rather than the harder "
+            "shin-bone ridge on the front, is a strong POSTERIOR indicator — weight it "
+            "at least as heavily as the panel-composition comparison below, and prefer "
+            "it if the two seem to disagree.\n"
+            "There is a THIRD reference image included with this message (separate from "
+            "the probe-vs-hand/levels one) with two panels, both real frames from this "
+            "exact exam, both user-verified ground truth (not guessed): PANEL A is "
+            "confirmed ANTERIOR/MEDIAL (annotated red=anterior, green=medial). PANEL B is "
+            "confirmed POSTERIOR (annotated blue). Compare the CURRENT frame you are "
+            "classifying against BOTH panels and judge which one it more closely resembles "
+            "— not just 'does a leg appear', but the overall composition: how much of the "
+            "leg(s)/body is in frame, the clinician's arm/hand position relative to the "
+            "probe, how the probe is angled relative to the leg(s). If the current frame "
+            "closely resembles PANEL A's composition, answer medial or anterior. If it "
+            "closely resembles PANEL B's composition, answer posterior. If it resembles "
+            "neither clearly, do not force a confident guess — answer at 'low' or 'medium' "
+            "confidence, or 'uncertain' if genuinely unreadable, rather than asserting a "
+            "surface the image doesn't actually support.\n"
+            "- lateral: the probe is on the OUTER side of the leg, away from the other leg "
+            "— uncommon in this kind of exam, only choose it if clearly visible (neither "
+            "reference panel is an example of this).\n\n"
+        )
+        + "Work through the facing-direction and leg_side reasoning ONCE, reach a "
         "conclusion, and move on — do not re-litigate the same left/right judgment "
         "back and forth repeatedly. If after one careful pass you are genuinely torn, "
         "answer 'uncertain' rather than continuing to deliberate.\n\n"
-        "STRICT reasoning budget: think in at most 6 short sentences total, covering "
-        "in order — (1) facing direction, (2) which leg is which, (3) which hand holds "
-        "the actual probe device, (4) leg_level using the joint-line landmark check "
-        "and the level reference's proportions, (5) surface, (6) done. Your FIRST judgment on each "
-        "point is final — do NOT write follow-up sentences starting with 'Wait', "
-        "'Actually', 'No,', 'Let me reconsider', 'Hmm', or any other self-correction. "
-        "The instant you have all judgments, stop reasoning and output the JSON "
-        "immediately — a long internal monologue is a failure, not thoroughness.\n\n"
-        "WHEN TO ANSWER 'uncertain': only for a field where the image genuinely gives "
+        + (
+            "STRICT reasoning budget: think in at most 7 short sentences total, covering "
+            "in order — (1) facing direction, (2) which leg is which, (3) which hand "
+            "holds the actual probe device, (4) leg_level using the joint-line landmark "
+            "check and the level reference's proportions, (5) look SPECIFICALLY at the "
+            "THIRD (zoomed foot-crop) image and state plainly whether it shows toes or a "
+            "heel — do not skip or rush this step, it is a separate dedicated check, not "
+            "a restatement of step 1, (6) surface, using step 5's finding as your primary "
+            "evidence, (7) done. Your FIRST judgment on each point is final — do NOT "
+            "write follow-up sentences starting with 'Wait', 'Actually', 'No,', 'Let me "
+            "reconsider', 'Hmm', or any other self-correction. The instant you have all "
+            "judgments, stop reasoning and output the JSON immediately — a long internal "
+            "monologue is a failure, not thoroughness.\n\n"
+            if has_foot_crop else
+            "STRICT reasoning budget: think in at most 6 short sentences total, covering "
+            "in order — (1) facing direction, (2) which leg is which, (3) which hand holds "
+            "the actual probe device, (4) leg_level using the joint-line landmark check "
+            "and the level reference's proportions, (5) surface, (6) done. Your FIRST judgment on each "
+            "point is final — do NOT write follow-up sentences starting with 'Wait', "
+            "'Actually', 'No,', 'Let me reconsider', 'Hmm', or any other self-correction. "
+            "The instant you have all judgments, stop reasoning and output the JSON "
+            "immediately — a long internal monologue is a failure, not thoroughness.\n\n"
+        )
+        + "WHEN TO ANSWER 'uncertain': only for a field where the image genuinely gives "
         "you no usable evidence — e.g. the probe/leg is completely out of frame, fully "
         "hidden, or the frame itself is unusable (blank/blurred beyond recognition). If "
         "the probe and leg ARE visible but the view is merely awkward, oblique, or "
@@ -727,17 +870,33 @@ def _level_system_prompt(allowed_levels: list[str], position_evidence: str = Non
     )
 
 
-LEVEL_USER_PROMPT = (
-    "The FIRST image is the actual frame from the webcam video, at the timestamp "
-    "matching an ultrasound frame we need to interpret — identify the probe location on "
-    "the leg IN THIS FIRST IMAGE. The remaining images are fixed REFERENCE EXAMPLES (not "
-    "from this timestamp, not what you are classifying), described in the system "
-    "instructions: the SECOND image is the groin-to-ankle leg-level band sequence for "
-    "proportion reference. The THIRD image is a two-panel composite with ground-truth "
-    "panels for the anterior/medial vs. posterior surface distinction. Use both "
-    "reference images only to recognize those patterns if they appear in the first "
-    "image."
-)
+def _level_user_prompt(has_foot_crop: bool) -> str:
+    """has_foot_crop controls what the THIRD image actually is — see
+    _level_system_prompt's has_foot_crop docstring: this model has a hard 3-image cap,
+    so the foot crop REPLACES the surface reference panel in the same image slot rather
+    than being appended as a fourth. Keep this in sync with read_level_and_surface's
+    extra_images construction — the text here must always describe the image that was
+    actually sent, not a fixed assumption."""
+    third_image_desc = (
+        "The THIRD image is NOT a fixed reference — it is a ZOOMED-IN crop of THIS SAME "
+        "FIRST FRAME's foot/ankle region, enlarged so fine toe-vs-heel detail "
+        "(unreliable to read on the full first image at this resolution, confirmed by "
+        "direct testing) is actually visible. Use it specifically for the toe/heel "
+        "facing-direction and surface check described in the system instructions, "
+        "trusting it over the full first image if they seem to disagree."
+        if has_foot_crop else
+        "The THIRD image is a fixed REFERENCE two-panel composite with ground-truth "
+        "panels for the anterior/medial vs. posterior surface distinction. Use it only "
+        "to recognize those patterns if they appear in the first image."
+    )
+    return (
+        "The FIRST image is the actual frame from the webcam video, at the timestamp "
+        "matching an ultrasound frame we need to interpret — identify the probe location "
+        "on the leg IN THIS FIRST IMAGE. The SECOND image is a fixed REFERENCE EXAMPLE "
+        "(not from this timestamp, not what you are classifying): the groin-to-ankle "
+        "leg-level band sequence for proportion reference. Use it only to recognize "
+        "that pattern if it appears in the first image. " + third_image_desc
+    )
 
 MAX_TOKENS = 16384  # Groq's hard ceiling for this model's context window — confirmed via a
 # real 400 error when 25000 was tried; cannot be raised further.
@@ -822,15 +981,27 @@ def read_level_and_surface(frame_bgr, allowed_levels: list[str], position_eviden
     reuses existing, tested code rather than adding new speculative logic."""
     _, buf = cv2.imencode(".jpg", frame_bgr)
     img_b64 = base64.b64encode(buf).decode()
-    system = _level_system_prompt(allowed_levels, position_evidence)
+    crop = knee_cv.foot_crop(frame_bgr)  # see knee_cv.foot_crop's docstring — fixes a
+    # confirmed real vision failure (hallucinated "toes visible" on heel-only frames),
+    # not a prompt-wording issue.
+    has_foot_crop = crop is not None
+    system = _level_system_prompt(allowed_levels, position_evidence, has_foot_crop=has_foot_crop)
     if occluded:
         system += OCCLUSION_NOTE
-    user = LEVEL_USER_PROMPT
+    user = _level_user_prompt(has_foot_crop=has_foot_crop)
     level_ref_b64 = _get_level_reference_image_b64()
-    surface_ref_b64 = _get_surface_reference_image_b64()
+    # Groq's real hard cap for this model is 3 images per call (confirmed via a real 400
+    # error), and this call already sends the real frame + level reference = 2. The foot
+    # crop REPLACES the surface reference panel rather than appending a 4th image when
+    # available — see _level_system_prompt's has_foot_crop docstring for why this is safe
+    # (the prompt text is switched to match exactly what's actually sent, never claiming
+    # an image exists that wasn't included). Falls back to the original surface panel
+    # when knee_cv can't find a crop for this frame — unchanged behavior, not a
+    # regression for frames the new fix doesn't apply to.
+    third_image_b64 = _encode_jpeg_b64(crop) if has_foot_crop else _get_surface_reference_image_b64()
     extra_images = [im for im in [
         (level_ref_b64, "image/jpeg") if level_ref_b64 else None,
-        (surface_ref_b64, "image/jpeg") if surface_ref_b64 else None,
+        (third_image_b64, "image/jpeg") if third_image_b64 else None,
     ] if im] or None
     # No posterior majority-vote here (removed after a real TPM crash caused by that
     # specific multi-vote pattern -- see history note above MAX_TOKENS) -- but DOES get
