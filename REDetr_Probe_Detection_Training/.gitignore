@@ -1,0 +1,57 @@
+# Ignore all dataset images by default — only keep small samples below
+dataset/train/*.jpg
+dataset/valid/*.jpg
+dataset/test/*.jpg
+
+# Model weights and checkpoints
+*.pt
+*.pth
+*.safetensors
+*.bin
+*.ckpt
+
+# Keep 20 sample train images
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00000.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00005.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00010.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00015.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00020.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00025.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00030.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00035.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00040.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00045.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00050.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00055.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00060.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00065.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00070.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00075.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00080.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00085.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00090.jpg
+!dataset/train/QMLwebcam_recording_2026-03-17T02-07-33-864Z__full_scanner_0_to_11_clean__00095.jpg
+
+# Keep 10 sample valid images
+!dataset/valid/QMLwebcam_recording_2026-05-12T09-49-11-071Z__full_scanner_19_to_37_clean__00080.jpg
+!dataset/valid/QMLwebcam_recording_2026-05-12T09-49-11-071Z__full_scanner_19_to_37_clean__00085.jpg
+!dataset/valid/QMLwebcam_recording_2026-05-12T09-49-11-071Z__full_scanner_19_to_37_clean__00090.jpg
+!dataset/valid/QMLwebcam_recording_2026-05-12T09-49-11-071Z__full_scanner_19_to_37_clean__00095.jpg
+!dataset/valid/QMLwebcam_recording_2026-05-12T09-49-11-071Z__full_scanner_19_to_37_clean__00100.jpg
+!dataset/valid/QMLwebcam_recording_2026-05-12T09-49-11-071Z__full_scanner_19_to_37_clean__00505.jpg
+!dataset/valid/QMLwebcam_recording_2026-05-12T09-49-11-071Z__full_scanner_19_to_37_clean__00510.jpg
+!dataset/valid/QMLwebcam_recording_2026-05-12T09-49-11-071Z__full_scanner_19_to_37_clean__00515.jpg
+!dataset/valid/QMLwebcam_recording_2026-05-12T09-49-11-071Z__full_scanner_19_to_37_clean__00525.jpg
+!dataset/valid/QMLwebcam_recording_2026-05-12T09-49-11-071Z__full_scanner_19_to_37_clean__00540.jpg
+
+# Keep 10 sample test images
+!dataset/test/QMLwebcam_recording_2026-04-30T08-50-07-689Z__full_scanner_0_to_19_clean__00160.jpg
+!dataset/test/QMLwebcam_recording_2026-04-30T08-50-07-689Z__full_scanner_0_to_19_clean__00565.jpg
+!dataset/test/QMLwebcam_recording_2026-04-30T08-50-07-689Z__full_scanner_0_to_19_clean__00575.jpg
+!dataset/test/QMLwebcam_recording_2026-04-30T08-50-07-689Z__full_scanner_0_to_19_clean__00580.jpg
+!dataset/test/QMLwebcam_recording_2026-04-30T08-50-07-689Z__full_scanner_0_to_19_clean__00700.jpg
+!dataset/test/QMLwebcam_recording_2026-04-30T08-50-07-689Z__full_scanner_0_to_19_clean__00705.jpg
+!dataset/test/QMLwebcam_recording_2026-04-30T08-50-07-689Z__full_scanner_0_to_19_clean__00710.jpg
+!dataset/test/QMLwebcam_recording_2026-04-30T08-50-07-689Z__full_scanner_0_to_19_clean__00715.jpg
+!dataset/test/QMLwebcam_recording_2026-04-30T08-50-07-689Z__full_scanner_0_to_19_clean__00725.jpg
+!dataset/test/QMLwebcam_recording_2026-04-30T08-50-07-689Z__full_scanner_0_to_19_clean__00765.jpg
