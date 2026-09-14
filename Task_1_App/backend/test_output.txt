@@ -1,0 +1,52 @@
+=== INPUT: There is reflux at the saphenofemoral junction. Blood flows backward down the GSV to the ankle, no tributary involvement, no re-entry. ===
+{
+    "interpretation": "The saphenofemoral junction is incompetent, allowing deep venous blood to enter the great saphenous vein (EP N1→N2). The GSV then refluxes retrograde down to the ankle without any tributary involvement (RP N2→N1).",
+    "clips": [
+        {
+            "flow": "EP",
+            "fromType": "N1",
+            "toType": "N2",
+            "posYRatio": 0.06,
+            "step": "SFJ",
+            "legSide": "Unspecified"
+        },
+        {
+            "flow": "RP",
+            "fromType": "N2",
+            "toType": "N1",
+            "posYRatio": 0.90,
+            "legSide": "Unspecified"
+        }
+    ]
+}
+
+=== INPUT: Perforator entry into mid GSV at the calf. SFJ is competent. No reflux anywhere else. ===
+{
+    "interpretation": "A perforating vein inserts into the mid‑calf segment of the great saphenous vein; the saphenofemoral junction is competent and there is no reflux in any vessel.",
+    "clips": [
+        {
+            "flow": "EP",
+            "fromType": "N2",
+            "toType": "N2",
+            "posYRatio": 0.70,
+            "step": "mid calf perforator",
+            "legSide": "Unspecified"
+        }
+    ]
+}
+
+=== INPUT: Deep vein directly feeds a tributary in the lower calf near the ankle, coming from a pelvic vein origin. ===
+{
+    "interpretation": "A deep (N1) source, originating from a pelvic vein, directly feeds a superficial tributary (N3) in the lower calf near the ankle.",
+    "clips": [
+        {
+            "flow": "EP",
+            "fromType": "N1",
+            "toType": "N3",
+            "posYRatio": 0.82,
+            "source": "pelvic",
+            "legSide": "Unspecified"
+        }
+    ]
+}
+

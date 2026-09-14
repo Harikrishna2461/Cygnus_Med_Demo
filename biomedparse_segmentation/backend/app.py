@@ -28,6 +28,7 @@ from flask_cors import CORS
 import numpy as np
 
 import engine
+import groq_verify
 import roi as roi_detect
 import video_io
 from coco_export import CocoVideoAnnotationBuilder
@@ -85,7 +86,8 @@ def _process_video(job_id: str, input_path: str, video_name: str):
         writer = video_io.H264VideoWriter(out_video_path, fps=fps, width=width, height=height)
         coco = CocoVideoAnnotationBuilder(video_name=video_name, fps=fps, width=width, height=height)
 
-        _set_job(job_id, stage='processing', message='Segmenting veins frame by frame...')
+        _set_job(job_id, stage='processing',
+                 message='Segmenting veins frame by frame (Groq-verifying each candidate blob)...')
 
         total_vein_frames = 0
         for idx, frame_rgb in video_io.iter_frames(input_path):
@@ -99,6 +101,14 @@ def _process_video(job_id: str, input_path: str, video_name: str):
             crop_mask = engine.segment_frame(model, crop, threshold=VEIN_THRESHOLD)
             mask = np.zeros(frame_rgb.shape[:2], dtype=np.uint8)
             mask[y1:y2, x1:x2] = crop_mask
+
+            # Classical shape/darkness filters alone can't tell a real vein
+            # apart from a compact-ish patch of muscle texture — the single
+            # highest-confidence BiomedParse query occasionally fires on the
+            # wrong structure. A Groq vision-LLM check per candidate blob
+            # (same fix Task_4_VLM_Fascia_Vein_Detection uses) drops those.
+            if mask.max() > 0:
+                mask = groq_verify.verify_vein_mask(mask, frame_rgb)
 
             if mask.max() > 0:
                 total_vein_frames += 1
