@@ -1,0 +1,76 @@
+{
+  "clips": [
+    {
+      "algoSnapshot": null,
+      "clipPath": "SFJ-Knee_00_EP_N2-N2.mp4",
+      "connectedTo": [
+        1
+      ],
+      "ep_ligation_rect2": true,
+      "flow": "EP",
+      "fps": 30.0,
+      "fromType": "N2",
+      "fullPath": "C:/Users/Admin/AppData/Local/cygmed/vcube/temp_clips_1778810558/data_collection/SFJ-Knee_00_EP_N2-N2.mp4",
+      "legSide": "right",
+      "notes": "",
+      "posXRatio": 0.26,
+      "posYRatio": 0.033,
+      "processingProgress": 100,
+      "sequenceNumber": 0,
+      "step": "SFJ-Knee",
+      "toType": "N2"
+    },
+    {
+      "algoSnapshot": null,
+      "clipPath": "SFJ-Knee_01_RP_N3-N2.mp4",
+      "clipPathBase": "SFJ-Knee_01_RP_N3-N2",
+      "connectedTo": [
+        2
+      ],
+      "eliminationTest": "",
+      "flow": "RP",
+      "fps": 30.0,
+      "fromType": "N3",
+      "fullPath": "C:/Users/Admin/AppData/Local/cygmed/vcube/temp_clips_1778810558/data_collection/SFJ-Knee_01_RP_N3-N2.mp4",
+      "legSide": "right",
+      "notes": "",
+      "posXRatio": 0.174,
+      "posYRatio": 0.168,
+      "processingProgress": 100,
+      "sequenceNumber": 1,
+      "step": "SFJ-Knee",
+      "toType": "N2"
+    },
+    {
+      "algoSnapshot": null,
+      "clipPath": "SFJ-Knee_02_RP_N2-N1.mp4",
+      "flow": "RP",
+      "fps": 30.0,
+      "fromType": "N2",
+      "fullPath": "C:/Users/Admin/AppData/Local/cygmed/vcube/temp_clips_1778810558/data_collection/SFJ-Knee_02_RP_N2-N1.mp4",
+      "legSide": "right",
+      "notes": "",
+      "posXRatio": 0.203,
+      "posYRatio": 0.31,
+      "processingProgress": 100,
+      "sequenceNumber": 2,
+      "step": "SFJ-Knee",
+      "toType": "N1"
+    }
+  ],
+  "hasEdited": false,
+  "ligation": {
+    "calibre": "",
+    "diameterChoice": "",
+    "distanceToPerf": "",
+    "editedLigation": "false",
+    "editedReasoning": "false",
+    "editedShuntType": "false",
+    "hasDrainage": "",
+    "ligation": "- Ligate highest EP at N2->N3\n",
+    "reasoning": "- EP starts at mid GSV from N2 to N2 \n- RP exists along both N2 (GSV) and N3 \n",
+    "reflux": "",
+    "shuntType": "2C"
+  },
+  "needsReassess": false
+}

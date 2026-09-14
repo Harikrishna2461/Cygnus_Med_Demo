@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BiomedParse Vein Segmentation</title>
+<style>
+  :root {
+    --bg: #0f1420; --panel: #171d2c; --border: #2a3244; --text: #e7ecf5;
+    --muted: #8a93a8; --accent: #35d07f; --accent-dim: #1f7a4d; --danger: #e2574c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, Segoe UI, Roboto, sans-serif; padding: 24px 16px; }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .drop { border: 2px dashed var(--border); border-radius: 10px; padding: 32px; text-align: center; cursor: pointer; transition: border-color .15s; }
+  .drop:hover, .drop.drag { border-color: var(--accent); }
+  .drop input { display: none; }
+  button { background: var(--accent); color: #08130d; border: none; border-radius: 8px; padding: 10px 18px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+  button:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+  button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 10px; margin: 14px 0; }
+  .meta-item { background: #10161f; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .meta-item .label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: .04em; }
+  .meta-item .value { font-size: 1.05rem; font-weight: 600; margin-top: 2px; }
+  .bar-outer { background: #10161f; border: 1px solid var(--border); border-radius: 999px; height: 10px; overflow: hidden; margin: 10px 0; }
+  .bar-inner { background: linear-gradient(90deg, var(--accent-dim), var(--accent)); height: 100%; width: 0%; transition: width .2s; }
+  video { width: 100%; border-radius: 10px; background: #000; display: block; }
+  .status-line { color: var(--muted); font-size: 0.85rem; }
+  .hidden { display: none !important; }
+  .error { color: var(--danger); font-size: 0.85rem; }
+  a.download-link { text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>BiomedParse Vein Segmentation</h1>
+  <div class="sub">Upload an ultrasound video → veins only (no fascia) are segmented frame-by-frame → view the annotated video → download CVAT-ready COCO&nbsp;1.0 annotations.</div>
+
+  <div class="panel" id="uploadPanel">
+    <div class="drop" id="drop">
+      <div id="dropText">Click to choose a video, or drag one here</div>
+      <input type="file" id="fileInput" accept="video/*">
+    </div>
+    <div class="row" style="margin-top:14px;">
+      <button id="uploadBtn" disabled>Upload &amp; Segment</button>
+      <span class="status-line" id="fileName"></span>
+    </div>
+  </div>
+
+  <div class="panel hidden" id="progressPanel">
+    <div class="meta-grid" id="metaGrid"></div>
+    <div class="bar-outer"><div class="bar-inner" id="bar"></div></div>
+    <div class="status-line" id="statusText">Queued...</div>
+    <div class="error hidden" id="errorText"></div>
+  </div>
+
+  <div class="panel hidden" id="resultPanel">
+    <video id="resultVideo" controls></video>
+    <div class="row" style="margin-top:14px;">
+      <a class="download-link" id="cocoLink" href="#"><button id="cocoBtn">Download COCO 1.0 Annotations (.zip)</button></a>
+      <button class="secondary" id="resetBtn">Segment another video</button>
+    </div>
+    <div class="status-line" id="summaryText" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<script>
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('fileInput');
+const uploadBtn = document.getElementById('uploadBtn');
+const fileNameEl = document.getElementById('fileName');
+const dropText = document.getElementById('dropText');
+
+const uploadPanel = document.getElementById('uploadPanel');
+const progressPanel = document.getElementById('progressPanel');
+const resultPanel = document.getElementById('resultPanel');
+const metaGrid = document.getElementById('metaGrid');
+const bar = document.getElementById('bar');
+const statusText = document.getElementById('statusText');
+const errorText = document.getElementById('errorText');
+const resultVideo = document.getElementById('resultVideo');
+const cocoLink = document.getElementById('cocoLink');
+const summaryText = document.getElementById('summaryText');
+const resetBtn = document.getElementById('resetBtn');
+
+let selectedFile = null;
+let pollTimer = null;
+
+drop.addEventListener('click', () => fileInput.click());
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
+drop.addEventListener('drop', e => {
+  if (e.dataTransfer.files.length) selectFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) selectFile(fileInput.files[0]); });
+
+function selectFile(f) {
+  selectedFile = f;
+  fileNameEl.textContent = f.name;
+  dropText.textContent = 'Selected: ' + f.name;
+  uploadBtn.disabled = false;
+}
+
+uploadBtn.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  uploadBtn.disabled = true;
+  const fd = new FormData();
+  fd.append('video', selectedFile);
+  try {
+    const resp = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await resp.json();
+    if (data.error) { alert(data.error); uploadBtn.disabled = false; return; }
+    uploadPanel.classList.add('hidden');
+    progressPanel.classList.remove('hidden');
+    pollStatus(data.job_id);
+  } catch (e) {
+    alert('Upload failed: ' + e);
+    uploadBtn.disabled = false;
+  }
+});
+
+function metaItem(label, value) {
+  return `<div class="meta-item"><div class="label">${label}</div><div class="value">${value}</div></div>`;
+}
+
+async function pollStatus(jobId) {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    const resp = await fetch('/api/status/' + jobId);
+    const job = await resp.json();
+    if (job.error) { clearInterval(pollTimer); errorText.textContent = job.error; errorText.classList.remove('hidden'); return; }
+
+    statusText.textContent = job.message || job.stage;
+
+    if (job.fps !== undefined && job.fps !== null) {
+      metaGrid.innerHTML =
+        metaItem('Detected FPS', job.fps.toFixed(3)) +
+        metaItem('Frame Count', job.frame_count) +
+        metaItem('Resolution', job.width + '×' + job.height) +
+        metaItem('Duration', job.duration_sec ? job.duration_sec.toFixed(2) + 's' : '—') +
+        metaItem('Processed', (job.processed || 0) + ' / ' + job.frame_count) +
+        metaItem('Vein Frames', job.vein_frames !== undefined ? job.vein_frames : '—') +
+        (job.roi ? metaItem('Scan ROI', job.roi.join(', ')) : '');
+    }
+
+    if (job.frame_count) {
+      const pct = Math.min(100, Math.round(100 * (job.processed || 0) / job.frame_count));
+      bar.style.width = pct + '%';
+    }
+
+    if (job.stage === 'done') {
+      clearInterval(pollTimer);
+      progressPanel.classList.add('hidden');
+      resultPanel.classList.remove('hidden');
+      resultVideo.src = job.video_url;
+      cocoLink.href = job.coco_url;
+      summaryText.textContent =
+        `${job.frame_count} frames @ ${job.fps.toFixed(3)} fps — veins detected in ${job.vein_frames} frame(s).`;
+    } else if (job.stage === 'error') {
+      clearInterval(pollTimer);
+      errorText.textContent = job.message;
+      errorText.classList.remove('hidden');
+    }
+  }, 800);
+}
+
+resetBtn.addEventListener('click', () => {
+  selectedFile = null;
+  fileInput.value = '';
+  fileNameEl.textContent = '';
+  dropText.textContent = 'Click to choose a video, or drag one here';
+  uploadBtn.disabled = true;
+  bar.style.width = '0%';
+  errorText.classList.add('hidden');
+  resultPanel.classList.add('hidden');
+  progressPanel.classList.add('hidden');
+  uploadPanel.classList.remove('hidden');
+});
+</script>
+</body>
+</html>

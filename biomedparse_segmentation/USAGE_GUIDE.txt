@@ -1,0 +1,82 @@
+BiomedParse Vein Segmentation — Usage Guide
+=============================================
+
+WHAT THIS APP DOES
+-------------------
+1. You upload an ultrasound video.
+2. The app reads the video's real FPS and frame count (not guessed —
+   decoded frame-by-frame, since some video files have wrong headers).
+3. Every frame is run through a finetuned BiomedParse model that finds
+   VEINS ONLY (no fascia lines, no other structures).
+4. You can watch the result: the original video with a green outline
+   drawn around each detected vein, frame by frame.
+5. You can download a "Download COCO 1.0 Annotations" .zip — this
+   contains every frame as a .jpg plus a COCO-format annotation file
+   listing the vein outline(s) per frame. Upload that .zip straight
+   into CVAT (Tasks -> Create -> Upload -> "COCO 1.0" format) as an
+   Images task, and every frame arrives pre-annotated with editable
+   vein polygons you (or a teammate) can then correct by hand.
+
+HOW TO RUN IT
+--------------
+Double-click run.bat (or from a terminal: cd backend && py -3.12 app.py),
+then open http://localhost:5050 in a browser. The vein model (~1.8GB)
+only loads the first time you upload a video, so the app starts instantly
+but the first upload takes ~10-30s longer while it loads.
+
+Requires an NVIDIA GPU (same as Task_4_VLM_Fascia_Vein_Detection) — the
+vein model runs on CUDA, not CPU.
+
+ABOUT THE FPS / FRAME COUNT
+-----------------------------
+You mentioned a 1 min 20 sec (80s) video had about 2403 frames — that
+works out to roughly 30.04 fps (2403 / 80 ≈ 30.04, i.e. essentially a
+standard 30fps video where the on-screen "1:20" duration is rounded down
+from an actual ~80.1s). Rather than hardcoding 30fps (or any fixed
+number), the app always reads each uploaded video's true fps/frame count
+itself (backend/video_io.py: probe_video) so every video — 24fps, 30fps,
+60fps, whatever — is handled correctly and the COCO export's per-frame
+numbering/timestamps line up exactly with the source video.
+
+FOLDER LAYOUT
+---------------
+backend/
+  app.py          - Flask server: upload, background processing job, status polling,
+                    serves the annotated video and the COCO zip download.
+  engine.py       - Loads the finetuned vein-only BiomedParse model and runs
+                    per-frame inference (vendored/trimmed from
+                    Task_4_VLM_Fascia_Vein_Detection/app.py — vein path only,
+                    no fascia, no LISA/Florence, no Groq blob-verifier).
+  video_io.py     - FPS/frame-count detection (probe_video), frame reading
+                    (iter_frames), and H.264 video writing (H264VideoWriter,
+                    via bundled imageio-ffmpeg — OpenCV's own VideoWriter has
+                    no working H.264 encoder on this machine).
+  coco_export.py  - Builds the CVAT-importable COCO 1.0 zip (images/ +
+                    annotations/instances_default.json), converting each
+                    frame's vein mask to polygon segmentation(s).
+frontend/
+  index.html      - Single-page upload/progress/result UI.
+checkpoints/vein/model_state_dict.pt
+  - Copied from the finetuned vein checkpoint in
+    Task_4_VLM_Fascia_Vein_Detection/BiomedParse/output/fascia_vein_finetuning/...
+    (the same checkpoint documented in the project's
+    biomedparse_finetuned_model memory note). Updating the checkpoint here
+    later just means overwriting this file with a newer model_state_dict.pt.
+BiomedParse/modeling, BiomedParse/utilities, BiomedParse/configs
+  - Vendored inference-only subset of the BiomedParse source (no training
+    code, no heavy optional deps) — same recipe as the earlier
+    BiomedParse_Vein_Fascia_Segmentation standalone folder.
+stubs/
+  - detectron2/fvcore/mpi4py stand-in packages so the app runs without a
+    real detectron2 build on Windows.
+uploads/, outputs/
+  - Runtime scratch space: uploaded source videos and generated annotated
+    videos / COCO zips, keyed by a random job id per upload.
+
+VERIFIED
+---------
+Smoke-tested end-to-end same day it was built: engine loads the vein
+checkpoint and runs inference on GPU, video_io correctly detects fps/frame
+count and writes an H.264 mp4, coco_export produces a valid COCO 1.0 zip
+(images/ + annotations/instances_default.json), and the Flask app serves
+the upload page.

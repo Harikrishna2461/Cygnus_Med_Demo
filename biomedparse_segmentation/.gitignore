@@ -1,0 +1,7 @@
+uploads/*
+outputs/*
+!uploads/.gitkeep
+!outputs/.gitkeep
+checkpoints/**/*.pt
+__pycache__/
+*.pyc

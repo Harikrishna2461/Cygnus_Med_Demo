@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -m 'Fix repeat-question guards to use full_history including current user message *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}

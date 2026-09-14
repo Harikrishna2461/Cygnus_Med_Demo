@@ -1,0 +1,41 @@
+# CHIVA Clinical Assistant (Task 1) — local development stack
+#
+# Runs the app container alongside its own Ollama container for embeddings,
+# so a developer can start everything with one command and no local Python
+# environment. Groq is still called over the internet for LLM inference —
+# only the embedding model runs locally.
+#
+# Usage (from Task_1_Handover/):
+#   1. Copy Docker/.env.example to Docker/.env and fill in GROQ_API_KEY
+#   2. docker compose -f Docker/docker-compose.yml up --build
+#   3. On first run only, pull the embedding model into the ollama container:
+#        docker compose -f Docker/docker-compose.yml exec ollama ollama pull nomic-embed-text
+#   4. Open http://localhost:7860
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - CMED_HOST=0.0.0.0
+      - CMED_PORT=7860
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production-use-a-long-random-string}
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
