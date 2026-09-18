@@ -8,6 +8,9 @@ bp = Blueprint("auth", __name__)
 
 @bp.route("/api/login", methods=["POST"])
 def api_login():
+    """POST /api/login — authenticates by username only (there is no password check
+    anywhere in this app) and sets the session cookie on success. Usage: called by
+    login.html's login form; looks the user up via chat_db.get_user_by_username()."""
     data = request.get_json(force=True, silent=True) or {}
     username = (data.get("username") or "").strip().lower()
 
@@ -34,12 +37,17 @@ def api_login():
 
 @bp.route("/api/logout", methods=["POST"])
 def api_logout():
+    """POST /api/logout — clears the session cookie, logging the current user out.
+    Usage: called by the frontend's logout button on any page."""
     session.clear()
     return jsonify({"status": "logged out"})
 
 
 @bp.route("/api/me", methods=["GET"])
 def api_me():
+    """GET /api/me — returns the currently logged-in user's id/username/admin status
+    from the session cookie. Usage: called by the frontend on page load to check who's
+    logged in and whether to show admin-only UI."""
     if "user_id" not in session:
         return jsonify({"error": "Not authenticated"}), 401
     return jsonify({

@@ -17,6 +17,10 @@ bp = Blueprint("general", __name__)
 
 
 def _clean_text(text: str) -> str:
+    """Normalises smart quotes/dashes to plain ASCII equivalents and strips zero-width
+    characters. Usage: called on every retrieved RAG chunk in api_general_chat() before
+    it's inserted into the prompt, so odd Unicode from source documents doesn't leak
+    into the model's output."""
     if not text:
         return text
     replacements = {
@@ -71,6 +75,11 @@ Do not copy chunks verbatim. Reason from the knowledge base and answer in your o
 @bp.route("/api/general-chat", methods=["POST"])
 @login_required
 def api_general_chat():
+    """POST /api/general-chat — the General Medical Chat endpoint: runs a domain-
+    relevance guardrail, retrieves RAG context from the final_structured_rag
+    collection, cleans it, and generates a response. Usage: called by general.html's
+    chat UI for every question asked in that tab; separate from and does not touch
+    the Clinical Assistant's classification flow in routes/clinical.py."""
     try:
         data = request.get_json(force=True, silent=False)
     except Exception as e:

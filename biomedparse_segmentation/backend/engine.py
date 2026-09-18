@@ -1,10 +1,30 @@
 """
 Vein-only BiomedParse segmentation engine.
 
-Vendored/adapted from Task_4_VLM_Fascia_Vein_Detection/app.py — keeps only the
-vein model + vein postprocessing path (no fascia, no LISA/Florence, no Groq
-blob-evaluator by default). See memory note `biomedparse_finetuned_model` for
-the provenance of these functions.
+Ported EXACTLY from Vein_Name_Annotation_From_Webcam_And_Segmented_Videos/
+backend/biomedparse_engine.py (the vein half only — fascia dropped, not
+needed here) — not from Task_4_VLM_Fascia_Vein_Detection/app.py, and with
+no tuning/modification of our own on top of that source. That project
+already diagnosed and fixed the two real bugs Task_4's version had:
+  1. `.resize((512,512))` stretches a non-square ROI crop, distorting
+     proportions the model never trained on. Fixed with a letterboxed
+     resize (aspect-preserving + mid-gray pad) matching BiomedParse's own
+     training-time transform (detectron2 ResizeScale + FixedSizeCrop).
+  2. `prob_to_vein_mask`'s area filter used fractions of the CURRENT
+     image's pixel count. After ROI-cropping to a smaller frame, the same
+     real vein covers a much larger fraction of that smaller frame, so a
+     fraction-of-current-image cap was rejecting genuinely large, obvious
+     veins as "too big" purely because the frame got tighter. Fixed by
+     making the area bounds fractions of a FIXED reference pixel count
+     (Task_4's own validated ~802x805 test-frame size) instead.
+No Groq/LLM blob-verification step — classical CV filtering only, so this
+stays fast and has no external API dependency or rate limits.
+
+A prior version of this file added its own top-K query ensemble and
+tightened circularity/aspect-ratio thresholds on top of this ported
+pipeline. That made results worse, not better (tighter circularity
+rejected genuinely round veins; the ensemble let more noise through) and
+was reverted — this file is intentionally a 1:1 port, nothing more.
 """
 import glob as _glob
 import os
@@ -35,6 +55,18 @@ VEIN_PROMPT = (
     'peripheral vascular ultrasound below fascia'
 )
 VEIN_COLOR = (0, 210, 0)  # green, RGB
+INFER_SIZE = 512
+
+# Vein blob filtering constants — ported verbatim from
+# Vein_Name_Annotation_From_Webcam_And_Segmented_Videos/backend/config.py.
+# Do not retune these without a specific request; see module docstring.
+VEIN_PROB_THRESHOLD = 0.25
+VEIN_MIN_AREA_FRAC = 0.0002
+VEIN_MAX_AREA_FRAC = 0.025
+VEIN_MAX_ASPECT_RATIO = 4.0
+VEIN_MIN_CIRCULARITY = 0.15
+VEIN_MAX_ANECHOIC_MEAN = 65.0
+VEIN_AREA_REFERENCE_PX = 802 * 805  # fixed reference — see module docstring
 
 _model = None
 
@@ -66,20 +98,32 @@ def load_model():
     return _model
 
 
-def _grounding_prob(mdl, query_image_pil, text, infer_size=512):
-    """Grounding inference. Returns float32 [H,W] probability map in [0,1]."""
-    m = mdl.model
-    pred = m.sem_seg_head.predictor
-    W, H = query_image_pil.size
+def grounding_prob(model, image_pil: Image.Image, text: str, infer_size: int = INFER_SIZE) -> np.ndarray:
+    """
+    Letterboxed grounding inference: aspect-ratio-preserving resize to fit
+    within infer_size x infer_size, padded with mid-gray (128) to a square
+    canvas (content anchored top-left) — matches BiomedParse's own
+    training-time transform (detectron2 ResizeScale + FixedSizeCrop),
+    unlike a naive `.resize((infer_size, infer_size))` stretch which
+    distorts non-square ROI crops.
 
-    resized = np.asarray(query_image_pil.resize((infer_size, infer_size), Image.BICUBIC)).astype(np.float32)
-    img_t = torch.from_numpy(resized.copy()).permute(2, 0, 1).cuda()
-    images = ImageList.from_tensors(
-        [(img_t - m.pixel_mean) / m.pixel_std], m.size_divisibility
-    )
-    gtext = pred.lang_encoder.get_text_token_embeddings(
-        [text], name='grounding', token=False, norm=False
-    )
+    Returns a dense float32 [0,1] probability map at the original (H, W) of image_pil.
+    """
+    m = model.model
+    pred = m.sem_seg_head.predictor
+    W, H = image_pil.size
+
+    scale = min(infer_size / W, infer_size / H)
+    new_w, new_h = max(1, round(W * scale)), max(1, round(H * scale))
+    resized_content = image_pil.resize((new_w, new_h), Image.BICUBIC)
+    canvas = Image.new("RGB", (infer_size, infer_size), (128, 128, 128))
+    canvas.paste(resized_content, (0, 0))
+
+    arr = np.asarray(canvas).astype(np.float32)
+    img_t = torch.from_numpy(arr.copy()).permute(2, 0, 1).cuda()
+    images = ImageList.from_tensors([(img_t - m.pixel_mean) / m.pixel_std], m.size_divisibility)
+
+    gtext = pred.lang_encoder.get_text_token_embeddings([text], name='grounding', token=False, norm=False)
     tok_emb = gtext['token_emb']
     tok_mask = gtext['tokens']['attention_mask'].bool()
     q_emb = tok_emb[tok_mask]
@@ -99,24 +143,31 @@ def _grounding_prob(mdl, query_image_pil, text, infer_size=512):
     probs = torch.sigmoid(all_gm)
     weighted = probs.reshape(101, -1).max(dim=1).values
     best_q = weighted.argmax().item()
-    return F.interpolate(
-        all_gm[best_q:best_q + 1][None], (H, W), mode='bilinear', align_corners=False,
+
+    # Upsample to canvas size, crop out the padding, then resize the real-content
+    # region up to the true original (H, W) -- the inverse of the letterbox above.
+    canvas_pred = F.interpolate(
+        all_gm[best_q:best_q + 1][None], (infer_size, infer_size), mode='bilinear', align_corners=False,
+    )[0, 0]
+    content_pred = canvas_pred[:new_h, :new_w]
+    final = F.interpolate(
+        content_pred[None, None], (H, W), mode='bilinear', align_corners=False,
     )[0, 0].sigmoid().detach().cpu().numpy().astype(np.float32)
+    return final
 
 
-def prob_to_vein_mask(prob: np.ndarray, threshold: float = 0.5, image_gray: np.ndarray = None) -> np.ndarray:
+def prob_to_vein_mask(prob: np.ndarray, image_gray: np.ndarray = None,
+                       threshold: float = VEIN_PROB_THRESHOLD) -> np.ndarray:
     """
-    Keep only blobs that look like real vein cross-sections:
-      - small (0.02-2.5% of image)
-      - anechoic (mean pixel < 65)
-      - not wildly elongated (aspect ratio <= 4)
-      - not completely irregular (circularity >= 0.15)
-    Returns a uint8 {0,1} mask.
+    Keep only blobs that look like real vein cross-sections: small,
+    anechoic, not elongated, not irregular. Area bounds are fractions of a
+    FIXED reference pixel count (VEIN_AREA_REFERENCE_PX), not of
+    prob.shape itself — see module docstring for why.
     """
     binary = (prob > threshold).astype(np.uint8)
-    total = prob.shape[0] * prob.shape[1]
-    min_area = max(10, int(0.0002 * total))
-    max_area = int(0.025 * total)
+    total = VEIN_AREA_REFERENCE_PX
+    min_area = max(10, int(VEIN_MIN_AREA_FRAC * total))
+    max_area = int(VEIN_MAX_AREA_FRAC * total)
     n, labels, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
     out = np.zeros_like(binary)
     for i in range(1, n):
@@ -125,34 +176,32 @@ def prob_to_vein_mask(prob: np.ndarray, threshold: float = 0.5, image_gray: np.n
             continue
         if image_gray is not None:
             mean_val = float(image_gray[labels == i].mean())
-            if mean_val > 65:
+            if mean_val > VEIN_MAX_ANECHOIC_MEAN:
                 continue
         bw = stats[i, cv2.CC_STAT_WIDTH]
         bh = stats[i, cv2.CC_STAT_HEIGHT]
-        if bw >= 1 and bh >= 1 and max(bw, bh) / min(bw, bh) > 4.0:
+        if bw >= 1 and bh >= 1 and max(bw, bh) / min(bw, bh) > VEIN_MAX_ASPECT_RATIO:
             continue
         mask_i = (labels == i).astype(np.uint8)
         cnts, _ = cv2.findContours(mask_i, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if cnts:
             perim = cv2.arcLength(cnts[0], True)
-            if perim > 0 and (4 * np.pi * area / perim ** 2) < 0.15:
+            if perim > 0 and (4 * np.pi * area / perim ** 2) < VEIN_MIN_CIRCULARITY:
                 continue
         out[labels == i] = 1
     return out
 
 
-def segment_frame(model, image_rgb: np.ndarray, threshold: float = 0.5) -> np.ndarray:
+def segment_frame(model, image_rgb: np.ndarray) -> np.ndarray:
     """
     Segment veins in a single RGB frame (numpy uint8 [H,W,3]).
     Returns a uint8 {0,1} mask, same H,W as input.
     """
-    h, w = image_rgb.shape[:2]
     pil_img = Image.fromarray(image_rgb)
     gray = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2GRAY)
     with torch.no_grad():
-        prob = _grounding_prob(model, pil_img, text=VEIN_PROMPT)
-    prob = cv2.resize(prob, (w, h))
-    mask = prob_to_vein_mask(prob, threshold=threshold, image_gray=gray)
+        prob = grounding_prob(model, pil_img, text=VEIN_PROMPT)
+    mask = prob_to_vein_mask(prob, image_gray=gray)
     return mask
 
 

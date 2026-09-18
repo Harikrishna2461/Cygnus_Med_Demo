@@ -31,7 +31,10 @@ GENERAL_COLLECTION = "final_structured_rag"
 
 
 def set_qdrant_client(client: QdrantClient):
-    """Set the shared Qdrant client (called by app.py during startup)."""
+    """Set the shared Qdrant client. Usage: called once by services.init_services() at
+    startup — the same client instance rag_engine.py also receives, so both RAG
+    engines share one Qdrant connection to the qdrant_storage/ files rather than
+    opening it twice."""
     global _qdrant_client
     _qdrant_client = client
 
@@ -54,6 +57,10 @@ REJECT_KEYWORDS = {
 
 
 def _get_qdrant() -> QdrantClient:
+    """Returns the shared Qdrant client, creating a fallback local connection if
+    set_qdrant_client() was never called. Usage: called internally by every other
+    function in this file that needs to talk to Qdrant (collection_exists,
+    get_collection_size, retrieve_general_context)."""
     global _qdrant_client
     if _qdrant_client is None:
         _qdrant_client = QdrantClient(path=QDRANT_PATH)
@@ -61,6 +68,9 @@ def _get_qdrant() -> QdrantClient:
 
 
 def collection_exists() -> bool:
+    """Checks whether the General Chat Qdrant collection (final_structured_rag) has
+    been ingested. Usage: called by app.py's _startup() to decide whether to load the
+    BM25 index, and by routes/general.py before running a general-chat query."""
     try:
         cols = [c.name for c in _get_qdrant().get_collections().collections]
         return GENERAL_COLLECTION in cols
@@ -70,6 +80,9 @@ def collection_exists() -> bool:
 
 
 def get_collection_size() -> int:
+    """Returns how many chunks are indexed in the final_structured_rag collection (0 if
+    it doesn't exist or the query fails). Usage: called by app.py's startup log
+    line."""
     try:
         info = _get_qdrant().get_collection(GENERAL_COLLECTION)
         return info.points_count or 0
@@ -78,6 +91,11 @@ def get_collection_size() -> int:
 
 
 def get_embedding(text: str) -> np.ndarray:
+    """Calls Ollama's embedding endpoint to turn a text string into the 768-dim vector
+    used for this collection's vector search (returns a zero vector on failure rather
+    than raising). Usage: called internally by retrieve_general_context() for every
+    General Chat query — identical implementation to rag_engine.py's version, kept
+    separate since this file has its own module-level Qdrant client."""
     try:
         resp = requests.post(
             f"{OLLAMA_BASE_URL}/api/embed",
@@ -92,6 +110,10 @@ def get_embedding(text: str) -> np.ndarray:
 
 
 def _get_cross_encoder():
+    """Lazily loads and caches the cross-encoder reranker model on first use (falls
+    back to None, with a warning, if disabled or unavailable — retrieval then skips
+    reranking). Usage: called internally by retrieve_general_context() on every
+    query."""
     global _cross_encoder
     if _cross_encoder is None and CROSS_ENCODER_ENABLED:
         try:
@@ -107,6 +129,9 @@ def _get_cross_encoder():
 
 
 def build_bm25_index(chunks: list[str]):
+    """Builds the in-memory BM25 keyword-search index for the general-chat corpus.
+    Usage: called by load_bm25_from_collection() below, which supplies the chunk text
+    pulled from the final_structured_rag collection."""
     global _bm25_index, _bm25_corpus
     if not chunks:
         return
@@ -121,7 +146,9 @@ def build_bm25_index(chunks: list[str]):
 
 
 def load_bm25_from_collection():
-    """Build BM25 index from the final_structured_rag collection."""
+    """Build BM25 index from the final_structured_rag collection. Usage: called once
+    at startup from app.py's _startup() — the General Chat equivalent of
+    rag_engine.py's load_bm25_from_qdrant()."""
     if not collection_exists():
         logger.warning(f"Collection '{GENERAL_COLLECTION}' not found — BM25 index skipped.")
         return

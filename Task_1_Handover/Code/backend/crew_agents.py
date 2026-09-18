@@ -25,6 +25,12 @@ _orig_completion = litellm.completion
 
 
 def _patched_completion(*args, **kwargs):
+    """Drop-in replacement for litellm.completion that strips the "cache_breakpoint"
+    key CrewAI's internal flow system injects into message dicts (Groq's API rejects
+    any message with unknown properties, so the raw call would otherwise fail). Usage:
+    assigned over litellm.completion at import time (see the line right below this
+    function) — every LLM call any crew_agents.py Agent makes goes through this
+    wrapper transparently."""
     for msg in kwargs.get("messages", []):
         msg.pop("cache_breakpoint", None)
     return _orig_completion(*args, **kwargs)
@@ -34,6 +40,11 @@ litellm.completion = _patched_completion
 
 
 def _make_llm() -> LLM:
+    """Builds the shared CrewAI LLM config (Groq model, temperature) that every agent
+    factory below attaches to its Agent. Usage: called once inside each of
+    make_clinical_interpreter(), make_shunt_analyst(), and
+    make_general_medical_assistant() — a fresh LLM object per agent, not a shared
+    singleton."""
     return LLM(
         model=f"groq/{GROQ_MODEL}",
         api_key=GROQ_API_KEY,
@@ -47,6 +58,9 @@ def make_clinical_interpreter() -> Agent:
       - Sufficiency check (_SUFFICIENCY_PROMPT)
       - CHIVA clip generation (_NL_TO_CHIVA_PROMPT)
       - Conversational follow-up (_CONVERSATIONAL_PROMPT)
+
+    Usage: called by crew_pipeline.py's parse_nl_to_clips() and
+    build_conversational_response().
     """
     return Agent(
         role="CHIVA Clinical Interpreter",
@@ -70,6 +84,8 @@ def make_shunt_analyst() -> Agent:
     Covers shunt_classification_and_ligation_llm.py LLM calls:
       - Shunt type classification (_call_llm_for_shunt_classification)
       - CHIVA ligation planning (_call_llm_for_ligation)
+
+    Usage: called by crew_pipeline.py's classify_and_plan_ligation_with_llm().
     """
     return Agent(
         role="CHIVA Shunt Classification and Ligation Specialist",
@@ -92,6 +108,9 @@ def make_general_medical_assistant() -> Agent:
     """
     Covers the direct groq_client call in routes/general.py:
       - General medical Q&A with RAG-retrieved context
+
+    Usage: called by crew_pipeline.py's generate_general_response(), which
+    routes/general.py calls for every General Chat message.
     """
     return Agent(
         role="Medical Knowledge Assistant",

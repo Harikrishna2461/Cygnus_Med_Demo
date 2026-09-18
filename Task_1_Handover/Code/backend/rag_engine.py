@@ -36,12 +36,19 @@ _bm25_corpus: list[str] = []
 # ── Qdrant client ─────────────────────────────────────────────────────────────
 
 def set_qdrant_client(client: QdrantClient):
-    """Accept a shared QdrantClient from app.py to avoid lock conflicts."""
+    """Accept a shared QdrantClient from app.py to avoid lock conflicts. Usage: called
+    once by services.init_services() at startup — the same client instance is also
+    injected into general_chat_engine.py, so both RAG engines share one Qdrant
+    connection instead of opening the local qdrant_storage/ files twice."""
     global _qdrant_client
     _qdrant_client = client
 
 
 def _get_qdrant() -> QdrantClient:
+    """Returns the shared Qdrant client, creating a fallback connection (local path or
+    remote host, per config) if set_qdrant_client() was never called. Usage: called
+    internally by every other function in this file that needs to talk to Qdrant
+    (collection_exists, get_collection_size, retrieve_context)."""
     global _qdrant_client
     if _qdrant_client is None:
         if QDRANT_HOST:
@@ -54,6 +61,10 @@ def _get_qdrant() -> QdrantClient:
 
 
 def collection_exists() -> bool:
+    """Checks whether the clinical Qdrant collection (ligation_knowledgebase_db_v2) has
+    been ingested. Usage: called by app.py's _startup() to decide whether to load the
+    BM25 index, by routes/status.py's api_status() for the health check, and by
+    routes/clinical.py before running the classification pipeline."""
     try:
         cols = [c.name for c in _get_qdrant().get_collections().collections]
         return QDRANT_COLLECTION in cols
@@ -62,6 +73,9 @@ def collection_exists() -> bool:
 
 
 def get_collection_size() -> int:
+    """Returns how many chunks are indexed in the clinical collection (0 if it doesn't
+    exist or the query fails). Usage: called by app.py's startup log line and by
+    routes/status.py's api_status()."""
     try:
         info = _get_qdrant().get_collection(QDRANT_COLLECTION)
         return info.points_count or 0
@@ -72,6 +86,11 @@ def get_collection_size() -> int:
 # ── Embedding ─────────────────────────────────────────────────────────────────
 
 def get_embedding(text: str) -> np.ndarray:
+    """Calls Ollama's embedding endpoint to turn a text string into the 768-dim vector
+    used for Qdrant's vector search (returns a zero vector on failure rather than
+    raising, so a transient Ollama outage degrades retrieval instead of crashing the
+    request). Usage: called internally by retrieve_context() for every query the
+    Clinical Assistant's ligation-planning RAG runs."""
     try:
         resp = requests.post(
             f"{OLLAMA_BASE_URL}/api/embed",
@@ -88,6 +107,10 @@ def get_embedding(text: str) -> np.ndarray:
 # ── Cross-encoder ─────────────────────────────────────────────────────────────
 
 def _get_cross_encoder():
+    """Lazily loads and caches the cross-encoder reranker model on first use (falls
+    back to None, and a warning, if CROSS_ENCODER_ENABLED is False or the model fails
+    to load — retrieval then just skips the rerank step). Usage: called internally by
+    retrieve_context() on every query."""
     global _cross_encoder
     if _cross_encoder is None and CROSS_ENCODER_ENABLED:
         try:
@@ -105,6 +128,9 @@ def _get_cross_encoder():
 # ── BM25 index ────────────────────────────────────────────────────────────────
 
 def build_bm25_index(chunks: list[str]):
+    """Builds the in-memory BM25 keyword-search index from a list of text chunks.
+    Usage: called by load_bm25_from_qdrant() below, which supplies the chunk text
+    pulled from the clinical Qdrant collection."""
     global _bm25_index, _bm25_corpus
     if not chunks:
         return

@@ -12,7 +12,10 @@ import sheets_logger as _sheets
 
 
 def _migrate_sessions_table():
-    """Migrate sessions table to add missing columns (mode, hidden, user_id)."""
+    """Migrate sessions table to add missing columns (mode, hidden, user_id).
+    Usage: called once at startup from init_db(), before any session rows are read or
+    written, so a database created before these columns existed keeps working without
+    any manual fix-up."""
     try:
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.execute("PRAGMA table_info(sessions)")
@@ -58,7 +61,10 @@ def _migrate_sessions_table():
 
 
 def _migrate_feedback_type():
-    """Add feedback_type column to feedback table without losing existing data."""
+    """Add feedback_type column to feedback table without losing existing data.
+    Usage: called once at startup from init_db(), after _ensure_default_admin(), so a
+    database created before this column existed keeps working without any manual
+    fix-up."""
     try:
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.execute("PRAGMA table_info(feedback)")
@@ -73,6 +79,10 @@ def _migrate_feedback_type():
 
 
 def init_db():
+    """Creates the users/sessions/messages/feedback tables if they don't already exist,
+    then runs the column migrations and default-admin seeding that must happen after the
+    tables exist. Usage: called exactly once at process startup, from app.py's
+    _startup()."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.executescript("""
             CREATE TABLE IF NOT EXISTS users (
@@ -124,12 +134,22 @@ def init_db():
 
 
 def _now() -> str:
+    """Returns the current local timestamp as an ISO-8601 string. Usage: every
+    created_at/updated_at value written anywhere in this module comes from this one
+    function — it's the single source of timestamps for the whole database."""
     return datetime.now().isoformat()
 
 
 # -- Users --------------------------------------------------------------------
 
 def create_user(username: str, password: str = "", is_admin: bool = False) -> str:
+    """Inserts a new user row with a fresh UUID user_id. Note: password_hash is always
+    stored as an empty string here — this app's login (routes/auth.py's api_login) never
+    checks a password at all, so the password argument is accepted for API compatibility
+    but not actually used or verified against anything. Usage: called by
+    _ensure_default_admin() to seed the default admin accounts at startup, and by
+    routes/admin.py's add_user() when an admin creates a new account from the Admin
+    Panel."""
     uid = str(uuid.uuid4())
     now = _now()
     with sqlite3.connect(DB_PATH) as conn:
@@ -142,6 +162,10 @@ def create_user(username: str, password: str = "", is_admin: bool = False) -> st
 
 
 def get_user_by_username(username: str) -> dict | None:
+    """Looks up one active user by username (case-insensitive — the username is
+    lowercased before matching). Usage: called by routes/auth.py's api_login() — this
+    lookup is the ONLY check performed during login; if a matching row comes back the
+    user is logged in immediately, with no password verification of any kind."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         row = conn.execute(
@@ -152,6 +176,9 @@ def get_user_by_username(username: str) -> dict | None:
 
 
 def get_all_users() -> list[dict]:
+    """Returns every user's public fields only (password_hash is deliberately excluded
+    from the SELECT). Usage: called by routes/admin.py's list_users() to populate the
+    Admin Panel's user list."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         rows = conn.execute(
@@ -161,12 +188,21 @@ def get_all_users() -> list[dict]:
 
 
 def deactivate_user(user_id: str):
+    """Soft-deletes a user by setting is_active=0 rather than actually deleting the row
+    — this keeps the row around so old sessions/messages that reference this user_id
+    stay valid instead of becoming orphaned. Usage: called by routes/admin.py's
+    remove_user() when an admin removes an account from the Admin Panel."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("UPDATE users SET is_active=0 WHERE user_id=?", (user_id,))
         conn.commit()
 
 
 def update_user_password(user_id: str, new_password: str):
+    """Hashes and stores a new password for a user. Usage: NOT currently called from
+    anywhere in the codebase — no route exposes a change-password action, and login
+    itself (get_user_by_username) never checks password_hash regardless. This exists as
+    the one place a real password check/reset could be wired in later if login is
+    changed to require one."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute(
             "UPDATE users SET password_hash=? WHERE user_id=?",
@@ -176,20 +212,30 @@ def update_user_password(user_id: str, new_password: str):
 
 
 def _ensure_default_admin():
-    """Create the default admin account if no users exist."""
+    """Create the default admin account plus the team's admin accounts if no users
+    exist yet. Login (see routes/auth.py) only checks that the username exists — there
+    is no password check anywhere in this app — so these accounts work by username alone.
+    Runs once per fresh database; re-running against an existing DB with users already
+    present is a no-op. Usage: called from init_db() at startup, between the two table
+    migration steps."""
     with sqlite3.connect(DB_PATH) as conn:
         count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
     if count == 0:
-        try:
-            create_user(ADMIN_USERNAME, ADMIN_PASSWORD, is_admin=True)
-            print(f"Default admin '{ADMIN_USERNAME}' created.")
-        except Exception as e:
-            print(f"Could not create default admin: {e}")
+        for username in (ADMIN_USERNAME, "krish", "harin", "jeffry"):
+            try:
+                create_user(username, ADMIN_PASSWORD, is_admin=True)
+                print(f"Default admin '{username}' created.")
+            except Exception as e:
+                print(f"Could not create default admin '{username}': {e}")
 
 
 # -- Sessions -----------------------------------------------------------------
 
 def create_session(title: str = "New Consultation", mode: str = "clinical", user_id: str | None = None) -> str:
+    """Creates a new chat session row (mode is either "clinical" or "general") and
+    mirrors it to the optional Google Sheets log. Usage: called by routes/sessions.py's
+    api_new_session() whenever a user starts a new conversation from either the
+    Clinical Assistant or General Chat tab."""
     sid = str(uuid.uuid4())
     now = _now()
     with sqlite3.connect(DB_PATH) as conn:
@@ -203,6 +249,11 @@ def create_session(title: str = "New Consultation", mode: str = "clinical", user
 
 
 def update_session_title(session_id: str, title: str):
+    """Renames a session and bumps its updated_at (the title is truncated to 80 chars).
+    Usage: called two ways — automatically by routes/clinical.py and routes/general.py
+    to auto-title a session from the user's first message, and manually by
+    routes/sessions.py's api_rename_session() when a user renames a session themselves
+    from the sidebar."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute(
             "UPDATE sessions SET title=?, updated_at=? WHERE session_id=?",
@@ -212,7 +263,10 @@ def update_session_title(session_id: str, title: str):
 
 
 def get_sessions(mode: str | None = None, user_id: str | None = None) -> list[dict]:
-    """Get non-hidden sessions, optionally filtered by mode and user_id."""
+    """Get non-hidden sessions, optionally filtered by mode and user_id. Usage: called
+    by routes/sessions.py's api_list_sessions() to populate the session sidebar,
+    scoped to the logged-in user's own sessions plus any session with no owner
+    (user_id IS NULL)."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         base = "SELECT * FROM sessions WHERE hidden=0"
@@ -229,6 +283,9 @@ def get_sessions(mode: str | None = None, user_id: str | None = None) -> list[di
 
 
 def hide_session(session_id: str):
+    """Marks a session as hidden — a soft-archive, not a delete; the row and all its
+    messages stay in the database. Usage: called by routes/sessions.py's
+    api_hide_session() when a user archives a session from the sidebar."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("UPDATE sessions SET hidden=1 WHERE session_id=?", (session_id,))
         conn.commit()
@@ -237,6 +294,13 @@ def hide_session(session_id: str):
 # -- Messages -----------------------------------------------------------------
 
 def save_message(session_id: str, role: str, content: str, metadata: dict | None = None) -> str:
+    """Inserts one chat message (role is "user" or "assistant"), bumps the parent
+    session's updated_at, and mirrors the write to the optional Google Sheets log.
+    Usage: this is the single write path for every message in both the Clinical
+    (/api/chat) and General Chat (/api/general-chat) flows — called repeatedly
+    throughout routes/clinical.py and routes/general.py for every user message and
+    every assistant reply, including all of the follow-up/sufficiency-gate
+    questions."""
     mid = str(uuid.uuid4())
     now = _now()
     with sqlite3.connect(DB_PATH) as conn:
@@ -254,6 +318,11 @@ def save_message(session_id: str, role: str, content: str, metadata: dict | None
 
 
 def get_messages(session_id: str) -> list[dict]:
+    """Fetches a session's full message history in chronological order, parsing each
+    message's metadata column back from JSON into a dict. Usage: called by
+    routes/clinical.py and routes/general.py to reconstruct conversation history/context
+    for the current turn, and by routes/sessions.py's api_get_messages() to let the
+    frontend redisplay a past session when it's reopened."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         rows = conn.execute(
@@ -281,6 +350,9 @@ def save_feedback(
     doctor_rating: int | None = None,
     feedback_type: str = "classification",
 ) -> str:
+    """Records one feedback entry (a clinician's rating/comment on a classification or
+    ligation result) tied to a session, and mirrors it to the optional Google Sheets
+    log. Usage: called by routes/feedback.py's api_submit_feedback()."""
     fid = str(uuid.uuid4())
     now = _now()
     with sqlite3.connect(DB_PATH) as conn:
@@ -294,6 +366,9 @@ def save_feedback(
 
 
 def get_all_feedback() -> list[dict]:
+    """Returns the most recent 500 feedback entries, newest first. Usage: called by
+    routes/feedback.py's api_get_feedback() to populate the Feedback Log view — the
+    session audit trail shown in the UI."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         rows = conn.execute(
@@ -303,6 +378,10 @@ def get_all_feedback() -> list[dict]:
 
 
 def get_db_export() -> dict:
+    """Serializes the entire database (users, sessions, messages, feedback) into one
+    dict, parsing each message's metadata back from JSON along the way. Usage: called
+    by routes/admin.py's export_db() to produce the Admin Panel's full-database export
+    file."""
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         users = [dict(r) for r in conn.execute(

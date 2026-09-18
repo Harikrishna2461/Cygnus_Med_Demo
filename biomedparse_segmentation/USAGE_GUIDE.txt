@@ -44,9 +44,20 @@ backend/
   app.py          - Flask server: upload, background processing job, status polling,
                     serves the annotated video and the COCO zip download.
   engine.py       - Loads the finetuned vein-only BiomedParse model and runs
-                    per-frame inference (vendored/trimmed from
-                    Task_4_VLM_Fascia_Vein_Detection/app.py — vein path only,
-                    no fascia, no LISA/Florence, no Groq blob-verifier).
+                    per-frame inference. Ported from
+                    Vein_Name_Annotation_From_Webcam_And_Segmented_Videos/
+                    backend/biomedparse_engine.py (vein path only), NOT from
+                    Task_4_VLM_Fascia_Vein_Detection/app.py — that version's
+                    naive resize-stretch + Groq LLM per-blob verifier was
+                    tried first and dropped (Groq rate-limiting made a
+                    multi-thousand-frame video painfully slow). This version
+                    uses a letterboxed resize (matches the real training
+                    transform) and a fixed-reference-pixel area filter
+                    instead, with no LLM/API call anywhere in the pipeline.
+  roi.py          - Detects the ultrasound scan-area rectangle once per video
+                    and excludes machine UI chrome (icons, black borders)
+                    from what the model ever sees (see cv_ensemble.py,
+                    frame_sampler.py).
   video_io.py     - FPS/frame-count detection (probe_video), frame reading
                     (iter_frames), and H.264 video writing (H264VideoWriter,
                     via bundled imageio-ffmpeg — OpenCV's own VideoWriter has

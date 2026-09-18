@@ -9,12 +9,20 @@ _parent_module_loaded: bool = False
 
 
 def set_parent_module_flag(loaded: bool) -> None:
+    """Records whether the classification module loaded successfully at startup, for
+    api_status() to report later. Usage: called once by app.py during startup, right
+    after it tries importing shunt_classification_and_ligation_llm."""
     global _parent_module_loaded
     _parent_module_loaded = loaded
 
 
 @bp.route("/api/status")
 def api_status():
+    """GET /api/status — health check reporting whether the classification module
+    loaded, whether the Qdrant collection is ready and how many documents it holds,
+    and whether Ollama (with the embedding model) is reachable. Usage: called by the
+    frontend on load to show a readiness banner, and useful for manually checking
+    whether the app is fully up after starting it."""
     ollama_ok = False
     ollama_model_ok = False
     try:

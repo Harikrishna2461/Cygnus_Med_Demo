@@ -11,12 +11,18 @@ bp = Blueprint("feedback", __name__)
 @bp.route("/api/feedback", methods=["GET"])
 @login_required
 def api_get_feedback():
+    """GET /api/feedback — returns the most recent feedback entries. Usage: called by
+    the frontend's Feedback Log view; wraps chat_db.get_all_feedback()."""
     return jsonify(get_all_feedback())
 
 
 @bp.route("/api/feedback", methods=["POST"])
 @login_required
 def api_submit_feedback():
+    """POST /api/feedback — records a clinician's rating/comment on a classification or
+    ligation result (validates session_id/doctor_question/ai_response are present and
+    doctor_rating is 1-5 if given). Usage: called by the frontend's feedback widget
+    after a clinical or ligation response; wraps chat_db.save_feedback()."""
     try:
         data = request.get_json(force=True, silent=False)
     except Exception as e:

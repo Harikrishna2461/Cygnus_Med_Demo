@@ -918,6 +918,10 @@ available analysis, say so directly and suggest what additional information woul
 
 
 def _clean_json(raw: str) -> str:
+    """Strips a leading ```json / trailing ``` markdown code fence from a raw LLM
+    response, if present. Usage: called by parse_nl_to_clips() on both the sufficiency-
+    check and CHIVA-interpretation responses before json.loads(); also imported
+    directly by crew_pipeline.py, which reuses it inside its own _extract_json()."""
     raw = raw.strip()
     raw = re.sub(r"^```[a-z]*\n?", "", raw)
     raw = re.sub(r"\n?```$", "", raw)

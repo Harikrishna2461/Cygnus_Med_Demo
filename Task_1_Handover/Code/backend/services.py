@@ -93,10 +93,20 @@ def call_llm(
 
 
 def retrieve_ligation_context(query: str, k: int = 5) -> list[str]:
+    """Thin wrapper around rag_engine.retrieve_context() — the RAG entry point handed
+    to the classification pipeline as retrieve_ligation_context_fn. Usage: passed by
+    routes/clinical.py to both crew_pipeline.classify_and_plan_ligation_with_llm() (in
+    /api/chat and /api/classify) as the function it calls to fetch ligation-planning
+    passages for a given shunt type."""
     return retrieve_context(query, k=k)
 
 
 def format_analysis_for_context(result: dict) -> str:
+    """Serializes a classification result (shunt type, confidence, reasoning,
+    ligation steps, rationale) into a short plain-text block. Usage: called by
+    routes/clinical.py right after a successful classification, storing the result in
+    services.analysis_cache[session_id] so build_conversational_response() has
+    something to ground follow-up answers in during the same session."""
     lines: list[str] = []
     for f in result.get("findings", [result]):
         leg = f.get("leg", "Assessment")

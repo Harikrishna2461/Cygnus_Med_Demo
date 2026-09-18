@@ -64,6 +64,12 @@ except ImportError as _err:
     _PARENT_MODULE = False
 
     def classify_and_plan_ligation_with_llm(*args, **kwargs):
+        """Fallback stub used only when the real
+        shunt_classification_and_ligation_llm.py failed to import above — raises
+        immediately with a clear fix-it message instead of letting a NameError happen
+        later, deeper in the request. Usage: only ever invoked if _PARENT_MODULE is
+        False; in the normal, working setup the real module's function shadows this
+        one and this stub is never called."""
         raise RuntimeError(
             "shunt_classification_and_ligation_llm.py not found. "
             "Copy it from backend/ into this folder and restart."
@@ -96,6 +102,10 @@ app.register_blueprint(admin_bp)
 # ── Startup ───────────────────────────────────────────────────────────────────
 
 def _startup() -> None:
+    """Runs once at process start, before the server accepts requests: initialises the
+    database, checks both Qdrant collections exist and loads their BM25 indexes, and
+    logs a readiness summary. Usage: called at the bottom of this file inside
+    `if __name__ == "__main__":`, right before app.run()."""
     from chat_db import init_db
     from rag_engine import collection_exists, get_collection_size, load_bm25_from_qdrant
     from general_chat_engine import (
@@ -129,6 +139,10 @@ def _startup() -> None:
 
 
 def _open_browser() -> None:
+    """Waits 2 seconds then opens the default browser to the running app — purely a
+    local-dev convenience so you don't have to type the URL yourself. Usage: started
+    as a daemon thread at the bottom of this file, right before app.run(); the sleep
+    gives the Flask server a moment to actually start listening first."""
     time.sleep(2)
     webbrowser.open(f"http://{HOST}:{PORT}")
 

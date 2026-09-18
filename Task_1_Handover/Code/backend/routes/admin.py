@@ -14,12 +14,19 @@ bp = Blueprint("admin", __name__)
 @bp.route("/api/admin/users", methods=["GET"])
 @admin_required
 def list_users():
+    """GET /api/admin/users — returns every user account (admin-only). Usage: called
+    by the frontend's Admin Panel to populate the user management list; wraps
+    chat_db.get_all_users()."""
     return jsonify(get_all_users())
 
 
 @bp.route("/api/admin/users", methods=["POST"])
 @admin_required
 def add_user():
+    """POST /api/admin/users — creates a new user account (admin-only). Usage: called
+    by the Admin Panel's "add user" form; wraps chat_db.create_user(). Note: since
+    login (routes/auth.py) never checks a password, the account works by username
+    alone regardless of is_admin."""
     data = request.get_json(force=True, silent=True) or {}
     username = (data.get("username") or "").strip()
     is_admin = bool(data.get("is_admin", False))
@@ -37,6 +44,9 @@ def add_user():
 @bp.route("/api/admin/users/<user_id>", methods=["DELETE"])
 @admin_required
 def remove_user(user_id):
+    """DELETE /api/admin/users/<user_id> — deactivates a user account (admin-only, soft
+    delete). Usage: called by the Admin Panel's "remove user" action; wraps
+    chat_db.deactivate_user()."""
     deactivate_user(user_id)
     return jsonify({"status": "deactivated"})
 
@@ -44,6 +54,10 @@ def remove_user(user_id):
 @bp.route("/api/admin/export-db", methods=["GET"])
 @admin_required
 def export_db():
+    """GET /api/admin/export-db — exports the entire database (users, sessions,
+    messages, feedback) as a downloadable .xlsx workbook, one sheet per table
+    (admin-only). Usage: called by the Admin Panel's "export database" button; wraps
+    chat_db.get_db_export() and formats the result with openpyxl."""
     data = get_db_export()
 
     wb = openpyxl.Workbook()

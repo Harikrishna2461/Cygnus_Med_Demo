@@ -413,8 +413,14 @@ def _compute_primary_step(shunt_type: str, clips: list[dict]) -> str:
     Returns the first ligation step in the same terse format as the CMED clip data.
     Uses the clip's step label directly — no computed anatomical guesses.
     e.g. "Ligate the EP at N2->N3 at SFJ-Knee"
+
+    Usage: called by build_ligation_prompt() to seed the "primary step" hint the LLM
+    is given before it writes the full ligation plan.
     """
     def _loc(c: dict) -> str:
+        """Local shorthand: anatomical location label for one clip's posYRatio.
+        Usage: called repeatedly below, once per shunt-type branch in this
+        function."""
         return _posY_to_location(c.get("posYRatio") or 0.0)
 
     if "Type 1" in shunt_type and "1+2" not in shunt_type:
@@ -695,6 +701,12 @@ def _compute_ligation_hints(shunt_type: str, clips: list[dict]) -> str:
 
 
 def _clip_label(flow: str, ft: str, tt: str, y: float) -> str:
+    """Returns a short bracketed annotation for one clip (e.g. " [SFJ-ENTRY=
+    INCOMPETENT]") describing what that EP/RP pattern means clinically, falling back
+    to the static _CLIP_LABELS lookup table for patterns that don't need posYRatio-
+    based disambiguation. Usage: called by _summarise_clips() for every clip when
+    building the clip listing shown in both the classification and ligation
+    prompts."""
     if flow == "EP" and ft == "N1" and tt == "N2":
         if y <= 0.098:
             return " [SFJ-ENTRY=INCOMPETENT]"
@@ -705,6 +717,11 @@ def _clip_label(flow: str, ft: str, tt: str, y: float) -> str:
 
 
 def _summarise_clips(clips: list[dict]) -> str:
+    """Renders a full clip list as a numbered, human-readable text block (flow,
+    fromType/toType, posYRatio, plus any step/calibre/source/notes/eliminationTest
+    fields and a clinical label from _clip_label()). Usage: called by
+    build_shunt_classification_prompt() and build_ligation_prompt() to embed the
+    clip listing directly into both LLM prompts."""
     lines = []
     for i, c in enumerate(clips):
         flow = c.get("flow", "?")
@@ -1235,6 +1252,14 @@ Output ONLY valid JSON — no markdown, no extra text:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _repair_and_parse(text: str) -> dict | None:
+    """Best-effort recovery of a valid dict from a malformed/truncated LLM JSON
+    response: strips markdown fences, tries a straight json.loads(), and falls back to
+    regex-extracting individual fields (including the nested ex_list() helper for
+    array fields) if that fails outright. Returns None only if nothing usable could be
+    recovered. Usage: called as the last-resort fallback by
+    _call_llm_for_shunt_classification() and _call_llm_for_ligation() below, and
+    imported directly by crew_pipeline.py's _parse_agent_json() for the same
+    purpose."""
     if not text:
         return None
     text = re.sub(r"^```[a-z]*\n?", "", text.strip())
@@ -1275,6 +1300,10 @@ def _repair_and_parse(text: str) -> dict | None:
         result["confidence"] = float(cm[1])
 
     def ex_list(key):
+        """Local helper: regex-extracts a JSON array's string elements for one key
+        out of the raw (possibly truncated/malformed) LLM text. Usage: called for
+        each of ligation_steps, additional_info_needed, and
+        complications_contraindications right below."""
         m = re.search(rf'"{key}"\s*:\s*\[([^\]]*)', raw)
         return re.findall(r'"([^"]+)"', m[1]) if m else []
 

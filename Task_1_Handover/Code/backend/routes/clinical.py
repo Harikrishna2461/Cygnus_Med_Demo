@@ -76,6 +76,12 @@ def _sufficiency_gate_already_answered(history: list[dict]) -> bool:
 @bp.route("/api/chat", methods=["POST"])
 @login_required
 def api_chat():
+    """POST /api/chat — the main conversational Clinical Assistant endpoint (session-
+    based, natural-language-only). Runs the sufficiency gate, NL-to-clips
+    interpretation, classification, and ligation planning, and asks follow-up
+    questions when needed (elimination test, calibre, Type 4 subtype). Usage: called
+    by index.html's chat UI for every message the clinician sends. For a stateless
+    alternative that also accepts pre-structured clip JSON, see api_classify() below."""
     try:
         data = request.get_json(force=True, silent=False)
     except Exception as e:

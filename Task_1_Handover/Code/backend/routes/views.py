@@ -34,6 +34,9 @@ def _require_admin():
 
 @bp.route("/login")
 def login_page():
+    """GET /login — serves login.html, or redirects to / if already logged in.
+    Usage: the entry point every unauthenticated request gets redirected to by
+    _require_login()."""
     if "user_id" in session:
         return redirect("/")
     return send_file(str(_FRONTEND_DIR / "login.html"))
@@ -41,6 +44,10 @@ def login_page():
 
 @bp.route("/")
 def landing():
+    """GET / — the mode-selection landing page (choose Clinical Support or General
+    Chat), with an Admin Panel link shown only if the logged-in user is an admin.
+    Usage: this is the page a browser lands on after logging in; the HTML is built
+    inline here rather than as a separate template file."""
     redir = _require_login()
     if redir:
         return redir
@@ -146,6 +153,8 @@ def landing():
 
 @bp.route("/clinical")
 def clinical():
+    """GET /clinical — serves index.html, the main Clinical Assistant chat UI. Usage:
+    reached via the landing page's "Clinical Support" card."""
     redir = _require_login()
     if redir:
         return redir
@@ -154,6 +163,8 @@ def clinical():
 
 @bp.route("/general")
 def general():
+    """GET /general — serves general.html, the General Medical Chat UI. Usage:
+    reached via the landing page's "General Chat" card."""
     redir = _require_login()
     if redir:
         return redir
@@ -162,6 +173,14 @@ def general():
 
 @bp.route("/admin")
 def admin_panel():
+    """GET /admin — serves admin.html, the Admin Panel UI. Usage: reached via the
+    landing page's Admin Panel link (shown only to admins). NOTE: gated by
+    _require_admin(), which checks BOTH session["is_admin"] AND a hardcoded
+    _ADMIN_WHITELIST = {"krish", "jeffry"} above — an account with is_admin=True but a
+    username outside that whitelist (e.g. "admin" or "harin") gets 403'd from this page
+    even though the /api/admin/* endpoints in routes/admin.py (gated only by
+    auth.admin_required, which does not check this whitelist) would still work for
+    them."""
     redir = _require_admin()
     if redir:
         return redir
@@ -170,4 +189,7 @@ def admin_panel():
 
 @bp.route("/shunt-diagram/<path:filename>")
 def shunt_diagram(filename):
+    """GET /shunt-diagram/<filename> — serves a static CHIVA shunt-type reference
+    image by filename. Usage: referenced by <img> tags in the frontend to show the
+    relevant diagram alongside a classification result."""
     return send_file(str(_FRONTEND_DIR / "shunt_diagrams" / filename))

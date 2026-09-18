@@ -41,7 +41,10 @@ _ready  = False
 
 
 def _init():
-    """Initialise gspread client once. Called lazily on first log call."""
+    """Initialise gspread client once. Called lazily on first log call. Usage: called
+    internally by _append()'s _do() the first time any log_session/log_message/
+    log_feedback call fires; no-ops silently (leaves logging disabled) if credentials
+    or GOOGLE_SHEETS_ID aren't configured."""
     global _client, _sheet, _ready
     try:
         import gspread
@@ -83,8 +86,14 @@ def _init():
 
 
 def _append(tab: str, row: list):
-    """Append one row to the given tab. Runs in a background thread."""
+    """Append one row to the given tab. Runs in a background thread so Google Sheets
+    latency never blocks the Flask response. Usage: called by log_session(),
+    log_message(), and log_feedback() below — the shared write path for all three
+    tabs."""
     def _do():
+        """The actual background-thread body: lazily initialises the gspread client if
+        needed, then appends the row, disabling further logging (until the next lazy
+        _init() retry) if the write fails."""
         global _ready
         with _lock:
             if _client is None:
@@ -104,10 +113,16 @@ def _append(tab: str, row: list):
 # ── Public API ─────────────────────────────────────────────────────────────────
 
 def log_session(session_id: str, title: str, mode: str, created_at: str, updated_at: str):
+    """Mirrors a session creation to the "Sessions" tab. Usage: called by
+    chat_db.create_session() every time a new session is created, alongside the real
+    SQLite write — this is a best-effort copy, not the source of truth."""
     _append("Sessions", [session_id, title, mode, created_at, updated_at])
 
 
 def log_message(message_id: str, session_id: str, role: str, content: str, created_at: str):
+    """Mirrors one chat message to the "Messages" tab (truncated to 2000 chars; system
+    messages are skipped). Usage: called by chat_db.save_message() every time a
+    message is saved, alongside the real SQLite write."""
     # Only log user and assistant turns — skip system messages
     if role == "system":
         return
@@ -123,6 +138,9 @@ def log_feedback(
     doctor_rating,
     created_at: str,
 ):
+    """Mirrors one feedback entry to the "Feedback" tab (question/response truncated).
+    Usage: called by chat_db.save_feedback() every time feedback is submitted,
+    alongside the real SQLite write."""
     _append("Feedback", [
         feedback_id, session_id,
         doctor_question[:1000], ai_response[:2000],

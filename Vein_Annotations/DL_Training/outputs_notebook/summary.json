@@ -1,0 +1,11 @@
+{
+  "n_train": 13316,
+  "n_val": 1664,
+  "n_test": 1665,
+  "epochs_trained": 86,
+  "best_val_iou": 0.6753662985104781,
+  "test_iou": 0.6891476357424701,
+  "test_dice": 0.7574740184677972,
+  "test_pixel_acc": 0.9984013504452176,
+  "model_params_millions": 8.903811
+}

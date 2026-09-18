@@ -28,8 +28,8 @@ from flask_cors import CORS
 import numpy as np
 
 import engine
-import groq_verify
 import roi as roi_detect
+import temporal
 import video_io
 from coco_export import CocoVideoAnnotationBuilder
 
@@ -44,8 +44,6 @@ UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
 OUTPUT_DIR = os.path.join(BASE_DIR, 'outputs')
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-VEIN_THRESHOLD = 0.5
 
 # job_id -> status dict
 _jobs = {}
@@ -83,40 +81,55 @@ def _process_video(job_id: str, input_path: str, video_name: str):
         out_video_path = os.path.join(OUTPUT_DIR, f'{job_id}_annotated.mp4')
         out_coco_path = os.path.join(OUTPUT_DIR, f'{job_id}_coco.zip')
 
-        writer = video_io.H264VideoWriter(out_video_path, fps=fps, width=width, height=height)
-        coco = CocoVideoAnnotationBuilder(video_name=video_name, fps=fps, width=width, height=height)
-
-        _set_job(job_id, stage='processing',
-                 message='Segmenting veins frame by frame (Groq-verifying each candidate blob)...')
-
-        total_vein_frames = 0
+        # --- Pass 1: per-frame segmentation (engine.py, unchanged/unmodified) ---
+        # Only lightweight blob metadata (centroid/bbox/contour/area) is kept
+        # per frame, not full masks — cheap even across thousands of frames.
+        _set_job(job_id, stage='processing', message='Segmenting veins frame by frame (pass 1/2)...')
+        per_frame_blobs = []
         for idx, frame_rgb in video_io.iter_frames(input_path):
             # Segment only the true scan-area crop — running the model on the
             # full device screen (icons, black letterboxing) produces false
             # positives there, since it looks nothing like the ROI-cropped
             # frames the model was trained on. The resulting mask is in crop
-            # coordinates; paste it back into a full-frame-sized canvas so
-            # drawing/export stay in the original video's coordinate space.
+            # coordinates; shift blob coordinates back to full-frame space.
             crop = frame_rgb[y1:y2, x1:x2]
-            crop_mask = engine.segment_frame(model, crop, threshold=VEIN_THRESHOLD)
-            mask = np.zeros(frame_rgb.shape[:2], dtype=np.uint8)
-            mask[y1:y2, x1:x2] = crop_mask
+            crop_mask = engine.segment_frame(model, crop)
+            blobs = temporal.extract_blobs(idx, crop_mask)
+            for b in blobs:
+                b.centroid = (b.centroid[0] + x1, b.centroid[1] + y1)
+                b.bbox = (b.bbox[0] + x1, b.bbox[1] + y1, b.bbox[2], b.bbox[3])
+                b.contour = b.contour + np.array([[x1, y1]], dtype=b.contour.dtype)
+            per_frame_blobs.append(blobs)
 
-            # Classical shape/darkness filters alone can't tell a real vein
-            # apart from a compact-ish patch of muscle texture — the single
-            # highest-confidence BiomedParse query occasionally fires on the
-            # wrong structure. A Groq vision-LLM check per candidate blob
-            # (same fix Task_4_VLM_Fascia_Vein_Detection uses) drops those.
-            if mask.max() > 0:
-                mask = groq_verify.verify_vein_mask(mask, frame_rgb)
+            if idx % 20 == 0 or idx == frame_count - 1:
+                _set_job(job_id, processed=idx + 1)
 
+        # --- Temporal consistency pass ---
+        # A real vein persists across many consecutive frames; a one-off
+        # flicker (watermark/probe-indicator dot, stray speckle) usually
+        # doesn't. Link blobs into tracks across frames and keep only
+        # persistent ones, filling the rare frame a persistent vein was
+        # missed on. See temporal.py — independent of engine.py's per-frame
+        # filtering, so this doesn't touch already-tuned model output.
+        _set_job(job_id, stage='linking', message='Checking detections for temporal consistency...')
+        confirmed_masks = temporal.build_confirmed_masks(per_frame_blobs, width, height)
+
+        # --- Pass 2: draw + write video + build COCO export ---
+        _set_job(job_id, stage='finalizing', message='Writing annotated video and COCO export (pass 2/2)...',
+                  processed=0)
+        writer = video_io.H264VideoWriter(out_video_path, fps=fps, width=width, height=height)
+        coco = CocoVideoAnnotationBuilder(video_name=video_name, fps=fps, width=width, height=height)
+
+        total_vein_frames = 0
+        for idx, frame_rgb in video_io.iter_frames(input_path):
+            mask = confirmed_masks[idx]
             if mask.max() > 0:
                 total_vein_frames += 1
             annotated = engine.draw_vein_contours(frame_rgb, mask)
             writer.write(annotated)
             coco.add_frame(idx, frame_rgb, mask)
 
-            if idx % 5 == 0 or idx == frame_count - 1:
+            if idx % 20 == 0 or idx == frame_count - 1:
                 _set_job(job_id, processed=idx + 1, vein_frames=total_vein_frames)
 
         writer.close()
