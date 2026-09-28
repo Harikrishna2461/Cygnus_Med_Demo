@@ -6,107 +6,8 @@ into CHIVA virtual clips that can be passed directly to the classification
 and ligation planning pipeline.
 """
 
-import json
-import logging
 import re
-from typing import Callable
 
-logger = logging.getLogger(__name__)
-
-_NL_TO_CHIVA_PROMPT_OLD = """You are an expert CHIVA vascular surgeon. A colleague is describing a patient's venous flow condition in plain clinical language. Your job is to translate that description into CHIVA clip notation so the AI classification system can process it.
-
-=== CHIVA NOTATION GUIDE ===
-
-COMPARTMENTS:
-  N1 = Deep venous system (femoral vein, popliteal vein, deep veins)
-  N2 = Saphenous trunk (GSV = Great Saphenous Vein, SSV = Small Saphenous Vein)
-  N3 = Tributaries, perforators branching off the saphenous trunk, varicosities, superficial branches
-
-FLOW DIRECTIONS:
-  EP = Entry Point — blood pathologically escapes FROM deep INTO superficial (valve has failed).
-  RP = Re-entry Point — blood exits FROM superficial BACK INTO deep via a perforator.
-       The RP perforator carries blood superficial→deep (correct perforator direction).
-       The segment ABOVE the RP is what refluxes — the RP itself does not reflux.
-
-POSITION RATIOS (posYRatio — 0 = groin, 1 = ankle):
-  SFJ / groin area:           0.04 – 0.09
-  Upper thigh:                0.10 – 0.20
-  Mid thigh (Hunterian area): 0.21 – 0.35
-  Knee / popliteal area:      0.40 – 0.55
-  Calf:                       0.60 – 0.80
-  Ankle:                      0.85 – 1.00
-
-KEY MAPPINGS FROM CLINICAL LANGUAGE:
-  "SFJ incompetent" / "reflux at SFJ" / "deep blood enters GSV at groin"
-      → EP  N1→N2  posYRatio≈0.06
-
-  "GSV reflux" / "blood flows backward in GSV" / "GSV carries reflux downward"
-      → RP  N2→N1  (at the level described, e.g. mid-thigh ≈ 0.30)
-
-  "blood escapes to tributaries" / "GSV feeds tributaries" / "EP from GSV to branch" /
-  "GSV feeds a tributary" / "GSV discharges into a tributary" / "discharges forward into a tributary" /
-  "GSV discharges blood into" / "blood exits the GSV into a tributary" / "GSV empties into a tributary"
-      → EP  N2→N3  (at the level described)
-
-  "blood refluxes back in the tributary" / "tributary drains backward" / "tributary carries blood retrograde"
-      → RP N3→N2 (if the tributary drains back into the GSV trunk)
-        RP N3→N1 (if the tributary drains directly to the deep system)
-      The RP marks where the refluxing tributary exits — the tributary segment above is what refluxes.
-
-  "perforator feeds GSV" / "there is a perforator entry into the trunk"
-      → EP  N2→N2  (perforator entry — note: fromType=N2, toType=N2, NOT N1→N2)
-      This means SFJ is COMPETENT even if posYRatio is small.
-
-  "deep vein directly feeds a tributary" / "N1 to N3 direct connection"
-      → EP  N1→N3
-
-  "Hunterian perforator incompetent" / "mid-thigh perforator entry from deep system"
-      → EP  N1→N2  posYRatio≈0.25 (SFJ INCOMPETENT via Hunterian)
-
-IMPORTANT DISTINCTIONS:
-  - EP N1→N2: incompetent SFJ or Hunterian perforator — deep blood floods into GSV trunk
-  - EP N2→N2: incompetent mid-segment perforator — deep blood enters GSV trunk (SFJ COMPETENT)
-  - EP N2→N3: GSV trunk overflows forward into a tributary (GSV pressure exceeds tributary threshold)
-  - EP N1→N3: deep blood enters a tributary directly, bypassing the GSV trunk entirely
-  - RP N2→N1: GSV trunk carries blood downward (reflux); blood re-enters deep via perforator here
-  - RP N3→N2: tributary carries blood backward; blood re-enters GSV trunk at this point
-  - RP N3→N1: tributary carries blood backward; blood re-enters deep system directly at this point
-
-=== CLINICAL DESCRIPTION TO INTERPRET ===
-{description}
-
-=== INSTRUCTIONS ===
-1. Read the description carefully.
-2. Identify each distinct blood flow event mentioned.
-3. Generate one virtual clip per flow event.
-4. Use the mappings above to assign EP/RP and N1/N2/N3 notation.
-5. Estimate posYRatio from anatomical location clues.
-6. If left/right leg is explicitly mentioned, assign legSide accordingly. If NOT mentioned, use "Unspecified" — never assume or default to Left or Right.
-7. If the description is NOT about patient venous anatomy (e.g., it is a question,
-   a greeting, or asks about a concept without describing a patient), set is_clinical=false.
-
-Output ONLY valid JSON — no markdown, no explanation:
-{{
-    "is_clinical": true,
-    "interpretation": "<2-3 sentences summarising the findings in CHIVA terms>",
-    "clips": [
-        {{
-            "flow": "EP",
-            "fromType": "N1",
-            "toType": "N2",
-            "posYRatio": 0.06,
-            "step": "SFJ",
-            "legSide": "Unspecified"
-        }}
-    ]
-}}
-
-If not clinical:
-{{
-    "is_clinical": false,
-    "interpretation": null,
-    "clips": []
-}}"""
 
 _NL_TO_CHIVA_PROMPT = """You are an expert CHIVA vascular surgeon. A colleague is describing a patient's venous flow condition in plain clinical language. Your job is to translate that description into CHIVA clip notation so the AI classification system can process it.
 
@@ -919,9 +820,8 @@ available analysis, say so directly and suggest what additional information woul
 
 def _clean_json(raw: str) -> str:
     """Strips a leading ```json / trailing ``` markdown code fence from a raw LLM
-    response, if present. Usage: called by parse_nl_to_clips() on both the sufficiency-
-    check and CHIVA-interpretation responses before json.loads(); also imported
-    directly by crew_pipeline.py, which reuses it inside its own _extract_json()."""
+    response, if present. Usage: imported by crew_pipeline.py, which calls it inside
+    its _extract_json() to clean every agent response before json.loads()."""
     raw = raw.strip()
     raw = re.sub(r"^```[a-z]*\n?", "", raw)
     raw = re.sub(r"\n?```$", "", raw)
@@ -956,89 +856,4 @@ def _build_accumulated_description(history: list[dict] | None, current_message: 
     return "\n".join(f"[Message {i+1}]: {m}" for i, m in enumerate(all_msgs))
 
 
-def parse_nl_to_clips(user_message: str, call_llm_fn: Callable, history: list[dict] | None = None) -> dict:
-    """
-    Two-stage pipeline:
-      1. Focused sufficiency check — a separate call whose only job is to decide
-         whether the input describes actual blood movement. No CHIVA clip context,
-         so the model can't rationalise sufficiency to justify generating clips.
-      2. Full CHIVA interpretation — only reached if stage 1 passes.
 
-    history — prior messages in the session (user + assistant), used to accumulate
-    the full clinical description across multiple turns.
-    """
-    accumulated = _build_accumulated_description(history, user_message)
-
-    # ── Stage 1: sufficiency check ──────────────────────────────────────────
-    try:
-        check_raw, _ = call_llm_fn(
-            _SUFFICIENCY_PROMPT.format(description=accumulated),
-            return_usage=True,
-            max_tokens=800,
-        )
-        check = json.loads(_clean_json(check_raw))
-        verdict = check.get("verdict", "sufficient")
-    except Exception as e:
-        logger.error(f"Sufficiency check failed: {e}")
-        verdict = "sufficient"  # fall through to CHIVA call on error
-
-    if verdict == "question":
-        return {"is_clinical": False, "sufficient_information": False, "missing_information": None, "interpretation": None, "clips": []}
-
-    if verdict == "insufficient":
-        missing = check.get("missing") or (
-            "Still need to know whether blood refluxes backward through the GSV trunk, "
-            "whether it escapes into any tributary, and if so whether it also refluxes "
-            "backward through that tributary."
-        )
-        return {"is_clinical": True, "sufficient_information": False, "missing_information": missing, "interpretation": None, "clips": []}
-
-    # ── Stage 2: CHIVA interpretation (only if verdict == "sufficient") ─────
-    try:
-        raw, _ = call_llm_fn(
-            _NL_TO_CHIVA_PROMPT.format(description=accumulated),
-            return_usage=True,
-            max_tokens=1024,
-        )
-        result = json.loads(_clean_json(raw))
-        if isinstance(result, dict) and "clips" in result:
-            return {
-                "is_clinical": True,
-                "sufficient_information": True,
-                "missing_information": None,
-                "interpretation": result.get("interpretation"),
-                "clips": result.get("clips", []),
-            }
-    except Exception as e:
-        logger.error(f"CHIVA interpretation failed: {e}")
-    return {"is_clinical": False, "sufficient_information": False, "missing_information": None, "interpretation": None, "clips": []}
-
-
-def build_conversational_response(
-    user_message: str,
-    analysis_context: str,
-    history: list[dict],
-    call_llm_fn: Callable,
-) -> str:
-    """Generate a conversational follow-up response given the analysis context."""
-    history_lines = []
-    for m in history[-8:]:
-        role_label = "Clinician" if m.get("role") == "user" else "Assistant"
-        content = m.get("content", "")[:400]
-        history_lines.append(f"{role_label}: {content}")
-
-    prompt = _CONVERSATIONAL_PROMPT.format(
-        analysis_context=analysis_context or "No prior clinical analysis available.",
-        history="\n".join(history_lines) or "(start of conversation)",
-        user_message=user_message.strip(),
-    )
-
-    try:
-        response, _ = call_llm_fn(prompt, return_usage=True, max_tokens=900)
-        return response.strip()
-    except Exception as e:
-        logger.error(f"Conversational response failed: {e}")
-        return (
-            "I'm sorry, I encountered an error generating a response. "
-            "Please check your network connection and try again."
-        )

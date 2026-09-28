@@ -1,9 +1,7 @@
-import logging
 from flask import Blueprint, jsonify, request, session as flask_session
 from auth import login_required
 from chat_db import create_session, update_session_title, get_sessions, get_messages, hide_session
 
-logger = logging.getLogger(__name__)
 bp = Blueprint("sessions", __name__)
 
 

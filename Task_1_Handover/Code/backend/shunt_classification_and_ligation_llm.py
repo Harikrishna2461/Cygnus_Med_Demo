@@ -13,7 +13,7 @@ import json
 import re
 import logging
 from contextlib import suppress
-from typing import Any, Callable
+from typing import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -981,18 +981,6 @@ Output ONLY the JSON below — no other text, no markdown.
 # TASK 2: LIGATION PLANNING (With RAG)
 # ─────────────────────────────────────────────────────────────────────────────
 
-LIGATION_QUERIES_OLD = {
-    "Type 1": "SFJ incompetent with circular reflux N1->N2->N1. High ligation tie at saphenofemoral junction. Multiple GSV reflux points management strategy.",
-    "Type 2A": "Tributary entry from GSV trunk N2->N3 without SFJ involvement. Ligate highest EP at tributary junction. Branching anatomy considerations.",
-    "Type 2B": "Perforator-fed shunt via N2->N2 entry into saphenous trunk. Open distal shunt with tributary reflux N3->N1. Selective perforator ligation.",
-    "Type 2C": "Perforator-fed shunt via N2->N2 entry with secondary GSV reflux N2->N1. Selective perforator ligation combined with GSV segment treatment.",
-    "Type 3": "SFJ incompetent with dual entries: EP N1->N2 and EP N2->N3. Staged approach: tributary ligation first, then follow-up for SFJ. Six to twelve month reassessment.",
-    "Type 4": "N1->N3 perforator or pelvic-point shunt with N2 return via N2->N1. Target the N1->N3 escape/perforator entry and the return path through N2.",
-    "Type 5": "N1->N3 shunt with looping return through N3 and complex re-entry path. Target the N1->N3 escape entry and all refluxing N3 return segments.",
-    "Type 1+2": "Complex dual entry shunt SFJ incompetent N1->N2 plus tributary escape N2->N3. CHIVA 1 single stage simultaneous high tie SFJ and flush tie every N2->N3 junction.",
-    "No shunt detected": "No significant shunt detected. Standard compression therapy. No surgical intervention required.",
-    "Undetermined": "Unclear shunt classification. Elimination test required to determine type. Defer ligation planning until classification confirmed.",
-}
 
 LIGATION_QUERIES = {
     "Type 1": (
@@ -1256,10 +1244,8 @@ def _repair_and_parse(text: str) -> dict | None:
     response: strips markdown fences, tries a straight json.loads(), and falls back to
     regex-extracting individual fields (including the nested ex_list() helper for
     array fields) if that fails outright. Returns None only if nothing usable could be
-    recovered. Usage: called as the last-resort fallback by
-    _call_llm_for_shunt_classification() and _call_llm_for_ligation() below, and
-    imported directly by crew_pipeline.py's _parse_agent_json() for the same
-    purpose."""
+    recovered. Usage: imported by crew_pipeline.py and used as the last-resort
+    fallback in its _parse_agent_json()."""
     if not text:
         return None
     text = re.sub(r"^```[a-z]*\n?", "", text.strip())
@@ -1321,71 +1307,8 @@ def _repair_and_parse(text: str) -> dict | None:
 # PUBLIC API — UNIFIED INTERFACE
 # ─────────────────────────────────────────────────────────────────────────────
 
-_CLASSIFICATION_ERROR_RESULT: dict = {
-    "shunt_type": "Classification failed",
-    "confidence": 0.0,
-    "chain_of_thought": "",
-    "reasoning": ["The LLM did not return a parseable classification response. Please retry."],
-    "needs_elim_test": False,
-    "ask_branching": False,
-    "summary": "Classification unavailable.",
-    "_llm_error": True,
-}
-
-_LIGATION_ERROR_RESULT: dict = {
-    "shunt_type": "Unknown",
-    "ligation_steps": ["Unable to generate ligation plan — please retry"],
-    "clinical_rationale": "LLM response could not be parsed.",
-    "additional_info_needed": [],
-    "complications_contraindications": [],
-    "followup_schedule": "",
-    "chiva_approach": "",
-    "confidence": 0.0,
-    "_llm_error": True,
-}
 
 _LEG_ORDER = {"Left": 0, "Right": 1}
-
-
-def _call_llm_for_shunt_classification(group: list[dict], leg_label: str, call_llm_fn: Callable) -> dict:
-    """Task 1: Classify shunt type — NO RAG."""
-    prompt = build_shunt_classification_prompt(group, leg_label)
-    logger.info(f"Shunt classification LLM prompt for {leg_label}: {len(prompt)} chars")
-    try:
-        raw, usage = call_llm_fn(prompt, max_tokens=2048, temperature=0, return_usage=True)
-        logger.info(f"Shunt classification LLM response ({leg_label}): {raw[:300]!r}")
-        logger.info(f"Shunt classification tokens ({leg_label}): prompt={usage.get('prompt_tokens', 0)}, completion={usage.get('completion_tokens', 0)}")
-        result = _repair_and_parse(raw)
-        if result and "shunt_type" in result:
-            result['_llm_usage'] = usage
-            return result
-        logger.error(f"Shunt classification returned unparseable response for {leg_label}: {raw[:200]!r}")
-        raise RuntimeError(f"The model returned an unreadable response for {leg_label}. Please retry.")
-    except RuntimeError:
-        raise
-    except Exception as e:
-        logger.error(f"Shunt classification LLM call failed for {leg_label}: {e}")
-        raise RuntimeError(str(e)) from e
-
-
-
-
-def _call_llm_for_ligation(shunt_type: str, group: list[dict], rag_context: str, leg_label: str, call_llm_fn: Callable) -> dict:
-    """Task 2: Plan ligation — WITH RAG."""
-    prompt = build_ligation_prompt(shunt_type, group, rag_context, leg_label)
-    logger.info(f"Ligation planning LLM prompt for {leg_label}: {len(prompt)} chars")
-    try:
-        raw, usage = call_llm_fn(prompt, return_usage=True)
-        logger.info(f"Ligation planning LLM response ({leg_label}): {raw[:300]!r}")
-        logger.info(f"Ligation planning tokens ({leg_label}): prompt={usage.get('prompt_tokens', 0)}, completion={usage.get('completion_tokens', 0)}")
-        result = _repair_and_parse(raw)
-        if result and "ligation_steps" in result:
-            result['_llm_usage'] = usage
-            return result
-    except Exception as e:
-        logger.error(f"Ligation planning LLM call failed for {leg_label}: {e}")
-    logger.error(f"Ligation planning failed for {leg_label}")
-    raise RuntimeError(f"Ligation planning failed for {leg_label}")
 
 
 def _retrieve_rag_context_for_ligation(shunt_type: str, retrieve_fn: Callable) -> str:
@@ -1398,134 +1321,3 @@ def _retrieve_rag_context_for_ligation(shunt_type: str, retrieve_fn: Callable) -
         logger.warning(f"RAG retrieval failed for ligation planning ({shunt_type}): {e}")
     return "No RAG context available."
 
-
-def classify_and_plan_ligation_with_llm(
-    clip_list: list[dict[str, Any]],
-    call_llm_fn: Callable,
-    retrieve_ligation_context_fn: Callable | None = None,
-) -> dict:
-    """
-    Unified API: Classify shunts AND generate ligation plans.
-
-    Workflow:
-    1. Group clips by leg
-    2. Call LLM for SHUNT CLASSIFICATION (no RAG)
-    3. Call LLM for LIGATION PLANNING (with ligation RAG)
-    4. Return combined result
-
-    Args:
-        clip_list: Raw clip data from assessment
-        call_llm_fn: Function to call LLM (returns (response, usage_dict))
-        retrieve_ligation_context_fn: Function to retrieve from ligation database
-
-    Returns:
-        {
-            "findings": [
-                {
-                    "leg": "Left" | "Right",
-                    "shunt_type": str,
-                    "confidence": float,
-                    "reasoning": [...],
-                    "needs_elim_test": bool,
-                    "ask_branching": bool,
-                    "summary": str,
-                    "ligation_steps": [...],
-                    "clinical_rationale": str,
-                    "additional_info_needed": [...],
-                    "complications_contraindications": [...],
-                    "followup_schedule": str,
-                    "chiva_approach": str,
-                    "num_clips": int,
-                }
-            ],
-            "shunt_type": str (primary leg),
-            "confidence": float (primary leg),
-            "summary": str (primary leg),
-            ...
-        }
-    """
-    # Group by leg — if no clips provided, run with an empty "Unspecified" group
-    groups: dict[str, list[dict]] = {}
-    if not clip_list:
-        groups["Unspecified"] = []
-    else:
-        for c in clip_list:
-            side = (c.get("legSide") or c.get("leg_side") or "Assessment").strip().capitalize()
-            groups.setdefault(side, []).append(c)
-
-    findings = []
-    total_prompt_tokens = 0
-    total_completion_tokens = 0
-    for leg_label, group in groups.items():
-        # Step 1: Shunt Classification (NO RAG)
-        classification = _call_llm_for_shunt_classification(group, leg_label, call_llm_fn)
-        classification_usage = classification.pop("_llm_usage", {})
-        shunt_type = classification.get("shunt_type", "Unknown")
-
-        # Step 2: Ligation Planning — LLM handles all types including No shunt / Undetermined
-        rag_context = (
-            _retrieve_rag_context_for_ligation(shunt_type, retrieve_ligation_context_fn)
-            if retrieve_ligation_context_fn else "No RAG context available."
-        )
-        ligation = _call_llm_for_ligation(shunt_type, group, rag_context, leg_label, call_llm_fn)
-        ligation_usage = ligation.pop("_llm_usage", {})
-
-        total_prompt_tokens += classification_usage.get("prompt_tokens", 0) + ligation_usage.get("prompt_tokens", 0)
-        total_completion_tokens += classification_usage.get("completion_tokens", 0) + ligation_usage.get("completion_tokens", 0)
-
-        # Merge both results
-        finding = {
-            "leg": leg_label,
-            "num_clips": len(group),
-
-            # Classification results
-            "shunt_type": classification.get("shunt_type"),
-            "assessment": classification.get("shunt_type"),
-            "confidence": classification.get("confidence", 0.0),
-            "chain_of_thought": classification.get("chain_of_thought", ""),
-            "reasoning": classification.get("reasoning", []),
-            "needs_elim_test": classification.get("needs_elim_test", False),
-            #"ask_diameter": classification.get("ask_diameter", False),
-            "ask_branching": classification.get("ask_branching", False),
-            "summary": classification.get("summary", ""),
-
-            # Ligation results
-            "ligation_steps": ligation.get("ligation_steps", []),
-            "point_of_ligation": ligation.get("ligation_steps", [""])[0] if ligation.get("ligation_steps") else "",
-            "clinical_rationale": ligation.get("clinical_rationale", ""),
-            "additional_info_needed": ligation.get("additional_info_needed", []),
-            "complications_contraindications": ligation.get("complications_contraindications", []),
-            "followup_schedule": ligation.get("followup_schedule", ""),
-            "chiva_approach": ligation.get("chiva_approach", ""),
-            "classification_llm_usage": classification_usage,
-            "ligation_llm_usage": ligation_usage,
-        }
-        findings.append(finding)
-
-    findings.sort(key=lambda f: _LEG_ORDER.get(f["leg"], 2))
-
-    if not findings:
-        raise RuntimeError("Combined shunt classifier returned no findings")
-
-
-    primary = findings[0]
-    return {
-        "findings": findings,
-        "shunt_type": primary.get("shunt_type"),
-        "confidence": primary.get("confidence", 0.0),
-        "chain_of_thought": primary.get("chain_of_thought", ""),
-        "reasoning": primary.get("reasoning", []),
-        "ligation": primary.get("ligation_steps", []),  # For backward compat with old API
-        "point_of_ligation": primary.get("point_of_ligation", primary.get("ligation_steps", [""])[0] if primary.get("ligation_steps") else ""),
-        "summary": primary.get("summary", ""),
-        "needs_elim_test": primary.get("needs_elim_test", False),
-        #"ask_diameter": primary.get("ask_diameter", False),
-        "ask_branching": primary.get("ask_branching", False),
-        "num_clips": len(clip_list),
-        "num_findings": len(findings),
-        "token_usage": {
-            "prompt_tokens": total_prompt_tokens,
-            "completion_tokens": total_completion_tokens,
-            "total_tokens": total_prompt_tokens + total_completion_tokens,
-        },
-    }

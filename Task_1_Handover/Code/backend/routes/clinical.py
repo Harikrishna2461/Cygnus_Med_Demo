@@ -17,11 +17,6 @@ logger = logging.getLogger(__name__)
 bp = Blueprint("clinical", __name__)
 
 
-def set_classification_fn(loaded: bool, fn) -> None:
-    """No-op — CrewAI pipeline is self-contained and needs no external injection."""
-    pass
-
-
 def _already_asked(history: list[dict], marker: str) -> bool:
     """
     Return True if the assistant already sent a message containing *marker*
@@ -438,6 +433,7 @@ def api_classify():
             return jsonify(result), 400
 
         return jsonify(result), 200
+
 
     except ValueError as e:
         # Invalid mode or payload format

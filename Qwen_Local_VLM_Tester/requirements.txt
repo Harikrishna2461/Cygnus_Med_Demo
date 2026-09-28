@@ -1,0 +1,8 @@
+flask
+pillow
+torch
+torchvision
+transformers>=5.9
+accelerate
+compressed-tensors
+huggingface_hub

@@ -5,16 +5,6 @@ from rag_engine import collection_exists, get_collection_size
 
 bp = Blueprint("status", __name__)
 
-_parent_module_loaded: bool = False
-
-
-def set_parent_module_flag(loaded: bool) -> None:
-    """Records whether the classification module loaded successfully at startup, for
-    api_status() to report later. Usage: called once by app.py during startup, right
-    after it tries importing shunt_classification_and_ligation_llm."""
-    global _parent_module_loaded
-    _parent_module_loaded = loaded
-
 
 @bp.route("/api/status")
 def api_status():
@@ -36,7 +26,6 @@ def api_status():
 
     return jsonify({
         "status": "running",
-        "parent_module_loaded": _parent_module_loaded,
         "qdrant": {
             "collection_ready": collection_exists(),
             "document_count": get_collection_size(),

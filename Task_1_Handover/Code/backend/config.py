@@ -2,10 +2,8 @@ import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-APP_DIR = BASE_DIR.parent
 
 # Parent backend — for importing shared prompts/rules (dev environment)
-PARENT_BACKEND_DIR = BASE_DIR.parent.parent / "backend"
 
 # Qdrant — local copy at cmed_demo/backend/qdrant_storage
 # ligation_knowledgebase_db_v2 (nomic-embed-text, 768-dim, Apr 23) is newer than
@@ -27,8 +25,6 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 GROQ_MODEL = "openai/gpt-oss-120b"
 
 # Chunking
-CHUNK_SIZE = 400
-CHUNK_OVERLAP = 50
 
 # Improved RAG retrieval (cross-encoder reranking pipeline)
 VECTOR_TOP_K = 50        # Pull top-50 by vector similarity
@@ -61,4 +57,3 @@ CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
 # Auth
 SECRET_KEY = os.getenv("SECRET_KEY", "change-this-in-production-use-a-long-random-string")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")

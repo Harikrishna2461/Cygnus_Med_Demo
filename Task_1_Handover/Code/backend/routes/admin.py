@@ -1,13 +1,11 @@
 import io
 import json
-import logging
 from datetime import datetime
 import openpyxl
 from flask import Blueprint, jsonify, request, Response
 from auth import admin_required
 from chat_db import get_all_users, create_user, deactivate_user, get_db_export
 
-logger = logging.getLogger(__name__)
 bp = Blueprint("admin", __name__)
 
 

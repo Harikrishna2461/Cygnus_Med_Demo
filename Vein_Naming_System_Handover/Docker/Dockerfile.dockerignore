@@ -1,0 +1,8 @@
+**/__pycache__
+**/*.pyc
+backend/uploads
+backend/outputs
+BiomedParse_Assets/checkpoints/*/*.pt
+.venv
+*.mp4
+!sample_data/*.mp4

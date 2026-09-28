@@ -82,3 +82,7 @@ Task_1_App_Pyside/_internal/
 
 # Private keys
 *.pem
+
+# Large ML datasets (>1GB each - too big for GitHub)
+Vein_Annotations/segmentation_dataset_v1/
+Vein_Annotations/segmentation_dataset_v2/

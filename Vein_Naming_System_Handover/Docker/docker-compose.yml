@@ -1,0 +1,74 @@
+# Two containers on one GPU:
+#   qwen : llama.cpp llama-server serving Qwen 27B (4-bit GGUF + vision projector). ~17.4GB weights
+#          + KV cache. The reasoning/vision engine for EVERY VLM/LLM call in the pipeline.
+#   app  : Flask web app + BioMedParse segmentation (~3-5GB VRAM). Talks to qwen over the
+#          compose network at http://qwen:8081.
+# Total VRAM needed: ~30GB -> a 32GB card (RTX 5090 / A6000-class) or bigger. On smaller cards
+# run `qwen` with a smaller quant or split the two across machines (see Docker_Guide.docx).
+#
+# Requires: Docker + NVIDIA Container Toolkit (Docker Desktop on Windows: WSL2 backend + GPU support).
+# Usage:    cp .env.example .env   (edit the paths)   then   docker compose up --build
+
+services:
+  qwen:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    restart: unless-stopped
+    volumes:
+      - ${QWEN_MODEL_DIR}:/models:ro
+    command: >
+      --model /models/${QWEN_GGUF_FILE}
+      --mmproj /models/${QWEN_MMPROJ_FILE}
+      --jinja
+      --n-gpu-layers 999
+      --parallel ${VLM_MAX_CONCURRENT:-2}
+      --ctx-size ${QWEN_CTX_SIZE:-65536}
+      --cache-type-k q8_0 --cache-type-v q8_0
+      --flash-attn on
+      --host 0.0.0.0
+      --port 8081
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://127.0.0.1:8081/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      start_period: 180s      # loading 17GB of weights takes a while
+      retries: 20
+
+  app:
+    build:
+      context: ../Code
+      dockerfile: ../Docker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      qwen:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-7862}:7862"
+    environment:
+      LLAMA_SERVER_URL: http://qwen:8081
+      VLM_MAX_CONCURRENT: ${VLM_MAX_CONCURRENT:-2}     # must equal qwen's --parallel (same variable above)
+      CMED_FASCIA_CKPT_DIR: /weights/fascia
+      CMED_VEIN_CKPT_DIR: /weights/vein
+    volumes:
+      - ${BIOMEDPARSE_WEIGHTS_DIR}:/weights:ro          # contains fascia/model_state_dict.pt + vein/model_state_dict.pt
+      - hf_cache:/hf_cache                              # Hugging Face cache (BiomedBERT text encoder, ~440MB, downloaded once)
+      - app_uploads:/app/backend/uploads
+      - app_outputs:/app/backend/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+volumes:
+  hf_cache:
+  app_uploads:
+  app_outputs:

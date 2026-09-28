@@ -1,0 +1,171 @@
+<mxfile host="65bd71144e">
+    <diagram id="chiva-arch" name="System Architecture">
+        <mxGraphModel dx="1555" dy="1007" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="960" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="lbl1" parent="1" style="text;html=1;align=left;verticalAlign=middle;" value="&lt;b&gt;Tier 1&lt;/b&gt;&lt;br&gt;Frontend" vertex="1">
+                    <mxGeometry height="60" width="120" x="10" y="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl2" parent="1" style="text;html=1;align=left;verticalAlign=middle;" value="&lt;b&gt;Tier 2&lt;/b&gt;&lt;br&gt;Application" vertex="1">
+                    <mxGeometry height="50" width="120" x="10" y="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl3" parent="1" style="text;html=1;align=left;verticalAlign=middle;" value="&lt;b&gt;Tier 3&lt;/b&gt;&lt;br&gt;Routes" vertex="1">
+                    <mxGeometry height="70" width="120" x="10" y="210" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl4" parent="1" style="text;html=1;align=left;verticalAlign=middle;" value="&lt;b&gt;Tier 4&lt;/b&gt;&lt;br&gt;Agents / Services" vertex="1">
+                    <mxGeometry height="130" width="120" x="10" y="320" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl5" parent="1" style="text;html=1;align=left;verticalAlign=middle;" value="&lt;b&gt;Tier 5&lt;/b&gt;&lt;br&gt;RAG / External" vertex="1">
+                    <mxGeometry height="90" width="120" x="10" y="490" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl6" parent="1" style="text;html=1;align=left;verticalAlign=middle;" value="&lt;b&gt;Tier 6&lt;/b&gt;&lt;br&gt;Output" vertex="1">
+                    <mxGeometry height="80" width="120" x="10" y="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="f1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0e6b5c;strokeWidth=2;fontSize=17;" value="&lt;b&gt;Clinical Assistant&lt;/b&gt;&lt;br&gt;index.html" vertex="1">
+                    <mxGeometry height="60" width="460" x="160" y="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="f2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#5b3fa6;strokeWidth=2;fontSize=17;" value="&lt;b&gt;General Chat&lt;/b&gt;&lt;br&gt;general.html" vertex="1">
+                    <mxGeometry height="60" width="460" x="660" y="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="f3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#54503f;strokeWidth=2;fontSize=17;" value="&lt;b&gt;Admin Interface&lt;/b&gt;&lt;br&gt;admin.html" vertex="1">
+                    <mxGeometry height="60" width="200" x="1160" y="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="app" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0eee8;strokeColor=#54503f;strokeWidth=2;fontSize=17;" value="&lt;b&gt;app.py — Flask app (port 7860)&lt;/b&gt;&lt;br&gt;registers all blueprints · runs startup checks · calls services.init_services()" vertex="1">
+                    <mxGeometry height="50" width="1200" x="160" y="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="r1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0e6b5c;strokeWidth=2;fontSize=17;" value="&lt;b&gt;routes/clinical.py&lt;/b&gt;&lt;br&gt;POST /api/chat&lt;br&gt;POST /api/classify" vertex="1">
+                    <mxGeometry height="70" width="460" x="160" y="210" as="geometry"/>
+                </mxCell>
+                <mxCell id="r2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#5b3fa6;strokeWidth=2;fontSize=17;" value="&lt;b&gt;routes/general.py&lt;/b&gt;&lt;br&gt;POST /api/general-chat" vertex="1">
+                    <mxGeometry height="70" width="460" x="720" y="210" as="geometry"/>
+                </mxCell>
+                <mxCell id="la1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0e6b5c;strokeWidth=2;fontSize=17;" value="&lt;b&gt;crew_agents.py&lt;/b&gt;&lt;br&gt;make_clinical_interpreter()&lt;br&gt;make_shunt_analyst()&lt;br&gt;&lt;br&gt;Used for interpretation, classification, ligation planning" vertex="1">
+                    <mxGeometry height="140" width="220" x="160" y="320" as="geometry"/>
+                </mxCell>
+                <mxCell id="la2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0e6b5c;strokeWidth=2;fontSize=17;" value="&lt;b&gt;services.py&lt;/b&gt;&lt;br&gt;retrieve_ligation_context()&lt;br&gt;format_analysis_for_context()&lt;br&gt;init_services() (startup wiring)" vertex="1">
+                    <mxGeometry height="130" width="240" x="450" y="320" as="geometry"/>
+                </mxCell>
+                <mxCell id="ra1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#5b3fa6;strokeWidth=2;fontSize=17;" value="&lt;b&gt;crew_agents.py&lt;/b&gt;&lt;br&gt;make_general_medical_assistant()&lt;br&gt;&lt;br&gt;Used for general Q&amp;amp;A grounded in retrieved RAG context" vertex="1">
+                    <mxGeometry height="130" width="300" x="920" y="340" as="geometry"/>
+                </mxCell>
+                <mxCell id="rg1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0e6b5c;strokeWidth=2;fontSize=17;" value="&lt;b&gt;rag_engine.py&lt;/b&gt;&lt;br&gt;vector search + BM25 merge + cross-encoder rerank&lt;br&gt;collection: ligation_knowledgebase_db_v2" vertex="1">
+                    <mxGeometry height="90" width="460" x="170" y="500" as="geometry"/>
+                </mxCell>
+                <mxCell id="rg2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#5b3fa6;strokeWidth=2;fontSize=17;" value="&lt;b&gt;general_chat_engine.py&lt;/b&gt;&lt;br&gt;is_domain_relevant() guardrail&lt;br&gt;retrieve_general_context(): vector + BM25 merge + cross-encoder rerank&lt;br&gt;collection: final_structured_rag" vertex="1">
+                    <mxGeometry height="110" width="460" x="720" y="490" as="geometry"/>
+                </mxCell>
+                <mxCell id="o1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0e6b5c;strokeWidth=2;fontSize=17;" value="&lt;b&gt;Response → routes/clinical.py&lt;/b&gt;&lt;br&gt;JSON: shunt_type, confidence, findings, ligation_steps, conversational_response&lt;br&gt;saved via chat_db.py, returned to index.html" vertex="1">
+                    <mxGeometry height="90" width="460" x="170" y="615" as="geometry"/>
+                </mxCell>
+                <mxCell id="o2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#5b3fa6;strokeWidth=2;fontSize=17;" value="&lt;b&gt;Response → routes/general.py&lt;/b&gt;&lt;br&gt;JSON: conversational_response, context_count&lt;br&gt;saved via chat_db.py, returned to general.html" vertex="1">
+                    <mxGeometry height="90" width="460" x="720" y="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="note" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=top;strokeColor=#999999;rounded=0;spacingLeft=6;spacingTop=4;fontSize=17;" value="&lt;b&gt;Notes (not drawn as tiers)&lt;/b&gt;&lt;br&gt;• LLM: every agent calls Groq (openai/gpt-oss-120b) through the CrewAI/litellm wrapper in crew_agents.py (_make_llm()).&lt;br&gt;• Database: both routes read/write the same SQLite store via chat_db.py (sessions, messages, feedback, users).&lt;br&gt;• Core logic: crew_pipeline.py sits between routes and agents. Clinical functions (parse_nl_to_clips, build_conversational_response, classify_and_plan_ligation_with_llm, run_pipeline) are called only by routes/clinical.py; generate_general_response() only by routes/general.py.&lt;br&gt;• services.call_llm() and services.groq_client are unused (dead code).&lt;br&gt;• services.init_services() runs once at startup and injects the shared Qdrant client into both rag_engine.py and general_chat_engine.py (arrow labelled &#39;startup&#39;). That is the only link between services.py and General Chat; at request time General Chat never calls services.py." vertex="1">
+                    <mxGeometry height="220" width="950" x="170" y="730" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" edge="1" parent="1" source="f1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#0e6b5c;strokeWidth=2;exitX=0.25;exitY=1;entryX=0.0958;entryY=0;" target="app" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ret_f1" edge="1" parent="1" source="app" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#0e6b5c;strokeWidth=2;exitX=0.2875;exitY=0;entryX=0.75;entryY=1;" target="f1" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" edge="1" parent="1" source="f2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#5b3fa6;strokeWidth=2;exitX=0.25;exitY=1;entryX=0.5125;entryY=0;" target="app" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ret_f2" edge="1" parent="1" source="app" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#5b3fa6;strokeWidth=2;exitX=0.7042;exitY=0;entryX=0.75;entryY=1;" target="f2" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" edge="1" parent="1" source="f3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#54503f;strokeWidth=2;exitX=0.25;exitY=1;entryX=0.875;entryY=0;" target="app" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ret_f3" edge="1" parent="1" source="app" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#54503f;strokeWidth=2;exitX=0.9583;exitY=0;entryX=0.75;entryY=1;" target="f3" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4" edge="1" parent="1" source="app" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#0e6b5c;strokeWidth=2;exitX=0.0958;exitY=1;entryX=0.25;entryY=0;" target="r1" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ret_r1" edge="1" parent="1" source="r1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#0e6b5c;strokeWidth=2;exitX=0.75;exitY=0;entryX=0.2875;entryY=1;" target="app" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5" edge="1" parent="1" source="app" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#5b3fa6;strokeWidth=2;exitX=0.5125;exitY=1;entryX=0.25;entryY=0;" target="r2" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ret_r2" edge="1" parent="1" source="r2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#5b3fa6;strokeWidth=2;exitX=0.75;exitY=0;entryX=0.7042;entryY=1;" target="app" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6" edge="1" parent="1" source="r1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#0e6b5c;strokeWidth=2;exitX=0.25;exitY=1;entryX=0.5227;entryY=0;" target="la1" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" edge="1" parent="1" source="r1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#0e6b5c;strokeWidth=2;exitX=0.75;exitY=1;entryX=0.2292;entryY=0;" target="la2" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e8" edge="1" parent="1" source="la2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#0e6b5c;strokeWidth=2;exitX=0;exitY=0.2;entryX=1;entryY=0.1857;fontSize=14;labelBackgroundColor=#ffffff;" target="la1" value="ctx">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e9" edge="1" parent="1" source="la2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#0e6b5c;strokeWidth=2;exitX=0.1667;exitY=1;entryX=0.6957;entryY=0;fontSize=17;labelBackgroundColor=#ffffff;" target="rg1" value="calls">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e10" edge="1" parent="1" source="rg1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#0e6b5c;strokeWidth=2;exitX=0.9348;exitY=0;entryX=0.625;entryY=1;fontSize=17;labelBackgroundColor=#ffffff;" target="la2" value="chunks">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e14" edge="1" parent="1" source="la1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#0e6b5c;strokeWidth=2;exitX=0;exitY=0.7857;entryX=0;entryY=0.5;fontSize=14;labelBackgroundColor=#ffffff;" target="o1" value="agent reply">
+                    <mxGeometry relative="1" x="-0.577" as="geometry">
+                        <mxPoint x="45" as="offset"/>
+                        <Array as="points">
+                            <mxPoint x="150" y="430"/>
+                            <mxPoint x="150" y="660"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ret_o1" edge="1" parent="1" source="o1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#0e6b5c;strokeWidth=2;exitX=0;exitY=0.8333;entryX=0;entryY=0.5;fontSize=14;labelBackgroundColor=#ffffff;" target="r1" value="response">
+                    <mxGeometry relative="1" x="0.69" as="geometry">
+                        <mxPoint x="40" as="offset"/>
+                        <Array as="points">
+                            <mxPoint x="138" y="690"/>
+                            <mxPoint x="138" y="245"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e16" edge="1" parent="1" source="la2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#54503f;strokeWidth=2;exitX=1;exitY=0.8462;entryX=0.0543;entryY=0;fontSize=14;labelBackgroundColor=#ffffff;" target="rg2" value="startup">
+                    <mxGeometry relative="1" x="0.52" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="735" y="430"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e11" edge="1" parent="1" source="r2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#5b3fa6;strokeWidth=2;exitX=0.8043;exitY=1;entryX=0.5;entryY=0;fontSize=17;labelBackgroundColor=#ffffff;" target="ra1" value="system+user prompt (context inlined)">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e12" edge="1" parent="1" source="r2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#5b3fa6;strokeWidth=2;exitX=0.2717;exitY=1;entryX=0.163;entryY=0;fontSize=17;labelBackgroundColor=#ffffff;" target="rg2" value="calls">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e13" edge="1" parent="1" source="rg2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#5b3fa6;strokeWidth=2;exitX=0.2826;exitY=0;entryX=0.3913;entryY=1;fontSize=17;labelBackgroundColor=#ffffff;" target="r2" value="chunks">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e15" edge="1" parent="1" source="ra1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#5b3fa6;strokeWidth=2;exitX=1;exitY=0.7692;entryX=1;entryY=0.5;fontSize=17;labelBackgroundColor=#ffffff;" target="o2" value="agent reply">
+                    <mxGeometry relative="1" x="-0.4462" as="geometry">
+                        <mxPoint as="offset"/>
+                        <Array as="points">
+                            <mxPoint x="1220" y="430"/>
+                            <mxPoint x="1240" y="430"/>
+                            <mxPoint x="1240" y="665"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ret_o2" edge="1" parent="1" source="o2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#5b3fa6;strokeWidth=2;exitX=1;exitY=0.8333;entryX=1;entryY=0.5;fontSize=17;labelBackgroundColor=#ffffff;" target="r2" value="response">
+                    <mxGeometry relative="1" y="-40" as="geometry">
+                        <mxPoint as="offset"/>
+                        <Array as="points">
+                            <mxPoint x="1290" y="695"/>
+                            <mxPoint x="1290" y="245"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="legend" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=top;strokeColor=#999999;rounded=0;spacingLeft=6;spacingTop=4;fontSize=14;" value="&lt;b&gt;Legend&lt;/b&gt;&lt;br&gt;Solid arrow = request / call&lt;br&gt;Dashed arrow = response / data returned" vertex="1">
+                    <mxGeometry height="80" width="300" x="1150" y="730" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

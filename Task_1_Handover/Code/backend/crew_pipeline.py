@@ -1,21 +1,21 @@
 """
-CrewAI-backed pipeline — same public interface as the originals.
+CrewAI-backed pipeline: every LLM call in Task 1 runs through a CrewAI agent (crew_agents.py).
 
-Callers (routes) import from here exactly as they would from the originals:
-  parse_nl_to_clips(...)
-  build_conversational_response(...)
-  classify_and_plan_ligation_with_llm(...)
-  generate_general_response(...)   <- new, replaces the direct Groq call in routes/general.py
+Functions used by the routes:
+  parse_nl_to_clips(...)                  free text -> CHIVA clips (sufficiency check, then interpretation)
+  build_conversational_response(...)      follow-up answers grounded in the last analysis
+  classify_and_plan_ligation_with_llm()   clips -> shunt type + ligation plan, per leg
+  run_pipeline(...)                       NLP / RAW mode switch used by POST /api/classify
+  generate_general_response(...)          General Medical Chat answers
 
-call_llm_fn is accepted for API compatibility but unused here — agents carry their own LLM.
-If a CrewAI call fails the exception propagates so the caller can fall back to the original.
+If a CrewAI call fails, the exception propagates to the calling route, which reports the error.
 
-All prompts and parsing helpers are imported from the original modules — no duplication.
+Prompts and parsing helpers are defined once, in nl_interpreter.py and
+shunt_classification_and_ligation_llm.py, and imported here.
 """
 
 import json
 import logging
-import re
 from typing import Callable
 
 from crewai import Crew, Process, Task
@@ -26,7 +26,7 @@ from crew_agents import (
     make_shunt_analyst,
 )
 
-# Reuse every prompt and utility from the originals — nothing is copied.
+# Prompts and helpers are defined once, in nl_interpreter.py and shunt_classification_and_ligation_llm.py.
 from nl_interpreter import (
     _CONVERSATIONAL_PROMPT,
     _NL_TO_CHIVA_PROMPT,
@@ -131,12 +131,11 @@ def _parse_agent_json(raw: str) -> dict | None:
 
 def parse_nl_to_clips(
     user_message: str,
-    call_llm_fn: Callable = None,
     history: list[dict] | None = None,
     skip_sufficiency: bool = False,
 ) -> dict:
     """
-    CrewAI equivalent of nl_interpreter.parse_nl_to_clips.
+    Convert a clinician's description into CHIVA clips.
     Two-stage: sufficiency check → (if sufficient) CHIVA interpretation.
 
     skip_sufficiency — when True, bypass the sufficiency gate and go straight
@@ -220,9 +219,8 @@ def build_conversational_response(
     user_message: str,
     analysis_context: str,
     history: list[dict],
-    call_llm_fn: Callable = None,
 ) -> str:
-    """CrewAI equivalent of nl_interpreter.build_conversational_response."""
+    """Generate a follow-up answer grounded in the last classification result."""
     history_lines = []
     for m in history[-8:]:
         role_label = "Clinician" if m.get("role") == "user" else "Assistant"
@@ -275,11 +273,10 @@ _NO_LIGATION_RESULT: dict[str, dict] = {
 
 def classify_and_plan_ligation_with_llm(
     clip_list: list[dict],
-    call_llm_fn: Callable = None,
     retrieve_ligation_context_fn: Callable | None = None,
 ) -> dict:
     """
-    CrewAI equivalent of shunt_classification_and_ligation_llm.classify_and_plan_ligation_with_llm.
+    Classify each leg's clips, then plan its ligation (RAG-grounded).
     Per-leg: classification task → ligation planning task → merge into findings dict.
     """
     groups: dict[str, list[dict]] = {}
@@ -476,7 +473,7 @@ def run_pipeline(
 
 def generate_general_response(system_prompt: str, user_prompt: str) -> str:
     """
-    Drop-in for the direct groq_client.chat.completions.create call in routes/general.py.
+    Generate the General Medical Chat answer for routes/general.py.
     Combines system + user prompt and runs it through the GeneralMedicalAssistant agent.
     """
     agent = make_general_medical_assistant()

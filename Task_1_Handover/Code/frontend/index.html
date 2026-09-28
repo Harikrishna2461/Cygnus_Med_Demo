@@ -1431,10 +1431,6 @@ function escHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
-function escAttr(s) {
-  if (s == null) return '';
-  return String(s).replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
-}
 
 function formatDate(iso) {
   if (!iso) return '';

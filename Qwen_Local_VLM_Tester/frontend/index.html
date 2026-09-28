@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwen Local VLM Tester</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Qwen Local VLM Tester</h1>
+  <div id="model-status" class="status-pill status-loading">checking model status…</div>
+</header>
+
+<main>
+  <section class="panel controls">
+    <h2>1. Task</h2>
+    <select id="task-select"></select>
+    <p class="hint" id="task-hint"></p>
+
+    <h2>2. Image(s)</h2>
+    <div id="dropzone" class="dropzone">
+      <p>Drag &amp; drop image(s) here, or click to browse</p>
+      <input type="file" id="file-input" accept="image/*" multiple hidden>
+    </div>
+    <div id="preview-row" class="preview-row"></div>
+
+    <h2>3. Prompt</h2>
+    <label for="system-prompt">System prompt</label>
+    <textarea id="system-prompt" rows="10"></textarea>
+    <label for="user-text">User question / instruction</label>
+    <textarea id="user-text" rows="4"></textarea>
+
+    <div class="params-row">
+      <label>Max new tokens
+        <input type="number" id="max-tokens" value="1024" min="16" max="16384">
+      </label>
+      <label>Temperature
+        <input type="number" id="temperature" value="0.2" min="0" max="1.5" step="0.05">
+      </label>
+    </div>
+    <label class="checkbox-row">
+      <input type="checkbox" id="enable-thinking" checked>
+      Enable thinking (model reasons before answering — slower, usually higher quality;
+      uncheck to compare direct-answer latency/quality)
+    </label>
+
+    <button id="run-btn" disabled>Run</button>
+  </section>
+
+  <section class="panel results">
+    <h2>Result</h2>
+    <div id="latency-display" class="latency-display">—</div>
+    <div id="run-error" class="error-box" hidden></div>
+
+    <div class="result-grid">
+      <div>
+        <h3>Raw model output</h3>
+        <pre id="raw-output" class="output-box"></pre>
+      </div>
+      <div>
+        <h3>Parsed JSON</h3>
+        <pre id="parsed-output" class="output-box"></pre>
+      </div>
+    </div>
+
+    <h2>Run history <span class="hint">(persisted to backend/logs/runs.jsonl — survives refresh/restart)</span></h2>
+    <table id="history-table">
+      <thead>
+        <tr><th>#</th><th>When</th><th>Task</th><th>Latency (s)</th><th>Tokens (in/out)</th><th>Tok/s</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

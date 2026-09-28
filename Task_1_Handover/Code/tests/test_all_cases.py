@@ -302,7 +302,7 @@ def run_clip_file_tests():
     sample_data/data/<ShuntType>/ and verifies the
     classifier returns the expected shunt type.
     """
-    import os, sys, pathlib
+    import sys, pathlib
     sys.path.insert(0, str(pathlib.Path(__file__).parent / "backend"))
 
     try:

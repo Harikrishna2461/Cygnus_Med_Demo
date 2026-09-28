@@ -11,7 +11,6 @@ Uses the pre-built ligation_knowledgebase_db_v2 collection (nomic-embed-text,
 """
 
 import logging
-import os
 import numpy as np
 import requests
 
@@ -180,7 +179,6 @@ def load_bm25_from_qdrant():
             logger.warning("No text payloads found in collection — BM25 index empty.")
     except Exception as e:
         logger.warning(f"BM25 from Qdrant failed: {e}. Continuing without BM25.")
-
 
 
 # ── Two-stage retrieval ────────────────────────────────────────────────────────

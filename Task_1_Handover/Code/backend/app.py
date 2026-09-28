@@ -47,40 +47,14 @@ app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 CORS(app, origins=CORS_ORIGINS, supports_credentials=True)
 
-# ── Services (Groq + Qdrant clients) ─────────────────────────────────────────
+# ── Services (Qdrant client) ─────────────────────────────────────────
 import services
 services.init_services()
 
 # ── Classification module (optional parent backend) ───────────────────────────
-try:
-    from shunt_classification_and_ligation_llm import classify_and_plan_ligation_with_llm
-    _PARENT_MODULE = True
-except ImportError as _err:
-    logger.warning(
-        f"Parent module not found ({_err}). "
-        "Copy shunt_classification_and_ligation_llm.py from the parent backend/ into "
-        "this backend/ folder and restart."
-    )
-    _PARENT_MODULE = False
-
-    def classify_and_plan_ligation_with_llm(*args, **kwargs):
-        """Fallback stub used only when the real
-        shunt_classification_and_ligation_llm.py failed to import above — raises
-        immediately with a clear fix-it message instead of letting a NameError happen
-        later, deeper in the request. Usage: only ever invoked if _PARENT_MODULE is
-        False; in the normal, working setup the real module's function shadows this
-        one and this stub is never called."""
-        raise RuntimeError(
-            "shunt_classification_and_ligation_llm.py not found. "
-            "Copy it from backend/ into this folder and restart."
-        )
 
 # ── Wire flags into route modules ────────────────────────────────────────────
-from routes.clinical import set_classification_fn
-from routes.status import set_parent_module_flag
 
-set_classification_fn(_PARENT_MODULE, classify_and_plan_ligation_with_llm)
-set_parent_module_flag(_PARENT_MODULE)
 
 # ── Register blueprints ───────────────────────────────────────────────────────
 from routes import (

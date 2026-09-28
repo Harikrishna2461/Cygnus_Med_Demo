@@ -6,8 +6,7 @@ import json
 import sqlite3
 import uuid
 from datetime import datetime
-from werkzeug.security import generate_password_hash
-from config import DB_PATH, ADMIN_USERNAME, ADMIN_PASSWORD
+from config import DB_PATH, ADMIN_USERNAME
 import sheets_logger as _sheets
 
 
@@ -142,7 +141,7 @@ def _now() -> str:
 
 # -- Users --------------------------------------------------------------------
 
-def create_user(username: str, password: str = "", is_admin: bool = False) -> str:
+def create_user(username: str, is_admin: bool = False) -> str:
     """Inserts a new user row with a fresh UUID user_id. Note: password_hash is always
     stored as an empty string here — this app's login (routes/auth.py's api_login) never
     checks a password at all, so the password argument is accepted for API compatibility
@@ -197,20 +196,6 @@ def deactivate_user(user_id: str):
         conn.commit()
 
 
-def update_user_password(user_id: str, new_password: str):
-    """Hashes and stores a new password for a user. Usage: NOT currently called from
-    anywhere in the codebase — no route exposes a change-password action, and login
-    itself (get_user_by_username) never checks password_hash regardless. This exists as
-    the one place a real password check/reset could be wired in later if login is
-    changed to require one."""
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute(
-            "UPDATE users SET password_hash=? WHERE user_id=?",
-            (generate_password_hash(new_password), user_id),
-        )
-        conn.commit()
-
-
 def _ensure_default_admin():
     """Create the default admin account plus the team's admin accounts if no users
     exist yet. Login (see routes/auth.py) only checks that the username exists — there
@@ -223,7 +208,7 @@ def _ensure_default_admin():
     if count == 0:
         for username in (ADMIN_USERNAME, "krish", "harin", "jeffry"):
             try:
-                create_user(username, ADMIN_PASSWORD, is_admin=True)
+                create_user(username, is_admin=True)
                 print(f"Default admin '{username}' created.")
             except Exception as e:
                 print(f"Could not create default admin '{username}': {e}")

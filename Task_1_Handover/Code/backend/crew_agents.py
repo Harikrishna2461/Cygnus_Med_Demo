@@ -9,14 +9,12 @@ Three agents cover all LLM calls in the system:
 Each factory creates a fresh Agent instance; do not share instances across requests.
 """
 
-import logging
 
 import litellm
 from crewai import Agent, LLM
 
 from config import GROQ_API_KEY, GROQ_MODEL
 
-logger = logging.getLogger(__name__)
 
 # crewai's internal flow system injects 'cache_breakpoint' into message dicts
 # before calling litellm. Groq rejects any message with unknown properties.
@@ -81,9 +79,9 @@ def make_clinical_interpreter() -> Agent:
 
 def make_shunt_analyst() -> Agent:
     """
-    Covers shunt_classification_and_ligation_llm.py LLM calls:
-      - Shunt type classification (_call_llm_for_shunt_classification)
-      - CHIVA ligation planning (_call_llm_for_ligation)
+    Covers the shunt-classification and ligation-planning LLM calls:
+      - Shunt type classification (prompt from build_shunt_classification_prompt)
+      - CHIVA ligation planning (prompt from build_ligation_prompt)
 
     Usage: called by crew_pipeline.py's classify_and_plan_ligation_with_llm().
     """
@@ -103,10 +101,9 @@ def make_shunt_analyst() -> Agent:
         allow_delegation=False,
     )
 
-
 def make_general_medical_assistant() -> Agent:
     """
-    Covers the direct groq_client call in routes/general.py:
+    Covers the General Medical Chat answer generated for routes/general.py:
       - General medical Q&A with RAG-retrieved context
 
     Usage: called by crew_pipeline.py's generate_general_response(), which
