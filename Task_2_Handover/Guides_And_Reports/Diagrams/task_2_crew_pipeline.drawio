@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="65bd71144e">
+    <diagram id="task2-crew" name="Crew Pipeline">
+        <mxGraphModel dx="1555" dy="1007" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="1000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- INPUT -->
+                <mxCell id="inp" value="&lt;b&gt;INPUT&lt;/b&gt;&#xa;state_message (str)&#xa;pos_y (float)&#xa;clips (list[dict])&#xa;history_summary&#xa;q_state&#xa;rejection_notes&#xa;recent_guidance&#xa;accepted_shunts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4c9a6a;strokeColor=#4c9a6a;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="20" y="170" width="200" height="260" as="geometry"/>
+                </mxCell>
+
+                <!-- TASK 1 -->
+                <mxCell id="t1" value="&lt;b&gt;TASK 1&lt;/b&gt;&#xa;Clinical Interpreter&#xa;[MID model]&#xa;max_iter=3&#xa;&#xa;Assess clip soundness&#xa;vs. VLM annotation&#xa;≤100 words" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c88a28;strokeColor=#c88a28;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="240" y="120" width="190" height="190" as="geometry"/>
+                </mxCell>
+
+                <!-- TASK 2 -->
+                <mxCell id="t2" value="&lt;b&gt;TASK 2&lt;/b&gt;&#xa;Shunt Analyst&#xa;[HEAVY model]&#xa;max_iter=3&#xa;&#xa;context: [task1]&#xa;&#xa;Classify shunt type&#xa;Types 1/2A/2B/2C&#xa;/3/4/5/6&#xa;&#xa;JSON output:&#xa;{shunt_type,&#xa;confirmed,&#xa;elim_required,&#xa;evidence}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c88a28;strokeColor=#c88a28;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="450" y="70" width="190" height="300" as="geometry"/>
+                </mxCell>
+
+                <!-- TASK 3 -->
+                <mxCell id="t3" value="&lt;b&gt;TASK 3&lt;/b&gt;&#xa;Circuit Analyst&#xa;[HEAVY model]&#xa;max_iter=3&#xa;&#xa;context: [task1,task2]&#xa;&#xa;Examination state&#xa;A–F · next zone&#xa;≤80 words" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c88a28;strokeColor=#c88a28;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="660" y="120" width="190" height="200" as="geometry"/>
+                </mxCell>
+
+                <!-- TASK 4 -->
+                <mxCell id="t4" value="&lt;b&gt;TASK 4&lt;/b&gt;&#xa;Navigation Planner&#xa;[MID model]&#xa;max_iter=3&#xa;&#xa;context: [task3]&#xa;&#xa;ONE movement cmd&#xa;≤15 words&#xa;Starts with 'Move'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c88a28;strokeColor=#c88a28;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="870" y="120" width="190" height="200" as="geometry"/>
+                </mxCell>
+
+                <!-- TASK 5 -->
+                <mxCell id="t5" value="&lt;b&gt;TASK 5&lt;/b&gt;&#xa;Guidance Specialist&#xa;[HEAVY model]&#xa;max_iter=3&#xa;&#xa;context: [task2, task4]&#xa;(task3 EXCLUDED)&#xa;&#xa;JSON output:&#xa;{guidance,&#xa;action:&#xa;move|maneuver&#xa;|complete}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c88a28;strokeColor=#c88a28;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="1080" y="70" width="190" height="300" as="geometry"/>
+                </mxCell>
+
+                <!-- PARSE box -->
+                <mxCell id="parse" value="&lt;b&gt;PARSE:&lt;/b&gt; task5.raw → json.loads(_extract_json_str()) → guidance + action   |   task2.raw → json.loads() → shunt_found + shunt_type + shunt_evidence&#xa;On json.JSONDecodeError: fallback guidance = 'Continue scanning distally to locate anatomical junction' · action = 'move' · shunt_found = False" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4c9a6a;strokeColor=#4c9a6a;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="240" y="480" width="820" height="90" as="geometry"/>
+                </mxCell>
+
+                <!-- RETURN TUPLE -->
+                <mxCell id="ret" value="&lt;b&gt;Returns:&lt;/b&gt; (guidance: str, agents_raw: dict, action: str, shunt_found: bool, shunt_type: str, shunt_evidence: str)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b04040;strokeColor=#b04040;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="240" y="600" width="820" height="70" as="geometry"/>
+                </mxCell>
+
+                <!-- TIMEOUT/ERROR path -->
+                <mxCell id="timeout" value="&lt;b&gt;TIMEOUT (90 s) OR ERROR:&lt;/b&gt;&#xa;_done.wait(timeout=90) → False&#xa;OR _error_box[0] is not None&#xa;&#xa;Fallback:&#xa;'Continue scanning distally&#xa;to locate anatomical junction'&#xa;action='move', shunt_found=False&#xa;&#xa;Daemon thread keeps running&#xa;(NOT cancelled)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b04040;strokeColor=#b04040;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="1100" y="460" width="170" height="220" as="geometry"/>
+                </mxCell>
+
+                <!-- LITELLM PATCH NOTE -->
+                <mxCell id="patch" value="&lt;b&gt;crew_agents.py: _patched_completion()&lt;/b&gt; — monkey-patches litellm.completion at module import time&#xa;Strips 'cache_breakpoint' field from all messages (CrewAI 1.14.7 injects it; Groq rejects it with HTTP 400)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3cd;strokeColor=#c88a28;fontColor=#1f3864;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+                    <mxGeometry x="240" y="710" width="600" height="70" as="geometry"/>
+                </mxCell>
+
+                <!-- GROQ API box -->
+                <mxCell id="groqapi" value="&lt;b&gt;Groq Cloud API&lt;/b&gt; — 5 sequential calls&#xa;openai/gpt-oss-120b (GROQ_TEXT_MODEL and GROQ_MID_MODEL — same default)&#xa;temperature=0.3 per agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8763bd;strokeColor=#8763bd;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="900" y="710" width="370" height="70" as="geometry"/>
+                </mxCell>
+
+                <!-- EDGES -->
+                <!-- inp → t1 -->
+                <mxCell id="e_inp_t1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="inp" target="t1" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <!-- t1 → t2 -->
+                <mxCell id="e_t1_t2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#c88a28;" edge="1" source="t1" target="t2" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <!-- t2 → t3 -->
+                <mxCell id="e_t2_t3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#c88a28;" edge="1" source="t2" target="t3" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <!-- t3 → t4 -->
+                <mxCell id="e_t3_t4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#c88a28;" edge="1" source="t3" target="t4" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <!-- t4 → t5 -->
+                <mxCell id="e_t4_t5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#c88a28;" edge="1" source="t4" target="t5" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <!-- t2 → t5 (context skip) -->
+                <mxCell id="e_t2_t5" value="context" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=1;strokeColor=#c88a28;dashed=1;" edge="1" source="t2" target="t5" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="545" y="50"/>
+                            <mxPoint x="1175" y="50"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- t5 → parse -->
+                <mxCell id="e_t5_parse" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="t5" target="parse" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1175" y="400"/>
+                            <mxPoint x="1060" y="400"/>
+                            <mxPoint x="1060" y="525"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- t2 → parse (shunt JSON) -->
+                <mxCell id="e_t2_parse" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=1;strokeColor=#c88a28;dashed=1;" edge="1" source="t2" target="parse" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="545" y="400"/>
+                            <mxPoint x="545" y="525"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- parse → ret -->
+                <mxCell id="e_parse_ret" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#b04040;" edge="1" source="parse" target="ret" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <!-- crew tasks → groqapi -->
+                <mxCell id="e_tasks_groq" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=1;strokeColor=#8763bd;dashed=1;" edge="1" source="t3" target="groqapi" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="755" y="400"/>
+                            <mxPoint x="755" y="745"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- timeout connection to crew -->
+                <mxCell id="e_crew_timeout" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=1;strokeColor=#b04040;dashed=1;" edge="1" source="t5" target="timeout" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1270" y="220"/>
+                            <mxPoint x="1270" y="360"/>
+                            <mxPoint x="1185" y="360"/>
+                            <mxPoint x="1185" y="460"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

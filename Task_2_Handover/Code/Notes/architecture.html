@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CHIVA Architecture</title>
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { background: #0d1117; display: flex; justify-content: center; padding: 28px 16px; min-height: 100vh; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1000 1160" width="1000" style="max-width:100%;height:auto" font-family="'Segoe UI',system-ui,sans-serif">
+<defs>
+  <marker id="a"  markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#4b5563"/></marker>
+  <marker id="ag" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#22c55e"/></marker>
+  <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ef4444"/></marker>
+  <marker id="av" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#8b5cf6"/></marker>
+</defs>
+
+<!-- TITLE -->
+<text x="500" y="26" text-anchor="middle" fill="#f1f5f9" font-size="17" font-weight="700">CHIVA Streaming Guidance — System Architecture</text>
+
+<!-- ═══ FRONTEND ═══ -->
+<rect x="300" y="42" width="400" height="50" rx="7" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/>
+<text x="500" y="64" text-anchor="middle" fill="#93c5fd" font-size="13" font-weight="700">Frontend — stream.html</text>
+<text x="500" y="82" text-anchor="middle" fill="#60a5fa" font-size="10.5">SVG leg diagram · coordToState(sx, sy) → region · posY · surface · leg · is_front</text>
+
+<!-- Frontend → WS arrows -->
+<line x1="420" y1="92" x2="295" y2="128" stroke="#4b5563" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="580" y1="92" x2="705" y2="128" stroke="#4b5563" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="500" y="114" text-anchor="middle" fill="#374151" font-size="10">Socket.IO</text>
+
+<!-- ═══ WS EVENTS ═══ -->
+<rect x="82"  y="130" width="224" height="58" rx="6" fill="#1a2535" stroke="#475569" stroke-width="1.5"/>
+<text x="194" y="152" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="700">probe_move</text>
+<text x="194" y="168" text-anchor="middle" fill="#64748b" font-size="10">session_id · region · pos_y_ratio</text>
+<text x="194" y="182" text-anchor="middle" fill="#64748b" font-size="10">surface · leg · pos_x · is_front</text>
+
+<rect x="694" y="130" width="224" height="58" rx="6" fill="#1a2535" stroke="#475569" stroke-width="1.5"/>
+<text x="806" y="152" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="700">clip_mark</text>
+<text x="806" y="168" text-anchor="middle" fill="#64748b" font-size="10">flow(EP/RP) · from_type · to_type</text>
+<text x="806" y="182" text-anchor="middle" fill="#64748b" font-size="10">pos_y · region · surface · leg · elim_test</text>
+
+<!-- WS → Route -->
+<line x1="194" y1="188" x2="360" y2="228" stroke="#4b5563" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="806" y1="188" x2="640" y2="228" stroke="#4b5563" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- ═══ SESSION (left panel) ═══ -->
+<rect x="10" y="228" width="192" height="126" rx="6" fill="#2d1b4e" stroke="#8b5cf6" stroke-width="1.5"/>
+<text x="106" y="248" text-anchor="middle" fill="#c4b5fd" font-size="11" font-weight="700">StreamSession</text>
+<text x="106" y="264" text-anchor="middle" fill="#a78bfa" font-size="9.5">clips[]</text>
+<text x="106" y="278" text-anchor="middle" fill="#a78bfa" font-size="9.5">scan_log[ max 300 ]</text>
+<text x="106" y="292" text-anchor="middle" fill="#a78bfa" font-size="9.5">history[] · thinking_log[ max 50 ]</text>
+<text x="106" y="306" text-anchor="middle" fill="#a78bfa" font-size="9.5">last_vlm_pos_y · last_llm_pos_y</text>
+<text x="106" y="320" text-anchor="middle" fill="#a78bfa" font-size="9.5">max_visited_pos_y · generation</text>
+<text x="106" y="334" text-anchor="middle" fill="#a78bfa" font-size="9.5">last_vlm_summary · active</text>
+<!-- Session ↔ Route -->
+<line x1="202" y1="285" x2="272" y2="263" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#av)"/>
+
+<!-- ═══ ROUTE ═══ -->
+<rect x="274" y="230" width="452" height="58" rx="7" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/>
+<text x="500" y="254" text-anchor="middle" fill="#93c5fd" font-size="13" font-weight="700">Route Layer — stream.py</text>
+<text x="500" y="271" text-anchor="middle" fill="#60a5fa" font-size="10.5">get_or_create(session_id) · bump generation · spawn background thread</text>
+<text x="500" y="285" text-anchor="middle" fill="#60a5fa" font-size="10">generation gate: skip emit if sess.generation > req_gen + 6</text>
+
+<!-- Route → Engine -->
+<line x1="500" y1="288" x2="500" y2="326" stroke="#4b5563" stroke-width="2" marker-end="url(#a)"/>
+
+<!-- ═══ ENGINE ═══ -->
+<rect x="240" y="328" width="520" height="58" rx="7" fill="#1a3528" stroke="#22c55e" stroke-width="2"/>
+<text x="500" y="351" text-anchor="middle" fill="#86efac" font-size="13" font-weight="700">Engine — process_probe_state()</text>
+<text x="500" y="368" text-anchor="middle" fill="#4ade80" font-size="10.5">session · region · pos_y · surface · leg · pos_x · is_front · force_vlm · force_llm</text>
+<text x="500" y="382" text-anchor="middle" fill="#4ade80" font-size="10">Step 1: log_scan_position() → scan_log · max_visited_pos_y updated</text>
+
+<!-- Engine → VLM Gate / LLM Gate -->
+<line x1="380" y1="386" x2="234" y2="426" stroke="#4b5563" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="620" y1="386" x2="766" y2="426" stroke="#4b5563" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- ═══ GATES ═══ -->
+<rect x="82"  y="428" width="268" height="46" rx="6" fill="#0f1f10" stroke="#16a34a" stroke-width="1.5"/>
+<text x="216" y="449" text-anchor="middle" fill="#86efac" font-size="12" font-weight="700">VLM Gate</text>
+<text x="216" y="464" text-anchor="middle" fill="#4ade80" font-size="10">Δ posY ≥ 0.05  ·  or force_vlm</text>
+
+<rect x="650" y="428" width="268" height="46" rx="6" fill="#0f1f10" stroke="#16a34a" stroke-width="1.5"/>
+<text x="784" y="449" text-anchor="middle" fill="#86efac" font-size="12" font-weight="700">LLM Gate</text>
+<text x="784" y="464" text-anchor="middle" fill="#4ade80" font-size="10">Δ posY ≥ 0.03  ·  or force_llm</text>
+
+<!-- VLM Gate → VLM Agent -->
+<line x1="216" y1="474" x2="216" y2="514" stroke="#22c55e" stroke-width="1.5" marker-end="url(#ag)"/>
+
+<!-- LLM Gate → horizontal bus → 3 agents -->
+<line x1="784" y1="474" x2="784" y2="500" stroke="#22c55e" stroke-width="1.5"/>
+<line x1="548" y1="500" x2="930" y2="500" stroke="#22c55e" stroke-width="1.5"/>
+<line x1="548" y1="500" x2="548" y2="514" stroke="#22c55e" stroke-width="1.5" marker-end="url(#ag)"/>
+<line x1="739" y1="500" x2="739" y2="514" stroke="#22c55e" stroke-width="1.5" marker-end="url(#ag)"/>
+<line x1="930" y1="500" x2="930" y2="514" stroke="#22c55e" stroke-width="1.5" marker-end="url(#ag)"/>
+
+<!-- ═══ AGENTS ═══ -->
+<rect x="66"  y="516" width="300" height="56" rx="6" fill="#0f1f10" stroke="#22c55e" stroke-width="1.5"/>
+<text x="216" y="540" text-anchor="middle" fill="#86efac" font-size="12" font-weight="700">VLM Agent</text>
+<text x="216" y="556" text-anchor="middle" fill="#4ade80" font-size="10">extract_frame_at(posY) — annotated video</text>
+<text x="216" y="569" text-anchor="middle" fill="#4ade80" font-size="10">llama-4-scout-17b-16e-instruct (Groq)</text>
+
+<rect x="450" y="516" width="190" height="56" rx="6" fill="#0f1f10" stroke="#22c55e" stroke-width="1.5"/>
+<text x="545" y="540" text-anchor="middle" fill="#86efac" font-size="11" font-weight="700">History Agent</text>
+<text x="545" y="556" text-anchor="middle" fill="#4ade80" font-size="10">posY-band coverage</text>
+<text x="545" y="569" text-anchor="middle" fill="#4ade80" font-size="10">build_summary(session, posY)</text>
+
+<rect x="648" y="516" width="180" height="56" rx="6" fill="#0f1f10" stroke="#22c55e" stroke-width="1.5"/>
+<text x="738" y="540" text-anchor="middle" fill="#86efac" font-size="11" font-weight="700">Q-State Agent</text>
+<text x="738" y="556" text-anchor="middle" fill="#4ade80" font-size="10">Q1–Q4 circuit status</text>
+<text x="738" y="569" text-anchor="middle" fill="#4ade80" font-size="10">analyze(clips[])</text>
+
+<rect x="836" y="516" width="152" height="56" rx="6" fill="#0f1f10" stroke="#22c55e" stroke-width="1.5"/>
+<text x="912" y="540" text-anchor="middle" fill="#86efac" font-size="11" font-weight="700">Protocol Agent</text>
+<text x="912" y="556" text-anchor="middle" fill="#4ade80" font-size="10">zone protocol text</text>
+<text x="912" y="569" text-anchor="middle" fill="#4ade80" font-size="10">get_protocol(region, posY)</text>
+
+<!-- All agents → State Message Builder -->
+<line x1="216" y1="572" x2="400" y2="622" stroke="#4b5563" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="545" y1="572" x2="472" y2="622" stroke="#4b5563" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="738" y1="572" x2="524" y2="622" stroke="#4b5563" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="912" y1="572" x2="576" y2="622" stroke="#4b5563" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- ═══ STATE MESSAGE ═══ -->
+<rect x="270" y="624" width="460" height="48" rx="7" fill="#1a3528" stroke="#22c55e" stroke-width="2"/>
+<text x="500" y="646" text-anchor="middle" fill="#86efac" font-size="13" font-weight="700">State Message Builder</text>
+<text x="500" y="662" text-anchor="middle" fill="#4ade80" font-size="10.5">probe · clips · VLM · history · Q-state · protocol · config  →  enriched prompt</text>
+
+<!-- State → Rule Engine -->
+<line x1="500" y1="672" x2="500" y2="710" stroke="#4b5563" stroke-width="2" marker-end="url(#a)"/>
+
+<!-- ═══ RULE ENGINE ═══ -->
+<rect x="160" y="712" width="626" height="92" rx="8" fill="#3b0f0f" stroke="#ef4444" stroke-width="2"/>
+<text x="473" y="736" text-anchor="middle" fill="#fca5a5" font-size="13" font-weight="700">Rule Engine — 7 Deterministic Rules</text>
+<text x="473" y="754" text-anchor="middle" fill="#f87171" font-size="10">R1 maneuver:  EP N2→N3 (no elimTest) + RP N3→N1 + RP N2→N1</text>
+<text x="473" y="769" text-anchor="middle" fill="#f87171" font-size="10">R2: elimTest=No Reflux  ·  R3: elimTest=Reflux  ·  R4: EP N1→N3 + RP N2→N1</text>
+<text x="473" y="784" text-anchor="middle" fill="#f87171" font-size="10">R5: EP N1→N3 + RP N3→N1 (no trunk)  ·  R5b: N1→N3 + N3→N2 + N2→N3 + N3→N1</text>
+<text x="473" y="799" text-anchor="middle" fill="#f87171" font-size="10">R6: EP N1→N2 + RP N2→N1 + no N2→N3 + old_max_visited ≥ 0.48  ·  R7: EP N2→N3 + RP N3→N1 (no junction)</text>
+
+<!-- Rule fires → complete/maneuver -->
+<line x1="786" y1="756" x2="844" y2="756" stroke="#ef4444" stroke-width="2" marker-end="url(#ar)"/>
+<text x="815" y="750" text-anchor="middle" fill="#ef4444" font-size="9">fires</text>
+<rect x="844" y="726" width="144" height="72" rx="6" fill="#2a0a0a" stroke="#ef4444" stroke-width="1.5"/>
+<text x="916" y="752" text-anchor="middle" fill="#fca5a5" font-size="12" font-weight="700">complete</text>
+<text x="916" y="768" text-anchor="middle" fill="#f87171" font-size="10">or</text>
+<text x="916" y="782" text-anchor="middle" fill="#fca5a5" font-size="12" font-weight="700">maneuver</text>
+<text x="916" y="796" text-anchor="middle" fill="#f87171" font-size="9">last_llm_pos_y = −1</text>
+
+<!-- No rule → CrewAI -->
+<line x1="500" y1="804" x2="500" y2="842" stroke="#4b5563" stroke-width="2" marker-end="url(#a)"/>
+<text x="456" y="827" text-anchor="middle" fill="#6b7280" font-size="10">no rule fires</text>
+
+<!-- ═══ CREWAI ═══ -->
+<rect x="148" y="844" width="704" height="76" rx="8" fill="#1a0d00" stroke="#f97316" stroke-width="2"/>
+<text x="500" y="868" text-anchor="middle" fill="#fdba74" font-size="13" font-weight="700">CrewAI Pipeline — 5 Sequential Agents</text>
+<text x="500" y="886" text-anchor="middle" fill="#fb923c" font-size="10.5">ClinicalInterpreter → ShuntAnalyst → CircuitAnalyst → NavigationPlanner → GuidanceSpecialist</text>
+<text x="500" y="902" text-anchor="middle" fill="#fb923c" font-size="10">llama-3.3-70b-versatile (Groq)  ·  action locked to "move"  ·  push_exchange() + push_thinking() on completion</text>
+
+<!-- CrewAI → Output -->
+<line x1="500" y1="920" x2="500" y2="958" stroke="#4b5563" stroke-width="2" marker-end="url(#a)"/>
+
+<!-- ═══ OUTPUT ═══ -->
+<rect x="270" y="960" width="460" height="62" rx="8" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/>
+<text x="500" y="983" text-anchor="middle" fill="#93c5fd" font-size="13" font-weight="700">guidance_update  (Socket.IO emit)</text>
+<text x="500" y="1000" text-anchor="middle" fill="#60a5fa" font-size="10.5">guidance · action (move / complete / maneuver) · vlm{} · vlm_summary</text>
+<text x="500" y="1016" text-anchor="middle" fill="#60a5fa" font-size="10.5">region · pos_y · thinking { state_msg, raw }</text>
+
+<!-- CONFIG FOOTER -->
+<rect x="40" y="1048" width="920" height="96" rx="6" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+<text x="500" y="1068" text-anchor="middle" fill="#6b7280" font-size="10.5" font-weight="700">Config Thresholds</text>
+<text x="190" y="1086" text-anchor="middle" fill="#4b5563" font-size="10">VLM_THRESHOLD = 0.05</text>
+<text x="350" y="1086" text-anchor="middle" fill="#4b5563" font-size="10">LLM_THRESHOLD = 0.03</text>
+<text x="510" y="1086" text-anchor="middle" fill="#4b5563" font-size="10">HISTORY_WINDOW = 8</text>
+<text x="680" y="1086" text-anchor="middle" fill="#4b5563" font-size="10">SLIDING_WINDOW = 10</text>
+<text x="850" y="1086" text-anchor="middle" fill="#4b5563" font-size="10">STABILITY = 0.6</text>
+<text x="190" y="1104" text-anchor="middle" fill="#4b5563" font-size="10">SFJ_MAX = 0.13</text>
+<text x="350" y="1104" text-anchor="middle" fill="#4b5563" font-size="10">SPJ_THIGH_MIN = 0.80</text>
+<text x="510" y="1104" text-anchor="middle" fill="#4b5563" font-size="10">SPJ_CALF_MAX = 0.05</text>
+<text x="680" y="1104" text-anchor="middle" fill="#4b5563" font-size="10">KNEE_N = 0.5497</text>
+<text x="850" y="1104" text-anchor="middle" fill="#4b5563" font-size="10">gen_gate = req_gen + 6</text>
+<text x="500" y="1122" text-anchor="middle" fill="#374151" font-size="9.5">Other events: stream_start (resets session) · clips_replace (full clip swap) · session_end (marks inactive) · clips_updated · session_ready</text>
+
+</svg>
+</body>
+</html>

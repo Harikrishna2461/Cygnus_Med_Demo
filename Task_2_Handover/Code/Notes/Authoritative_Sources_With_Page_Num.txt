@@ -1,0 +1,259 @@
+Authoritative Sources with Page Numbers
+1. Examination sequence order
+Adler et al. 2022, "Varicose Veins of the Lower Extremity: Doppler US Evaluation" — page 2190–2191
+
+"Standards promulgated by the Society of Vascular Ultrasound stipulate that at minimum, baseline and maneuver response spectral Doppler US documentation be obtained at the CFV, mid FV, PV, GSV at the saphenofemoral junction, GSV above and below the knee, SSV at the saphenopopliteal junction, and SSV in the calf."
+
+This is the only source with an explicit ordered list.
+
+2. SFJ examination protocol — Mickey Mouse sign + Valsalva
+Franceschi & Zamboni 2009, "Principles of Venous Hemodynamics," Chapter 9 "How to Perform a Duplex Mapping" — page 111
+
+"SFJ is recognized by the so-called Mickey Mouse Sign, depicted in the transverse duplex access of the groin by the anatomical relationship of the FV, the head, with the 2 ears, GSV and FA, respectively. The Doppler PW sample placed on the femoral side of the terminal valve registers a SF reflux under Valsalva. Squeezing of the proximal GSV confirms reflux. Concordance of squeezing and Valsalva is the indication to the treatment of the SFJ."
+
+3. Which maneuver to use where
+Adler et al. 2022 — page 2190
+
+"The Valsalva maneuver is an appropriate provocative maneuver for the saphenofemoral junction, while augmentation with use of calf compression is necessary for provocative maneuvers beyond the saphenofemoral junction when the terminal valve at the saphenofemoral junction is intact."
+
+Delfrate 2023 (JTAVR 8(2):21) — page 5
+
+"The Paraná maneuver is preferable to the squeezing test because it activates more physiologically the VMP. It consists of a slight push to the waist of the patient which triggers a calf proprioceptive contraction-relaxation reflex."
+
+4. Valsalva decision logic at SFJ
+Delfrate 2023 (JTAVR 8(2):22) — page 6
+
+"The Valsalva test consists of a blocked and forced expiration that reverses downwards the Pressure Gradient. It stops the flow of the competent veins but it reverses it through N1→N2 and N1→N3 EPs. Notice that it triggers a reflux throughout N2 and N3 only if N1→N2 or N1→N3 junctions are incompetent. If N1→N2 or N1→N3 junctions are competent, it cannot trigger a N2 or N3 reflux."
+
+Delfrate 2023 (JTAVR 8(2):24) — page 8
+
+"The SFJ is a strategic point where several different hemodynamic patterns may be misinterpreted. The N1→N2 reflux at the GSV end assessed by Paraná/squeezing is not specific of the incompetence of the terminal valve and must be every time confirmed by positive Valsalva... If Valsalva is negative, the Paraná reflux is just due to the incompetence of the pre-terminal valve below a competent terminal valve."
+
+5. Reflux elimination test — differentiates Type 1 vs Type 3
+Franceschi & Zamboni 2009 — page 114
+
+"REFLUX ELIMINATION TEST AND SHUNT DEFINITION. Finally, reflux is reduced but still active at the level of the GSV main trunk (B1-B2), despite finger compression of reflux points 2 and 3. A gradient between SFJ and the re-entry point (green arrow) maintains a closed type I shunt."
+
+6. What mapping is and when it happens
+Franceschi & Zamboni 2009, Chapter 9 — page 107
+
+"The reader can easily learn a procedural duplex protocol in order to realize a complete venous mapping."
+
+Franceschi & Zamboni 2009 — page 91
+
+"Mapping is a schematic design that depicts the venous anatomo-functional configuration of each patient. Flow direction according to the systole-diastolic phase of dynamic tests and Valsalva maneuver is indicated by an arrow for each depicted vein. Data are obtained through echo-Doppler. In this way EP, shunting veins, REP, and occluded or removed veins can be identified."
+
+Let me go through the system prompt line by line and map each claim to its exact source paragraph.
+
+Read C:\Users\Krish\.claude\projects\c--Users-Krish-Downloads-Cygnus-Med-Demo-Task-1-App\bd70bb34-ce24-467e-b163-76bf4d5aaa0c\tool-results\bpqd0vw4n.txt (lines 37-116)
+Read C:\Users\Krish\.claude\projects\c--Users-Krish-Downloads-Cygnus-Med-Demo-Task-1-App\bd70bb34-ce24-467e-b163-76bf4d5aaa0c\tool-results\b46bihsor.txt (lines 666-865)
+I now have everything I need. Here is the exact citation for every prompt line:
+
+STEP 1 — DEEP VEINS FIRST
+Prompt line: "Following the ECD diagnostic protocol, the first step is to verify that the deep venous system presents neither obstruction nor refluxes."
+
+Source: Gianesini et al. 2014, Phlebology (article page 11)
+Section: "CHIVA strategy diagnostic and therapeutic technical notes — Deep venous system assessment"
+Exact paragraph:
+
+"Following the ECD diagnostic protocol, the first step is to verify that the deep venous system presents neither obstruction nor refluxes."
+
+Prompt line: "Locations: CFV, upper FV, mid FV, lower FV, popliteal vein. Test: Valsalva at CFV/upper FV; augmentation (calf squeeze or Paranà) at PV and below."
+
+Source: Adler et al. 2022, RadioGraphics 42:2184–2200, page 2190
+Section: "Technique" subsection, evaluation sequence paragraph
+Exact paragraph:
+
+"evaluation consists of compression with gray-scale still or cine US documentation of the CFV, saphenofemoral junction, deep FV, and FV at the upper thigh; FV at the mid thigh; FV at the distal thigh; PV; posterior tibial vein; and peroneal veins."
+
+"The Valsalva maneuver is an appropriate provocative maneuver for the saphenofemoral junction, while augmentation with use of calf compression (applied manually or by using a rapid cuff inflation system) is necessary for provocative maneuvers beyond the saphenofemoral junction when the terminal valve at the saphenofemoral junction is intact."
+
+STEP 2 — ILIAC VALVE COMPETENCE
+Prompt lines:
+
+
+Scan femoral vein ABOVE SFJ. Perform Valsalva.
+Valsalva systole shows color flow → iliac valve absent/incompetent.
+No flow during systole → iliac valve competent.
+Source: Gianesini et al. 2014, Phlebology, article page 13
+Section: "CHIVA strategy diagnostic and therapeutic technical notes", paragraph 2 (immediately after "Deep venous system assessment" section)
+Exact paragraphs:
+
+"Subsequently, it is mandatory to test the iliac valve competence. To do so, a simple Valsalva manoeuver while scanning the femoral vein above the sapheno-femoral junction (SFJ) will be indicative of the hydrostatic column overloading the same junction. It is evident how an iliac valve absence/incompetence will increase the reflux risk along the SFJ."
+
+(Figure 17 caption): "Valsalva manoeuver release in a competent iliac valve case: the color (the flow) appears just during the release phase, not during the systolic push. This is an indirect sign of valve competence. In case of incompetence, the colour would appear also during the systolic Valsalva push, so pointing out an incompetence/agenesia of the iliac valve."
+
+STEP 3 — SFJ ASSESSMENT
+Prompt line: "Transverse view first: identify Mickey Mouse sign (CFV = head, GSV and FA = ears)."
+
+Source: Franceschi & Zamboni 2009, Principles of Venous Hemodynamics, book page 113 (Chapter 9)
+Section: "How to Perform a Duplex Mapping", Figure 8 caption
+Exact text:
+
+"Fig. 8: Panel A: SFJ is recognized by the so-called Mickey Mouse Sign, depicted in the transverse duplex access of the groin by the anatomical relationship of the FV, the head, with the 2 ears, GSV and FA, respectively."
+
+Also: Gianesini et al. 2014, article page 12, Figure 18 caption:
+
+"FA, FV and GSV transverse section form the so-called Miky-mouse image, a correct point of assessment for SFJ competence assessment."
+
+Prompt line: "Place Doppler sample on FEMORAL SIDE of terminal valve."
+
+Source 1: Franceschi & Zamboni 2009, book page 111 (Chapter 9), Figure 3 caption:
+
+"Further analysis by placing the Doppler sample on the femoral side of the terminal valve demonstrate a competent valve at the Valsalva manoeuver."
+
+Source 2: Gianesini et al. 2014, article page 13, body text:
+
+"The SFJ must be evaluated placing the sample volume on the femoral side of the terminal valve, performing both a Valsalva (VAL) and a compression/relaxation (CR) manoeuver."
+
+Prompt line: "SFJ INCOMPETENT only if BOTH Valsalva AND CR are positive for reflux. If only one is positive → terminal valve competent; Paranà reflux = pre-terminal valve only."
+
+Source 1: Gianesini et al. 2014, article page 13, body text (same paragraph as above):
+
+"Only in case of both the manoeuvers' positivity the junction can be considered incompetent."
+
+Source 2: Delfrate 2023, JTAVR 8(2), journal page 24 (article page 8):
+
+"the SFJ is a strategic point where several different hemodynamic patterns may be misinterpreted. As a matter of fact, the N1>N2 reflux at the GSV end assessed by Paraná/squeezing is not specific of the incompetence of the terminal valve and must be every time confirmed by positive Valsalva… If Valsalva is negative, the Paraná reflux is just due to the incompetence of the pre-terminal valve below a competent terminal valve or a post-CHIVA disconnection SFJ."
+
+Prompt line: "Squeezing of the proximal GSV confirms reflux. Concordance of squeezing and Valsalva is the indication to the treatment of the SFJ."
+
+Source: Franceschi & Zamboni 2009, book page 113, Figure 8 caption (Chapter 9):
+
+"Squeezing of the proximal GSV confirms reflux. Concordance of squeezing and Valsalva is the indication to the treatment of the SFJ."
+
+Prompt line: "Check arch tributaries (AASV, epigastric, pudendal): if Valsalva positive in tributaries → follow upward to identify true EP."
+
+Source: Delfrate 2023, JTAVR 8(2), journal page 24:
+
+"That is why Valsalva must check the arch tributaries. If it is positive, these tributaries are followed upwards until the EP is detected."
+
+STEP 4 — GSV THIGH
+Prompt line: "Follow GSV distally (posY 0.10→0.35) in medial thigh. Transverse view confirms GSV inside fascial envelope (saphenous eye sign)."
+
+Source: Adler et al. 2022, RadioGraphics, page 2191, Figure 5 caption (left panel):
+
+"Subsequently, longitudinal duplex Doppler and transverse gray-scale US images of the GSV at the saphenofemoral junction (5), mid thigh (6), lower thigh (7), and calf (8) are obtained. The anteroposterior diameter of the GSV is measured at locations 5–8."
+
+"At our institution, gray-scale US images of the GSV and SSV at these locations are also captured in the transverse plane to ensure that the vein lies within the expected fascial envelope."
+
+Prompt line: "'No reflux, no re-entry and vice versa': if GSV still has reflux below an escape point, expect another re-entry perforator distally."
+
+Source: Franceschi & Zamboni 2009, book page 115 (Chapter 9), Figure 11 caption:
+
+"Reflux is still present in GSV main trunk below the reflux point 2, N2-N3. This finding suggests the presence below of further re-entry points. 'No reflux, no re-entry and viceversa'."
+
+Prompt line: "Hunterian perforators at posY 0.21–0.35: check for EP N1→N2 via perforator. If SFJ competent but thigh GSV has reflux → Hunterian may be the EP."
+
+Source: Gianesini et al. 2014, article page 11, "Hybrid techniques" section:
+
+"This is the case for example of N1-N2 compartment jumps arising not from an incompetent sapheno-femoral junction but rather by an incompetent hunterian perforating vein, feeding a Type 1 + N3 shunt." (Figure 14 caption)
+
+"A flush ligation of the incompetent Hunterian perforating vein would require a too big skin incision nowadays. A mini-access is herein proposed, aimed to the saphenous trunk isolation at the perforating vein confluence."
+
+STEP 5 — REFLUX ELIMINATION TEST
+Prompt lines:
+
+
+GSV reflux DISAPPEARS at compression → RP is on N3 = TYPE 3 SHUNT.
+GSV reflux PERSISTS at compression → RP is on GSV trunk = TYPE 1 or 1+N3 SHUNT.
+This test is MANDATORY before any junction disconnection decision.
+Source 1: Franceschi & Zamboni 2009, book page 116 (Chapter 9), Figure 14 caption:
+
+"REFLUX ELIMINATION TEST AND SHUNT DEFINITION. Finally, reflux is reduced but still active at the level of the GSV main trunk (B1-B2), despite finger compression of reflux points 2 and 3. A gradient between SFJ and the re-entry point (green arrow) maintains a closed type I shunt."
+
+Source 2: Gianesini et al. 2014, article page 13, Figure 13 caption:
+
+"Reflux elimination test. A simple digit compression of the incompetent tributary that is endowed with its own RP will permit to discriminate among a type 1 + N3 and a type 3 shunt. In case of saphenous reflux persistence at the digit compression, an RP must be keeping the energy gradient present, thus indicating the perforating vein along the not compressed saphenous trunk (type 1 + N3 shunt). In case of reflux disappearance at the finger compression, the RP must be expected along the same N3 tributary (thus a Type 3 shunt), being excluded by the finger compression, so temporarily eliminating the energy gradient."
+
+Source 3: Gianesini et al. 2014, article page 14, Figure 22 caption:
+
+"According to the reflux elimination test, if a flow is detected at the compression/relaxation during the finger compression of the incompetent tributary, a valid re-entry perforator is focused on the GSV and thus a high ligation can be performed (CHIVA 1 procedure). If no flow is detected, the correct indication is just for a flush ligation of the incompetent tributary (CHIVA 2 first step), because of the risk of creating a not-draining venous system, thus leading to possible thrombosis."
+
+STEP 6 — RE-ENTRY PERFORATOR IDENTIFICATION
+Prompt line: "Re-entry perforators show INWARD flow (toward N1) during calf muscle DIASTOLE. Color Doppler during Paranà release shows inward (blue) flow."
+
+Source: Gianesini et al. 2014, article page 15, "Re-entry point identification" section:
+
+"Subsequently, a color-mode analysis of a B-mode visible perforating vein will show a prevalent inward flow during calf muscle diastole, so indicating the efficient RP."
+
+Also Figure 21 caption (same page):
+
+"It is mandatory to consider the net flow direction and not just the flow time. In the case herein reported the in-ward diastolic flow is clearly prevalent, thus, independently from its flow time, it can be considered physiological because draining from the more superficial compartment (the saphenous network) to the deepest one."
+
+Prompt line: "Perforators pathological if outward flow ≥500ms AND diameter ≥3.5mm"
+
+Source: Delfrate 2023, JTAVR 8(2), journal page 25:
+
+"In the AVF 2023 guidelines are considered pathologic the perforator veins with an outward flow duration ≥ 500 ms and a diameter ≥ 3.5 mm on DU."
+
+STEP 7 — SPJ / SSV
+Prompt line: "Position: lateral decubitus (left lat for right leg, right lat for left leg)"
+
+Source: Adler et al. 2022, RadioGraphics, page 2190, patient positioning paragraph:
+
+"Right and left lateral decubitus positions with the patient tilted may be needed to evaluate the SSV. The left lateral decubitus position is appropriate for evaluation of the right SSV, and the right lateral decubitus position is appropriate for evaluation of the left SSV."
+
+Prompt line: "SPJ: BOTH Paranà (active) AND compression/relaxation (passive) must be positive → incompetent. If only one positive → SPJ terminal valve competent."
+
+Source: Gianesini et al. 2014, article page 14, body text (second paragraph of page):
+
+"In the same way, the sapheno-popliteal junction must be assessed both by active (Paranà) and passive (CR) manoeuvers, whose positivity must be contemporaneously present to diagnose a true junctional incompetence."
+
+Prompt line: "Giacomini vein: assess with Paranà — forward systolic flow = viable outflow route."
+
+Source: Franceschi & Zamboni 2009, book page 126 (Chapter 9), Figure 33 caption:
+
+"B-mode study of the Giacomini vein. B. Emptying under Paranà manouvre also through the Giacomini' vein. C. Forward flow along the Giacomini' vein during muscular systole. This finding indicates the Giacomini as a valuable outflow route to be used in our haemodynamic surgery plan."
+
+Prompt line: "Follow SSV distally (posY 0.50→0.80) for N2→N3 escape points."
+
+Source: Adler et al. 2022, RadioGraphics, page 2191, Figure 5 caption (right panel):
+
+"longitudinal duplex Doppler and transverse gray-scale US images of the cranial extension of the SSV (if present) (9), and at the saphenopopliteal junction (10) and mid calf (11) are obtained."
+
+STEP 8 — CALF AND ANKLE
+Prompt line: "Add distal SSV only when stasis ulcers present."
+
+Source: Adler et al. 2022, RadioGraphics, page 2191, Figure 5 caption:
+
+"Distal-calf SSV imaging is included when stasis ulcers are present."
+
+MANEUVER RULES
+Prompt line: "Valsalva: use ONLY at SFJ, iliac vein, and CFV/upper FV. Augmentation/Paranà/squeezing everywhere below SFJ."
+
+Source: Adler et al. 2022, RadioGraphics, page 2190:
+
+"The Valsalva maneuver is an appropriate provocative maneuver for the saphenofemoral junction, while augmentation with use of calf compression (applied manually or by using a rapid cuff inflation system) is necessary for provocative maneuvers beyond the saphenofemoral junction when the terminal valve at the saphenofemoral junction is intact."
+
+Also page 2191:
+
+"While the Valsalva maneuver is sufficient to test for reflux in the CFV and upper FV and at the saphenofemoral junction, normalcy of valve function at these levels requires a switch to an augmentation maneuver below."
+
+Prompt line: "Paranà preferred over squeezing: activates calf pump physiologically."
+
+Source: Delfrate 2023, JTAVR 8(2), journal page 21:
+
+"The Paraná maneuver is preferable to the squeezing test because it activates more physiologically the VMP. It consists of a slight push to the waist of the patient which triggers a calf proprioceptive contraction-relaxation reflex."
+
+Prompt line: "Valsalva distinguishes shunt types: reflux on BOTH Valsalva AND Paranà → N1 EP present. Reflux on Paranà ONLY → Shunt 0 or Type 2 (no N1 EP)."
+
+Source: Delfrate 2023, JTAVR 8(2), journal page 22:
+
+"The Valsalva test consists of a blocked and forced expiration that reverses downwards the Pressure Gradient. It stops the flow of the competent veins but it reverses it through N1>N2 and N1>N3 EPs. Notice that it triggers a reflux throughout N2 and N3 only if N1>N2 or N1>N3 junctions are incompetent. If N1>N2 or N1>N3 junctions are competent, it cannot trigger a N2 or N3 reflux neither in S0, even if these veins show a Paraná diastolic reflux."
+
+Also Delfrate page 26 (Shunt 0 definition):
+
+"Shunt 0 (Zero) is a harmless shunt… It is activated only by the VMP diastole (Paraná/Squeezing) and not by the Valsalva systole."
+
+Prompt line: "Reflux threshold: >500ms = pathological in deep and superficial veins."
+
+Source: Adler et al. 2022, RadioGraphics, page 2193:
+
+"A reflux time longer than 500 msec, or 0.5 second, is the conventional threshold for insufficiency in the deep and superficial venous system, but some advocate 1 second as a better threshold to improve specificity."
+
+What has NO verified source (honest gaps)
+Prompt element	Status
+Q1-Q4 framework names - Our own construction — not from any of the books. The books describe the same diagnostic logic but never use "Q1 Q2 Q3 Q4" labels.
+posYRatio numerical ranges	Derived from anatomy facts in the books, but the specific 0.04-0.09 / 0.21-0.35 numbers are our mapping to the software coordinate system, not directly quoted.
+"N3 = everything else superficial"	Franceschi/Delfrate describe the compartment system but use "AC3" or "superficial compartment", not the exact wording.

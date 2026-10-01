@@ -8,12 +8,12 @@
 
 ### Training Data by Type
 - anatomy: 1
-- classification: 25
-- ligation: 5
+- classification: 23
+- ligation: 7
 
 ### Validation Data by Type
-- classification: 5
-- ligation: 3
+- classification: 7
+- ligation: 1
 
 ### Difficulty Distribution
 - basic: 1 (3.2%)
@@ -54,9 +54,12 @@ python validate_fine_tuned_model.py \
 ## Sample Training Pairs
 
 ### Classification Example
-**Type:** ligation
-**Shunt Type:** Type 3
-**Instruction:** For a Type 3 CHIVA venous shunt, outline the ligation strategy, procedure options, and expected outc...
+**Type:** classification
+**Shunt Type:** Type 1
+**Instruction:** Analyze the following ultrasound clips and classify the CHIVA venous shunt type:
+
+Clips:
+  • Clip 1:...
 
 ### Ligation Planning Example
 **Type:** classification

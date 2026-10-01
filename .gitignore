@@ -30,6 +30,7 @@ __pycache__/
 *.pth
 *.pt
 *.bin
+*.gguf
 
 # Cache directories
 .cache/

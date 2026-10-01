@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="65bd71144e">
+    <diagram id="task2-arch" name="System Architecture">
+        <mxGraphModel dx="1555" dy="1007" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- TIER LABELS -->
+                <mxCell id="lbl1" value="Tier 1 / Frontend" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;fontStyle=1;fontColor=#1f3864;" vertex="1" parent="1">
+                    <mxGeometry x="10" y="50" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl2" value="Tier 2 / Application" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;fontStyle=1;fontColor=#5b8fd4;" vertex="1" parent="1">
+                    <mxGeometry x="10" y="165" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl3" value="Tier 3 / Routes" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;fontStyle=1;fontColor=#5b8fd4;" vertex="1" parent="1">
+                    <mxGeometry x="10" y="255" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl4" value="Tier 4 / Engine &amp; Context" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;fontStyle=1;fontColor=#4c9a6a;" vertex="1" parent="1">
+                    <mxGeometry x="10" y="395" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl5" value="Tier 5 / Crew Pipeline" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;fontStyle=1;fontColor=#c88a28;" vertex="1" parent="1">
+                    <mxGeometry x="10" y="605" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl6" value="Tier 6 / External" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;fontStyle=1;fontColor=#8763bd;" vertex="1" parent="1">
+                    <mxGeometry x="10" y="775" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl7" value="Tier 7 / Output" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;fontStyle=1;fontColor=#b04040;" vertex="1" parent="1">
+                    <mxGeometry x="10" y="895" width="140" height="30" as="geometry"/>
+                </mxCell>
+
+                <!-- TIER 1 — Frontend -->
+                <mxCell id="f1" value="&lt;b&gt;Streaming UI&lt;/b&gt; / stream.html&#xa;Socket.IO client · leg diagram · probe_move/clip_mark emit · 200 ms debounce" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dce8f5;strokeColor=#1f3864;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="40" width="520" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="f2" value="&lt;b&gt;Legacy UI&lt;/b&gt; / index.html&#xa;POST /api/guidance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dce8f5;strokeColor=#1f3864;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="700" y="40" width="300" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="f3" value="&lt;b&gt;Test Page&lt;/b&gt; / test.html&#xa;Single-image test" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dce8f5;strokeColor=#1f3864;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="1020" y="40" width="260" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- TIER 2 — Application -->
+                <mxCell id="app" value="&lt;b&gt;app.py&lt;/b&gt; — Flask + Flask-SocketIO (port 7861) · registers blueprints · opens browser at /stream · register_stream_events(socketio)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf1fb;strokeColor=#5b8fd4;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="160" width="1120" height="60" as="geometry"/>
+                </mxCell>
+
+                <!-- TIER 3 — Routes -->
+                <mxCell id="r1" value="&lt;b&gt;routes/stream.py&lt;/b&gt;&#xa;SocketIO: stream_start · probe_move · clip_mark&#xa;clips_replace · session_end · shunt_accept · shunt_reject" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf1fb;strokeColor=#5b8fd4;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="250" width="480" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="r2" value="&lt;b&gt;routes/localization.py&lt;/b&gt;&#xa;POST /api/localize&#xa;POST /api/localize/batch&#xa;POST /api/localize/reset" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf1fb;strokeColor=#5b8fd4;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="660" y="250" width="300" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="r3" value="&lt;b&gt;routes/guidance.py&lt;/b&gt;&#xa;POST /api/guidance (legacy)&#xa;POST /api/wrong-region" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf1fb;strokeColor=#5b8fd4;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="980" y="250" width="300" height="100" as="geometry"/>
+                </mxCell>
+
+                <!-- TIER 4 — Engine & Context Builders -->
+                <mxCell id="eng" value="&lt;b&gt;streaming_guidance_engine.py&lt;/b&gt;&#xa;process_probe_state() — orchestrator&#xa;_get_frame_for_region() — asset picker&#xa;extract_frame_at() — cv2 video fallback&#xa;VLM threshold: 0.05 · LLM threshold: 0.06" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5ee;strokeColor=#4c9a6a;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="390" width="480" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="cb" value="&lt;b&gt;Context Builders (pure Python — no model)&lt;/b&gt;&#xa;history_agent.build_summary() — zone-visit text&#xa;q_state_agent.analyze() — Q1–Q4 status&#xa;protocol_agent.get_protocol() — zone protocol text&#xa;guidance_agent.build_state_message() — assembles state_message" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5ee;strokeColor=#4c9a6a;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="660" y="390" width="460" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="vlm" value="&lt;b&gt;vlm_analyzer.py&lt;/b&gt;&#xa;analyze_frame()&#xa;Groq vision API&#xa;timeout=15 s&#xa;max_tokens=512" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf3e0;strokeColor=#c88a28;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="1140" y="390" width="140" height="130" as="geometry"/>
+                </mxCell>
+
+                <!-- TIER 5 — Crew Pipeline -->
+                <mxCell id="crew" value="&lt;b&gt;crew_pipeline.run_guidance_crew()&lt;/b&gt; — Crew(process=Process.sequential) — timeout 90 s&#xa;&#xa;Task 1: Clinical Interpreter [MID]  →  Task 2: Shunt Analyst [HEAVY] → JSON {shunt_type, confirmed, elim_required, evidence}&#xa;→  Task 3: Circuit Analyst [HEAVY]  →  Task 4: Navigation Planner [MID]  →  Task 5: Guidance Specialist [HEAVY] → JSON {guidance, action}&#xa;&#xa;crew_agents.py: _patched_completion() strips cache_breakpoint from all litellm calls&#xa;All agents: max_iter=3 · verbose=True · allow_delegation=False · temperature=0.3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf3e0;strokeColor=#c88a28;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="560" width="1120" height="170" as="geometry"/>
+                </mxCell>
+
+                <!-- TIER 6 — External -->
+                <mxCell id="groq" value="&lt;b&gt;Groq Cloud API&lt;/b&gt;&#xa;Text: openai/gpt-oss-120b (GROQ_TEXT_MODEL = GROQ_MID_MODEL by default)&#xa;Vision: qwen/qwen3.8-27b (GROQ_VISION_MODEL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0ecfa;strokeColor=#8763bd;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="770" width="520" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="assets" value="&lt;b&gt;Local Filesystem&lt;/b&gt;&#xa;assets/guidance/*.jpg (sent to VLM)&#xa;assets/vein_frames/*.jpg (label from folder — NO VLM call)&#xa;sample_data/202207191643_00-Moving.mp4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5ee;strokeColor=#4c9a6a;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="700" y="770" width="340" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="mem" value="&lt;b&gt;In-Memory State&lt;/b&gt;&#xa;streaming_session._sessions dict&#xa;no database · lost on restart&#xa;sessions never deleted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5ee;strokeColor=#4c9a6a;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="1060" y="770" width="220" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- TIER 7 — Output -->
+                <mxCell id="out" value="&lt;b&gt;Socket.IO emissions → Browser&lt;/b&gt;&#xa;guidance_update {guidance, action, vlm, vlm_summary, frame_b64, region, pos_y, shunt_confirmed, shunt_type, shunt_evidence, thinking}&#xa;shunt_confirmed {shunt_type, shunt_evidence, leg}  ·  clips_updated  ·  session_ready  ·  session_ended" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9e8e8;strokeColor=#b04040;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="890" width="1120" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- EDGES -->
+                <mxCell id="e_f1_app" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#1f3864;" edge="1" source="f1" target="app" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_f2_app" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#1f3864;" edge="1" source="f2" target="app" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_app_r1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#5b8fd4;" edge="1" source="app" target="r1" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_app_r2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#5b8fd4;" edge="1" source="app" target="r2" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_app_r3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#5b8fd4;" edge="1" source="app" target="r3" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_r1_eng" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="r1" target="eng" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_eng_cb" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="eng" target="cb" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_eng_vlm" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#c88a28;" edge="1" source="eng" target="vlm" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cb_crew" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="cb" target="crew" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_vlm_groq" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#c88a28;dashed=1;" edge="1" source="vlm" target="groq" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_crew_groq" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#c88a28;dashed=1;" edge="1" source="crew" target="groq" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_eng_assets" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="eng" target="assets" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_r1_mem" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#5b8fd4;" edge="1" source="r1" target="mem" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_crew_out" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#b04040;dashed=1;" edge="1" source="crew" target="out" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- NOTE box -->
+                <mxCell id="note" value="NOTE: probe_localizer.py (classify_single) is used only by /api/localize REST endpoint. The streaming path gets its region string from the browser JavaScript mapReg() function — the two implementations are independent. Zone bands (posY boundaries) are defined separately in history_agent.py (_BANDS), crew_pipeline.py (_zone_name()), and q_state_agent.py (_level()) — no shared source of truth." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3cd;strokeColor=#c88a28;fontColor=#1f3864;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="990" width="1120" height="80" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="65bd71144e">
+    <diagram id="task2-dataflow" name="Probe Move Dataflow">
+        <mxGraphModel dx="1555" dy="1007" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1600" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- 1. START -->
+                <mxCell id="start" value="Browser emits probe_move&#xa;{region, pos_y_ratio, leg, surface, ...}" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1f3864;fontColor=#ffffff;strokeColor=#1f3864;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="500" y="30" width="200" height="60" as="geometry"/>
+                </mxCell>
+
+                <!-- 2. handle_probe_move -->
+                <mxCell id="n2" value="&lt;b&gt;handle_probe_move(data)&lt;/b&gt;&#xa;routes/stream.py&#xa;get_or_create(session_id) · sess.bump()&#xa;spawn daemon Thread" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5b8fd4;strokeColor=#5b8fd4;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="400" y="130" width="400" height="70" as="geometry"/>
+                </mxCell>
+
+                <!-- 3. process_probe_state -->
+                <mxCell id="n3" value="&lt;b&gt;process_probe_state(...)&lt;/b&gt;&#xa;streaming_guidance_engine.py&#xa;sess.log_scan_position(pos_y, region, ...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4c9a6a;strokeColor=#4c9a6a;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="400" y="240" width="400" height="70" as="geometry"/>
+                </mxCell>
+
+                <!-- 4. DECISION: VLM threshold -->
+                <mxCell id="d4" value="|pos_y − last_vlm_pos_y| ≥ 0.05&#xa;OR region changed?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e8f5ee;strokeColor=#4c9a6a;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="380" y="350" width="440" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- 5a. YES: _get_frame_for_region -->
+                <mxCell id="n5a" value="&lt;b&gt;_get_frame_for_region(region, pos_y)&lt;/b&gt;&#xa;_build_region_sources()&#xa;bucket = int(round(pos_y × 20))&#xa;sources[bucket % n] → file path" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4c9a6a;strokeColor=#4c9a6a;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="180" y="470" width="350" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- 5b. NO: Use cached VLM -->
+                <mxCell id="n5b" value="Use cached VLM&#xa;session.last_vlm_summary&#xa;session.last_vlm_frame_b64&#xa;(no new API call)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5ee;strokeColor=#4c9a6a;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="720" y="470" width="250" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- 6a. DECISION: vein_frames -->
+                <mxCell id="d6a" value="frame_source == 'vein_frames'&#xa;AND folder_meta present?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fdf3e0;strokeColor=#c88a28;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="140" y="590" width="430" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- 7a-YES: Synthetic VLM -->
+                <mxCell id="n7ayes" value="&lt;b&gt;Synthetic VLM (NO API CALL)&lt;/b&gt;&#xa;streaming_guidance_engine.py&#xa;UltrasoundAssessment from&#xa;_VEIN_FOLDER_TO_META[folder]&#xa;No Groq call" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4c9a6a;strokeColor=#4c9a6a;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="20" y="720" width="280" height="90" as="geometry"/>
+                </mxCell>
+
+                <!-- 7a-NO: vlm_agent.analyze -->
+                <mxCell id="n7ano" value="&lt;b&gt;vlm_agent.analyze()&lt;/b&gt;&#xa;vlm_analyzer.analyze_frame()&#xa;Groq API: qwen/qwen3.8-27b&#xa;timeout=15s · max_tokens=512&#xa;→ UltrasoundAssessment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c88a28;strokeColor=#c88a28;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="330" y="720" width="280" height="90" as="geometry"/>
+                </mxCell>
+
+                <!-- 8. DECISION: LLM threshold -->
+                <mxCell id="d8" value="|pos_y − last_llm_pos_y| ≥ 0.06&#xa;OR region changed&#xa;OR force_llm (clip_mark)?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e8f5ee;strokeColor=#4c9a6a;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="360" y="860" width="480" height="90" as="geometry"/>
+                </mxCell>
+
+                <!-- 9a. YES: Context Builders -->
+                <mxCell id="n9a" value="&lt;b&gt;Context Builders&lt;/b&gt;&#xa;history_agent.build_summary(session)&#xa;q_state_agent.analyze(leg_clips)&#xa;protocol_agent.get_protocol(region, pos_y)&#xa;guidance_agent.build_state_message(...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4c9a6a;strokeColor=#4c9a6a;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="1000" width="360" height="110" as="geometry"/>
+                </mxCell>
+
+                <!-- 10a. crew_pipeline -->
+                <mxCell id="n10a" value="&lt;b&gt;crew_pipeline.run_guidance_crew(...)&lt;/b&gt;&#xa;Crew(Process.sequential) in daemon thread&#xa;_done.wait(timeout=90)&#xa;5 Groq API calls (openai/gpt-oss-120b)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c88a28;strokeColor=#c88a28;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="1160" width="360" height="90" as="geometry"/>
+                </mxCell>
+
+                <!-- 9b. NO: Echo last guidance -->
+                <mxCell id="n9b" value="Echo last guidance&#xa;guidance = session.last_guidance&#xa;action = session.last_action&#xa;(no model call)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5ee;strokeColor=#4c9a6a;fontColor=#1f3864;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="680" y="1000" width="280" height="90" as="geometry"/>
+                </mxCell>
+
+                <!-- 11. DECISION: Stale check -->
+                <mxCell id="d11" value="sess.generation &gt; req_gen + 6?&#xa;(stale check)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f9e8e8;strokeColor=#b04040;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="350" y="1300" width="500" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- 12a. YES: DISCARD -->
+                <mxCell id="n12a" value="DISCARD&#xa;return&#xa;(silent discard)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b04040;strokeColor=#b04040;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="900" y="1300" width="160" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- 12b. NO: DECISION shunt found -->
+                <mxCell id="d12b" value="shunt_found AND new&#xa;leg:type key?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f9e8e8;strokeColor=#b04040;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="330" y="1430" width="540" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- 13a. emit shunt_confirmed -->
+                <mxCell id="n13a" value="emit shunt_confirmed&#xa;socketio.emit('shunt_confirmed'&#xa;{shunt_type, evidence, leg})" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b04040;strokeColor=#b04040;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="1560" width="260" height="70" as="geometry"/>
+                </mxCell>
+
+                <!-- 13b. emit guidance_update -->
+                <mxCell id="n13b" value="emit guidance_update&#xa;socketio.emit('guidance_update'&#xa;{guidance, action, vlm, frame_b64, region, pos_y, thinking, ...})" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b04040;strokeColor=#b04040;fontColor=#ffffff;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="360" y="1560" width="480" height="70" as="geometry"/>
+                </mxCell>
+
+                <!-- EDGES -->
+                <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#1f3864;" edge="1" source="start" target="n2" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#5b8fd4;" edge="1" source="n2" target="n3" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="n3" target="d4" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <!-- d4 YES → n5a -->
+                <mxCell id="e4yes" value="YES" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="d4" target="n5a" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="380" y="390"/>
+                            <mxPoint x="355" y="390"/>
+                            <mxPoint x="355" y="510"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- d4 NO → n5b -->
+                <mxCell id="e4no" value="NO" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="d4" target="n5b" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="820" y="390"/>
+                            <mxPoint x="845" y="390"/>
+                            <mxPoint x="845" y="510"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- n5a → d6a -->
+                <mxCell id="e5a" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="n5a" target="d6a" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <!-- d6a YES → n7ayes -->
+                <mxCell id="e6yes" value="YES" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#c88a28;" edge="1" source="d6a" target="n7ayes" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="140" y="630"/>
+                            <mxPoint x="160" y="630"/>
+                            <mxPoint x="160" y="765"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- d6a NO → n7ano -->
+                <mxCell id="e6no" value="NO" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#c88a28;" edge="1" source="d6a" target="n7ano" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="570" y="630"/>
+                            <mxPoint x="470" y="630"/>
+                            <mxPoint x="470" y="765"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- n7ayes → d8 -->
+                <mxCell id="e7ayes_d8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="n7ayes" target="d8" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="160" y="850"/>
+                            <mxPoint x="160" y="905"/>
+                            <mxPoint x="360" y="905"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- n7ano → d8 -->
+                <mxCell id="e7ano_d8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="n7ano" target="d8" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="470" y="850"/>
+                            <mxPoint x="470" y="905"/>
+                            <mxPoint x="600" y="905"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- n5b → d8 -->
+                <mxCell id="e5b_d8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="n5b" target="d8" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="845" y="600"/>
+                            <mxPoint x="845" y="905"/>
+                            <mxPoint x="840" y="905"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- d8 YES → n9a -->
+                <mxCell id="e8yes" value="YES" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="d8" target="n9a" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="360" y="905"/>
+                            <mxPoint x="330" y="905"/>
+                            <mxPoint x="330" y="1055"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- d8 NO → n9b -->
+                <mxCell id="e8no" value="NO" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#4c9a6a;" edge="1" source="d8" target="n9b" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="840" y="905"/>
+                            <mxPoint x="820" y="905"/>
+                            <mxPoint x="820" y="1045"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- n9a → n10a -->
+                <mxCell id="e9a" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#c88a28;" edge="1" source="n9a" target="n10a" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <!-- n10a → d11 -->
+                <mxCell id="e10a_d11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#b04040;" edge="1" source="n10a" target="d11" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="330" y="1290"/>
+                            <mxPoint x="330" y="1340"/>
+                            <mxPoint x="350" y="1340"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- n9b → d11 -->
+                <mxCell id="e9b_d11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#b04040;" edge="1" source="n9b" target="d11" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="820" y="1140"/>
+                            <mxPoint x="820" y="1340"/>
+                            <mxPoint x="850" y="1340"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- d11 YES → n12a (stale discard) -->
+                <mxCell id="e11yes" value="YES (stale)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#b04040;" edge="1" source="d11" target="n12a" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="850" y="1340"/>
+                            <mxPoint x="980" y="1340"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- d11 NO → d12b -->
+                <mxCell id="e11no" value="NO" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#b04040;" edge="1" source="d11" target="d12b" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <!-- d12b YES → n13a -->
+                <mxCell id="e12yes" value="YES" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#b04040;" edge="1" source="d12b" target="n13a" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="330" y="1470"/>
+                            <mxPoint x="190" y="1470"/>
+                            <mxPoint x="190" y="1595"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- d12b → n13b (always emits guidance_update) -->
+                <mxCell id="e12b_13b" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#b04040;" edge="1" source="d12b" target="n13b" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="600" y="1510"/>
+                            <mxPoint x="600" y="1595"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <!-- n13a → n13b (then emits guidance_update) -->
+                <mxCell id="e13a_13b" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;strokeColor=#b04040;" edge="1" source="n13a" target="n13b" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

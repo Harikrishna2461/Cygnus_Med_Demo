@@ -1,0 +1,23 @@
+Franceschi & Zamboni 2009 (chapters 5, 6, 7), Gianesini 2014, Delfrate 2023, Vescu/Casian 2022 (Shunt_Book_8), Carriazo 2015, and the Inteleos report. Here's what the literature says:
+
+Verdict: all 9 type criteria are correct
+No fundamental corrections needed. Detailed findings per type:
+
+Type	Criteria	Literature verdict
+1	EP N1→N2 + RP N2→N1, NO N3  --> Exact match — Franceschi p.73: "N1-N2-N1 succession, no N3"
+2A	EP N2→N3 + RP N3→N1, NO EP N1→N2, NO RP N2→N1	--> Exact — Gianesini: "EP is N2→N3 only; absence of efficient RP on N2"
+2B	EP N2→N2 + RP N3→N1, NO EP N1→N2, NO RP N2→N1	--> Correct logic — EP N2→N2 notation is non-standard but functionally sound (Delfrate: "proximal saphenous incontinence without N1 source")
+2C	(EP N2→N2 or EP N2→N3) + RP N3→N1 + RP N2→N1, NO EP N1→N2  --> Matches Delfrate & Vescu — RP N3→N2 is also valid (the code handles both, correct)
+3 (3-clip)	EP N1→N2 + EP N2→N3 + RP N3→N1, NO RP N2→N1  --> Validated — Gianesini: "Type 3 defined by ABSENCE of efficient RP on N2." No elimination test needed when RP N2→N1 was never found — that IS the definition
+3 (4-clip + No Reflux)	Same + RP N2→N1 → elim test → No Reflux	 --> Gianesini Fig.13: "If evoked saphenous reflux eliminated by N3 compression → RP on N2 is inefficient → Type 3"
+1+2	Same 4-clip + elim test → Reflux  --> Delfrate: "Shunt 1+2 = shunt 1 plus shunt 2; RP on N2 is genuine (Reflux persists on N3 compression)"
+4	EP N1→N3 + RP N2→N1, NO RP N3→N1  --> Franceschi p.74: "N1-N3-N2-N1 succession." RP N3→N2 (intermediate step N3→trunk) is implied but not needed as a separate clip
+5	EP N1→N3 + RP N3→N2 + EP N2→N3 + RP N3→N1, NO RP N2→N1	 --> Exact — Franceschi p.75: "N1-N3-N2-N3-N1 succession." Delfrate confirms CHIVA requires disconnecting both N1→N3 AND N2→N3 EPs
+6	EP N1→N3 + RP N3→N1, NO N2 clips  --> Franceschi: "N1-N3-N1, no N2 involvement." Delfrate notes a secondary variant (N1→N3→competent N2→N1) but that's an edge case
+
+Two noted gaps (not errors, future enhancements)
+SPJ as Type 1b EP: Literature (Gianesini, Delfrate) recognizes SPJ as a valid N1→N2 entry point. If a user marks EP N1→N2 at posY≈0.50 posterior (SPJ zone), it should also be a valid Type 1 trigger — this already works in your code since it checks clip type not position.
+
+Type 6 secondary variant: Delfrate describes N1→N3→competent N2→N1 (N2 drains without refluxing) — your code would classify this as Type 4. It's rare and clinically distinct, documented as an acceptable limitation.
+
+The clip criteria in the software are medically sound.

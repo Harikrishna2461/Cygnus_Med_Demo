@@ -1,36 +1,27 @@
 """Central config: paths, model ids, sampling cadence. No classification logic lives here."""
-import glob
 import os
 
 # --- Paths (all captured as absolute before biomedparse_engine ever chdirs) ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))           # .../Vein_Name_Annotation_From_Webcam_And_Segmented_Videos/backend
 PROJECT_DIR = os.path.dirname(BASE_DIR)                          # .../Vein_Name_Annotation_From_Webcam_And_Segmented_Videos
 CYGNUS_ROOT = os.path.dirname(PROJECT_DIR)                       # .../Cygnus_Med_Demo
+
+# Default HF_HOME to the bundled hf_cache/ next to Code/ -- set here (not just in run.bat) so
+# it applies to every entry point (direct `python3 app.py`, a smoketest script; Docker's own
+# HF_HOME already overrides this via docker-compose). Must run before biomedparse_engine's
+# `import transformers` chain, which reads HF_HOME at import time. The BiomedBERT text encoder
+# is bundled at hf_cache/hub/models--microsoft--BiomedNLP-.../, so the first job needs no
+# internet. Never overrides an HF_HOME the caller already set.
+os.environ.setdefault("HF_HOME", os.path.join(PROJECT_DIR, "hf_cache"))
 # BioMedParse: the inference SOURCE (modeling/, utilities/, configs/, stubs/) is vendored in
-# ../BiomedParse_Assets (~1MB). The two ~1.7GB finetuned WEIGHT files are not bundled -- drop
-# them into BiomedParse_Assets/checkpoints/fascia/ and .../vein/, or point the CMED_* env vars
-# below elsewhere (Developer Guide, "Model assets"). If neither is done, the original
-# dev-machine locations are tried as a last resort.
-def _find_task4_dir() -> str:
-    """Root that holds BiomedParse/ (modeling, utilities, configs) and stubs/. Order: env
-    override; the bundled BiomedParse_Assets/ next to backend/ (handover default); else walk
-    up the ancestors for the original dev layout's sibling Task_4_VLM_Fascia_Vein_Detection."""
-    env = os.getenv("CMED_TASK4_DIR")
-    if env:
-        return env
-    bundled = os.path.join(PROJECT_DIR, "BiomedParse_Assets")
-    if os.path.isdir(os.path.join(bundled, "BiomedParse")):
-        return bundled
-    cur = PROJECT_DIR
-    for _ in range(5):
-        cand = os.path.join(cur, "Task_4_VLM_Fascia_Vein_Detection")
-        if os.path.isdir(cand):
-            return cand
-        cur = os.path.dirname(cur)
-    return bundled
-
-
-TASK4_DIR = _find_task4_dir()
+# ../BiomedParse_Assets (~1MB) -- this package is standalone and is never shipped next to the
+# original Task_4_VLM_Fascia_Vein_Detection project, so there is deliberately no dev-machine
+# fallback path here. The two ~1.7GB finetuned WEIGHT files are not bundled by default -- drop
+# them into BiomedParse_Assets/checkpoints/fascia/ and .../vein/ (or point CMED_FASCIA_CKPT_DIR /
+# CMED_VEIN_CKPT_DIR elsewhere). Missing weights fail loudly at load time (biomedparse_engine
+# raises, naming the exact path expected) rather than silently downloading a different,
+# non-finetuned model from Hugging Face -- see that module's _newest_ckpt.
+TASK4_DIR = os.getenv("CMED_TASK4_DIR") or os.path.join(PROJECT_DIR, "BiomedParse_Assets")
 
 UPLOADS_DIR = os.getenv("CMED_UPLOADS_DIR") or os.path.join(BASE_DIR, "uploads")
 OUTPUTS_DIR = os.getenv("CMED_OUTPUTS_DIR") or os.path.join(BASE_DIR, "outputs")
@@ -43,35 +34,17 @@ STUBS_DIR = os.getenv("CMED_STUBS_DIR") or os.path.join(TASK4_DIR, "stubs")
 BIOMEDPARSE_CONFIG = os.path.join(BIOMEDPARSE_DIR, "configs", "biomed_fascia_finetuning.yaml")
 
 
-def _resolve_ckpt_dir(env_name: str, bundled_subdir: str, dev_fallback: str) -> str:
-    """Checkpoint dir: env override; else BiomedParse_Assets/checkpoints/<sub> if a
-    model_state_dict.pt has been placed there (handover layout); else the original dev
-    machine location. biomedparse_engine globs the newest model_state_dict.pt under it."""
-    env = os.getenv(env_name)
-    if env:
-        return env
-    bundled = os.path.join(PROJECT_DIR, "BiomedParse_Assets", "checkpoints", bundled_subdir)
-    if glob.glob(os.path.join(bundled, "**", "model_state_dict.pt"), recursive=True):
-        return bundled
-    return dev_fallback
+def _resolve_ckpt_dir(env_name: str, bundled_subdir: str) -> str:
+    """Checkpoint dir: env override, else always the bundled BiomedParse_Assets/checkpoints/<sub>
+    (whether or not a model_state_dict.pt actually lives there yet). This package is standalone,
+    so there is no dev-machine path to fall back to -- biomedparse_engine._newest_ckpt is what
+    actually checks whether the file exists, and raises a clear, actionable error if it doesn't,
+    naming this exact path. Never silently substitutes a different (non-finetuned) model."""
+    return os.getenv(env_name) or os.path.join(PROJECT_DIR, "BiomedParse_Assets", "checkpoints", bundled_subdir)
 
 
-def _dev_task4_dir() -> str:
-    """The original dev layout's Task_4 folder if it exists up the tree (last-resort weights)."""
-    cur = PROJECT_DIR
-    for _ in range(5):
-        cand = os.path.join(cur, "Task_4_VLM_Fascia_Vein_Detection")
-        if os.path.isdir(cand):
-            return cand
-        cur = os.path.dirname(cur)
-    return os.path.join(PROJECT_DIR, "Task_4_VLM_Fascia_Vein_Detection")  # nonexistent; debuggable path
-
-
-FASCIA_CKPT_DIR = _resolve_ckpt_dir(
-    "CMED_FASCIA_CKPT_DIR", "fascia",
-    os.path.join(_dev_task4_dir(), "BiomedParse", "output", "fascia_finetuning_v2_production"))
-VEIN_CKPT_DIR = _resolve_ckpt_dir("CMED_VEIN_CKPT_DIR", "vein", r"D:\vein_phase3")
-LOCAL_FALLBACK_WEIGHTS = os.getenv("CMED_FALLBACK_WEIGHTS") or os.path.join(TASK4_DIR, "pretrained", "biomedparse_v1.pt")
+FASCIA_CKPT_DIR = _resolve_ckpt_dir("CMED_FASCIA_CKPT_DIR", "fascia")
+VEIN_CKPT_DIR = _resolve_ckpt_dir("CMED_VEIN_CKPT_DIR", "vein")
 
 FASCIA_PROMPT = "fascia layer in PeripheralVascular Ultrasound"
 VEIN_PROMPT = (
@@ -92,6 +65,19 @@ VEIN_MAX_AREA_FRAC = 0.025
 VEIN_MAX_ASPECT_RATIO = 4.0
 VEIN_MIN_CIRCULARITY = 0.15
 VEIN_MAX_ANECHOIC_MEAN = 65.0
+# Size-tiered admission for small blobs (config.VEIN_MIN_AREA_FRAC above is a hard floor --
+# left untouched, do NOT lower it, that is what removed the speckle noise). A real small
+# tributary can still be smaller than that floor, so anything between
+# VEIN_SMALL_MIN_AREA_FRAC and VEIN_MIN_AREA_FRAC gets a SECOND CHANCE under stricter shape
+# checks (rounder, darker, less elongated) instead of being dropped outright -- noise blobs
+# in that size band are typically irregular/brighter (speckle clumps, not a real anechoic
+# lumen), so this recovers genuine small veins without reopening the door the area-floor
+# raise closed. Blobs at/above VEIN_MIN_AREA_FRAC are completely unaffected by this (same
+# checks as before).
+VEIN_SMALL_MIN_AREA_FRAC = 0.0006   # ~482px -- floor for the second-chance band
+VEIN_SMALL_MAX_ANECHOIC_MEAN = 45.0  # stricter/darker than VEIN_MAX_ANECHOIC_MEAN (65)
+VEIN_SMALL_MIN_CIRCULARITY = 0.55    # stricter/rounder than VEIN_MIN_CIRCULARITY (0.15)
+VEIN_SMALL_MAX_ASPECT_RATIO = 2.2    # stricter than VEIN_MAX_ASPECT_RATIO (4.0)
 # Fixed reference pixel count (~802x805, Task_4's own validated test-frame size) that
 # VEIN_MIN/MAX_AREA_FRAC are fractions of. Keeps the size filter scale-invariant across
 # different ROI-crop dimensions instead of rescaling with whatever the current frame
@@ -100,6 +86,16 @@ VEIN_AREA_REFERENCE_PX = 802 * 805
 
 # Fascia two-line extraction (ported from Task_4/app.py::prob_to_fascia_two_lines)
 FASCIA_PROB_THRESHOLD = 0.15
+
+# Pass 1 scheduling: forces a fresh Stage 2 call for a HELD (not freshly reclassified) blob
+# whose position relative to the fascia lines has drifted this many px (in either d_sup or
+# d_deep -- see stage2_fascia_classify._geometry_hint for the convention), or crossed a line
+# outright, since it was last classified -- see pipeline._geometry_drifted. Deliberately well
+# outside the few-px zone Stage 2's own prompt treats as still-ambiguous-but-N2, so this only
+# fires on a real, class-relevant move, not sampling jitter. Verified on a real 2-minute clip:
+# 67 of 164 Stage 2 calls were drift-triggered, and a full post-hoc scan of every held label
+# against its own tick's geometry found zero remaining contradictions (see Developer Guide 10.4).
+GEOMETRY_DRIFT_PX = 20.0
 
 # --- Local Qwen VLM/LLM (llama.cpp `llama-server`, 4-bit GGUF) ---
 # Replaces the hosted Groq API. ONE local model serves every reasoning/vision call: Stage 2
@@ -208,6 +204,7 @@ WEBCAM_MOTION_DIFF_THRESHOLD = 20.0      # mean abs grayscale pixel diff (0-255 
 BLOB_CHANGE_DEBOUNCE_FRAC = 0.05
 OUTPUT_FPS = 10
 WEBCAM_TIME_OFFSET_SEC = 0.0   # add to ultrasound timestamp before indexing into webcam video
+
 
 # --- Video output encoding ---
 # OpenCV's VideoWriter has no working H.264 encoder on this machine (OpenH264 DLL

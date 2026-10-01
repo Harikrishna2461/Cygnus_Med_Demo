@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Task 2 — Single-State Image Test</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
+    --accent: #4f8ef7; --accent2: #34d399; --warn: #f59e0b; --danger: #ef4444;
+    --text: #e2e8f0; --muted: #64748b; --border: #2d3348;
+    --radius: 8px; --font: 'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
+
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 12px 24px; display: flex; align-items: center; gap: 12px;
+  }
+  header h1 { font-size: 15px; font-weight: 600; color: var(--accent); }
+  header span { color: var(--muted); font-size: 12px; }
+  .back-link { margin-left: auto; font-size: 12px; color: var(--muted); text-decoration: none; }
+  .back-link:hover { color: var(--accent); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-left: 8px; }
+  .status-dot.ok { background: var(--accent2); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 0;
+    height: calc(100vh - 49px);
+  }
+
+  .panel {
+    overflow-y: auto; padding: 18px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .left-panel { background: var(--surface); border-right: 1px solid var(--border); }
+
+  .card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .card.on-left { background: var(--bg); }
+  .card h3 {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--muted); margin-bottom: 10px;
+  }
+
+  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 3px; }
+  input[type=number], select, textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 5px; color: var(--text); padding: 7px 10px; font-size: 13px;
+    font-family: inherit;
+  }
+  .on-left input[type=number], .on-left select, .on-left textarea {
+    background: var(--surface);
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .field { margin-bottom: 10px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .toggle-row { display: flex; align-items: center; gap: 10px; }
+  .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: var(--surface2); border-radius: 20px; cursor: pointer; transition: .2s; border: 1px solid var(--border); }
+  .slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 2px; bottom: 2px; background: var(--muted); border-radius: 50%; transition: .2s; }
+  input:checked + .slider { background: var(--accent); border-color: var(--accent); }
+  input:checked + .slider:before { transform: translateX(16px); background: #fff; }
+
+  .region-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .region-pill {
+    padding: 4px 11px; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: 12px;
+    cursor: pointer; transition: all .15s; font-family: inherit;
+  }
+  .region-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .region-pill.active { border-color: var(--accent); color: var(--accent); background: rgba(79,142,247,.1); }
+
+  /* Image drop zone */
+  .img-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 14px; text-align: center; cursor: pointer; transition: border-color .15s;
+    position: relative;
+  }
+  .img-zone:hover, .img-zone.dragover { border-color: var(--accent); }
+  .img-zone .placeholder { color: var(--muted); font-size: 13px; pointer-events: none; }
+  .img-zone .placeholder small { display: block; font-size: 11px; margin-top: 4px; }
+  .img-zone img { max-width: 100%; border-radius: 6px; display: block; margin: 0 auto; }
+  .img-zone input[type=file] { display: none; }
+
+  .img-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .pill { font-size: 11px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2px 8px; color: var(--muted); }
+
+  /* Action button */
+  .btn-run {
+    width: 100%; padding: 11px; border-radius: var(--radius); border: none;
+    cursor: pointer; font-size: 14px; font-weight: 700;
+    background: var(--accent); color: #fff; transition: opacity .15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-run:hover { opacity: .88; }
+  .btn-run:disabled { opacity: .4; cursor: not-allowed; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .btn-sm {
+    padding: 5px 12px; border-radius: 5px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); font-size: 12px;
+    cursor: pointer; font-family: inherit; transition: border-color .15s;
+  }
+  .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Result components */
+  .result-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; color: var(--muted); gap: 10px; text-align: center;
+  }
+  .result-empty svg { opacity: .3; }
+
+  .region-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700;
+    background: var(--surface2); border: 1px solid var(--border);
+  }
+  .region-badge.sfj     { border-color: #818cf8; color: #818cf8; }
+  .region-badge.gsv-thi { border-color: #34d399; color: #34d399; }
+  .region-badge.gsv-cal { border-color: #6ee7b7; color: #6ee7b7; }
+  .region-badge.spj     { border-color: #f59e0b; color: #f59e0b; }
+  .region-badge.ssv     { border-color: #fb923c; color: #fb923c; }
+  .region-badge.unknown { border-color: var(--muted); color: var(--muted); }
+
+  .conf-bar { height: 5px; border-radius: 4px; background: var(--border); overflow: hidden; margin-top: 6px; }
+  .conf-bar-fill { height: 100%; background: var(--accent); transition: width .4s; }
+
+  .alert { padding: 10px 12px; border-radius: var(--radius); font-size: 13px; line-height: 1.5; }
+  .alert-warn  { background: rgba(245,158,11,.1);  border: 1px solid rgba(245,158,11,.3); color: var(--warn); }
+  .alert-ok    { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.3); color: var(--accent2); }
+  .alert-error { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.3);  color: var(--danger); }
+
+  .guidance-block { padding: 12px 14px; border-radius: var(--radius); background: rgba(79,142,247,.06); border: 1px solid rgba(79,142,247,.2); line-height: 1.65; font-size: 13.5px; }
+  .guidance-block + .guidance-block { margin-top: 8px; }
+  .guidance-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 5px; }
+  .guidance-label.next  { color: var(--accent2); }
+  .guidance-label.note  { color: var(--warn); }
+
+  .step-list { display: flex; flex-direction: column; gap: 5px; }
+  .step-item {
+    padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface2); font-size: 13px; line-height: 1.5;
+  }
+  .step-item.suggested { border-color: var(--accent); background: rgba(79,142,247,.07); }
+  .step-num { font-size: 10px; color: var(--muted); margin-right: 6px; }
+
+  .vlm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .vlm-cell { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
+  .vlm-cell .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .vlm-cell .val { font-size: 13px; font-weight: 500; margin-top: 3px; }
+  .vlm-findings { margin-top: 8px; padding: 10px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); font-size: 13px; line-height: 1.6; }
+
+  .uploaded-img-card {
+    border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--border);
+    background: #000;
+  }
+  .uploaded-img-card img { width: 100%; display: block; max-height: 320px; object-fit: contain; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Single-State Image Test</h1>
+  <span>Upload a frame — get guidance for the next state</span>
+  <a href="/" class="back-link">Back to full demo</a>
+  <div id="statusDot" class="status-dot" title="API status"></div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: inputs -->
+  <div class="panel left-panel">
+
+    <!-- Image upload -->
+    <div class="card on-left">
+      <h3>Ultrasound Frame</h3>
+      <div class="img-zone" id="imgZone"
+           onclick="document.getElementById('imgFile').click()"
+           ondragover="handleDragOver(event)"
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event)">
+        <div class="placeholder" id="imgPlaceholder">
+          Click or drag an ultrasound image here
+          <small>JPEG / PNG — the VLM will analyse this frame</small>
+        </div>
+        <img id="imgPreview" style="display:none"/>
+        <input type="file" id="imgFile" accept="image/*" onchange="loadImageFile(this)"/>
+      </div>
+      <div class="img-meta" id="imgMeta" style="display:none">
+        <span class="pill" id="imgSizePill">—</span>
+        <button class="btn-sm" onclick="clearImage()">Remove</button>
+      </div>
+    </div>
+
+    <!-- Scanner state -->
+    <div class="card on-left">
+      <h3>Scanner State</h3>
+      <div class="field">
+        <label>Segment ID</label>
+        <select id="segmentId">
+          <option value="0">0 — Left Thigh</option>
+          <option value="1">1 — Left Calf</option>
+          <option value="2" selected>2 — Right Thigh</option>
+          <option value="3">3 — Right Calf</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Segment Distance <small style="color:var(--muted)">(0 = proximal · 1 = distal)</small></label>
+        <input type="number" id="segDist" value="0.05" min="0" max="1" step="0.01"/>
+      </div>
+      <div class="field">
+        <div class="toggle-row">
+          <label class="toggle" style="margin:0">
+            <input type="checkbox" id="isFront" checked/>
+            <span class="slider"></span>
+          </label>
+          <span id="isFrontLabel" style="font-size:13px;color:var(--text)">Front (anterior)</span>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>X <small>(px, optional)</small></label><input type="number" id="coordX" placeholder="—"/></div>
+        <div class="field"><label>Y <small>(px, optional)</small></label><input type="number" id="coordY" placeholder="—"/></div>
+      </div>
+    </div>
+
+    <!-- Expected region -->
+    <div class="card on-left">
+      <h3>Expected Region <small style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)">(for wrong-region detection)</small></h3>
+      <div class="region-pills" id="regionPills">
+        <button class="region-pill active" data-r="">Any</button>
+        <button class="region-pill" data-r="SFJ">SFJ</button>
+        <button class="region-pill" data-r="GSV-THI">GSV-THI</button>
+        <button class="region-pill" data-r="GSV-CAL">GSV-CAL</button>
+        <button class="region-pill" data-r="SPJ">SPJ</button>
+        <button class="region-pill" data-r="SSV">SSV</button>
+      </div>
+    </div>
+
+    <!-- EP/RP findings (optional) -->
+    <div class="card on-left">
+      <h3>EP / RP Findings <small style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)">(Task-1 output, optional)</small></h3>
+      <textarea id="epRpJson" rows="4"
+        style="font-family:monospace;font-size:12px;resize:vertical"
+        placeholder='{"clips":[{"flow":"EP","fromType":"N1","toType":"N2",...}]}'></textarea>
+    </div>
+
+    <button class="btn-run" id="btnRun" onclick="runGuidance()">
+      <span id="btnLabel">Get Guidance</span>
+      <span id="btnSpinner" style="display:none" class="spinner"></span>
+    </button>
+
+    <button class="btn-sm" style="text-align:center;width:100%" onclick="loadSample()">Load sample data</button>
+
+  </div>
+
+  <!-- RIGHT: results -->
+  <div class="panel" id="rightPanel">
+
+    <div id="emptyState" class="result-empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+      </svg>
+      <div>Upload an image and set the scanner state,<br>then click <strong>Get Guidance</strong>.</div>
+    </div>
+
+    <div id="results" style="display:none; display:flex; flex-direction:column; gap:14px">
+
+      <!-- Uploaded image display -->
+      <div class="uploaded-img-card" id="resultImgCard" style="display:none">
+        <img id="resultImg"/>
+      </div>
+
+      <!-- Region + confidence -->
+      <div class="card" id="regionCard">
+        <h3>Detected Region</h3>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span id="regionBadge" class="region-badge">—</span>
+          <span id="legPill" class="pill">—</span>
+          <span id="stablePill" class="pill">—</span>
+        </div>
+        <div class="conf-bar"><div class="conf-bar-fill" id="confFill" style="width:0%"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px" id="confText"></div>
+      </div>
+
+      <!-- Wrong region alert -->
+      <div id="wrongRegionDiv" style="display:none"></div>
+
+      <!-- Active guidance (now / next / note) -->
+      <div class="card" id="guidanceCard" style="display:none">
+        <h3>Active Guidance</h3>
+        <div id="guidanceNow" class="guidance-block" style="display:none">
+          <div class="guidance-label">Now</div>
+          <div id="guidanceNowText"></div>
+        </div>
+        <div id="guidanceNext" class="guidance-block" style="display:none;margin-top:8px">
+          <div class="guidance-label next">Next step</div>
+          <div id="guidanceNextText"></div>
+        </div>
+        <div id="guidanceNote" class="guidance-block" style="display:none;margin-top:8px">
+          <div class="guidance-label note">Clinical note</div>
+          <div id="guidanceNoteText"></div>
+        </div>
+      </div>
+
+      <!-- Protocol steps -->
+      <div class="card" id="protocolCard" style="display:none">
+        <h3 style="display:flex;justify-content:space-between">
+          Passive Protocol
+          <span id="protocolRegionLabel" style="font-size:12px;color:var(--accent);font-weight:400;text-transform:none;letter-spacing:0"></span>
+        </h3>
+        <div class="step-list" id="stepList"></div>
+      </div>
+
+      <!-- VLM assessment -->
+      <div class="card" id="vlmCard" style="display:none">
+        <h3>VLM Frame Analysis</h3>
+        <div class="vlm-grid" id="vlmGrid"></div>
+        <div class="vlm-findings" id="vlmFindings" style="display:none"></div>
+        <div id="vlmAdjust" style="display:none;margin-top:8px;padding:10px;border-radius:6px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);font-size:13px;color:var(--warn)"></div>
+      </div>
+
+      <!-- Raw JSON -->
+      <details>
+        <summary style="cursor:pointer;color:var(--muted);font-size:12px;padding:4px 0">Raw API response</summary>
+        <pre id="rawJson" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-size:11px;overflow-x:auto;margin-top:8px;color:var(--muted);white-space:pre-wrap;word-break:break-all"></pre>
+      </details>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = '';
+let selectedRegion = '';
+let imgB64 = null;
+let imgMediaType = 'image/jpeg';
+
+// ── region pill selection ────────────────────────────────────────────────────
+document.getElementById('regionPills').addEventListener('click', e => {
+  const btn = e.target.closest('.region-pill');
+  if (!btn) return;
+  document.querySelectorAll('.region-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedRegion = btn.dataset.r;
+});
+
+// ── front/back toggle label ──────────────────────────────────────────────────
+document.getElementById('isFront').addEventListener('change', function() {
+  document.getElementById('isFrontLabel').textContent =
+    this.checked ? 'Front (anterior)' : 'Back (posterior)';
+});
+
+// ── image handling ───────────────────────────────────────────────────────────
+function loadImageFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  processImageFile(file);
+}
+
+function processImageFile(file) {
+  imgMediaType = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = e.target.result;           // data:image/...;base64,...
+    imgB64 = data.split(',')[1];
+    const img = document.getElementById('imgPreview');
+    img.src = data;
+    img.style.display = 'block';
+    document.getElementById('imgPlaceholder').style.display = 'none';
+    document.getElementById('imgMeta').style.display = 'flex';
+    const kb = Math.round(file.size / 1024);
+    document.getElementById('imgSizePill').textContent =
+      `${file.name}  ·  ${kb} KB`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('imgZone').classList.add('dragover');
+}
+function handleDragLeave(e) {
+  document.getElementById('imgZone').classList.remove('dragover');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('imgZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) processImageFile(file);
+}
+
+function clearImage() {
+  imgB64 = null;
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('imgPlaceholder').style.display = 'block';
+  document.getElementById('imgMeta').style.display = 'none';
+  document.getElementById('imgFile').value = '';
+}
+
+// ── sample data ──────────────────────────────────────────────────────────────
+function loadSample() {
+  document.getElementById('segmentId').value = '2';
+  document.getElementById('segDist').value   = '0.05';
+  document.getElementById('isFront').checked = true;
+  document.getElementById('isFrontLabel').textContent = 'Front (anterior)';
+  document.getElementById('coordX').value = '452';
+  document.getElementById('coordY').value = '296';
+  // activate SFJ expected region
+  document.querySelectorAll('.region-pill').forEach(b => b.classList.remove('active'));
+  document.querySelector('.region-pill[data-r="SFJ"]').classList.add('active');
+  selectedRegion = 'SFJ';
+  document.getElementById('epRpJson').value = '';
+}
+
+// ── main API call ────────────────────────────────────────────────────────────
+async function runGuidance() {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+  document.getElementById('btnLabel').textContent = 'Analysing…';
+  document.getElementById('btnSpinner').style.display = 'inline-block';
+
+  const segId   = parseInt(document.getElementById('segmentId').value);
+  const segDist = parseFloat(document.getElementById('segDist').value);
+  const isFront = document.getElementById('isFront').checked;
+  const xVal    = document.getElementById('coordX').value.trim();
+  const yVal    = document.getElementById('coordY').value.trim();
+
+  const body = {
+    session_id: 'test_single',
+    segment_id: segId,
+    segment_dist: segDist,
+    is_front: isFront,
+    x: xVal ? parseInt(xVal) : null,
+    y: yVal ? parseInt(yVal) : null,
+    expected_region: selectedRegion || null,
+    current_clip_index: 0,
+  };
+
+  if (imgB64) {
+    body.ultrasound_image = imgB64;
+    body.image_media_type = imgMediaType;
+  }
+
+  const epRpRaw = document.getElementById('epRpJson').value.trim();
+  if (epRpRaw) {
+    try { body.ep_rp_findings = JSON.parse(epRpRaw); }
+    catch(e) { alert('EP/RP JSON is invalid: ' + e.message); resetBtn(); return; }
+  }
+
+  try {
+    const resp = await fetch(`${API}/api/guidance`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body),
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    renderResults(data);
+  } catch(err) {
+    showError('Request failed: ' + err.message);
+  } finally {
+    resetBtn();
+  }
+}
+
+function resetBtn() {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = false;
+  document.getElementById('btnLabel').textContent = 'Get Guidance';
+  document.getElementById('btnSpinner').style.display = 'none';
+}
+
+// ── render results ───────────────────────────────────────────────────────────
+function renderResults(data) {
+  document.getElementById('emptyState').style.display = 'none';
+  const res = document.getElementById('results');
+  res.style.display = 'flex';
+
+  document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
+
+  // Show uploaded image
+  if (imgB64) {
+    document.getElementById('resultImg').src = `data:${imgMediaType};base64,${imgB64}`;
+    document.getElementById('resultImgCard').style.display = 'block';
+  } else {
+    document.getElementById('resultImgCard').style.display = 'none';
+  }
+
+  // Region
+  const loc = data.location || {};
+  const region = (loc.region || 'UNKNOWN').toUpperCase();
+  const badgeClass = region.toLowerCase().replace('gsv-', 'gsv-');
+  const badge = document.getElementById('regionBadge');
+  badge.textContent = region;
+  badge.className = 'region-badge ' + region.toLowerCase().replace('gsv-thi','gsv-thi').replace('gsv-cal','gsv-cal');
+
+  document.getElementById('legPill').textContent = (loc.leg || '?') + ' leg';
+  document.getElementById('stablePill').textContent = loc.stable ? 'Stable' : 'Transitioning';
+  document.getElementById('stablePill').style.color = loc.stable ? 'var(--accent2)' : 'var(--warn)';
+  document.getElementById('stablePill').style.borderColor = loc.stable ? 'var(--accent2)' : 'var(--warn)';
+
+  const conf = (loc.confidence || 0) * 100;
+  document.getElementById('confFill').style.width = conf + '%';
+  document.getElementById('confText').textContent = `Confidence: ${conf.toFixed(0)}%  ·  Window: ${loc.window_count || '?'} readings`;
+
+  // Wrong region
+  const wr = data.wrong_region || {};
+  const wrDiv = document.getElementById('wrongRegionDiv');
+  if (wr.is_wrong) {
+    wrDiv.style.display = 'block';
+    wrDiv.innerHTML = `
+      <div class="alert alert-warn">
+        <strong>Wrong Region</strong> — ${escHtml(wr.reason || '')}
+        ${wr.suggestion ? `<br><span style="color:var(--text)">${escHtml(wr.suggestion)}</span>` : ''}
+      </div>`;
+  } else if (selectedRegion) {
+    wrDiv.style.display = 'block';
+    wrDiv.innerHTML = `<div class="alert alert-ok">Probe is in the expected region (${escHtml(region)})</div>`;
+  } else {
+    wrDiv.style.display = 'none';
+  }
+
+  // Active guidance
+  const gc = document.getElementById('guidanceCard');
+  if (data.current_guidance || data.next_step || data.clinical_note) {
+    gc.style.display = 'block';
+    setGuidanceBlock('guidanceNow', 'guidanceNowText', data.current_guidance);
+    setGuidanceBlock('guidanceNext', 'guidanceNextText', data.next_step);
+    setGuidanceBlock('guidanceNote', 'guidanceNoteText', data.clinical_note);
+  } else {
+    gc.style.display = 'none';
+  }
+
+  // Protocol steps
+  const clips = data.passive_clips || [];
+  const sugIdx = data.suggested_clip_index || 0;
+  const pc = document.getElementById('protocolCard');
+  if (clips.length) {
+    pc.style.display = 'block';
+    document.getElementById('protocolRegionLabel').textContent = region;
+    const list = document.getElementById('stepList');
+    list.innerHTML = '';
+    clips.forEach((c, i) => {
+      const text = c.subtitle_en || c.description || c;
+      const li = document.createElement('div');
+      li.className = 'step-item' + (i === sugIdx ? ' suggested' : '');
+      li.innerHTML = `<span class="step-num">${i + 1}.</span>${escHtml(String(text))}`;
+      list.appendChild(li);
+    });
+  } else {
+    pc.style.display = 'none';
+  }
+
+  // VLM assessment
+  const us = data.ultrasound_assessment;
+  const vc = document.getElementById('vlmCard');
+  if (us && !us.error) {
+    vc.style.display = 'block';
+    const grid = document.getElementById('vlmGrid');
+    grid.innerHTML = '';
+
+    const cells = [
+      ['Image Quality',  us.image_quality],
+      ['Imaging Mode',   us.imaging_mode],
+      ['Target Visible', us.target_vessel_visible ? 'Yes' : 'No'],
+      ['Vessel Caliber', us.vessel_caliber || '—'],
+      ['Colour Flow',    us.colour_flow_present ? 'Present' : 'None'],
+      ['Flow Direction', us.flow_direction || '—'],
+    ];
+    cells.forEach(([lbl, val]) => {
+      const cell = document.createElement('div');
+      cell.className = 'vlm-cell';
+      cell.innerHTML = `<div class="lbl">${escHtml(lbl)}</div><div class="val">${escHtml(String(val || '—'))}</div>`;
+      grid.appendChild(cell);
+    });
+
+    const findDiv = document.getElementById('vlmFindings');
+    if (us.frame_note) {
+      findDiv.style.display = 'block';
+      findDiv.innerHTML = `<span style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em">Frame observation</span><br>${escHtml(us.frame_note)}`;
+    } else {
+      findDiv.style.display = 'none';
+    }
+
+    document.getElementById('vlmAdjust').style.display = 'none';
+  } else if (us && us.error) {
+    vc.style.display = 'block';
+    document.getElementById('vlmGrid').innerHTML = `<div class="alert alert-error" style="grid-column:1/-1">VLM error: ${escHtml(us.error)}</div>`;
+    document.getElementById('vlmFindings').style.display = 'none';
+    document.getElementById('vlmAdjust').style.display = 'none';
+  } else {
+    vc.style.display = 'none';
+  }
+}
+
+function setGuidanceBlock(divId, textId, content) {
+  const d = document.getElementById(divId);
+  if (content) {
+    d.style.display = 'block';
+    document.getElementById(textId).textContent = content;
+  } else {
+    d.style.display = 'none';
+  }
+}
+
+function showError(msg) {
+  document.getElementById('emptyState').style.display = 'none';
+  const res = document.getElementById('results');
+  res.style.display = 'flex';
+  document.getElementById('regionCard').innerHTML =
+    `<div class="alert alert-error">${escHtml(msg)}</div>`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── status check ─────────────────────────────────────────────────────────────
+async function checkStatus() {
+  try {
+    const r = await fetch(`${API}/api/status`);
+    if (r.ok) {
+      const d = await r.json();
+      const dot = document.getElementById('statusDot');
+      if (d.groq_configured) {
+        dot.classList.add('ok');
+        dot.title = 'API OK — Groq';
+      }
+    }
+  } catch {}
+}
+checkStatus();
+</script>
+</body>
+</html>

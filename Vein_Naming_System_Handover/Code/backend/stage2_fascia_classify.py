@@ -16,86 +16,44 @@ import renderer
 _FASCIAL_DEPTH_TEXT = anatomy_knowledge.ANATOMY_REFERENCE_TEXT.split("LEG LEVELS")[0].strip()
 
 SYSTEM_PROMPT = (
-    "You read annotated leg-ultrasound frames. A YELLOW line marks the superficial edge of "
-    "the saphenous fascia; an ORANGE line marks the deep edge (at the muscle fascia). "
-    "Numbered contours mark candidate vein lumens detected by an automated segmentation "
-    "model — the model sometimes fires on things that are NOT real veins, for example "
-    "letters/words from an on-screen watermark or logo (a closed letter shape like 'e', "
-    "'o', 'g', or 'P' can look like a small dark oval), a UI icon, or other non-tissue "
-    "graphics. Real ultrasound tissue has a grainy speckle texture; text/logos/watermarks "
-    "have flat colour and sharp typographic edges with no speckle around them, and often "
-    "sit in a visually distinct strip or overlay rather than embedded in the grayscale scan "
-    "image.\n\n"
+    "You read annotated leg-ultrasound frames. Two lines mark the fascial compartment that "
+    "contains the saphenous trunk: a YELLOW line is its superficial edge, an ORANGE line is "
+    "its deep edge (the muscle fascia). Together they form one band -- the fascial layer. "
+    "Numbered contours mark candidate vein lumens found by an automated segmentation model, "
+    "which sometimes fires on things that are NOT real veins: letters/words from an "
+    "on-screen watermark or logo (a closed letter shape like 'e', 'o', 'g', or 'P' can look "
+    "like a small dark oval), a UI icon, or other non-tissue graphics. Real ultrasound "
+    "tissue has a grainy speckle texture; text/logos/watermarks have flat colour and sharp "
+    "typographic edges with no speckle around them.\n\n"
     "For EACH numbered blob, first judge is_valid_vein: does this actually sit inside real "
-    "speckled ultrasound tissue, or is it part of text/a watermark/a logo/UI graphics? "
-    "If invalid, you do not need to classify its depth — set n_class to null.\n\n"
-    "If valid, classify its depth relative to the fascial compartment:\n"
-    + _FASCIAL_DEPTH_TEXT +
-    "\n\nDECISION RULE — apply this explicitly, in order, for every valid blob. The "
-    "precomputed geometric measurement gives you a SIGNED distance to each line — that "
-    "sign is the primary signal, always defer to it over a vague visual impression of "
-    "'this looks close to a line so it's probably that class':\n"
-    "- d_deep (distance to the deep/orange line) POSITIVE means the blob's centroid is "
-    "still ABOVE the deep line, i.e. still inside the compartment. d_deep NEGATIVE means "
-    "the centroid has crossed BELOW the deep line, into deep tissue.\n"
-    "- d_sup (distance to the superficial/yellow line) POSITIVE means the centroid is "
-    "BELOW the yellow line, i.e. still inside or below the compartment. d_sup NEGATIVE "
-    "means the centroid has crossed ABOVE the yellow line, into subcutaneous fat.\n\n"
-    "Using those signs — THE SIGN IS THE ONLY RULE, there is no visual override or "
-    "exception to it. Do not classify by how the contour LOOKS relative to a line "
-    "(touching, brushing, dipping across it, etc.) — a real segmentation contour is "
-    "never pixel-perfect, so a genuinely-N2 vein's lumen boundary will often visually "
-    "graze or slightly overlap the orange line even though its actual position is still "
-    "within the compartment. The centroid sign already accounts for this — trust it "
-    "completely instead of re-judging from the picture:\n"
-    "- d_deep NEGATIVE (centroid below the deep line) → N1.\n"
-    "- d_deep POSITIVE (centroid above the deep line), no matter how small the number, "
-    "AND d_sup POSITIVE → N2. THIS IS THE DEFAULT for any blob that is solidly between "
-    "the two lines, including one whose contour visually touches, brushes, or appears to "
-    "slightly cross either line — being NEAR a line, or LOOKING like it crosses one, is "
-    "NOT the same as its centroid actually crossing it. A d_deep of +2px is still N2, "
-    "exactly the same rule as +80px — do not treat a small positive number as 'close "
-    "enough to N1'. Do not downgrade a blob to N1 just because it is the lowest/"
-    "deepest-looking blob in the frame, or because part of its visible boundary appears "
-    "to reach the orange line — check the actual sign, only the sign.\n"
-    "- d_sup NEGATIVE (centroid above the yellow line) → N3, using the same sign-only "
-    "rule (no visual override) as above.\n\n"
-    "TWO CONFIRMED, OPPOSITE, REAL FAILURE MODES this system exists to avoid — you must "
-    "guard against BOTH, not overcorrect from one into the other. Both have been "
-    "confirmed to recur MULTIPLE times on real footage, including after earlier attempts "
-    "to fix them, which is exactly why the rule above allows NO visual judgment call at "
-    "all anymore -- only the sign:\n"
-    "(a) Blobs sitting exactly at or just inside a fascia line getting defaulted to N3 "
-    "when the geometry clearly places them within or below the compartment — closeness "
-    "to the YELLOW line from below/inside is not superficiality.\n"
-    "(b) Blobs that are genuinely still N2 (d_deep POSITIVE, even barely) getting pushed "
-    "down to N1 because they sit in the lower part of the compartment and visually LOOK "
-    "close to, or like they touch, the ORANGE line — this has recurred even after "
-    "explicit prior instruction not to do it, so the fix now is structural: there is no "
-    "situation in which a POSITIVE d_deep should produce N1. None. If you find yourself "
-    "wanting to call a blob N1 because of how its contour looks against the orange line, "
-    "re-check the sign — if it says positive, the answer is N2, full stop, regardless of "
-    "what the picture seems to show.\n"
-    "Read the precomputed pixel-distance measurement carefully — a small \"Npx above/"
-    "below\" distance still has a definite sign; use ONLY that sign, never a visual "
-    "impression, no matter how confident that impression feels.\n\n"
-    "For each blob you are also given a precomputed geometric measurement (from the "
-    "segmentation model itself, not a guess) describing its position relative to both "
-    "fascia lines at its own column — use this alongside the image for the depth call, but "
-    "it says nothing about whether the blob is a real vein in the first place, judge that "
-    "from the image.\n\n"
-    "STRICT reasoning budget when there are multiple blobs: work through each blob in 2-3 "
-    "short sentences (validity, then which side of which line, therefore which class), "
-    "reach a conclusion, and move on to the next blob immediately — do not re-litigate a "
-    "blob you've already decided, and do not re-read the whole frame from scratch for "
-    "each one. The moment you have an answer for every blob, stop reasoning and output "
-    "the JSON — spending the whole budget circling back on the same 1-2 blobs repeatedly "
-    "is a failure mode that leaves every blob unclassified, not a sign of thoroughness.\n\n"
+    "speckled ultrasound tissue, or is it text/a watermark/a logo/UI graphics? If invalid, "
+    "set n_class to null.\n\n"
+    "If valid, classify its depth using EXACTLY this rule, nothing else:\n"
+    "- N2 = the blob is WITHIN the fascial compartment (between the yellow and orange "
+    "line), INCLUDING a blob that overlaps or touches either line. This is the default "
+    "for any blob that is not clearly and entirely on one side of the band.\n"
+    "- N3 = the blob is CLEARLY above the yellow line, entirely outside and above the "
+    "fascial compartment.\n"
+    "- N1 = the blob is CLEARLY below the orange line, entirely outside and below the "
+    "fascial compartment.\n\n"
+    "You are given a precomputed SIGNED pixel distance from each blob's centre to each "
+    "line -- use its sign, not a visual impression of where the contour's edge appears to "
+    "touch a line:\n"
+    "- Centre below the orange line (deep, negative d_deep) -> N1.\n"
+    "- Centre above the yellow line (superficial, negative d_sup) -> N3.\n"
+    "- Anything else -- centre sits between the two lines, on either side of the exact "
+    "midline, however close to either line, even 1px from it -- is N2. A blob whose "
+    "contour visually grazes or slightly crosses a line while its centre sign still says "
+    "between the lines is N2, not N1 or N3: the segmentation contour is never "
+    "pixel-perfect, the centre sign is the real position.\n\n"
+    "Thinking mode is OFF for this call: do not reason at length. For each blob, look at "
+    "its two signed distances, apply the rule above, and answer -- one line of internal "
+    "reasoning per blob at most, then move straight to the next blob. Do not re-check a "
+    "blob you already decided.\n\n"
     "Respond with ONLY a compact JSON object, no markdown, no prose outside the JSON, in "
     "exactly this shape:\n"
     '{"<blob_id>": {"is_valid_vein": true|false, "n_class": "N1"|"N2"|"N3"|null, '
-    '"reasoning": "<one sentence, cite the actual pixel measurement and which side of which '
-    'line it puts the blob on>"}, ...}'
+    "\"reasoning\": \"<one short phrase citing the sign, e.g. 'd_deep +14px -> N2'>\"}, ...}"
 )
 
 
@@ -203,15 +161,14 @@ _MISSING_RETRY_SUFFIX = (
 def classify_blobs(frame_bgr: np.ndarray, blobs: list, fascia) -> None:
     """Mutates blobs in place, filling n_class/n_class_reasoning. No-op if blobs is empty.
 
-    reasoning_effort='default' (full chain-of-thought) -- this call previously ran on the
-    project-wide config default of 'none', which was never deliberately chosen for this
-    stage, just inherited. Confirmed real-world complaint: veins sitting within or very
-    close to the fascial compartment were being defaulted to N3 (superficial) instead of
-    N2/N1. This is exactly the class of judgment ('none' mode makes seen fail on this
-    project every other time it was tried: leg_side mirroring, knee-boundary distance
-    calls) -- comparing a blob's position against two geometric lines and correctly
-    reading a small signed pixel distance needs real reasoning, not a single-shot
-    pattern-match.
+    Runs with thinking OFF (config.VLM_FORCE_NO_THINKING, project-wide -- see
+    Qwen_Local_VLM_Evaluation_Report.docx: thinking off scored 100% on this exact task in
+    1.5s/call, thinking on scored the same 100% but took ~17s/call and no better accuracy).
+    SYSTEM_PROMPT is written for that mode: the N1/N2/N3 rule is a strict sign check with a
+    single explicit default (N2, since "within or touching the compartment" covers most real
+    ambiguity), not a multi-step judgment call -- the earlier long, repetitive prompt in this
+    file's history was written to correct a reasoning model talking itself out of the sign
+    rule; a non-reasoning model just needs the rule stated once, clearly.
 
     max_tokens raised to the model's hard ceiling (16384), and a single truncation retry
     added -- confirmed necessary on real footage: a busy 4-blob frame produced 28k+ chars
@@ -228,7 +185,7 @@ def classify_blobs(frame_bgr: np.ndarray, blobs: list, fascia) -> None:
     user_text = build_prompt(blobs, fascia)
     parsed, raw = vlm_client.call_vlm_json(
         SYSTEM_PROMPT, user_text, image_b64=img_b64,
-        reasoning_effort="default", max_tokens=_first_attempt_max_tokens(len(blobs)),
+        reasoning_effort="none", max_tokens=_first_attempt_max_tokens(len(blobs)),  # thinking forced off project-wide anyway (config.VLM_FORCE_NO_THINKING); "none" here just makes the call site honest
         label="stage2_nclass",
     )
     truncated = _looks_truncated(parsed, raw)
@@ -242,7 +199,7 @@ def classify_blobs(frame_bgr: np.ndarray, blobs: list, fascia) -> None:
         print(f"[stage2] retrying: truncated={truncated}, missing_blob_ids={missing}")
         parsed, raw = vlm_client.call_vlm_json(
             SYSTEM_PROMPT, user_text + suffix, image_b64=img_b64,
-            reasoning_effort="default", max_tokens=_retry_max_tokens(len(blobs)),
+            reasoning_effort="none", max_tokens=_retry_max_tokens(len(blobs)),
             label="stage2_nclass_retry",
         )
         still_missing = _missing_blob_ids(parsed, blobs)

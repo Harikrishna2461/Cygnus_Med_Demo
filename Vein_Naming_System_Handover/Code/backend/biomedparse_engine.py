@@ -66,8 +66,8 @@ class VeinBlob:
 
 @dataclass
 class FasciaBoundary:
-    sup_row_at_col: np.ndarray         # float[W], NaN where invalid
-    deep_row_at_col: np.ndarray        # float[W], NaN where invalid
+    sup_row_at_col: np.ndarray         # Upper Boundary Line, float[W], NaN where invalid
+    deep_row_at_col: np.ndarray        # Lower Boundary Line, float[W], NaN where invalid
 
 
 _lock = threading.Lock()
@@ -91,15 +91,23 @@ _infer_lock = threading.Lock()
 
 
 def _newest_ckpt(ckpt_dir: str) -> str:
+    """Finds the newest model_state_dict.pt under ckpt_dir. Deliberately does NOT fall back to
+    the stock (non-finetuned) BiomedParse weights or try to download anything from Hugging Face
+    -- both would "succeed" silently with a model that was never trained on this project's fascia
+    and vein prompts, producing confidently wrong segmentation with no error to explain why. This
+    package ships without the two finetuned checkpoints (see config.py); a missing one is a setup
+    problem, not something to paper over, so it fails loudly and names the exact fix."""
     ckpts = sorted(
         glob.glob(os.path.join(ckpt_dir, "**", "model_state_dict.pt"), recursive=True),
         key=os.path.getmtime,
     )
     if ckpts:
         return ckpts[-1]
-    if os.path.exists(config.LOCAL_FALLBACK_WEIGHTS):
-        return config.LOCAL_FALLBACK_WEIGHTS
-    return "hf_hub:microsoft/BiomedParse"
+    raise RuntimeError(
+        f"No finetuned BioMedParse checkpoint (model_state_dict.pt) found under {ckpt_dir}. "
+        f"This package does not bundle the two ~1.7GB weight files -- copy the real "
+        f"model_state_dict.pt in there (see the Developer Guide, \"Model assets\"), or set "
+        f"CMED_FASCIA_CKPT_DIR / CMED_VEIN_CKPT_DIR to wherever it actually lives.")
 
 
 def _load_one(ckpt_dir: str):
@@ -238,25 +246,35 @@ def prob_to_vein_mask(prob: np.ndarray, image_gray: np.ndarray = None,
     total = config.VEIN_AREA_REFERENCE_PX
     min_area = max(10, int(config.VEIN_MIN_AREA_FRAC * total))
     max_area = int(config.VEIN_MAX_AREA_FRAC * total)
+    small_min_area = max(5, int(config.VEIN_SMALL_MIN_AREA_FRAC * total))
     n, labels, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
     out = np.zeros_like(binary)
     for i in range(1, n):
         area = stats[i, cv2.CC_STAT_AREA]
-        if area < min_area or area > max_area:
+        if area > max_area:
             continue
+        # Below the normal floor: only admit through the stricter "small blob" gate (see
+        # config.VEIN_SMALL_*) instead of dropping outright -- recovers genuine small
+        # tributaries that VEIN_MIN_AREA_FRAC's noise-floor raise would otherwise remove.
+        small_band = area < min_area
+        if small_band and area < small_min_area:
+            continue
+        max_anechoic = config.VEIN_SMALL_MAX_ANECHOIC_MEAN if small_band else config.VEIN_MAX_ANECHOIC_MEAN
+        max_aspect = config.VEIN_SMALL_MAX_ASPECT_RATIO if small_band else config.VEIN_MAX_ASPECT_RATIO
+        min_circularity = config.VEIN_SMALL_MIN_CIRCULARITY if small_band else config.VEIN_MIN_CIRCULARITY
         if image_gray is not None:
             mean_val = float(image_gray[labels == i].mean())
-            if mean_val > config.VEIN_MAX_ANECHOIC_MEAN:
+            if mean_val > max_anechoic:
                 continue
         bw = stats[i, cv2.CC_STAT_WIDTH]
         bh = stats[i, cv2.CC_STAT_HEIGHT]
-        if bw >= 1 and bh >= 1 and max(bw, bh) / min(bw, bh) > config.VEIN_MAX_ASPECT_RATIO:
+        if bw >= 1 and bh >= 1 and max(bw, bh) / min(bw, bh) > max_aspect:
             continue
         mask_i = (labels == i).astype(np.uint8)
         cnts, _ = cv2.findContours(mask_i, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if cnts:
             perim = cv2.arcLength(cnts[0], True)
-            if perim > 0 and (4 * np.pi * area / perim ** 2) < config.VEIN_MIN_CIRCULARITY:
+            if perim > 0 and (4 * np.pi * area / perim ** 2) < min_circularity:
                 continue
         out[labels == i] = 1
     return out

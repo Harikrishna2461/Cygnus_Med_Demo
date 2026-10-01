@@ -68,6 +68,43 @@ def _nearest_match(centroid: tuple, records: list, max_dist: float):
     return best
 
 
+def _fascia_signed_distances(centroid: tuple, fascia) -> tuple:
+    """(d_sup, d_deep) for one blob centroid against the fascia curves at its own column --
+    same convention as stage2_fascia_classify._geometry_hint (>0 d_sup = below/inside the
+    yellow line, >0 d_deep = above/inside the orange line). Returns (None, None) where the
+    fascia curve isn't reliably detected at that column."""
+    cx, cy = centroid
+    col = int(round(cx))
+    col = max(0, min(col, len(fascia.sup_row_at_col) - 1))
+    sup, deep = fascia.sup_row_at_col[col], fascia.deep_row_at_col[col]
+    if np.isnan(sup) or np.isnan(deep):
+        return None, None
+    return cy - sup, deep - cy
+
+
+# A held N1/N2/N3 label is only ever correct for as long as the blob it was assigned to
+# hasn't moved, relative to the fascia lines, into a different depth band. Centroid-distance
+# matching alone (see the scheduling loop below) can't catch this: a blob can keep matching
+# its predecessor within max_dist tick after tick (no blob-count change, no "lost" blob) while
+# still drifting vertically relative to a locally-curving fascia line, silently carrying a
+# stale label across several ticks. CONFIRMED on real footage's artifact.json: a blob
+# classified N1 at one tick (d_deep small/negative — itself a genuinely hard borderline call)
+# kept that N1 label held for the next two ticks even after its own newly-segmented geometry
+# had moved to d_deep=+40 and +66px (solidly N2), because nothing about its centroid motion
+# ever triggered a fresh Stage 2 call. config.GEOMETRY_DRIFT_PX is well outside the few-px
+# "even 1px is still N2" ambiguity zone Stage 2's own prompt is built around, and any outright
+# sign flip (crossing a line) is always treated as drift regardless of magnitude.
+
+
+def _geometry_drifted(prev: dict, d_sup: float, d_deep: float) -> bool:
+    if d_sup is None or d_deep is None or prev.get("d_sup") is None or prev.get("d_deep") is None:
+        return False
+    if (d_sup >= 0) != (prev["d_sup"] >= 0) or (d_deep >= 0) != (prev["d_deep"] >= 0):
+        return True  # crossed a fascia line since the held label was assigned
+    return (abs(d_sup - prev["d_sup"]) > config.GEOMETRY_DRIFT_PX
+            or abs(d_deep - prev["d_deep"]) > config.GEOMETRY_DRIFT_PX)
+
+
 # --- Artifact (de)serialization -------------------------------------------------------
 
 def _blob_to_dict(b) -> dict:
@@ -186,20 +223,38 @@ def run_pass1(ultrasound_path: str, intermediate_video_path: str, artifact_path:
     scheduled_ticks = []   # ticks selected for a fresh Stage 2 call
     all_ticks = []         # every tick, in order, needs_classify flag included
     last_classified_at = -1e9
-    last_centroids = []    # just centroids -- scheduling never needs n_class/is_valid
+    last_centroids = []    # centroid + fascia-relative geometry AT THE TIME OF LAST CLASSIFY --
+                            # scheduling never needs the actual n_class answer, but it does need
+                            # this geometry to detect a held label drifting stale (see
+                            # _geometry_drifted's docstring)
+    n_drift_triggered = 0
     for ts, frame in video_io.iter_sample_frames(ultrasound_path, config.SEG_SAMPLE_INTERVAL_SEC):
         blobs, fascia = bpe.segment_frame(frame)
         max_dist = _frame_diagonal(frame) * config.BLOB_CHANGE_DEBOUNCE_FRAC
 
+        def _blob_drifted(b) -> bool:
+            match = _nearest_match(b.centroid, last_centroids, max_dist)
+            if match is None:
+                return False  # covered separately by the "no centroid match" trigger below
+            d_sup, d_deep = _fascia_signed_distances(b.centroid, fascia)
+            return _geometry_drifted(match, d_sup, d_deep)
+
         elapsed_since_classify = ts - last_classified_at
+        drifted = bool(blobs) and any(_blob_drifted(b) for b in blobs)
         needs_classify = bool(blobs) and elapsed_since_classify >= config.VLM_MIN_INTERVAL_SEC and (
             elapsed_since_classify >= config.VLM_SAMPLE_INTERVAL_SEC
             or len(blobs) != len(last_centroids)
             or any(_nearest_match(b.centroid, last_centroids, max_dist) is None for b in blobs)
+            or drifted
         )
+        if drifted and needs_classify:
+            n_drift_triggered += 1
         if needs_classify:
             last_classified_at = ts
-            last_centroids = [{"centroid": b.centroid} for b in blobs]
+            last_centroids = []
+            for b in blobs:
+                d_sup, d_deep = _fascia_signed_distances(b.centroid, fascia)
+                last_centroids.append({"centroid": b.centroid, "d_sup": d_sup, "d_deep": d_deep})
 
         entry = {"ts": ts, "frame": frame, "blobs": blobs, "fascia": fascia, "needs_classify": needs_classify}
         all_ticks.append(entry)
@@ -207,7 +262,8 @@ def run_pass1(ultrasound_path: str, intermediate_video_path: str, artifact_path:
             scheduled_ticks.append(entry)
         _report(_SEG_WEIGHT * min(ts / duration, 1.0))
     print(f"[pipeline] Pass 1 segmentation+scheduling done in {time.monotonic() - seg_t0:.1f}s — "
-          f"{len(all_ticks)} ticks, {len(scheduled_ticks)} scheduled for a Stage 2 VLM call")
+          f"{len(all_ticks)} ticks, {len(scheduled_ticks)} scheduled for a Stage 2 VLM call "
+          f"({n_drift_triggered} of those triggered by fascia-relative drift on a held label)")
 
     # --- Step 2: fire all scheduled Stage 2 calls concurrently -- each mutates its own
     # tick's blobs in place, independent of every other tick (see docstring above) ---
