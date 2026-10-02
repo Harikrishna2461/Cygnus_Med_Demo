@@ -1,0 +1,46 @@
+# SAM 2
+.vscode/
+.DS_Store
+__pycache__/
+*-checkpoint.ipynb
+.venv
+*.egg*
+build/*
+_C.*
+outputs/*
+checkpoints/*.pt
+# Byte-compiled / optimized / DLL files
+*__pycache__*
+*.py[cod]
+*$py.class
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# checkpoint
+*.pth
+outputs/
+data/
+___old_data/
+
+.idea/

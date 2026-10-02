@@ -37,7 +37,7 @@ I raised it to allow one tool round-trip. But one tool call = one iteration: rea
 
 Minor
 8. API key hardcoded as fallback in config.py line 9
-GROQ_API_KEY = os.getenv("GROQ_API_KEY") or "gsk_OrD12jThCfK..." — if .env is missing, the production key is silently used. Should raise an error instead of falling back.
+GROQ_API_KEY = os.getenv("GROQ_API_KEY") or "<redacted>" — if .env is missing, the production key is silently used. Should raise an error instead of falling back.
 
 9. GROQ_FAST_MODEL comment wrong
 config.py says # GuidanceSpecialist — JSON packaging only but make_guidance_specialist() uses _make_llm("heavy"). GROQ_FAST_MODEL is defined but used by no agent in crew_agents.py.

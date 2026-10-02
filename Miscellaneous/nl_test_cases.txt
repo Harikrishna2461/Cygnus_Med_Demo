@@ -1,0 +1,179 @@
+Natural Language Questions from Sample Data
+No Shunt (4 files)
+no_shunt_detected_1 — EP N1→N2 (groin only, no RP)
+
+"The blood is seen passing forward from the femoral vein into the GSV at the groin level. However, no retrograde flow is detected anywhere in the GSV or any tributary branches. Is a shunt present and is ligation indicated?"
+
+no_shunt_detected_2 — EP N2→N2 (perforator entry only, no RP)
+
+"A perforating vessel at the groin level inserts into the mid-GSV with forward antegrade flow. The SFJ itself is competent. There is no reflux anywhere in the superficial venous system. Does this constitute a pathological shunt requiring treatment?"
+
+no_shunt_detected_3 — EP N1→N2 (groin only, no RP, different recording)
+
+"Blood flows forward from the deep venous system into the great saphenous vein at the SFJ. There is no backward flow seen in the GSV, no tributaries are recruited, and no reflux is present anywhere. Is this hemodynamically significant and would ligation be appropriate?"
+
+no_shunt_detected_4 — EP N1→N2 + EP N2→N3 (two forward flows, zero RP)
+
+"The SFJ is competent with antegrade inflow from the deep system into the GSV at the groin. The GSV then discharges blood forward into a superficial tributary at the upper thigh. No retrograde flow is identified in either the GSV trunk or the tributary itself. Is there a pathological shunt here and is ligation warranted?"
+
+Shunt Type 1 (5 files)
+clipdata — EP N1→N2 at SFJ (posY 0.05) + RP N2→N1 at upper thigh (posY 0.13)
+
+"The SFJ is incompetent and deep venous blood enters the GSV at the groin. The GSV then carries this blood backward in retrograde fashion through the upper thigh. No tributaries are involved. What is the shunt type and recommended ligation strategy?"
+
+clipdata2 — EP N1→N2 at SFJ (posY 0.077) + RP N2→N1 at upper thigh (posY 0.169)
+
+"Duplex shows reflux across the SFJ with blood passing from the deep system into the great saphenous vein just above the groin. The GSV demonstrates retrograde flow down into the upper thigh, with no escape into any branch vessels. What shunt classification applies and what is the appropriate treatment?"
+
+clipdata3 — EP N1→N2 at Hunterian perforator (posY 0.099) + RP N2→N1 at mid-thigh (posY 0.208), ligation = Hunterian
+
+"A Hunterian perforator at the upper thigh is incompetent, allowing deep venous blood to enter the GSV directly — the SFJ itself is competent. The great saphenous vein then refluxes downward to the mid-thigh level. What type of shunt is this and how should it be ligated?"
+
+clipdata4 — EP N1→N2 at SFJ (posY 0.043) + RP N2→N1 at mid-thigh (posY 0.204), ligation = SFJ
+
+"Blood flows forward from the femoral vein into the GSV at the SFJ. The GSV refluxes in retrograde direction down as far as the mid-thigh. There are no visible connections to superficial tributaries at any level. What is the shunt classification and ligation approach?"
+
+clipdata5 — EP N1→N2 at upper thigh perforator (posY 0.129) + RP N2→N1 at mid-thigh (posY 0.267), ligation = Hunterian
+
+"A perforating vessel in the upper thigh connects the deep system to the GSV with forward antegrade flow — the SFJ is competent and shows no incompetence. The GSV carries the blood backward through the mid-thigh. No tributary is involved. What shunt type is this and where should ligation be performed?"
+
+Shunt Type 1+2 (5 files)
+clipdata — EP N1→N2 + EP N2→N3 + RP N3→N1 + RP N2→N1, eliminationTest = Reflux
+
+corrected_version = "The SFJ is incompetent with antegrade flow from the deep vein into the GSV at the groin. The GSV feeds blood forward into a tributary at the upper thigh, and that tributary refluxes all the way back to the deep venous system. Additionally the GSV trunk itself also shows retrograde reflux. When the SFJ entry is compressed during an elimination test, tributary reflux is abolished, confirming the GSV as the single feeding source. What is the shunt type and what does this elimination test result imply for ligation planning?"
+
+"The SFJ is incompetent with antegrade flow from the deep vein into the GSV at the groin. The GSV feeds blood forward into a tributary at the upper thigh, and that tributary refluxes all the way back to the deep venous system. Additionally the GSV trunk itself also shows retrograde reflux. When the SFJ entry is compressed during an elimination test, reflux persists distally. What is the shunt type and what does the persistent elimination test result imply for ligation planning?"
+
+clipdata2 — same pattern, posY slightly different
+
+corrected_version = "Blood enters the GSV from the deep system at the SFJ. From the GSV, blood escapes forward into a superficial branch at the upper thigh. Both that tributary and the main GSV trunk demonstrate retrograde flow draining back to the deep vein. Compression of the SFJ during elimination testing abolishes the distal reflux completely, confirming the GSV as the sole source. How should this shunt be classified and what are the treatment implications?"
+
+"Blood enters the GSV from the deep system at the SFJ. From the GSV, blood escapes forward into a superficial branch at the upper thigh. Both that tributary and the main GSV trunk demonstrate retrograde flow draining back to the deep vein. Compression of the SFJ during elimination testing does not abolish the distal reflux. How should this shunt be classified and what are the treatment implications?"
+
+clipdata3 — same pattern, mid-thigh RP N3
+
+corrected_version = "Deep venous blood enters the GSV at the groin through an incompetent SFJ. At the upper thigh the GSV branches into a tributary which fills forward. Both the tributary and the main GSV trunk carry retrograde flow back toward the deep system, and elimination testing confirms tributary reflux disappeared when SFJ inflow was temporarily occluded. Can you classify this shunt and advise on next steps for ligation?"
+
+"Deep venous blood enters the GSV at the groin through an incompetent SFJ. At the upper thigh the GSV branches into a tributary which fills forward. Both the tributary and the main GSV trunk carry retrograde flow back toward the deep system, and elimination testing confirms reflux remains even when SFJ inflow is temporarily occluded. Can you classify this shunt and advise on next steps for ligation?"
+
+clipdata4 — same pattern, RP N3 at mid-thigh, RP N2 lower
+
+correctd_version = "The patient has an incompetent SFJ where femoral vein blood passes into the GSV. The GSV then passes blood forward into a tributary at the mid-thigh; that tributary re-enters the deep venous system via a perforating vessel. Retrograde flow is also present in the GSV trunk distally. Elimination testing demonstrates that tributary reflux disappeared on compression, confirming the GSV as the source. What is the shunt type and what further workup is needed before proceeding with ligation?"
+
+"The patient has an incompetent SFJ where femoral vein blood passes into the GSV. The GSV then passes blood forward into a tributary at the mid-thigh; this tributary refluxes backward to the deep system. Retrograde flow is also present in the GSV trunk distally. Elimination testing demonstrates that reflux continues. What is the shunt type and what further workup is needed before proceeding with ligation?"
+
+clipdata5 — same pattern, deeper posY values (knee level)
+
+"Duplex shows SFJ incompetence with antegrade flow from the femoral system into the GSV. Blood escapes from the GSV into a side branch near the knee, and that branch shows retrograde drainage all the way back to the deep veins. The GSV trunk is also refluxing. Even on elimination compression the reflux is not abolished. What classification and management strategy is recommended?"
+
+Shunt Type 2A (5 files)
+clipdata — EP N2→N3 only (posY 0.05 groin, no N1→N2)
+
+"The SFJ is competent — no deep venous inflow into the GSV is detected. However the GSV is seen discharging blood forward into a tributary branch at the groin level, with no retrograde flow identified in the GSV or the tributary. Is this a pathological shunt and if so what is the correct ligation?"
+
+clipdata2 — EP N2→N3 (posY 0.087, upper thigh)
+
+"No incompetence at the SFJ or any perforator feeding into the GSV is identified. The great saphenous vein feeds blood forward into a superficial branch at the upper thigh. No reflux is visible anywhere in the system. What type of shunt is this and how is it managed?"
+
+clipdata3 — EP N2→N3 (posY 0.124, mid thigh)
+
+"The deep venous system is entirely competent with no entry point into the GSV at any level. The only abnormal finding is the GSV feeding a lateral tributary at mid-thigh via an antegrade connection, with no backward flow component. What is the shunt classification and where should ligation be placed?"
+
+clipdata4 — EP N2→N3 (different posY)
+
+"On duplex assessment the only abnormal flow is an antegrade escape from the main saphenous trunk into a branch vessel at the upper thigh. There is no incompetent perforator or junction feeding the GSV from the deep system, and no reflux anywhere. How do you classify this and what is the recommended ligation point?"
+
+clipdata5 — EP N2→N3 (near knee)
+
+"Blood is seen flowing forward from the GSV into a tributary near the knee region. The SFJ is competent, no perforator feeds the GSV from the deep system, and there is no retrograde flow in any vessel. What is the shunt type and what is the appropriate intervention?"
+
+Shunt Type 2B (5 files)
+clipdata — EP N2→N2 (perforator at groin, posY 0.05) + RP N3→N1 (upper thigh, posY 0.13)
+
+"A mid-GSV perforator at the groin level allows blood to enter the saphenous trunk from a deep perforating vessel — the SFJ itself is competent. A tributary at the upper thigh is draining backward directly into the deep venous system. There is no retrograde flow in the GSV trunk itself. What shunt type is this and where should ligation be performed?"
+
+clipdata2 — EP N2→N2 (groin) + RP N3→N1 (same level)
+
+"The SFJ is competent but a perforator connects to the mid-GSV at the groin, injecting blood forward into the saphenous trunk. A superficial varicosity in the upper thigh shows retrograde drainage directly to the deep veins. The GSV trunk itself does not reflux. How is this classified and at what point is ligation recommended?"
+
+clipdata3 — EP N2→N2 + RP N3→N1 at calf level
+
+"An incompetent perforating vessel enters the GSV at the upper thigh without any SFJ involvement. A branch varicosity in the calf drains backward to the deep venous system. No reflux in the GSV trunk is present. What shunt type is this and what ligation is indicated?"
+
+clipdata4 — EP N2→N2 at knee + RP N3→N1 at lower thigh
+
+"A perforating vein at the knee level drives blood forward into the GSV. The SFJ junction is not involved at all. A tributary varicosity in the lower thigh refluxes backward into the deep venous system. The GSV trunk itself is free of any retrograde flow. What classification applies and what intervention is needed?"
+
+clipdata5 — EP N2→N2 in calf + RP N3→N1 near ankle
+
+"There is a perforator entry into the great saphenous vein in the calf region from the deep system, with the SFJ remaining competent. A superficial branch varicosity near the ankle carries blood backward and drains to the deep venous system. The GSV trunk itself shows no reflux. What is the shunt type and how should it be treated?"
+
+Shunt Type 2C (5 files)
+clipdata — EP N2→N2 (groin) + RP N3→N2 (upper thigh) + RP N2→N1 (mid thigh)
+
+"A perforator at the upper thigh enters the GSV with the SFJ remaining competent. Blood escapes from the GSV into a tributary which then refluxes back into the GSV at a lower level. The GSV trunk itself also shows retrograde flow draining toward the deep venous system. Both the tributary and the GSV are carrying reflux. What is the shunt type and recommended ligation?"
+
+clipdata2 — EP N2→N2 (groin) + RP N3→N2 + RP N2→N1
+
+"There is a perforating vessel at the groin inserting into the main saphenous trunk from below — no SFJ incompetence is detected. A tributary varicosity in the upper thigh fills forward from the GSV then drains retrograde back into the GSV. The GSV is also simultaneously refluxing backward toward the deep vein. How is this shunt classified?"
+
+clipdata3 — EP N2→N2 + RP N3→N2 + RP N2→N1 (different posY)
+
+"The SFJ is competent. A perforator inserts into the mid-GSV at the upper thigh. Blood escapes from the GSV into a tributary, which refluxes back into the GSV at a lower level. The GSV trunk also carries retrograde flow draining toward the deep system. How should this shunt be classified and what is the ligation strategy?"
+
+clipdata4 — EP N2→N2 at knee + RP N3→N2 at lower thigh + RP N2→N1
+
+"No flow is detected across the SFJ. A perforating vessel enters the GSV at the knee level. A tributary varicosity in the lower thigh discharges backward back into the GSV, and the GSV trunk carries this recirculated blood along with its own retrograde flow back to the femoral vein. What shunt type is this?"
+
+clipdata5 — EP N2→N2 near knee + RP N3→N2 at calf + RP N2→N1 at lower leg
+
+"The SFJ is competent. Below the knee, a perforator enters the GSV. A calf varicosity drains retrograde back into the GSV at a lower level, and the GSV trunk also refluxes upward toward the deep system. Both GSV and tributary reflux are present simultaneously. What is the shunt classification and where should ligation be placed?"
+
+Shunt Type 3 (5 files)
+clipdata — EP N1→N2 (SFJ) + EP N2→N3 (upper thigh) + RP N3→N1 (mid thigh), no RP N2
+
+"The SFJ is incompetent with blood passing from the deep vein into the GSV at the groin. At the upper thigh the GSV shunts blood forward into a superficial tributary. This tributary refluxes backward all the way to the deep venous system. The GSV trunk itself does not show any retrograde flow. What is the shunt type and what treatment is recommended?"
+
+clipdata2 — EP N1→N2 + EP N2→N3 + RP N3→N1, eliminationTest = No Reflux
+
+corrected_version = "Blood enters the GSV from the deep veins at the SFJ. The GSV then feeds a tributary branch at the upper thigh. The tributary carries this blood back to the deep system. What shunt type is this and what does the elimination test result indicate for ligation planning?"
+
+"Deep venous blood enters the GSV at the SFJ. The GSV then feeds a tributary branch at the upper thigh. The tributary carries retrograde blood back to the deep system. When the SFJ entry is compressed during elimination testing, the tributary reflux disappears completely. What shunt type is this and what does the elimination test result indicate for ligation planning?"
+
+clipdata3 — same pattern, different posY
+
+"The saphenofemoral junction is incompetent. The GSV distributes blood forward into a side tributary at mid-thigh level. That tributary shows complete retrograde drainage back to the deep venous system. The GSV trunk itself has no backward flow. What is the classification and recommended ligation approach?"
+
+clipdata4 — EP N1→N2 at SFJ + EP N2→N3 near knee + RP N3→N1
+
+"Blood flows forward from the deep system into the GSV at the groin. The GSV then passes blood forward into a varicosity near the knee via an antegrade connection. The varicosity empties backward toward the deep vein. Importantly the GSV trunk between the SFJ and the branching point shows no retrograde flow at all. What type of shunt is this?"
+
+clipdata5 — EP N1→N2 via Hunterian upper thigh + EP N2→N3 + RP N3→N1 at calf
+
+"A perforator in the upper thigh connects the deep system to the GSV with forward flow — the SFJ is competent. From the GSV, blood escapes into a tributary which refluxes all the way back to the deep vein at the calf level. The GSV itself is not refluxing backward. What is the shunt classification and ligation plan?"
+
+
+Additional 'No Shunt Test Cases' :
+Case 1 — no_shunt_detected_1.json (EP N1→N2 at SFJ only)
+
+On duplex examination of the right leg, the SFJ is competent — blood from the femoral vein enters the GSV at the groin. No retrograde flow is detected anywhere in the superficial venous system.
+
+Expected: No Shunt Detected
+
+Case 2 — no_shunt_detected_2.json (EP N2→N2 at SFJ level — perforator, SFJ competent)
+
+On the right leg, a perforating vessel connects to the GSV at the groin level. The SFJ itself is competent. No reflux is seen anywhere in the leg.
+
+Expected: No Shunt Detected
+
+Case 3 — no_shunt_detected_3.json (EP N1→N2 at SFJ only, same as case 1)
+
+Duplex scan of the right leg shows the SFJ is incompetent with antegrade blood flow from the deep femoral system into the GSV at the groin. No backward flow is detected anywhere — no reflux identified in the GSV or tributaries.
+
+Expected: No Shunt Detected
+
+Case 4 — no_shunt_detected_4.json (EP N1→N2 at SFJ + EP N2→N3 at upper thigh)
+
+Right leg duplex: the SFJ is incompetent, with blood from the femoral vein entering the GSV at the groin. At the upper thigh, blood escapes forward from the GSV into a tributary branch. No retrograde flow is identified anywhere — no backward flow in the GSV or any tributary.
+
+Expected: No Shunt Detected

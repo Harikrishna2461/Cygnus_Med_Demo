@@ -1,0 +1,3 @@
+Steps to identify a process running on port XXXX and kill it :
+  1. netstat -ano | findstr :XXXX
+  2. taskkill /PID XXXX /F

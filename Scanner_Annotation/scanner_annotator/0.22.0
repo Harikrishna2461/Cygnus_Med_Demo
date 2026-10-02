@@ -1,0 +1,21 @@
+Looking in indexes: https://download.pytorch.org/whl/cu126
+Collecting torch
+  Using cached https://download.pytorch.org/whl/cu126/torch-2.9.0%2Bcu126-cp312-cp312-win_amd64.whl.metadata (29 kB)
+Collecting torchvision
+  Using cached https://download.pytorch.org/whl/cu126/torchvision-0.24.0%2Bcu126-cp312-cp312-win_amd64.whl.metadata (6.1 kB)
+Requirement already satisfied: filelock in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from torch) (3.19.1)
+Requirement already satisfied: typing-extensions>=4.10.0 in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from torch) (4.15.0)
+Requirement already satisfied: sympy>=1.13.3 in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from torch) (1.14.0)
+Requirement already satisfied: networkx>=2.5.1 in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from torch) (3.5)
+Requirement already satisfied: jinja2 in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from torch) (3.1.6)
+Requirement already satisfied: fsspec>=0.8.5 in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from torch) (2025.9.0)
+Requirement already satisfied: setuptools in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from torch) (80.9.0)
+Requirement already satisfied: numpy in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from torchvision) (2.2.6)
+Requirement already satisfied: pillow!=8.3.*,>=5.3.0 in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from torchvision) (12.0.0)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from sympy>=1.13.3->torch) (1.3.0)
+Requirement already satisfied: MarkupSafe>=2.0 in c:\users\cygmed_n2\miniconda3\envs\sam2\lib\site-packages (from jinja2->torch) (2.1.5)
+Using cached https://download.pytorch.org/whl/cu126/torch-2.9.0%2Bcu126-cp312-cp312-win_amd64.whl (2582.7 MB)
+Using cached https://download.pytorch.org/whl/cu126/torchvision-0.24.0%2Bcu126-cp312-cp312-win_amd64.whl (8.8 MB)
+Installing collected packages: torch, torchvision
+
+Successfully installed torch-2.9.0+cu126 torchvision-0.24.0+cu126

@@ -1,0 +1,7 @@
+Finetuning Reference Document Links :
+
+PISSA : https://arxiv.org/abs/2404.02948
+Fine Tuning For Specific Domain : https://medium.com/@jamestang/fine-tuning-llms-for-specific-domains-why-how-and-what-to-consider-8b2fd5781615
+https://medium.com/@khayyam.h/the-evolution-of-fine-tuning-lora-adapters-and-other-peft-methods-explained-9ed0ac62937a
+https://medium.com/@baicenxiao/avoiding-amnesia-some-practical-guides-to-mitigate-catastrophic-forgetting-in-llms-post-training-6a23e4f064cb
+https://www.bing.com/search?pglt=43&q=how+to+prevent+the+llm+fro+catastrophic+forgetting+%3F&cvid=ba05b31d5e664acf8d8ddd8cfbfd3ff8&gs_lcrp=EgRlZGdlKgYIABBFGDkyBggAEEUYOTIICAEQ6QcY_FUyBwgCEOsHGEDSAQkxNTg4OGowajeoAgCwAgA&FORM=ANNAB1&PC=U531

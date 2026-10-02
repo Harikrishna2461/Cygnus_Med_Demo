@@ -1,0 +1,14 @@
+debug_mode: true
+
+PROCESSOR:
+  score_thr: 0.5
+
+VISUALIZER:
+  draw: true
+  draw_fps: true
+  draw_bbox: true
+  draw_skeleton: true
+  draw_scanner_location: true
+  draw_scanner_projection: true
+  draw_result_msg: true
+  draw_leg_diagram: true

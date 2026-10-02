@@ -1,0 +1,5 @@
+1. Uninstall CUDA 12.4
+2. Upgrade Display Driver 
+3. Install CUDA 12.8
+4. Install Pytorch with CUDA 12.8 support
+5. Install Transformers 

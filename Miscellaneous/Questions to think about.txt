@@ -1,0 +1,7 @@
+Questions to think about:
+1. What is analysis context variable and why is it not defined anywhere in the nl_interpreter.py file?
+2. Why are CHIVA rules and ligation queries called in the app.py file but not used at all?
+3. How is the shunt_classification_and_ligation_llm.py file being used in this app and is it working well and actually returning proper llm outputs and a rule based system is not being used.
+4. Explain the re-ranking system used here.
+5. Possibility of Agentic System?
+6. Can we make the start.bat file in such a way that it automatically installs all the required libraries by itself and the person using it only needs to have python installed?

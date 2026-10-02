@@ -1,0 +1,112 @@
+The "documents" ARE the text chunks stored in your Qdrant collection!
+
+Where Documents Come From
+Looking at load_bm25_from_qdrant() (rag_engine.py, lines 116-151):
+
+
+# This runs on app startup
+def load_bm25_from_qdrant():
+    client = _get_qdrant()
+    chunks: list[str] = []
+    
+    # Scroll through ALL points in ligation_knowledgebase_db_v2
+    while True:
+        result, next_offset = client.scroll(
+            collection_name=QDRANT_COLLECTION,
+            limit=256,
+            offset=offset,
+            with_payload=True,  # ← Get the payload!
+            with_vectors=False,
+        )
+        for point in result:
+            text = (point.payload or {}).get("text", "")  # ← Extract text from payload
+            if text:
+                chunks.append(text)  # ← This is your "document"
+So:
+
+
+Qdrant Collection (ligation_knowledgebase_db_v2)
+    └─ Point 1: {vector: [0.23, 0.45, ...], payload: {text: "Type 1 ligation: Incompetent SFJ requires high groin ligation..."}}
+    └─ Point 2: {vector: [0.12, 0.67, ...], payload: {text: "Type 2A perforator entry without SFJ involvement..."}}
+    └─ Point 3: {vector: [0.89, 0.34, ...], payload: {text: "Follow-up strategy: 6-12 month reassessment after Type 3 ligation..."}}
+    └─ ... (many more)
+Each payload.text IS a document (a chunk of ligation knowledge).
+
+Complete Flow with Your Real Setup
+When you ask: "How to ligate Type 1 shunt at SFJ?"
+
+Stage 1a: Vector Search in Qdrant
+
+q_vec = get_embedding("How to ligate Type 1 shunt at SFJ?")  # → 768-dim vector
+vector_hits = client.search(
+    collection_name="ligation_knowledgebase_db_v2",
+    query_vector=q_vec,
+    limit=50,  # VECTOR_TOP_K
+    with_payload=True
+)
+candidates = [h.payload.get("text") for h in vector_hits]  # ← Extract text payloads
+Result: 50 text chunks from Qdrant sorted by cosine similarity
+
+
+[
+  "Type 1 classification: SFJ incompetent...ligation at groin junction...",
+  "High groin ligation techniques for SFJ reflux...",
+  "SFJ anatomy and ligation point selection...",
+  ...
+]
+Stage 1b: BM25 on Same Payloads
+
+# At startup, we built BM25 index from ALL text payloads in Qdrant
+_bm25_corpus = [all text chunks from Qdrant]
+_bm25_index = BM25Okapi(tokenized)
+
+# Now search by keywords
+scores = _bm25_index.get_scores(["Type", "1", "ligate", "SFJ"])
+bm25_chunks = [_bm25_corpus[i] for i in top_indices]  # ← Same text chunks!
+Result: Top 50 text chunks ranked by keyword matching
+
+
+[
+  "Type 1 shunt requires SFJ ligation...",
+  "Type 1 classification with SFJ incompetence...",
+  "Ligation point for Type 1: High SFJ...",
+  ...
+]
+Stage 2: Cross-Encoder Re-ranks These Text Chunks
+
+# Merge both result sets (up to 50 unique text chunks)
+candidates = [merged text chunks from vector + BM25]
+
+# Cross-encoder scores each chunk
+pairs = [[query, chunk] for chunk in candidates]
+# [
+#   ["How to ligate Type 1?", "Type 1 ligation: SFJ incompetent requires..."],
+#   ["How to ligate Type 1?", "Type 2A perforator entry..."],
+#   ...
+# ]
+
+scores = cross_encoder.predict(pairs)  # Scores each pair
+Result: Top 5 text chunks by cross-encoder relevance score
+
+
+[
+  ("Type 1 SFJ incompetent: High ligation at groin. Steps: 1) Identify SFJ junction...", 0.94),
+  ("SFJ ligation technique and complications", 0.78),
+  ("Type 1 post-operative follow-up", 0.62),
+  ...
+]
+Summary
+
+Your Knowledge Base = Qdrant Collection
+         ↓
+Each entry in Qdrant = One "document" (text chunk in payload)
+         ↓
+Three ways to find relevant documents:
+  1. Vector search (semantic) in Qdrant
+  2. BM25 search (keyword) on extracted payloads
+  3. Cross-encoder (neural reranking) on merged results
+         ↓
+Top 5 documents (text chunks) → Sent to LLM for ligation planning
+The "documents" never leave Qdrant — we just extract their text payloads and search them different ways.
+
+Does this clarify it?

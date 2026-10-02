@@ -1,0 +1,82 @@
+Test Case 1: Type 1 Shunt (Simple SFJ incompetence)
+
+"There is reflux at the saphenofemoral junction. Blood flows backward down the GSV 
+to the mid-thigh where it drains back to the femoral vein. No tributary involvement. 
+What type is this and where should I ligate?" / "At saphenofemoral junction, there is reflux that flows to mid-thigh from down the GSV and it drains back to the femoral vein. But there is no tributary involvement. What type of shunt is this and what would you suggest for ligation?"
+Expected: Type 1 classification, ligation at SFJ
+
+Test Case 2: Type 3 Shunt (SFJ incompetent + tributary escape)
+
+"SFJ is incompetent with EP from femoral to GSV. The GSV then feeds into a tributary 
+at the upper thigh level. Blood refluxes from that tributary back into the femoral system. 
+No reflux back through the GSV trunk itself. What's the strategy?" / First blood reflux flows from the GSV into a tributary at the upper thigh level and then later it refluxes from that tributary back into the femoral system. But there is no reflux back through the GSV trunk itself. Also the SFJ is incompetent with EP from femoral to GSV.What's shunt type and the strategy? / First blood reflux flows from the GSV into a tributary at the upper thigh level and then later it refluxes from that tributary back into the femoral system. But there is no reflux back through the GSV trunk itself. What's shunt type and the strategy?.
+Expected: Type 3, staged CHIVA 2 approach (ligate tributary EP first)
+
+Test Case 3: Type 2A Shunt (Perforator-independent tributary entry)
+
+"SFJ is competent. There's an entry from the GSV into a tributary at mid-thigh without 
+any deep vein involvement. The tributary refluxes back to the femoral system. 
+What should I do?"
+Expected: Type 2A, ligate GSV→tributary junction
+
+Test Case 4: Follow-up Question
+After any analysis, ask:
+
+
+"What are the complications I should warn the patient about?"
+Expected: Conversational response about lymphocele, nerve injury, DVT risk, etc.
+
+Test Case 5: Type 2B Shunt (Perforator entry)
+
+"There's a perforator at the Hunterian level feeding the GSV with reflux into tributaries. 
+The SFJ is competent. No direct deep-to-GSV entry. How do I treat this?"
+Expected: Type 2B, ligate the perforator entry point
+
+Test Case 6: Conversational Clarification
+After any analysis, ask:
+
+
+"Explain the difference between Type 2B and Type 1+2 — when do I see each one?"
+Expected: Educational response explaining the anatomical difference
+
+
+More Possible Testing Questions Which are Very Vague:
+
+1. TYPE 1 — Simple SFJ Incompetence (No Perforator Involvement)
+   "Patient has varicose veins in the greater saphenous vein with reflux 
+    at the saphenofemoral junction. Doppler shows femoral vein flow reversal 
+    >500ms at the SFJ. Mid-thigh and calf perforators are competent."
+
+2. TYPE 2A — SFJ + Mid-Thigh Perforators
+   "GSV varicosities with SFJ reflux. Hemodynamic study shows incompetent 
+    Hunterian perforators in the mid-thigh (about 10cm above knee). 
+    Calf perforators are normal."
+
+3. TYPE 2B — SFJ + Below-Knee Perforators
+   "Varicose veins from groin to calf. SFJ incompetent on ultrasound 
+    with reflux. Boyd's perforator (below knee) shows reversed flow. 
+    Mid-thigh perforators are intact."
+
+4. TYPE 2C — SFJ + Extensive Perforator Involvement
+   "Severe GSV reflux at SFJ. Multiple incompetent perforators throughout 
+    the leg: Hunterian, Boyd's, and cockett perforators all show reflux. 
+    Widespread superficial network involvement."
+
+5. TYPE 3 — Short Saphenous Vein Reflux
+   "Patient presents with lateral calf pain and varicosities. Duplex shows 
+    short saphenous vein reflux at the sapheno-popliteal junction. 
+    Greater saphenous vein is competent."
+
+6. TYPE 1+2 — Combined GSV and SSV
+   "Bilateral varicose veins. Right leg: GSV reflux at SFJ with competent 
+    perforators. Left leg: SSV reflux at SPJ. No perforator involvement on either side."
+
+7. TYPE 4 — Pelvic Venous Reflux
+   "Patient with severe recurrent varicosities and pelvic pain. 
+    CT shows ovarian vein reflux and dilated internal iliac system. 
+    No superficial venous source of reflux identified."
+
+8. TYPE 5 — No Source Found
+   "Patient reports leg swelling and skin changes. Ultrasound shows 
+    varicose veins but no reflux at SFJ, SPJ, or major perforators. 
+    Pelvic imaging normal. Source of reflux not identified."

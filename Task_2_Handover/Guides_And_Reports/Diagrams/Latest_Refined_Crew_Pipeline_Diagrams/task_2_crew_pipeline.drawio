@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" pages="2">
+  <diagram id="p0" name="run_guidance_crew()">
+    <mxGraphModel dx="705" dy="627" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="3340" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="t5group" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;dashed=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;fontStyle=1;" value="Task 5 prompt rule — decided by the LLM, not Python" vertex="1">
+          <mxGeometry height="388" width="635" x="720" y="1631" as="geometry" />
+        </mxCell>
+        <mxCell id="kgroup" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;dashed=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=11;fontStyle=1;" value="inside crew.kickoff() — tasks run in order (exact inputs per task: see &#39;Agent inputs&#39; page)" vertex="1">
+          <mxGeometry height="666" width="470" x="230" y="1197" as="geometry" />
+        </mxCell>
+        <mxCell id="title" parent="1" style="text;html=1;fillColor=none;strokeColor=none;fontColor=default;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;" value="Task 2 — Crew pipeline: agents/crew_pipeline.run_guidance_crew()" vertex="1">
+          <mxGeometry height="30" width="1400" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="in" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;streaming_guidance_engine.py&lt;/b&gt;&lt;br&gt;process_probe_state() calls&lt;br&gt;run_guidance_crew()" vertex="1">
+          <mxGeometry height="66" width="240" x="50" y="77" as="geometry" />
+        </mxCell>
+        <mxCell id="zone" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;agents/crew_pipeline.py&lt;/b&gt;&lt;div&gt;run_guidance_crew()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="86" width="360" x="310" y="67" as="geometry" />
+        </mxCell>
+        <mxCell id="d_rej" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="rejection_notes&lt;br&gt;not empty?" vertex="1">
+          <mxGeometry height="90" width="220" x="380" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="rej" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="rejection_ctx = &#39;SURGEON FEEDBACK —&lt;br&gt;PRIOR CLASSIFICATION REJECTED&#39;&lt;br&gt;+ last 3 notes (goes into Task 1)" vertex="1">
+          <mxGeometry height="72" width="260" x="680" y="204" as="geometry" />
+        </mxCell>
+        <mxCell id="d_acc" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="accepted_shunts&lt;br&gt;not empty?" vertex="1">
+          <mxGeometry height="90" width="220" x="380" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="acc" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="accepted_ctx = &#39;SURGEON-ACCEPTED SHUNTS: …&#39;&lt;br&gt;do not re-confirm these types&lt;br&gt;(goes into Task 2)" vertex="1">
+          <mxGeometry height="72" width="260" x="680" y="334" as="geometry" />
+        </mxCell>
+        <mxCell id="clips" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="clips_text (It is the clip context)&lt;br&gt;flow from→to · posY · leg · [elimTest]" vertex="1">
+          <mxGeometry height="66" width="300" x="340" y="467" as="geometry" />
+        </mxCell>
+        <mxCell id="agents" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;agents/crew_agents.py&lt;/b&gt; — 5 AI agents&lt;br&gt;make_clinical_interpreter() · make_shunt_analyst() ·&lt;br&gt;make_circuit_analyst() · make_navigation_planner() ·&lt;br&gt;make_guidance_specialist()" vertex="1">
+          <mxGeometry height="86" width="360" x="310" y="587" as="geometry" />
+        </mxCell>
+        <mxCell id="kick" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="Crew(5 agents, 5 tasks, Process.sequential)&lt;br&gt;crew.kickoff() in a daemon thread&lt;br&gt;(stdout captured as verbose log)" vertex="1">
+          <mxGeometry height="72" width="320" x="330" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="t1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;Task 1 — Clinical Interpreter&lt;/b&gt; (GROQ_MID_MODEL)&lt;br&gt;input: rejection_ctx, current_zone, state_message&lt;br&gt;output: ≤100 words — clip soundness, VLM agreement,&lt;br&gt;expected-but-absent clips (shunt classification sufficiency)" vertex="1">
+          <mxGeometry height="86" width="380" x="300" y="1237" as="geometry" />
+        </mxCell>
+        <mxCell id="t2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;Task 2 — Shunt Analyst&lt;/b&gt; (GROQ_TEXT_MODEL)&lt;br&gt;context: Task 1&amp;nbsp;&lt;div&gt;&amp;nbsp;input: context, accepted_ctx, clips_text, type rules&lt;br&gt;output JSON: {shunt_type, confirmed, elim_required, evidence}&lt;/div&gt;" vertex="1">
+          <mxGeometry height="86" width="380" x="300" y="1367" as="geometry" />
+        </mxCell>
+        <mxCell id="t3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;Task 3 — Circuit Analyst&lt;/b&gt; (GROQ_TEXT_MODEL)&lt;br&gt;context: Task 1, Task 2&amp;nbsp;&lt;div&gt;input: context, current_zone, corridor fact,&lt;br&gt;q_state, history_summary, overused_zones&lt;br&gt;output: ≤80 words —&amp;gt; states A–F + where the probe goes&lt;/div&gt;" vertex="1">
+          <mxGeometry height="86" width="380" x="300" y="1497" as="geometry" />
+        </mxCell>
+        <mxCell id="t4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;Task 4 — Navigation Planner&lt;/b&gt; (GROQ_MID_MODEL)&lt;br&gt;context: Task 3&amp;nbsp;&lt;div&gt;&amp;nbsp;input: context, current_zone, pos_y, clip count,&lt;br&gt;recent_guidance (+ repeat warning), overused_zones&lt;br&gt;output: one &#39;Move …&#39; command, ≤15 words&lt;/div&gt;" vertex="1">
+          <mxGeometry height="86" width="380" x="300" y="1627" as="geometry" />
+        </mxCell>
+        <mxCell id="t5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;Task 5 — Guidance Specialist&lt;/b&gt; (GROQ_TEXT_MODEL)&lt;br&gt;context: Task 2, Task 4 (Task 3 excluded)&amp;nbsp;&lt;div&gt;&amp;nbsp;input: context,accepted_shunts&lt;br&gt;output JSON: {guidance, action}&lt;/div&gt;" vertex="1">
+          <mxGeometry height="86" width="380" x="300" y="1757" as="geometry" />
+        </mxCell>
+        <mxCell id="groq" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;agents/crew_agents.py&lt;/b&gt;&lt;br&gt;_make_llm(): groq/openai/gpt-oss-120b, temperature 0.3&lt;br&gt;max_iter 3&amp;nbsp;" vertex="1">
+          <mxGeometry height="86" width="330" x="850" y="1237" as="geometry" />
+        </mxCell>
+        <mxCell id="t3rules" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;dashed=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=2;fontSize=10;" value="&lt;b&gt;Task 3 prompt rules — decided by the LLM, not Python&lt;/b&gt;&lt;br&gt;A  Q1 open: corridor YES → examine current zone; NO → nearest of SFJ / Hunterian / SPJ not overused&lt;br&gt;B  Q2 open: trace GSV distally through the thigh&lt;br&gt;C  Q3 open: medial calf, posY 0.60–0.75&lt;br&gt;D  Q4 open: lower calf, posY 0.75–0.88&lt;br&gt;E1 Q1–Q4 confirmed, no elimTest: no routing&lt;br&gt;E2 elimTest recorded: route SPJ → upper thigh → calf&lt;br&gt;F  EP N1→N3: trace tributary to re-entry&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="150" width="470" x="745" y="1445" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="Task 2 output:&lt;br&gt;elim_required = true?" vertex="1">
+          <mxGeometry height="90" width="220" x="740" y="1665" as="geometry" />
+        </mxCell>
+        <mxCell id="m1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="action = &#39;maneuver&#39;&lt;br&gt;guidance = &#39;Perform elimination&lt;br&gt;test at current zone&#39;" vertex="1">
+          <mxGeometry height="66" width="230" x="1105" y="1677" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="confirmed = true AND&lt;br&gt;shunt_type not in&lt;br&gt;accepted_shunts?" vertex="1">
+          <mxGeometry height="100" width="230" x="735" y="1790" as="geometry" />
+        </mxCell>
+        <mxCell id="m2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="action = &#39;complete&#39;&lt;br&gt;guidance = &#39;Circuit complete —&lt;br&gt;classification confirmed&#39;" vertex="1">
+          <mxGeometry height="66" width="230" x="1105" y="1807" as="geometry" />
+        </mxCell>
+        <mxCell id="m3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="action = &#39;move&#39;&lt;br&gt;guidance = Task 4 &#39;Move …&#39;&lt;br&gt;command copied exactly" vertex="1">
+          <mxGeometry height="66" width="230" x="735" y="1937" as="geometry" />
+        </mxCell>
+        <mxCell id="d_to" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="_done.wait(timeout=90)&lt;br&gt;finished in time?" vertex="1">
+          <mxGeometry height="96" width="240" x="370" y="2032" as="geometry" />
+        </mxCell>
+        <mxCell id="fb" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="return fallback:&lt;br&gt;&#39;Continue scanning distally to&lt;br&gt;locate anatomical junction&#39;, &#39;move&#39;,&lt;br&gt;shunt_found False, &#39;undetermined&#39;&lt;br&gt;(timed-out thread keeps running)" vertex="1">
+          <mxGeometry height="100" width="240" x="50" y="2030" as="geometry" />
+        </mxCell>
+        <mxCell id="d_err" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="kickoff raised&lt;br&gt;an exception?" vertex="1">
+          <mxGeometry height="90" width="220" x="380" y="2165" as="geometry" />
+        </mxCell>
+        <mxCell id="raw" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="agents_raw = {interpret, shunt, circuit,&lt;br&gt;nav, guidance, verbose}&lt;br&gt;from result.tasks_output" vertex="1">
+          <mxGeometry height="72" width="300" x="340" y="2304" as="geometry" />
+        </mxCell>
+        <mxCell id="d_j5" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="Task 5 output&lt;br&gt;parses as JSON?" vertex="1">
+          <mxGeometry height="90" width="220" x="380" y="2425" as="geometry" />
+        </mxCell>
+        <mxCell id="j5_ok" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="guidance, action = values from JSON" vertex="1">
+          <mxGeometry height="50" width="300" x="340" y="2575" as="geometry" />
+        </mxCell>
+        <mxCell id="j5_no" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="keep defaults:&lt;br&gt;guidance = &#39;Continue scanning distally&lt;br&gt;to locate anatomical junction&#39;&lt;br&gt;action = &#39;move&#39;" vertex="1">
+          <mxGeometry height="80" width="260" x="680" y="2430" as="geometry" />
+        </mxCell>
+        <mxCell id="d_act" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="action in {move,&lt;br&gt;maneuver, complete}?" vertex="1">
+          <mxGeometry height="96" width="230" x="375" y="2682" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fix" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="action = &#39;move&#39;" vertex="1">
+          <mxGeometry height="46" width="200" x="710" y="2707" as="geometry" />
+        </mxCell>
+        <mxCell id="d_j2" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="Task 2 output&lt;br&gt;parses as JSON?" vertex="1">
+          <mxGeometry height="90" width="220" x="380" y="2815" as="geometry" />
+        </mxCell>
+        <mxCell id="j2_ok" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="shunt_found = confirmed&lt;br&gt;shunt_type, shunt_evidence from JSON" vertex="1">
+          <mxGeometry height="60" width="300" x="340" y="2960" as="geometry" />
+        </mxCell>
+        <mxCell id="j2_no" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="shunt_found = False&lt;br&gt;shunt_type = &#39;undetermined&#39;&lt;br&gt;shunt_evidence = &#39;&#39;" vertex="1">
+          <mxGeometry height="66" width="230" x="695" y="2957" as="geometry" />
+        </mxCell>
+        <mxCell id="ret" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;return&lt;/b&gt; (guidance, agents_raw, action,&lt;br&gt;shunt_found, shunt_type, shunt_evidence)" vertex="1">
+          <mxGeometry height="60" width="320" x="330" y="3090" as="geometry" />
+        </mxCell>
+        <mxCell id="out" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="back to process_probe_state()&lt;br&gt;(see Probe-move dataflow)" vertex="1">
+          <mxGeometry height="60" width="280" x="350" y="3220" as="geometry" />
+        </mxCell>
+        <mxCell id="e0_in_zone" edge="1" parent="1" source="in" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="zone" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1_zone_d_rej" edge="1" parent="1" source="zone" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="d_rej" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2_d_rej_rej" edge="1" parent="1" source="d_rej" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="rej" value="YES">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e3_d_rej_d_acc" edge="1" parent="1" source="d_rej" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="d_acc" value="NO">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e4_rej_d_acc" edge="1" parent="1" source="rej" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="d_acc" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="810" y="305" />
+              <mxPoint x="490" y="305" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5_d_acc_acc" edge="1" parent="1" source="d_acc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="acc" value="YES">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e6_d_acc_clips" edge="1" parent="1" source="d_acc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="clips" value="NO">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e7_acc_clips" edge="1" parent="1" source="acc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="clips" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="810" y="435" />
+              <mxPoint x="490" y="435" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8_clips_agents" edge="1" parent="1" source="clips" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="agents" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9_agents_d_cor" edge="1" parent="1" source="agents" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="kick" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="490" y="712" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e21_t1_t2" edge="1" parent="1" source="t1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="t2" value="context">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e22_t2_t3" edge="1" parent="1" source="t2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="t3" value="context">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23_t3_t4" edge="1" parent="1" source="t3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="t4" value="context">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e24_t4_t5" edge="1" parent="1" source="t4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="t5" value="context">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e25_kick_t1" edge="1" parent="1" source="kick" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="t1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e26_t1_t3" edge="1" parent="1" source="t1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;dashed=1;" target="t3" value="context">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="275" y="1297" />
+              <mxPoint x="275" y="1523" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e27_t2_t5" edge="1" parent="1" source="t2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;" target="t5" value="context">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="1427" />
+              <mxPoint x="250" y="1800" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e28_kgroup_groq" edge="1" parent="1" source="kgroup" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.12462462462462462;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;" target="groq" value="every task calls the LLM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e29_t3_t3rules" edge="1" parent="1" source="t3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.6333333333333333;entryDx=0;entryDy=0;dashed=1;" target="t3rules" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e30_a1_m1" edge="1" parent="1" source="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="m1" value="YES">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e31_a1_a2" edge="1" parent="1" source="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="a2" value="NO">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e32_a2_m2" edge="1" parent="1" source="a2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="m2" value="YES">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e33_a2_m3" edge="1" parent="1" source="a2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="m3" value="NO">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e34_t5_a1" edge="1" parent="1" source="t5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;" target="a1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="710" y="1800" />
+              <mxPoint x="710" y="1710" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e35_t5_d_to" edge="1" parent="1" source="t5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="d_to" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e36_d_to_fb" edge="1" parent="1" source="d_to" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="fb" value="NO">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e37_d_to_d_err" edge="1" parent="1" source="d_to" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="d_err" value="YES">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e38_d_err_fb" edge="1" parent="1" source="d_err" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="fb" value="YES">
+          <mxGeometry relative="1" x="-0.45" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="2210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e39_d_err_raw" edge="1" parent="1" source="d_err" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="raw" value="NO">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e40_raw_d_j5" edge="1" parent="1" source="raw" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="d_j5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e41_d_j5_j5_ok" edge="1" parent="1" source="d_j5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="j5_ok" value="YES">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e42_d_j5_j5_no" edge="1" parent="1" source="d_j5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="j5_no" value="NO">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e43_j5_ok_d_act" edge="1" parent="1" source="j5_ok" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="d_act" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e44_d_act_act_fix" edge="1" parent="1" source="d_act" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="act_fix" value="NO">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e45_d_act_d_j2" edge="1" parent="1" source="d_act" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="d_j2" value="YES">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e46_j5_no_d_j2" edge="1" parent="1" source="j5_no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="d_j2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="2470" />
+              <mxPoint x="1090" y="2860" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e47_act_fix_d_j2" edge="1" parent="1" source="act_fix" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="d_j2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="810" y="2784" />
+              <mxPoint x="490" y="2784" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e48_d_j2_j2_ok" edge="1" parent="1" source="d_j2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="j2_ok" value="YES">
+          <mxGeometry relative="1" x="-0.45" as="geometry" />
+        </mxCell>
+        <mxCell id="e49_d_j2_j2_no" edge="1" parent="1" source="d_j2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="j2_no" value="NO">
+          <mxGeometry relative="1" x="-0.45" as="geometry">
+            <Array as="points">
+              <mxPoint x="810" y="2860" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e50_j2_ok_ret" edge="1" parent="1" source="j2_ok" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ret" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e51_j2_no_ret" edge="1" parent="1" source="j2_no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="ret" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="810" y="3120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e52_ret_out" edge="1" parent="1" source="ret" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="out" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e53_fb_out" edge="1" parent="1" source="fb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="out" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="30" y="2080" />
+              <mxPoint x="30" y="3250" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="F56oKjvfUE9PCQULgoAo-1" edge="1" parent="1" source="zone" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;innerLoopWaypoints=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="zone">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="p1" name="Agent inputs">
+    <mxGraphModel dx="846" dy="752" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1620" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fillColor=none;strokeColor=none;fontColor=default;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;" value="Task 2 — What each crew agent receives (agents/crew_pipeline.py)" vertex="1">
+          <mxGeometry height="30" width="1400" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="rule" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;dashed=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=2;fontSize=10;" value="&lt;b&gt;How a task&#39;s prompt is built:&lt;/b&gt; its description (Python f-string, inputs on the left) + the raw text output of ONLY the tasks in its context=[…] list (CrewAI appends them under &#39;This is the context you&#39;re working with&#39;). Each agent&#39;s role / goal / backstory in crew_agents.py is fixed text with no session data. Anything without an arrow into a task is never seen by that agent — e.g. only Task 1 sees the VLM annotation and the examination protocol, and Task 5 never sees Task 1 or Task 3." vertex="1">
+          <mxGeometry height="60" width="1400" x="40" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="T1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;Task 1 — Clinical Interpreter&lt;/b&gt;&lt;br&gt;agent: make_clinical_interpreter()&lt;br&gt;model: GROQ_MID_MODEL&lt;br&gt;context: none (first task)&lt;br&gt;&lt;br&gt;out: ≤100 words — clip soundness,&lt;br&gt;VLM agreement, expected-but-absent clips" vertex="1">
+          <mxGeometry height="260" width="330" x="995" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="T2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;Task 2 — Shunt Analyst&lt;/b&gt;&lt;br&gt;agent: make_shunt_analyst()&lt;br&gt;model: GROQ_TEXT_MODEL&lt;br&gt;context: Task 1 output&lt;br&gt;out JSON: {shunt_type, confirmed,&lt;br&gt;elim_required, evidence}" vertex="1">
+          <mxGeometry height="180" width="330" x="995" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="T3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;Task 3 — Circuit Analyst&lt;/b&gt;&lt;br&gt;agent: make_circuit_analyst()&lt;br&gt;model: GROQ_TEXT_MODEL&lt;br&gt;context: Task 1 + Task 2 outputs&lt;br&gt;&lt;br&gt;out: ≤80 words — state A–F and&lt;br&gt;examine here / route to zone" vertex="1">
+          <mxGeometry height="330" width="330" x="995" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="T4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;Task 4 — Navigation Planner&lt;/b&gt;&lt;br&gt;agent: make_navigation_planner()&lt;br&gt;model: GROQ_MID_MODEL&lt;br&gt;context: Task 3 output&lt;br&gt;&lt;br&gt;out: one &#39;Move …&#39; command, ≤15 words" vertex="1">
+          <mxGeometry height="280" width="330" x="995" y="1090" as="geometry" />
+        </mxCell>
+        <mxCell id="T5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;Task 5 — Guidance Specialist&lt;/b&gt;&lt;br&gt;agent: make_guidance_specialist()&lt;br&gt;model: GROQ_TEXT_MODEL&lt;br&gt;context: Task 2 + Task 4 outputs&lt;br&gt;out JSON: {guidance, action}" vertex="1">
+          <mxGeometry height="140" width="330" x="995" y="1420" as="geometry" />
+        </mxCell>
+        <mxCell id="s_rej" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="rejection_ctx&lt;br&gt;(last 3 surgeon rejection notes, or empty)" vertex="1">
+          <mxGeometry height="56" width="330" x="395" y="177" as="geometry" />
+        </mxCell>
+        <mxCell id="s_state" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="&lt;b&gt;state_message&lt;/b&gt; (guidance_agent.build_state_message)&lt;br&gt;PROBE STATE: region, surface, leg, posY, posX, is_front,&lt;br&gt;CONFIRMED FINDINGS: clips on this leg,&lt;br&gt;VLM FRAME ANNOTATION, SCAN HISTORY SUMMARY&lt;br&gt;Q1–Q4 STATUS, EXAMINATION PROTOCOL" vertex="1">
+          <mxGeometry height="116" width="330" x="395" y="244" as="geometry" />
+        </mxCell>
+        <mxCell id="s_zone" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="pos_y + current_zone (_zone_name)" vertex="1">
+          <mxGeometry height="44" width="330" x="395" y="373" as="geometry" />
+        </mxCell>
+        <mxCell id="s_acc" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="accepted_ctx&lt;br&gt;(surgeon-accepted shunts, or empty)" vertex="1">
+          <mxGeometry height="56" width="330" x="395" y="492" as="geometry" />
+        </mxCell>
+        <mxCell id="s_clips" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="clips_text + clip count&lt;br&gt;(one line per clip on this leg:&lt;br&gt;flow from→to, posY, leg, elimTest)" vertex="1">
+          <mxGeometry height="66" width="330" x="395" y="582" as="geometry" />
+        </mxCell>
+        <mxCell id="s_cor" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="corridor fact&lt;br&gt;(0.04 ≤ pos_y ≤ 0.57: YES / NO)" vertex="1">
+          <mxGeometry height="50" width="330" x="395" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="s_q" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="q_state&lt;br&gt;(q_state_agent.analyze)" vertex="1">
+          <mxGeometry height="50" width="330" x="395" y="805" as="geometry" />
+        </mxCell>
+        <mxCell id="s_hist" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="history_summary&lt;br&gt;(history_agent.build_summary)" vertex="1">
+          <mxGeometry height="50" width="330" x="395" y="885" as="geometry" />
+        </mxCell>
+        <mxCell id="s_over" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="overused_zones&lt;br&gt;(zones named ≥ 2× in recent guidance;&lt;br&gt;&#39;none&#39; once Q1 is answered)" vertex="1">
+          <mxGeometry height="56" width="330" x="395" y="967" as="geometry" />
+        </mxCell>
+        <mxCell id="s_recent" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="recent_guidance (last 3 guidance strings)&lt;br&gt;+ &quot;&#39;…&#39; was said N× — find different&lt;br&gt;wording&quot; if one string repeats ≥ 2×" vertex="1">
+          <mxGeometry height="80" width="330" x="395" y="1110" as="geometry" />
+        </mxCell>
+        <mxCell id="s_count" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="len(clips) — number of clips" vertex="1">
+          <mxGeometry height="44" width="330" x="395" y="1228" as="geometry" />
+        </mxCell>
+        <mxCell id="s_accl" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;fontColor=default;fontSize=11;" value="accepted_shunts list&lt;br&gt;(used in the &#39;complete&#39; action rule)" vertex="1">
+          <mxGeometry height="56" width="330" x="395" y="1462" as="geometry" />
+        </mxCell>
+        <mxCell id="e0_s_rej_T1" edge="1" parent="1" source="s_rej" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.1346;entryDx=0;entryDy=0;" target="T1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1_s_state_T1" edge="1" parent="1" source="s_state" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5077;entryDx=0;entryDy=0;" target="T1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2_s_zone_T1" edge="1" parent="1" source="s_zone" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.8654;entryDx=0;entryDy=0;" target="T1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3_s_acc_T2" edge="1" parent="1" source="s_acc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.2222;entryDx=0;entryDy=0;" target="T2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4_s_clips_T2" edge="1" parent="1" source="s_clips" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" target="T2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5_s_cor_T3" edge="1" parent="1" source="s_cor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.1061;entryDx=0;entryDy=0;" target="T3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6_s_q_T3" edge="1" parent="1" source="s_q" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3636;entryDx=0;entryDy=0;" target="T3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7_s_hist_T3" edge="1" parent="1" source="s_hist" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.6061;entryDx=0;entryDy=0;" target="T3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8_s_over_T3" edge="1" parent="1" source="s_over" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.8636;entryDx=0;entryDy=0;" target="T3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9_s_recent_T4" edge="1" parent="1" source="s_recent" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.2143;entryDx=0;entryDy=0;" target="T4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10_s_count_T4" edge="1" parent="1" source="s_count" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5714;entryDx=0;entryDy=0;" target="T4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11_s_accl_T5" edge="1" parent="1" source="s_accl" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="T5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12_s_zone_T3" edge="1" parent="1" source="s_zone" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.2333;entryDx=0;entryDy=0;" target="T3" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="370" y="395" />
+              <mxPoint x="370" y="787" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13_s_zone_T4" edge="1" parent="1" source="s_zone" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.875;entryDx=0;entryDy=0;" target="T4" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="370" y="395" />
+              <mxPoint x="370" y="1335" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e14_s_over_T4" edge="1" parent="1" source="s_over" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.7679;entryDx=0;entryDy=0;" target="T4" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="995" />
+              <mxPoint x="390" y="1305" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15_T1_T2" edge="1" parent="1" source="T1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=1;entryY=0.2;entryDx=0;entryDy=0;" target="T2" value="Task 1&lt;br&gt;output">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1365" y="378" />
+              <mxPoint x="1365" y="516" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e16_T2_T3" edge="1" parent="1" source="T2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=1;entryY=0.15;entryDx=0;entryDy=0;" target="T3" value="Task 2&lt;br&gt;output">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1365" y="624" />
+              <mxPoint x="1365" y="760" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17_T3_T4" edge="1" parent="1" source="T3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=1;entryY=0.15;entryDx=0;entryDy=0;" target="T4" value="Task 3&lt;br&gt;output">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1365" y="990" />
+              <mxPoint x="1365" y="1132" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e18_T4_T5" edge="1" parent="1" source="T4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=1;entryY=0.3;entryDx=0;entryDy=0;" target="T5" value="Task 4&lt;br&gt;output">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1365" y="1328" />
+              <mxPoint x="1365" y="1462" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e19_T1_T3" edge="1" parent="1" source="T1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.6;exitDx=0;exitDy=0;entryX=1;entryY=0.35;entryDx=0;entryDy=0;" target="T3" value="Task 1&lt;br&gt;output">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1415" y="326" />
+              <mxPoint x="1415" y="826" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e20_T2_T5" edge="1" parent="1" source="T2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;endArrow=block;endFill=1;strokeColor=default;fontColor=default;fontSize=10;labelBackgroundColor=default;jumpStyle=arc;jumpSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.7;entryDx=0;entryDy=0;" target="T5" value="Task 2&lt;br&gt;output">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1465" y="570" />
+              <mxPoint x="1465" y="1518" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

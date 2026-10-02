@@ -31,6 +31,7 @@ __pycache__/
 *.pt
 *.bin
 *.gguf
+*.onnx
 
 # Cache directories
 .cache/

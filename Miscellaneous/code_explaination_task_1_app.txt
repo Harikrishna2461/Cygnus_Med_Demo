@@ -1,0 +1,115 @@
+1. Analysis Context Variable
+It IS defined — it's a function parameter in nl_interpreter.py:
+
+
+def build_conversational_response(
+    user_message: str,
+    analysis_context: str,    # ← It's here, line 240
+    history: list[dict],
+    call_llm_fn: Callable,
+) -> str:
+In app.py line 291, it's passed from cache:
+
+
+analysis_ctx = _analysis_cache.get(session_id, "")
+response_text = build_conversational_response(
+    user_message=user_message,
+    analysis_context=analysis_ctx,  # ← Passed here
+    history=history,
+    call_llm_fn=call_llm,
+)
+The _analysis_cache is built on line 258 when a clinical response is created.
+
+2. CHIVA_RULES and LIGATION_QUERIES Not Used in app.py
+They ARE being used — just indirectly. Here's the flow:
+
+
+app.py imports them (lines 52-55)
+    ↓
+They're used by classify_and_plan_ligation_with_llm() (in parent module)
+    ↓
+That function builds prompts that embed CHIVA_RULES and LIGATION_QUERIES
+    ↓
+LLM uses them to make decisions
+They're not directly referenced in app.py because they're encapsulated in the parent module. If you look at lines 216-294 of shunt_classification_and_ligation_llm.py, you'll see CHIVA_RULES is used in build_shunt_classification_prompt() and LIGATION_QUERIES is used in build_ligation_prompt().
+
+3. How shunt_classification_and_ligation_llm.py Works
+It's LLM-based with embedded CHIVA rules, not pure rule-based:
+
+Pipeline:
+
+NL → Clips (nl_interpreter.py): LLM converts natural language to CHIVA clip notation
+Clips → Classification (shunt_classification_and_ligation_llm.py, lines 216-294):
+Builds a prompt that embeds CHIVA_RULES (the decision logic)
+Sends clips + rules to LLM
+LLM reasons through the rules and outputs classification
+Classification → Ligation Plan (lines 328-380):
+Uses RAG to retrieve relevant ligation strategies from ligation_knowledgebase_db
+Sends shunt type + RAG context + clips to LLM
+LLM generates structured ligation steps
+Is it working well? It's prompt-engineered rule following, not pure ML. The CHIVA rules are in the prompt as "step-by-step decision guide" (lines 225-282). This approach:
+
+This ensures clinical accuracy (rules are explicit) and provides clear reasoning (LLM explains each step). But one possible bottleneck can be the fact that depending on the model, the ability of LLM to follow instructions can vary (i.e. quality varies with model).
+
+Re-ranking System Explained :
+Your app uses a 3-stage hybrid RAG pipeline for retrieving ligation knowledge:
+
+Stage 1a: Vector Search (Semantic)
+
+Query → Embed with nomic-embed-text (768-dim) → Cosine similarity search in Qdrant
+                                                → Top 50 documents by vector similarity
+Finds semantically similar content (e.g., "SFJ incompetent" matches "saphenofemoral junction reflux")
+
+Stage 1b: BM25 Search (Keyword-based)
+
+Query → Tokenize query → BM25 ranking on pre-built corpus
+                      → Top 50 documents by keyword match
+Finds exact keyword matches (e.g., "Type 1" matches "Type 1 ligation")
+
+Merging: Combines vector + BM25 results, deduplicates by content hash, keeps up to 50 candidates.
+
+Stage 2: Cross-Encoder Re-ranking (Learning-to-Rank)
+
+Query + each candidate → ms-marco-MiniLM-L-6-v2 model
+                      → Relevance scores (0-1, higher = better match)
+                      → Top 5 returned
+How it works:
+
+Creates pairs: [query, candidate_document]
+Sends to cross-encoder (trained on MS MARCO ranking task)
+Gets relevance score for each pair
+Sorts by score, returns top-5
+Example flow:
+
+
+Query: "Type 1 shunt SFJ incompetent ligation point"
+
+Stage 1a (Vector): Returns 50 docs similar to SFJ/Type1 concepts
+Stage 1b (BM25):   Returns 50 docs matching keywords "Type 1", "ligation", "SFJ"
+Merged:            ~50 unique candidates
+
+Stage 2 (Cross-encoder scores):
+  Doc A: "Type 1 classification: SFJ incompetent..."        → 0.92 --> Top ranked
+  Doc B: "Type 3 with SFJ reflux and tributary..."          → 0.61
+  Doc C: "Ligation point selection criteria..."             → 0.55
+  Doc D: "Type 2 perforator entry management..."            → 0.48
+  Doc E: "Post-operative follow-up for Type 1..."           → 0.42
+
+Final output: Top 5 by cross-encoder score
+Why This Three-Stage Approach?
+Stage	Strength	Weakness
+Vector	Catches semantic meaning ("junction" = "entry point")	Misses exact terminology
+BM25	Catches exact keywords ("Type 1" finds all Type 1 docs)	Doesn't understand meaning
+Cross-encoder	Re-ranks by actual relevance (understands context)	Slow (only ranks top candidates)
+
+Cascade effect:
+Vector catches semantic misses
+BM25 catches keyword misses
+Cross-encoder ensures final results are actually relevant
+Config in your app (config.py):
+
+VECTOR_TOP_K = 50           # Stage 1a/1b: keep top 50
+RERANK_TOP_N = 5            # Stage 2: return top 5
+CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+CROSS_ENCODER_ENABLED = True
+Fallback: If cross-encoder loads fails, returns candidates in vector order without reranking.

@@ -1,0 +1,28 @@
+Parsing segment ID and distance:
+
+SEGMENTS_NAME = ['left thigh', 'left calf', 'right thigh', 'right calf']
+
+eg)
+        "old": {
+            "segment_id": 0,
+            "segment_dist": 0.9085902032641305,
+            "bboxes": [
+                [
+                    187.5010223388672,
+                    0.386505126953125,
+                    577.3505249023438,
+                    645.5563354492188
+                ],
+                [
+                    343.4828796386719,
+                    80.06069946289062,
+                    1045.38720703125,
+                    718.9981689453125
+                ]
+            ],
+            "is_front": false,
+            "error": "",
+            "fps": 56.10518470653444
+        }
+
+then, it is "back", "left thigh", and 90.85% from the top (closer to knee)
